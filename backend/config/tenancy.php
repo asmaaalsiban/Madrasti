@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Central\Models\Tenant;
 use Stancl\Tenancy\Database\Models\Domain;
-use Stancl\Tenancy\Database\Models\Tenant;
 
 return [
     'tenant_model' => Tenant::class,
-    'id_generator' => Stancl\Tenancy\UUIDGenerator::class,
+    // null = we choose the tenant id ourselves (a lowercase slug such as "alnoor").
+    // It is also used in the tenant database name.
+    'id_generator' => null,
 
     'domain_model' => Domain::class,
 
@@ -16,10 +18,10 @@ return [
      *
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
-    'central_domains' => [
-        '127.0.0.1',
-        'localhost',
-    ],
+    'central_domains' => array_filter(array_map(
+        'trim',
+        explode(',', (string) env('CENTRAL_DOMAINS', '127.0.0.1,localhost'))
+    )),
 
     /**
      * Tenancy bootstrappers are executed when tenancy is initialized.
@@ -29,7 +31,9 @@ return [
      */
     'bootstrappers' => [
         Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
+        // CacheTenancyBootstrapper needs a cache store with tags (Redis/Memcached).
+        // Enable it once the project uses Redis, otherwise any cache call inside a tenant fails.
+        // Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
         // Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
@@ -51,7 +55,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'tenant',
+        'prefix' => 'madrasati_',
         'suffix' => '',
 
         /**
@@ -194,7 +198,7 @@ return [
      * Parameters used by the tenants:seed command.
      */
     'seeder_parameters' => [
-        '--class' => 'DatabaseSeeder', // root seeder class
+        '--class' => 'TenantDatabaseSeeder', // runs inside each school database
         // '--force' => true, // This needs to be true to seed tenant databases in production
     ],
 ];

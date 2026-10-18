@@ -8,22 +8,17 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 /*
 |--------------------------------------------------------------------------
-| Tenant Routes
+| School (tenant) API
 |--------------------------------------------------------------------------
 |
-| Here you can register the tenant routes for your application.
-| These routes are loaded by the TenantRouteServiceProvider.
-|
-| Feel free to customize them however you want. Good luck!
+| The school is resolved from the request domain (e.g. alnoor.localhost).
+| Every route inside routes/tenant/*.php runs against that school's database.
+| Loaded by App\Providers\TenancyServiceProvider.
 |
 */
 
 Route::middleware([
-    'web',
+    'api',
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
-])->group(function () {
-    Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
-    });
-});
+])->prefix('api')->group(base_path('routes/tenant/api.php'));
