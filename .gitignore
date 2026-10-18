@@ -19,3 +19,6 @@ frontend/.env.local
 .idea/
 .vscode/
 *.log
+
+# Claude Code local/session files (contain tokens, never commit)
+.claude/
