@@ -35,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => EnsureSuperAdmin::class,
         ]);
 
+        // Dev: Vite proxy forwards the school's host in X-Forwarded-Host. Restrict to real proxies in production.
+        $middleware->trustProxies(at: '*');
         $middleware->api(append: [
             SetLocale::class,
         ]);
