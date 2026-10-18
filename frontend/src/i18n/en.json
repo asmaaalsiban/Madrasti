@@ -1,0 +1,13 @@
+{
+  "common": { "appName": "Madrasati", "language": "العربية", "logout": "Log out", "loading": "Loading..." },
+  "auth": {
+    "title": "Sign in",
+    "login": "Email or phone number",
+    "password": "Password",
+    "submit": "Sign in",
+    "failed": "Could not sign in, please try again."
+  },
+  "roles": { "admin": "Admin", "teacher": "Teacher", "student": "Student", "parent": "Parent" },
+  "dashboard": { "welcome": "Welcome, {{name}}", "soon": "{{role}} tools will appear here soon." },
+  "errors": { "forbidden": "You are not allowed to view this page.", "notFound": "Page not found." }
+}
