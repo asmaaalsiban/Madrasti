@@ -1,20 +1,23 @@
 <?php
 
-namespace Tests\Concerns;
+namespace Tests;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
- * Feature tests run against the tenant schema in a single test database
+ * Base class for tests that need the tenant schema in a single test database
  * (no tenancy bootstrapping), so only tenant migrations are loaded.
  */
-trait UsesTenantSchema
+abstract class TenantTestCase extends TestCase
 {
+    use RefreshDatabase;
+
     protected function migrateFreshUsing(): array
     {
         return [
             '--drop-views' => $this->shouldDropViews(),
             '--drop-types' => $this->shouldDropTypes(),
             '--path' => 'database/migrations/tenant',
-            '--realpath' => false,
         ];
     }
 }

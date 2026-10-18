@@ -4,16 +4,12 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Shared\Enums\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Sanctum;
-use Tests\Concerns\UsesTenantSchema;
-use Tests\TestCase;
+use Tests\TenantTestCase;
 
-class RoleMiddlewareTest extends TestCase
+class RoleMiddlewareTest extends TenantTestCase
 {
-    use RefreshDatabase, UsesTenantSchema;
-
     protected function setUp(): void
     {
         parent::setUp();

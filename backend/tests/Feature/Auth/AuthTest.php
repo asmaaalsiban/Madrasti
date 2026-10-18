@@ -4,16 +4,12 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Shared\Enums\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
-use Tests\Concerns\UsesTenantSchema;
-use Tests\TestCase;
+use Tests\TenantTestCase;
 
-class AuthTest extends TestCase
+class AuthTest extends TenantTestCase
 {
-    use RefreshDatabase, UsesTenantSchema;
-
     protected function setUp(): void
     {
         parent::setUp();
