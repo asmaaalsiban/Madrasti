@@ -5,9 +5,14 @@ export const TOKEN_KEY = 'token'
 export const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) } catch { return null } }
 export const setToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
 
+// Dev: call Laravel directly on the same hostname (school1.localhost -> school1.localhost:8000),
+// so the school is resolved from the real Host header. Production: same-origin /api.
+const API_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:8000/api` : '/api')
+
 // The single API client for the whole app.
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: API_URL,
   headers: { Accept: 'application/json' },
 })
 
