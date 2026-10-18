@@ -1,0 +1,7 @@
+#!/bin/bash
+for arg in "$@"; do
+    case "${arg}" in
+        -p|--puppeteerConfigFile|--puppeteerConfigFile=*) exec "/opt/npm-tools/node_modules/.bin/mmdc" "$@" ;;
+    esac
+done
+exec "/opt/npm-tools/node_modules/.bin/mmdc" -p "/etc/puppeteer-config.json" "$@"
