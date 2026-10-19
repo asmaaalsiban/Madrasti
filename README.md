@@ -25,9 +25,27 @@ See [docs/project-structure.md](docs/project-structure.md) and [docs/database.md
 - `backend/database/migrations/tenant/` - everything inside a school database (11 files)
 
 ```
-php artisan migrate                 # central
+php artisan migrate --path=database/migrations/central   # central
 php artisan tenants:migrate         # all schools
 ```
+
+## Local demo (MySQL)
+
+```
+cd backend
+copy .env.example .env          # then set DB_PORT / DB_PASSWORD, and run: php artisan key:generate
+php artisan migrate --path=database/migrations/central
+php artisan school:create school2 "School 2" school2.localhost --admin-email=admin@school2.test --admin-password=Admin12345
+php artisan school:seed-demo school2     # demo admin, teachers, year, grades, subjects, classrooms (APP_ENV=local only)
+php artisan serve
+
+cd ../frontend
+npm install
+npm run dev -- --host
+```
+
+Open `http://school2.localhost:<vite port>` (not `localhost`: the school is resolved from the host name)
+and sign in with `admin@school2.test` / `Admin12345`.
 
 ## Status
 
