@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
+import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
@@ -15,11 +16,20 @@ export const routes = [
     children: [
       {
         element: <DashboardLayout />,
-        children: ROLES.map((role) => ({
+        children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
           children: [{ index: true, element: <RoleHome /> }],
         })),
+      },
+      {
+        element: <RequireRole role="admin" />,
+        children: [
+          {
+            element: <AdminLayout />,
+            children: [{ path: '/admin', element: <RoleHome /> }],
+          },
+        ],
       },
     ],
   },

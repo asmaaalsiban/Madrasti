@@ -47,5 +47,28 @@
       "finance": "الأقساط والمدفوعات"
     },
     "footer": "© {{year}} {{name}}. جميع الحقوق محفوظة."
+  },
+  "admin": {
+    "menu": "القائمة",
+    "nav": {
+      "overview": "نظرة عامة",
+      "academicYears": "السنوات الدراسية",
+      "gradeLevels": "الصفوف",
+      "classrooms": "الشعب",
+      "subjects": "المواد"
+    },
+    "actions": {
+      "add": "إضافة",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "search": "بحث",
+      "empty": "لا يوجد شيء لعرضه بعد.",
+      "confirmDelete": "هل أنت متأكد من الحذف؟",
+      "prev": "السابق",
+      "next": "التالي",
+      "actions": "إجراءات"
+    }
   }
 }
