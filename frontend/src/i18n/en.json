@@ -70,5 +70,38 @@
       "next": "Next",
       "actions": "Actions"
     }
+  },
+  "academic": {
+    "years": {
+      "title": "Academic years"
+    },
+    "grades": {
+      "title": "Grade levels"
+    },
+    "classrooms": {
+      "title": "Classrooms"
+    },
+    "subjects": {
+      "title": "Subjects"
+    },
+    "fields": {
+      "name": "Name",
+      "startsOn": "Starts on",
+      "endsOn": "Ends on",
+      "isCurrent": "Current year",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "sortOrder": "Sort order",
+      "code": "Code",
+      "gradeLevel": "Grade level",
+      "academicYear": "Academic year",
+      "capacity": "Capacity",
+      "select": "Select..."
+    },
+    "overview": {
+      "title": "Overview"
+    },
+    "yes": "Yes",
+    "no": "No"
   }
 }
