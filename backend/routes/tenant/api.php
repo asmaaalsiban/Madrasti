@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
+use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,4 +22,9 @@ Route::prefix('auth')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
     });
+});
+
+// School structure: admin only.
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function (): void {
+    Route::apiResource('subjects', SubjectController::class);
 });
