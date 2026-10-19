@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Policies\AcademicPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -26,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(Subject::class, AcademicPolicy::class);
+        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Subject::class] as $model) {
+            Gate::policy($model, AcademicPolicy::class);
+        }
 
         // 5 login attempts per minute for the same school + login + IP.
         RateLimiter::for('login', function (Request $request): Limit {

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Modules\Academic\Http\Controllers\AcademicYearController;
+use App\Modules\Academic\Http\Controllers\AdminOverviewController;
+use App\Modules\Academic\Http\Controllers\ClassroomController;
+use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Auth\Http\Controllers\AuthController;
@@ -26,5 +30,9 @@ Route::prefix('auth')->group(function (): void {
 
 // School structure: admin only.
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function (): void {
+    Route::get('admin/overview', AdminOverviewController::class);
+    Route::apiResource('academic-years', AcademicYearController::class);
+    Route::apiResource('grade-levels', GradeLevelController::class);
+    Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
 });
