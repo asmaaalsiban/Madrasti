@@ -47,5 +47,62 @@
       "finance": "Tuition & payments"
     },
     "footer": "© {{year}} {{name}}. All rights reserved."
+  },
+  "admin": {
+    "menu": "Menu",
+    "nav": {
+      "overview": "Overview",
+      "academicYears": "Academic years",
+      "gradeLevels": "Grade levels",
+      "classrooms": "Classrooms",
+      "subjects": "Subjects"
+    },
+    "actions": {
+      "add": "Add",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "search": "Search",
+      "empty": "Nothing to show yet.",
+      "confirmDelete": "Are you sure you want to delete this?",
+      "prev": "Previous",
+      "next": "Next",
+      "actions": "Actions",
+      "error": "Something went wrong, please try again."
+    }
+  },
+  "academic": {
+    "years": {
+      "title": "Academic years"
+    },
+    "grades": {
+      "title": "Grade levels"
+    },
+    "classrooms": {
+      "title": "Classrooms"
+    },
+    "subjects": {
+      "title": "Subjects"
+    },
+    "fields": {
+      "name": "Name",
+      "startsOn": "Starts on",
+      "endsOn": "Ends on",
+      "isCurrent": "Current year",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "sortOrder": "Sort order",
+      "code": "Code",
+      "gradeLevel": "Grade level",
+      "academicYear": "Academic year",
+      "capacity": "Capacity",
+      "select": "Select..."
+    },
+    "overview": {
+      "title": "Overview"
+    },
+    "yes": "Yes",
+    "no": "No"
   }
 }

@@ -47,5 +47,62 @@
       "finance": "الأقساط والمدفوعات"
     },
     "footer": "© {{year}} {{name}}. جميع الحقوق محفوظة."
+  },
+  "admin": {
+    "menu": "القائمة",
+    "nav": {
+      "overview": "نظرة عامة",
+      "academicYears": "السنوات الدراسية",
+      "gradeLevels": "الصفوف",
+      "classrooms": "الشعب",
+      "subjects": "المواد"
+    },
+    "actions": {
+      "add": "إضافة",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "search": "بحث",
+      "empty": "لا يوجد شيء لعرضه بعد.",
+      "confirmDelete": "هل أنت متأكد من الحذف؟",
+      "prev": "السابق",
+      "next": "التالي",
+      "actions": "إجراءات",
+      "error": "حدث خطأ ما، حاول مرة أخرى."
+    }
+  },
+  "academic": {
+    "years": {
+      "title": "السنوات الدراسية"
+    },
+    "grades": {
+      "title": "الصفوف"
+    },
+    "classrooms": {
+      "title": "الشعب"
+    },
+    "subjects": {
+      "title": "المواد"
+    },
+    "fields": {
+      "name": "الاسم",
+      "startsOn": "تاريخ البداية",
+      "endsOn": "تاريخ النهاية",
+      "isCurrent": "السنة الحالية",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "sortOrder": "الترتيب",
+      "code": "الرمز",
+      "gradeLevel": "الصف",
+      "academicYear": "السنة الدراسية",
+      "capacity": "السعة",
+      "select": "اختر..."
+    },
+    "overview": {
+      "title": "نظرة عامة"
+    },
+    "yes": "نعم",
+    "no": "لا"
   }
 }
