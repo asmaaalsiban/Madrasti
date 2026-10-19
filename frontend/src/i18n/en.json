@@ -1,5 +1,10 @@
 {
-  "common": { "appName": "Madrasati", "language": "العربية", "logout": "Log out", "loading": "Loading..." },
+  "common": {
+    "appName": "Madrasati",
+    "language": "العربية",
+    "logout": "Log out",
+    "loading": "Loading..."
+  },
   "auth": {
     "title": "Sign in",
     "login": "Email or phone number",
@@ -7,7 +12,40 @@
     "submit": "Sign in",
     "failed": "Could not sign in, please try again."
   },
-  "roles": { "admin": "Admin", "teacher": "Teacher", "student": "Student", "parent": "Parent" },
-  "dashboard": { "welcome": "Welcome, {{name}}", "soon": "{{role}} tools will appear here soon." },
-  "errors": { "forbidden": "You are not allowed to view this page.", "notFound": "Page not found." }
+  "roles": {
+    "admin": "Admin",
+    "teacher": "Teacher",
+    "student": "Student",
+    "parent": "Parent"
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{name}}",
+    "soon": "{{role}} tools will appear here soon."
+  },
+  "errors": {
+    "forbidden": "You are not allowed to view this page.",
+    "notFound": "Page not found."
+  },
+  "landing": {
+    "login": "Sign in",
+    "heroTitle": "Your whole school in one place",
+    "heroText": "Grades, attendance, timetables, and direct communication between administration, teachers, students, and parents.",
+    "rolesTitle": "A platform for everyone at school",
+    "roles": {
+      "admin": "Manage the school and organize every detail.",
+      "teacher": "Take attendance, follow students, and record grades.",
+      "student": "Timetable, grades, and homework made easy.",
+      "parent": "Follow your children and stay in touch with the school."
+    },
+    "featuresTitle": "Everything a school needs",
+    "features": {
+      "grades": "Grades",
+      "attendance": "Attendance",
+      "schedule": "Timetables",
+      "chat": "Communication",
+      "reports": "Reports",
+      "finance": "Tuition & payments"
+    },
+    "footer": "© {{year}} {{name}}. All rights reserved."
+  }
 }
