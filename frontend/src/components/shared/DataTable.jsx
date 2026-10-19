@@ -15,19 +15,19 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
         <table className="w-full text-start text-sm">
           <thead className="bg-slate-100">
             <tr>
-              {columns.map((c) => <th key={c.key} className="p-3 text-start font-medium">{c.label}</th>)}
-              {(onEdit || onDelete) && <th className="p-3 text-start font-medium">{t('admin.actions.actions')}</th>}
+              {columns.map((c) => <th key={c.key} className="p-2 text-start font-medium sm:p-3">{c.label}</th>)}
+              {(onEdit || onDelete) && <th className="p-2 text-start font-medium sm:p-3">{t('admin.actions.actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-t">
-                {columns.map((c) => <td key={c.key} className="p-3">{c.render ? c.render(row) : row[c.key]}</td>)}
+                {columns.map((c) => <td key={c.key} className="p-2 sm:p-3">{c.render ? c.render(row) : row[c.key]}</td>)}
                 {(onEdit || onDelete) && (
-                  <td className="flex gap-2 p-3">
+                  <td className="p-2 sm:p-3"><div className="flex gap-2">
                     {onEdit && <button type="button" className="text-brand" onClick={() => onEdit(row)}>{t('admin.actions.edit')}</button>}
                     {onDelete && <button type="button" className="text-red-600" onClick={() => onDelete(row)}>{t('admin.actions.delete')}</button>}
-                  </td>
+                  </div></td>
                 )}
               </tr>
             ))}
