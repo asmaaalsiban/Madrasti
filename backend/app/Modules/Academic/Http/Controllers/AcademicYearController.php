@@ -7,7 +7,6 @@ namespace App\Modules\Academic\Http\Controllers;
 use App\Modules\Academic\Http\Requests\AcademicYearRequest;
 use App\Modules\Academic\Http\Resources\AcademicYearResource;
 use App\Modules\Academic\Models\AcademicYear;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +14,8 @@ use Illuminate\Support\Facades\Gate;
 class AcademicYearController extends AcademicController
 {
     protected string $model = AcademicYear::class;
+
+    protected array $referencedBy = ['classrooms' => 'academic_year_id', 'terms' => 'academic_year_id', 'enrollments' => 'academic_year_id', 'schedule_generations' => 'academic_year_id', 'timetable_entries' => 'academic_year_id', 'fee_structures' => 'academic_year_id', 'student_fees' => 'academic_year_id'];
 
     protected string $resource = AcademicYearResource::class;
 
@@ -49,13 +50,6 @@ class AcademicYearController extends AcademicController
         return new AcademicYearResource($academicYear);
     }
 
-    protected function guardDelete(Model $model): void
-    {
-        if ($model->classrooms()->exists()) {
-            $this->inUse('academic_year');
-        }
-    }
-
     /** Only one year may be current at a time. */
     private function unsetOtherCurrent(AcademicYearRequest $request, ?int $exceptId): void
     {
@@ -63,5 +57,10 @@ class AcademicYearController extends AcademicController
             AcademicYear::where('is_current', true)->when($exceptId, fn ($q) => $q->where('id', '!=', $exceptId))->get()
                 ->each->update(['is_current' => false]);
         }
+    }
+
+    protected function resourceKey(): string
+    {
+        return 'academic_year';
     }
 }

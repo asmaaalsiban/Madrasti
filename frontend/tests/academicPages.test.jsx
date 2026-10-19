@@ -84,6 +84,25 @@ describe('SubjectsPage', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/subjects/1'))
   })
 
+  it('shows a generic error when saving fails without validation errors', async () => {
+    api.get.mockResolvedValue(paged([]))
+    api.post.mockRejectedValue({ response: { status: 500, data: { message: 'Server Error' } } })
+    renderPage(<SubjectsPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Something went wrong, please try again.')).toBeInTheDocument()
+  })
+
+  it('shows the empty state when a search has no matches', async () => {
+    api.get.mockResolvedValueOnce(paged([{ id: 1, code: 'MTH', name_ar: 'رياضيات', name_en: 'Math' }]))
+    api.get.mockResolvedValue(paged([]))
+    renderPage(<SubjectsPage />)
+    await screen.findByText('MTH')
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zzz' } })
+    expect(await screen.findByText('Nothing to show yet.')).toBeInTheDocument()
+  })
+
   it('renders Arabic labels', async () => {
     await i18n.changeLanguage('ar')
     api.get.mockResolvedValue(paged([]))

@@ -29,6 +29,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
   const [editing, setEditing] = useState(null) // row | {} (new) | null
   const [form, setForm] = useState({})
   const [errors, setErrors] = useState({})
+  const [formError, setFormError] = useState('')
   const [toDelete, setToDelete] = useState(null)
   const [notice, setNotice] = useState('')
 
@@ -36,18 +37,24 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
 
   const openForm = (row) => {
     setErrors({})
+    setFormError('')
     setForm(row?.id ? Object.fromEntries(fields.map((f) => [f.name, row[f.name] ?? ''])) : { ...empty })
     setEditing(row ?? {})
   }
 
   const submit = (e) => {
     e.preventDefault()
+    setFormError('')
     const body = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v === '' ? null : v]))
     save.mutate(
       { id: editing.id, body },
       {
         onSuccess: () => setEditing(null),
-        onError: (err) => setErrors(err.response?.data?.errors ?? {}),
+        onError: (err) => {
+          const fieldErrors = err.response?.data?.errors
+          setErrors(fieldErrors ?? {})
+          if (!fieldErrors) setFormError(t('admin.actions.error'))
+        },
       },
     )
   }
@@ -82,6 +89,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
       />
       <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)}>
         <form onSubmit={submit} className="space-y-3">
+          {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
           {fields.map((f) => (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]}>
               {f.type === 'select' ? (

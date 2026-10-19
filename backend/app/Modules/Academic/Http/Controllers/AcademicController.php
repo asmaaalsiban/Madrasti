@@ -7,11 +7,14 @@ namespace App\Modules\Academic\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 /**
  * Shared index/show/destroy for the admin school-structure resources.
@@ -31,6 +34,9 @@ abstract class AcademicController extends Controller
     /** @var list<string> */
     protected array $with = [];
 
+    /** @var array<string, string> table => column that references this resource's id */
+    protected array $referencedBy = [];
+
     protected string $orderBy = 'id';
 
     protected string $orderDirection = 'asc';
@@ -42,9 +48,10 @@ abstract class AcademicController extends Controller
         $query = $this->model::query()->with($this->with)->orderBy($this->orderBy, $this->orderDirection);
         $search = trim((string) $request->query('search', ''));
         if ($search !== '' && $this->searchable !== []) {
-            $query->where(function (Builder $q) use ($search): void {
+            $term = '%'.Str::of(mb_strtolower($search))->replace(['!', '%', '_'], ['!!', '!%', '!_']).'%';
+            $query->where(function (Builder $q) use ($term): void {
                 foreach ($this->searchable as $column) {
-                    $q->orWhere($column, 'like', '%'.$search.'%');
+                    $q->orWhereRaw("LOWER({$column}) LIKE ? ESCAPE '!'", [$term]);
                 }
             });
         }
@@ -68,7 +75,13 @@ abstract class AcademicController extends Controller
         $model = $this->model::query()->findOrFail($id);
         Gate::authorize('delete', $model);
         $this->guardDelete($model);
-        $model->delete();
+
+        try {
+            $model->delete();
+        } catch (QueryException $e) {
+            // Backstop for references the explicit guard does not list.
+            $this->inUse($this->resourceKey());
+        }
 
         return response()->json(null, 204);
     }
@@ -77,7 +90,17 @@ abstract class AcademicController extends Controller
     protected function filter(Builder $query, Request $request): void {}
 
     /** Abort with 422 when the row is still referenced elsewhere. */
-    protected function guardDelete(Model $model): void {}
+    protected function guardDelete(Model $model): void
+    {
+        foreach ($this->referencedBy as $table => $column) {
+            if (DB::table($table)->where($column, $model->getKey())->exists()) {
+                $this->inUse($this->resourceKey());
+            }
+        }
+    }
+
+    /** Key under academic.resources.* naming this resource in messages. */
+    abstract protected function resourceKey(): string;
 
     protected function inUse(string $resource): never
     {

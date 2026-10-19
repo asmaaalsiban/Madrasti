@@ -7,13 +7,14 @@ namespace App\Modules\Academic\Http\Controllers;
 use App\Modules\Academic\Http\Requests\GradeLevelRequest;
 use App\Modules\Academic\Http\Resources\GradeLevelResource;
 use App\Modules\Academic\Models\GradeLevel;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 
 class GradeLevelController extends AcademicController
 {
     protected string $model = GradeLevel::class;
+
+    protected array $referencedBy = ['classrooms' => 'grade_level_id', 'fee_structures' => 'grade_level_id'];
 
     protected string $resource = GradeLevelResource::class;
 
@@ -36,10 +37,8 @@ class GradeLevelController extends AcademicController
         return new GradeLevelResource($gradeLevel);
     }
 
-    protected function guardDelete(Model $model): void
+    protected function resourceKey(): string
     {
-        if ($model->classrooms()->exists()) {
-            $this->inUse('grade_level');
-        }
+        return 'grade_level';
     }
 }

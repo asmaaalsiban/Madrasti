@@ -8,15 +8,17 @@ use App\Modules\Academic\Http\Requests\ClassroomRequest;
 use App\Modules\Academic\Http\Resources\ClassroomResource;
 use App\Modules\Academic\Models\Classroom;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class ClassroomController extends AcademicController
 {
     protected string $model = Classroom::class;
+
+    protected array $referencedBy = ['enrollments' => 'classroom_id', 'student_attendances' => 'classroom_id', 'assessments' => 'classroom_id', 'lesson_plans' => 'classroom_id', 'conversations' => 'classroom_id', 'classroom_subject_teacher' => 'classroom_id', 'timetable_entries' => 'classroom_id', 'exam_sessions' => 'classroom_id', 'curriculum_units' => 'classroom_id', 'daily_summaries' => 'classroom_id', 'homework_assignments' => 'classroom_id', 'star_of_week' => 'classroom_id', 'announcements' => 'classroom_id', 'stories' => 'classroom_id'];
 
     protected string $resource = ClassroomResource::class;
 
@@ -37,6 +39,11 @@ class ClassroomController extends AcademicController
     public function update(ClassroomRequest $request, Classroom $classroom): ClassroomResource
     {
         Gate::authorize('update', $classroom);
+
+        $newYear = (int) $request->validated('academic_year_id');
+        if ($newYear !== $classroom->academic_year_id && DB::table('enrollments')->where('classroom_id', $classroom->id)->exists()) {
+            throw ValidationException::withMessages(['academic_year_id' => [__('academic.year_locked')]]);
+        }
         $classroom->update($request->validated());
 
         return new ClassroomResource($classroom->load($this->with));
@@ -51,10 +58,8 @@ class ClassroomController extends AcademicController
         }
     }
 
-    protected function guardDelete(Model $model): void
+    protected function resourceKey(): string
     {
-        if (DB::table('enrollments')->where('classroom_id', $model->id)->exists()) {
-            $this->inUse('classroom');
-        }
+        return 'classroom';
     }
 }

@@ -14,6 +14,8 @@ class SubjectController extends AcademicController
 {
     protected string $model = Subject::class;
 
+    protected array $referencedBy = ['classroom_subject_teacher' => 'subject_id', 'assessments' => 'subject_id', 'timetable_entries' => 'subject_id', 'exam_sessions' => 'subject_id', 'lesson_plans' => 'subject_id', 'curriculum_units' => 'subject_id', 'daily_summaries' => 'subject_id', 'homework_assignments' => 'subject_id'];
+
     protected string $resource = SubjectResource::class;
 
     protected array $searchable = ['code', 'name_ar', 'name_en'];
@@ -33,5 +35,10 @@ class SubjectController extends AcademicController
         $subject->update($request->validated());
 
         return new SubjectResource($subject);
+    }
+
+    protected function resourceKey(): string
+    {
+        return 'subject';
     }
 }

@@ -19,7 +19,7 @@ class ClassroomRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'grade_level_id' => ['required', 'integer', 'exists:grade_levels,id'],
             'academic_year_id' => ['required', 'integer', 'exists:academic_years,id'],
-            'homeroom_teacher_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', Role::Teacher->value)],
+            'homeroom_teacher_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', Role::Teacher->value)->where('is_active', true)->whereNull('deleted_at')],
             'capacity' => ['nullable', 'integer', 'min:1', 'max:65535'],
         ];
     }
