@@ -7,7 +7,7 @@ const fields = [
   { name: 'academic_year_id', label: 'academic.fields.academicYear', type: 'select', optionsFrom: 'academic-years', optionLabel: 'name' },
   { name: 'capacity', label: 'academic.fields.capacity', type: 'number' },
   {
-    name: 'homeroom_teacher_id', label: 'people.fields.homeroomTeacher', type: 'select', optionsFrom: 'teachers', optionLabel: 'name',
+    name: 'homeroom_teacher_id', label: 'people.fields.homeroomTeacher', type: 'select', optionsFrom: 'staff', optionsParams: { homeroom: 1 }, optionLabel: 'name',
     getValue: (row) => row.homeroom_teacher?.id,
   },
 ]

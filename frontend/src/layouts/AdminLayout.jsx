@@ -12,7 +12,7 @@ const NAV = [
   ['/admin/grade-levels', 'gradeLevels'],
   ['/admin/classrooms', 'classrooms'],
   ['/admin/subjects', 'subjects'],
-  ['/admin/teachers', 'teachers'],
+  ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],
 ]
 

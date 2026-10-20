@@ -65,8 +65,8 @@
       "gradeLevels": "الصفوف",
       "classrooms": "الشعب",
       "subjects": "المواد",
-      "teachers": "المعلمون",
-      "students": "الطلاب"
+      "students": "الطلاب",
+      "staff": "الكادر"
     },
     "actions": {
       "add": "إضافة",
@@ -140,7 +140,6 @@
     "changeSchoolCode": "تغيير كود المدرسة"
   },
   "people": {
-    "teachers": "المعلمون",
     "students": "الطلاب",
     "fields": {
       "email": "البريد الإلكتروني",
@@ -149,12 +148,12 @@
       "studentNumber": "رقم الطالب",
       "birthDate": "تاريخ الميلاد",
       "gender": "الجنس",
-      "studentEmail": "إيميل الطالب",
       "classroom": "الشعبة",
       "guardianEmail": "إيميل ولي الأمر",
       "guardianName": "اسم ولي الأمر",
       "guardians": "أولياء الأمور",
-      "homeroomTeacher": "المعلم المسؤول"
+      "homeroomTeacher": "المعلم المسؤول",
+      "guardianPhone": "جوال ولي الأمر"
     },
     "male": "ذكر",
     "female": "أنثى",
@@ -164,6 +163,66 @@
       "resetGuardianPassword": "إعادة كلمة مرور ولي الأمر",
       "resetConfirm": "إعادة كلمة المرور إلى الافتراضية؟ سيختار المستخدم كلمة جديدة عند الدخول التالي.",
       "resetDone": "تمت إعادة كلمة المرور إلى الكلمة الافتراضية."
+    },
+    "nameEnHint": "يُستخدم لتكوين إيميل الطالب.",
+    "accountCreated": {
+      "title": "تم إنشاء حساب الطالب",
+      "text": "يدخل الطالب بهذه البيانات ويجب أن يغيّر كلمة المرور. احفظها الآن: كلمة المرور تظهر مرة واحدة فقط.",
+      "email": "الإيميل",
+      "password": "كلمة المرور",
+      "close": "إغلاق"
+    }
+  },
+  "staff": {
+    "title": "الكادر",
+    "categories": {
+      "all": "الكل",
+      "teaching": "التدريس",
+      "administrative": "الإداريون",
+      "student_affairs": "شؤون الطلاب",
+      "health": "الصحة",
+      "technical": "الفنيون",
+      "services": "الخدمات"
+    },
+    "types": {
+      "teacher": "معلم",
+      "head_of_department": "رئيس قسم",
+      "subject_coordinator": "منسق مادة",
+      "trainee": "معلم متدرب",
+      "substitute_teacher": "معلم بديل",
+      "principal": "مدير المدرسة",
+      "vice_principal": "وكيل المدرسة",
+      "general_manager": "المدير العام",
+      "registrar": "موظف القبول والتسجيل",
+      "accountant": "محاسب",
+      "hr": "موارد بشرية",
+      "data_entry": "مدخل بيانات",
+      "counselor": "مرشد",
+      "floor_supervisor": "مشرف طابق",
+      "bus_supervisor": "مشرف باصات",
+      "activities_coordinator": "منسق أنشطة",
+      "sports_coach": "مدرب رياضي",
+      "nurse": "ممرض",
+      "pharmacist": "صيدلاني",
+      "librarian": "أمين مكتبة",
+      "lab_technician": "فني مختبر",
+      "it_support": "دعم تقني",
+      "caretaker": "آذن",
+      "driver": "سائق",
+      "security_guard": "حارس",
+      "canteen_worker": "عامل مقصف"
+    },
+    "fields": {
+      "type": "النوع",
+      "subject": "المادة",
+      "floor": "الطابق"
+    }
+  },
+  "parent": {
+    "home": {
+      "title": "أبنائي",
+      "emailHint": "يدخل ابنك بهذا الإيميل",
+      "empty": "لا يوجد أبناء مرتبطون بحسابك بعد."
     }
   }
 }
