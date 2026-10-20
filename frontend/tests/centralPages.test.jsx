@@ -137,12 +137,12 @@ describe('FindSchoolPage', () => {
 })
 
 describe('SwitchSchoolButton', () => {
-  it('forgets the selected school and goes back to the start page', () => {
+  it('forgets the selected school and opens the school code page', () => {
     setSchool('alnoor')
     render(<SwitchSchoolButton />)
     fireEvent.click(screen.getByRole('button', { name: 'Switch school' }))
     expect(getSchool()).toBeNull()
-    expect(goTo).toHaveBeenCalledWith('/')
+    expect(goTo).toHaveBeenCalledWith('/find-school')
   })
 
   it('has an Arabic label', async () => {
