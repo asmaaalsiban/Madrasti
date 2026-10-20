@@ -13,3 +13,6 @@ export const normalizeSchoolCode = (input) => input.trim().toLowerCase()
 // Where a school lives: <code>.<base domain>, on the same port as the current page in dev.
 export const schoolUrl = (code, path = '/', location = window.location) =>
   `${location.protocol}//${code}.${BASE_DOMAIN}${location.port ? `:${location.port}` : ''}${path}`
+
+// Full page navigation (the target is another host); a seam so tests can observe it.
+export const redirectTo = (url) => window.location.assign(url)
