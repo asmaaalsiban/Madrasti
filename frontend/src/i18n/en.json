@@ -125,6 +125,7 @@
     "back": "Back",
     "switchSchool": "Switch school",
     "schoolNotFound": "School not found. Check the school code.",
-    "schoolCodeHint": "You will type this code when you sign in"
+    "schoolCodeHint": "You will type this code when you sign in",
+    "changeSchoolCode": "Change school code"
   }
 }
