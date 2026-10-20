@@ -7,6 +7,7 @@ use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Shared\Enums\Role;
+use App\Shared\Enums\StaffType;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -27,7 +28,7 @@ class ClassroomTest extends AcademicTestCase
     public function test_admin_can_crud_classroom(): void
     {
         $this->actAsAdmin();
-        $teacher = User::factory()->role(Role::Teacher)->create();
+        $teacher = User::factory()->staff()->create();
 
         $id = $this->postJson('/api/classrooms', $this->body(['homeroom_teacher_id' => $teacher->id]))
             ->assertCreated()
@@ -46,6 +47,18 @@ class ClassroomTest extends AcademicTestCase
 
         $this->postJson('/api/classrooms', $this->body(['homeroom_teacher_id' => $parent->id]))
             ->assertUnprocessable()->assertJsonValidationErrors('homeroom_teacher_id');
+    }
+
+    public function test_only_teaching_staff_who_may_be_homeroom_teachers_are_accepted(): void
+    {
+        $this->actAsAdmin();
+        $nurse = User::factory()->staff(StaffType::Nurse)->create();
+        $trainee = User::factory()->staff(StaffType::Trainee)->create();
+        $head = User::factory()->staff(StaffType::HeadOfDepartment)->create();
+
+        $this->postJson('/api/classrooms', $this->body(['homeroom_teacher_id' => $nurse->id]))->assertUnprocessable()->assertJsonValidationErrors('homeroom_teacher_id');
+        $this->postJson('/api/classrooms', $this->body(['homeroom_teacher_id' => $trainee->id]))->assertUnprocessable()->assertJsonValidationErrors('homeroom_teacher_id');
+        $this->postJson('/api/classrooms', $this->body(['homeroom_teacher_id' => $head->id]))->assertCreated();
     }
 
     public function test_capacity_must_be_positive_and_foreign_keys_must_exist(): void

@@ -12,7 +12,7 @@ const inputClass = 'w-full rounded border p-2'
 // A select whose options are either static (field.options: [{ value, label }]) or loaded from another resource.
 function SelectField({ field, value, onChange }) {
   const { t, i18n } = useTranslation()
-  const remote = useResource(field.optionsFrom ?? 'unused').useList({ per_page: 100 }, { enabled: Boolean(field.optionsFrom) })
+  const remote = useResource(field.optionsFrom ?? 'unused').useList({ per_page: 100, ...field.optionsParams }, { enabled: Boolean(field.optionsFrom) })
   const label = (o) => o[field.optionLabel] ?? o[`name_${i18n.language}`] ?? o.name
   const options = field.options
     ? field.options.map((o) => ({ value: o.value, label: t(o.label) }))
@@ -26,9 +26,11 @@ function SelectField({ field, value, onChange }) {
 }
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
-// fields: [{ name, label, type?, options?, optionsFrom?, optionLabel?, getValue?(row), hint? }]
+// fields: [{ name, label, type?, options?, optionsFrom?, optionsParams?, optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
 // rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
-export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [] }) {
+// filters: extra query parameters of the list (remount the page with a new key when they change).
+// onSaved(response, isNew): called after a successful save.
+export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const { useList, save, remove } = useResource(path)
@@ -43,7 +45,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const [notice, setNotice] = useState('')
   const [status, setStatus] = useState('')
 
-  const { data, isLoading } = useList({ search: search || undefined, page })
+  const { data, isLoading } = useList({ search: search || undefined, page, ...filters })
 
   const openForm = (row) => {
     setErrors({})
@@ -56,10 +58,14 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
     e.preventDefault()
     setFormError('')
     const body = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v === '' ? null : v]))
+    const isNew = !editing.id
     save.mutate(
       { id: editing.id, body },
       {
-        onSuccess: () => setEditing(null),
+        onSuccess: (response) => {
+          setEditing(null)
+          onSaved?.(response, isNew)
+        },
         onError: (err) => {
           const fieldErrors = err.response?.data?.errors
           setErrors(fieldErrors ?? {})
@@ -114,7 +120,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
       <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)}>
         <form onSubmit={submit} className="space-y-3">
           {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
-          {fields.map((f) => (
+          {fields.filter((f) => !f.visibleWhen || f.visibleWhen(form)).map((f) => (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (
                 <SelectField field={f} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />

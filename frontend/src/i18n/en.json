@@ -65,8 +65,8 @@
       "gradeLevels": "Grade levels",
       "classrooms": "Classrooms",
       "subjects": "Subjects",
-      "teachers": "Teachers",
-      "students": "Students"
+      "students": "Students",
+      "staff": "Staff"
     },
     "actions": {
       "add": "Add",
@@ -140,7 +140,6 @@
     "changeSchoolCode": "Change school code"
   },
   "people": {
-    "teachers": "Teachers",
     "students": "Students",
     "fields": {
       "email": "Email",
@@ -149,12 +148,12 @@
       "studentNumber": "Student number",
       "birthDate": "Birth date",
       "gender": "Gender",
-      "studentEmail": "Student email",
       "classroom": "Classroom",
       "guardianEmail": "Parent email",
       "guardianName": "Parent name",
       "guardians": "Parents",
-      "homeroomTeacher": "Homeroom teacher"
+      "homeroomTeacher": "Homeroom teacher",
+      "guardianPhone": "Parent phone"
     },
     "male": "Male",
     "female": "Female",
@@ -164,6 +163,66 @@
       "resetGuardianPassword": "Reset parent password",
       "resetConfirm": "Reset this password to the default one? The user will have to choose a new password at the next sign-in.",
       "resetDone": "The password was reset to the default one."
+    },
+    "nameEnHint": "Used to build the student email.",
+    "accountCreated": {
+      "title": "Student account created",
+      "text": "The student signs in with these details and must change the password. Save them now: the password is shown only once.",
+      "email": "Email",
+      "password": "Password",
+      "close": "Close"
+    }
+  },
+  "staff": {
+    "title": "Staff",
+    "categories": {
+      "all": "All",
+      "teaching": "Teaching",
+      "administrative": "Administrative",
+      "student_affairs": "Student affairs",
+      "health": "Health",
+      "technical": "Technical",
+      "services": "Services"
+    },
+    "types": {
+      "teacher": "Teacher",
+      "head_of_department": "Head of department",
+      "subject_coordinator": "Subject coordinator",
+      "trainee": "Trainee teacher",
+      "substitute_teacher": "Substitute teacher",
+      "principal": "Principal",
+      "vice_principal": "Vice principal",
+      "general_manager": "General manager",
+      "registrar": "Registrar",
+      "accountant": "Accountant",
+      "hr": "HR",
+      "data_entry": "Data entry",
+      "counselor": "Counselor",
+      "floor_supervisor": "Floor supervisor",
+      "bus_supervisor": "Bus supervisor",
+      "activities_coordinator": "Activities coordinator",
+      "sports_coach": "Sports coach",
+      "nurse": "Nurse",
+      "pharmacist": "Pharmacist",
+      "librarian": "Librarian",
+      "lab_technician": "Lab technician",
+      "it_support": "IT support",
+      "caretaker": "Caretaker",
+      "driver": "Driver",
+      "security_guard": "Security guard",
+      "canteen_worker": "Canteen worker"
+    },
+    "fields": {
+      "type": "Type",
+      "subject": "Subject",
+      "floor": "Floor"
+    }
+  },
+  "parent": {
+    "home": {
+      "title": "My children",
+      "emailHint": "Your child signs in with this email",
+      "empty": "No children are linked to your account yet."
     }
   }
 }

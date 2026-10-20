@@ -61,9 +61,9 @@ class ReviewFixesTest extends AcademicTestCase
     public function test_homeroom_teacher_must_be_active_and_not_deleted(): void
     {
         $this->actAsAdmin();
-        $gone = User::factory()->role(Role::Teacher)->create();
+        $gone = User::factory()->staff()->create();
         $gone->delete();
-        $inactive = User::factory()->role(Role::Teacher)->inactive()->create();
+        $inactive = User::factory()->staff()->inactive()->create();
         $base = ['name' => 'A', 'grade_level_id' => GradeLevel::factory()->create()->id, 'academic_year_id' => AcademicYear::factory()->create()->id];
 
         $this->postJson('/api/classrooms', [...$base, 'homeroom_teacher_id' => $gone->id])->assertUnprocessable()->assertJsonValidationErrors('homeroom_teacher_id');

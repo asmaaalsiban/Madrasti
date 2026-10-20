@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Shared\Enums\Role;
+use App\Shared\Enums\StaffType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -32,6 +33,13 @@ class UserFactory extends Factory
     public function role(Role $role): static
     {
         return $this->state(fn () => ['role' => $role]);
+    }
+
+    /** A member of the school staff: account role and staff profile follow the type. */
+    public function staff(StaffType $type = StaffType::Teacher, array $profile = []): static
+    {
+        return $this->state(fn () => ['role' => $type->accountRole()])
+            ->afterCreating(fn (User $user) => $user->staffProfile()->create([...['staff_type' => $type], ...$profile]));
     }
 
     public function inactive(): static

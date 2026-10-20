@@ -87,7 +87,7 @@ class AuthController extends Controller
     private function withChildren(User $user): User
     {
         if ($user->role === Role::Guardian) {
-            $user->load('children');
+            $user->load(['children.user', 'children.enrollments.classroom']);
         }
 
         return $user;

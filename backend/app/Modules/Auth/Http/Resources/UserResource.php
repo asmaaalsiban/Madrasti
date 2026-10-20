@@ -34,6 +34,9 @@ class UserResource extends JsonResource
                 'student_number' => $student->student_number,
                 'name_ar' => $student->name_ar,
                 'name_en' => $student->name_en,
+                // The child's login email, so a parent who lost it finds it here.
+                'email' => $student->user?->email,
+                'classroom' => $student->enrollments->sortByDesc('academic_year_id')->first()?->classroom?->name,
             ])->values()),
         ];
     }

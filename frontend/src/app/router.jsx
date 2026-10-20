@@ -15,7 +15,8 @@ import OverviewPage from '../features/Academic/pages/OverviewPage'
 import SubjectsPage from '../features/Academic/pages/SubjectsPage'
 import RoleHome from '../features/Auth/pages/RoleHome'
 import StudentsPage from '../features/People/pages/StudentsPage'
-import TeachersPage from '../features/People/pages/TeachersPage'
+import StaffPage from '../features/People/pages/StaffPage'
+import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
@@ -32,7 +33,7 @@ export const routes = [
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
-          children: [{ index: true, element: <RoleHome /> }],
+          children: [{ index: true, element: role === 'parent' ? <ParentHome /> : <RoleHome /> }],
         })),
       },
       {
@@ -46,7 +47,7 @@ export const routes = [
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
               { path: '/admin/subjects', element: <SubjectsPage /> },
-              { path: '/admin/teachers', element: <TeachersPage /> },
+              { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
             ],
           },

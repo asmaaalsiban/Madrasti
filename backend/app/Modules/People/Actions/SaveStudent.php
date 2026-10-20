@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
+use App\Modules\People\Services\StudentEmail;
 use App\Shared\Enums\Role;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Creates or updates a student together with the student's login account, the classroom placement
@@ -22,12 +24,22 @@ class SaveStudent
     /**
      * @param  array<string, mixed>  $data  validated StudentRequest data
      */
+    public function __construct(private readonly StudentEmail $emails) {}
+
+    /**
+     * The student's login email is generated; it is returned once, with the default password, as the
+     * `generated_account` attribute of the result so the admin can hand it over.
+     *
+     * @param  array<string, mixed>  $data  validated StudentRequest data
+     */
     public function create(array $data): Student
     {
         return DB::transaction(function () use ($data): Student {
+            $email = $this->emails->generate($data['student_number'], $data['name_en'] ?? null, tenant('id') ?? 'school');
+
             $account = User::create([
                 'name' => $data['name_ar'],
-                'email' => $data['student_email'],
+                'email' => $email,
                 'role' => Role::Student,
                 'is_active' => true,
                 ...$this->defaultCredentials(),
@@ -36,9 +48,12 @@ class SaveStudent
             $student = Student::create([...$this->studentFields($data), 'user_id' => $account->id]);
 
             $this->place($student, $data['classroom_id'] ?? null);
-            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null);
+            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, $data['guardian_phone'] ?? null);
 
-            return $this->loaded($student);
+            $student = $this->loaded($student);
+            $student->setAttribute('generated_account', ['email' => $email, 'password' => config('accounts.default_password')]);
+
+            return $student;
         });
     }
 
@@ -50,11 +65,11 @@ class SaveStudent
         return DB::transaction(function () use ($student, $data): Student {
             $student->update($this->studentFields($data));
 
-            // Name and email follow the student record; the password is never touched here.
-            $student->user?->update(['name' => $data['name_ar'], 'email' => $data['student_email']]);
+            // The name follows the student record; the generated email and the password are never touched here.
+            $student->user?->update(['name' => $data['name_ar']]);
 
             $this->place($student, $data['classroom_id'] ?? null);
-            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, replacePrimary: true);
+            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, $data['guardian_phone'] ?? null, replacePrimary: true);
 
             return $this->loaded($student);
         });
@@ -104,19 +119,31 @@ class SaveStudent
      * The form edits the primary parent: with $replacePrimary a different email replaces the old primary parent's
      * link (their account stays), so fixing a mistyped email does not leave the wrong account with access to the child.
      */
-    private function linkGuardian(Student $student, ?string $email, ?string $name, bool $replacePrimary = false): void
+    private function linkGuardian(Student $student, ?string $email, ?string $name, ?string $phone = null, bool $replacePrimary = false): void
     {
         if ($email === null || $email === '') {
             return;
         }
 
-        $guardian = User::where('email', $email)->first() ?? User::create([
+        $existing = User::where('email', $email)->first();
+        if ($existing !== null && $existing->role !== Role::Guardian) {
+            // e.g. the student's own generated email: rolls the whole save back.
+            throw ValidationException::withMessages(['guardian_email' => __('people.guardian_email_conflict')]);
+        }
+
+        $guardian = $existing ?? User::create([
             'name' => $name ?: __('people.guardian_of', ['name' => $student->name_ar]),
             'email' => $email,
+            'phone' => $phone ?: null,
             'role' => Role::Guardian,
             'is_active' => true,
             ...$this->defaultCredentials(),
         ]);
+
+        // A phone given for an existing parent replaces the old one.
+        if ($phone && $guardian->phone !== $phone) {
+            $guardian->update(['phone' => $phone]);
+        }
 
         $linked = $student->guardians()->whereKey($guardian->id)->exists();
         $primary = $student->guardians()->wherePivot('is_primary', true)->first();

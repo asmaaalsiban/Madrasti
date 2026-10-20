@@ -34,12 +34,19 @@ class UserPolicy
 
     public function delete(User $user, User $target): bool
     {
-        return $user->hasRole(Role::Admin);
+        return $user->hasRole(Role::Admin) && ! $user->is($target);
     }
 
-    /** Admin passwords are never reset by another admin through this API. */
+    /**
+     * An admin may reset teachers, students, parents and admin-level staff (principal, ...), never themselves
+     * and never the school's first admin (an admin without a staff profile).
+     */
     public function resetPassword(User $user, User $target): bool
     {
-        return $user->hasRole(Role::Admin) && ! $target->hasRole(Role::Admin);
+        if (! $user->hasRole(Role::Admin) || $user->is($target)) {
+            return false;
+        }
+
+        return ! $target->hasRole(Role::Admin) || $target->staffProfile()->exists();
     }
 }
