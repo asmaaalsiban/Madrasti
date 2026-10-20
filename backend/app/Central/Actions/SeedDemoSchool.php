@@ -16,11 +16,16 @@ use Illuminate\Support\Facades\DB;
  */
 class SeedDemoSchool
 {
-    /** [email name, Arabic name, staff type, subject code]: the first three are teaching staff and homeroom teachers. */
+    /** [email name, Arabic name, staff type, subject code]: one teacher for each subject, plus a nurse. */
     private const STAFF = [
         ['teacher1', 'أحمد علي', StaffType::Teacher, 'ARB'],
         ['teacher2', 'سارة خالد', StaffType::Teacher, 'MTH'],
         ['teacher3', 'محمد يوسف', StaffType::HeadOfDepartment, 'SCI'],
+        ['teacher4', 'ليلى حسن', StaffType::Teacher, 'ENG'],
+        ['teacher5', 'خالد عمر', StaffType::Teacher, 'SOC'],
+        ['teacher6', 'هدى إبراهيم', StaffType::Teacher, 'REL'],
+        ['teacher7', 'رنا سعيد', StaffType::Teacher, 'ART'],
+        ['teacher8', 'عمر فؤاد', StaffType::Teacher, 'PE'],
         ['nurse1', 'نور حسن', StaffType::Nurse, null],
     ];
 
@@ -84,7 +89,7 @@ class SeedDemoSchool
                     'name' => ($i + 1).'-'.$section, 'grade_level_id' => $gradeId, 'academic_year_id' => $yearId,
                 ], [
                     'capacity' => 30,
-                    'homeroom_teacher_id' => $j === 0 ? ($teacherIds[$i] ?? null) : null,
+                    'homeroom_teacher_id' => $teacherIds[$j === 0 ? $i : 6 + $i] ?? null, // sections A of every grade, then B of grades 1-2
                 ]);
             }
         }
@@ -101,26 +106,67 @@ class SeedDemoSchool
         ];
     }
 
-    /** A few students with their accounts and parents, created the way the admin screen creates them (default password). */
+    private const STUDENTS_PER_CLASSROOM = 10;
+
+    private const FAMILIES = [
+        ['خالد', 'Khaled'], ['سامي', 'Sami'], ['نبيل', 'Nabil'], ['حداد', 'Haddad'], ['منصور', 'Mansour'], ['العلي', 'Ali'],
+        ['الخطيب', 'Khatib'], ['شاهين', 'Shaheen'], ['درويش', 'Darwish'], ['الأحمد', 'Ahmad'], ['صالح', 'Saleh'], ['قاسم', 'Qasim'],
+    ];
+
+    private const BOYS = [
+        ['أحمد', 'Ahmad'], ['محمد', 'Mohammad'], ['يوسف', 'Yousef'], ['عمر', 'Omar'], ['علي', 'Ali'], ['خالد', 'Khaled'],
+        ['إبراهيم', 'Ibrahim'], ['حمزة', 'Hamza'], ['زيد', 'Zaid'], ['كريم', 'Karim'], ['طارق', 'Tareq'], ['سليم', 'Salim'],
+    ];
+
+    private const GIRLS = [
+        ['ليلى', 'Layla'], ['مريم', 'Mariam'], ['سارة', 'Sara'], ['نور', 'Noor'], ['هدى', 'Huda'], ['رنا', 'Rana'],
+        ['لينا', 'Lina'], ['دانة', 'Dana'], ['جنى', 'Jana'], ['ريم', 'Reem'], ['تالا', 'Tala'], ['ياسمين', 'Yasmin'],
+    ];
+
+    /**
+     * Students with their accounts and parents, created the way the admin screen creates them (default password).
+     * The four hand-made ones come first, then every classroom is filled up to ten with generated students
+     * (fixed names, so running again gives the same data); about one student in three has a sibling in another classroom.
+     */
     private function seedStudents(string $domain, int $yearId): void
     {
         $saver = app(SaveStudent::class);
 
         foreach (self::STUDENTS as [$number, $nameAr, $nameEn, $classroom, $parent]) {
-            if (DB::table('students')->where('student_number', $number)->exists()) {
-                continue;
-            }
-
-            // The student's email is generated (e.g. ahmad.d1001@school2.edu).
-            $saver->create([
-                'student_number' => $number,
-                'name_ar' => $nameAr,
-                'name_en' => $nameEn,
-                'classroom_id' => DB::table('classrooms')->where('name', $classroom)->where('academic_year_id', $yearId)->value('id'),
-                'guardian_email' => 'parent'.$parent.'@'.$domain,
-                'guardian_phone' => '059910000'.$parent,
-            ]);
+            $this->createStudent($saver, $yearId, $domain, $number, $nameAr, $nameEn, $classroom, $parent, 'خالد');
         }
+
+        $fixed = array_count_values(array_column(self::STUDENTS, 3));
+        $classrooms = DB::table('classrooms')->where('academic_year_id', $yearId)->orderBy('id')->pluck('name')->all();
+        $index = 0;
+        foreach ($classrooms as $c => $classroom) {
+            for ($seat = 1; $seat <= self::STUDENTS_PER_CLASSROOM - ($fixed[$classroom] ?? 0); $seat++, $index++) {
+                $family = self::FAMILIES[($index % 84) % count(self::FAMILIES)];
+                [$first, $firstEn] = $index % 2 === 0 ? self::BOYS[($index * 5) % count(self::BOYS)] : self::GIRLS[($index * 7) % count(self::GIRLS)];
+                $this->createStudent(
+                    $saver, $yearId, $domain, 'D-'.(2001 + $c * 10 + $seat - 1),
+                    $first.' '.$family[0], $firstEn.' '.$family[1], $classroom, 4 + ($index % 84), $family[0],
+                );
+            }
+        }
+    }
+
+    private function createStudent(SaveStudent $saver, int $yearId, string $domain, string $number, string $nameAr, string $nameEn, string $classroom, int $parent, string $family): void
+    {
+        if (DB::table('students')->where('student_number', $number)->exists()) {
+            return;
+        }
+
+        // The student's email is generated (e.g. ahmad.d1001@school2.edu).
+        $saver->create([
+            'student_number' => $number,
+            'name_ar' => $nameAr,
+            'name_en' => $nameEn,
+            'classroom_id' => DB::table('classrooms')->where('name', $classroom)->where('academic_year_id', $yearId)->value('id'),
+            'guardian_email' => 'parent'.$parent.'@'.$domain,
+            'guardian_name' => 'ولي أمر '.$family,
+            'guardian_phone' => '0599'.str_pad((string) $parent, 6, '0', STR_PAD_LEFT),
+        ]);
     }
 
     /**
