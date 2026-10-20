@@ -14,6 +14,8 @@ const NAV = [
   ['/admin/subjects', 'subjects'],
   ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],
+  ['/admin/attendance', 'attendance'],
+  ['/admin/attendance-report', 'attendanceReport'],
 ]
 
 export default function AdminLayout() {

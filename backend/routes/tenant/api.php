@@ -8,6 +8,8 @@ use App\Modules\Academic\Http\Controllers\ClassroomController;
 use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
+use App\Modules\Attendance\Http\Controllers\AttendanceController;
+use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
@@ -47,3 +49,14 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::apiResource('students', StudentController::class);
     Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);
 });
+
+// Attendance: the homeroom teacher (or an admin) takes the classroom's day and sees the reports.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->group(function (): void {
+    Route::get('classrooms', [AttendanceController::class, 'classrooms']);
+    Route::get('/', [AttendanceController::class, 'show']);
+    Route::put('/', [AttendanceController::class, 'update']);
+    Route::get('report', [AttendanceReportController::class, 'index']);
+});
+
+// One student's days: admin, the homeroom teacher, the student and the student's parents (checked by a gate).
+Route::middleware('school-user')->get('attendance/students/{student}', [AttendanceReportController::class, 'student']);

@@ -68,7 +68,9 @@
       "classrooms": "Classrooms",
       "subjects": "Subjects",
       "students": "Students",
-      "staff": "Staff"
+      "staff": "Staff",
+      "attendance": "Take attendance",
+      "attendanceReport": "Absence report"
     },
     "actions": {
       "add": "Add",
@@ -226,5 +228,34 @@
       "emailHint": "Your child signs in with this email",
       "empty": "No children are linked to your account yet."
     }
+  },
+  "attendance": {
+    "takeTitle": "Take attendance",
+    "takeHint": "Record today for your classroom.",
+    "reportTitle": "Absence report",
+    "reportHint": "Days absent and late for each student.",
+    "classroom": "Classroom",
+    "allClassrooms": "All classrooms",
+    "date": "Date",
+    "from": "From",
+    "to": "To",
+    "present": "Present",
+    "late": "Late",
+    "absent": "Absent",
+    "summary": "Present: {{present}} · Late: {{late}} · Absent: {{absent}}",
+    "saved": "Saved. The parents of absent students are being notified.",
+    "alreadyRecorded": "This day was already recorded. Saving will correct it.",
+    "noClassrooms": "You are not the homeroom teacher of any classroom.",
+    "student": "Student",
+    "absentDays": "Days absent",
+    "lateDays": "Days late",
+    "absentDates": "Absence dates: {{name}}",
+    "lateDates": "Late dates: {{name}}",
+    "noDays": "No days to show.",
+    "close": "Close",
+    "childSummary": "Absent: {{absent}} · Late: {{late}}",
+    "showDates": "Show dates",
+    "hideDates": "Hide dates",
+    "loading": "Loading…"
   }
 }

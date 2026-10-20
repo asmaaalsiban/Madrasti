@@ -91,6 +91,23 @@ The admin can reset a staff member, student or parent to the default password fr
 After updating an existing install run `php artisan tenants:migrate` once (adds `staff_profiles.staff_type/subject_id/floor`; existing teachers become staff of type teacher).
 `school:seed-demo` also adds demo staff (`teacher1@<school>.test`, `nurse1@...`) and four students with parents (`parent1@<school>.test` ..., default password).
 
+## Attendance
+
+The homeroom teacher of a classroom (or an admin) records the day: **Take attendance** lists the students, everybody starts *present*,
+and the teacher only taps **Late** (yellow) or **Absent** (red) for the exceptions, then **Save**. Saving again the same day corrects it.
+Admins can record any classroom of the current academic year.
+
+- When a student is saved as absent, the parents' phones get a message ("your child ... was absent today"). It goes through the
+  queue and is recorded per parent in `absence_notifications` (sent / failed / skipped when the parent has no phone); a parent never gets the
+  same absence twice, and failed ones are tried again on the next save.
+- The provider is chosen with `MESSAGING_DRIVER`. Only `log` (writes the message to the Laravel log) exists for now. To add WhatsApp, Twilio, SMS...
+  create a class implementing `App\Shared\Messaging\MessageSender`, add it to `config/messaging.php` and set the driver.
+  Remember to run a queue worker (`php artisan queue:work`) when `QUEUE_CONNECTION` is not `sync`.
+- **Absence report** (admin and teacher): absent/late days per student for the academic year or a date range; click a number to see the dates.
+  Parents see their child's totals and dates on their home page.
+
+After updating run `php artisan tenants:migrate` (adds `absence_notifications`).
+
 ## Status
 
 Phase 1 (Foundation): folder structure and migrations are in place.
