@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import ChildAttendance from '../components/ChildAttendance'
 import { useAuth } from '../../Auth/AuthProvider'
 
 // A parent sees each child with the email the child signs in with.
@@ -20,6 +21,7 @@ export default function ParentHome() {
               {c.classroom && <p className="text-sm text-slate-600">{c.classroom}</p>}
               <p className="pt-1 text-xs text-slate-500">{t('parent.home.emailHint')}</p>
               <p dir="ltr" className="font-mono text-sm">{c.email}</p>
+              <ChildAttendance studentId={c.id} />
             </li>
           ))}
         </ul>

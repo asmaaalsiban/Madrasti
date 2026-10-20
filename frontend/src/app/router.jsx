@@ -14,12 +14,25 @@ import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
 import OverviewPage from '../features/Academic/pages/OverviewPage'
 import SubjectsPage from '../features/Academic/pages/SubjectsPage'
 import RoleHome from '../features/Auth/pages/RoleHome'
+import AttendanceReportPage from '../features/Attendance/pages/AttendanceReportPage'
+import TakeAttendancePage from '../features/Attendance/pages/TakeAttendancePage'
+import TeacherHome from '../features/Teacher/pages/TeacherHome'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
+
+// Pages of the non-admin roles (anything not listed shows the placeholder home).
+const HOME_ROUTES = {
+  parent: [{ index: true, element: <ParentHome /> }],
+  teacher: [
+    { index: true, element: <TeacherHome /> },
+    { path: 'attendance', element: <TakeAttendancePage /> },
+    { path: 'attendance/report', element: <AttendanceReportPage /> },
+  ],
+}
 
 export const routes = [
   { path: '/', element: <LandingPage /> },
@@ -33,7 +46,7 @@ export const routes = [
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
-          children: [{ index: true, element: role === 'parent' ? <ParentHome /> : <RoleHome /> }],
+          children: HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }],
         })),
       },
       {
@@ -49,6 +62,8 @@ export const routes = [
               { path: '/admin/subjects', element: <SubjectsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/attendance', element: <TakeAttendancePage /> },
+              { path: '/admin/attendance-report', element: <AttendanceReportPage /> },
             ],
           },
         ],

@@ -68,7 +68,9 @@
       "classrooms": "الشعب",
       "subjects": "المواد",
       "students": "الطلاب",
-      "staff": "الكادر"
+      "staff": "الكادر",
+      "attendance": "تحضير الطلاب",
+      "attendanceReport": "تقرير الغياب"
     },
     "actions": {
       "add": "إضافة",
@@ -226,5 +228,33 @@
       "emailHint": "يدخل ابنك بهذا الإيميل",
       "empty": "لا يوجد أبناء مرتبطون بحسابك بعد."
     }
+  },
+  "attendance": {
+    "takeTitle": "تحضير الطلاب",
+    "takeHint": "سجّل حضور شعبتك لليوم.",
+    "reportTitle": "تقرير الغياب",
+    "reportHint": "عدد أيام الغياب والتأخر لكل طالب.",
+    "classroom": "الشعبة",
+    "allClassrooms": "كل الشعب",
+    "date": "التاريخ",
+    "from": "من",
+    "to": "إلى",
+    "present": "حاضر",
+    "late": "متأخر",
+    "absent": "غائب",
+    "summary": "حاضر: {{present}} · متأخر: {{late}} · غائب: {{absent}}",
+    "saved": "تم الحفظ. يتم إشعار أولياء أمور الغائبين.",
+    "alreadyRecorded": "هذا اليوم مسجّل مسبقاً. الحفظ سيعدّله.",
+    "noClassrooms": "أنت لست المعلم المسؤول عن أي شعبة.",
+    "student": "الطالب",
+    "absentDays": "أيام الغياب",
+    "lateDays": "أيام التأخر",
+    "absentDates": "تواريخ الغياب: {{name}}",
+    "lateDates": "تواريخ التأخر: {{name}}",
+    "noDays": "لا توجد أيام لعرضها.",
+    "close": "إغلاق",
+    "childSummary": "غياب: {{absent}} · تأخر: {{late}}",
+    "showDates": "عرض التواريخ",
+    "hideDates": "إخفاء التواريخ"
   }
 }
