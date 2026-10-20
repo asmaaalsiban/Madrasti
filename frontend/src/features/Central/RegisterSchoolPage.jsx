@@ -28,7 +28,9 @@ export default function RegisterSchoolPage() {
     } catch (err) {
       const fieldErrors = err.response?.data?.errors
       setErrors(fieldErrors ?? {})
-      if (!fieldErrors) setFormError(t('central.genericError'))
+      // 403 (closed) and 429 (throttled) carry a translated message from the server.
+      const status = err.response?.status
+      if (!fieldErrors) setFormError(([403, 429].includes(status) && err.response.data?.message) || t('central.genericError'))
       setBusy(false)
     }
   }
