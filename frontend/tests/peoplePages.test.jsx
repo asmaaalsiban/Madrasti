@@ -38,12 +38,17 @@ const student = {
 }
 
 // Answers the endpoints the pages call.
-const serve = ({ staff = [], students = [], classrooms = [] } = {}) => {
+const dad = { id: 30, name: 'Abu Mohammad', email: 'dad@mail.test', phone: '0599123456', children: [{ id: 9, name_ar: 'محمد', name_en: 'Mohammad' }] }
+let guardians = []
+
+const serve = ({ staff = [], students = [], classrooms = [], parents = [] } = {}) => {
+  guardians = parents
   api.get.mockImplementation((url) => {
     if (url === '/staff-types') return Promise.resolve({ data: { data: types } })
     if (url === '/staff') return Promise.resolve(paged(staff))
     if (url === '/students') return Promise.resolve(paged(students))
     if (url === '/classrooms') return Promise.resolve(paged(classrooms))
+    if (url === '/guardians') return Promise.resolve({ data: { data: guardians } })
     if (url === '/subjects') return Promise.resolve(paged([{ id: 3, code: 'MTH', name_ar: 'الرياضيات', name_en: 'Math' }]))
     return Promise.resolve(paged([]))
   })
@@ -173,6 +178,32 @@ describe('StudentsPage', () => {
     expect(screen.queryByLabelText('Student email')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Parent phone')).toBeInTheDocument()
     expect(screen.getByLabelText('Parent email')).toBeInTheDocument()
+  })
+
+  it('fills the parent fields from an existing parent found by search', async () => {
+    serve({ parents: [dad] })
+    renderPage(<StudentsPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.change(screen.getByLabelText('Find an existing parent'), { target: { value: 'Abu' } })
+    fireEvent.click(await screen.findByRole('button', { name: /Abu Mohammad/ }))
+
+    expect(api.get).toHaveBeenCalledWith('/guardians', { params: expect.objectContaining({ search: 'Abu' }) })
+    expect(screen.getByLabelText('Parent email')).toHaveValue('dad@mail.test')
+    expect(screen.getByLabelText('Parent name')).toHaveValue('Abu Mohammad')
+    expect(screen.getByLabelText('Parent phone')).toHaveValue('0599123456')
+    expect(screen.queryByRole('button', { name: /Abu Mohammad/ })).not.toBeInTheDocument()
+  })
+
+  it('does not search for fewer than two letters and says when nobody matches', async () => {
+    serve()
+    renderPage(<StudentsPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.change(screen.getByLabelText('Find an existing parent'), { target: { value: 'A' } })
+    expect(api.get).not.toHaveBeenCalledWith('/guardians', expect.anything())
+    fireEvent.change(screen.getByLabelText('Find an existing parent'), { target: { value: 'Zed' } })
+    expect(await screen.findByText('No parent found. Type the email below to create a new one.')).toBeInTheDocument()
   })
 
   it('registers a student and shows the generated sign-in details once', async () => {

@@ -329,4 +329,38 @@ class StudentTest extends AcademicTestCase
     {
         $this->getJson('/api/students')->assertUnauthorized();
     }
+
+    public function test_admin_searches_existing_parents_by_name_phone_or_email_with_their_children(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/students', $this->body())->assertCreated();
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-1002', 'name_en' => 'Layla']))->assertCreated();
+        User::factory()->role(Role::Guardian)->create(['name' => 'Someone Else', 'phone' => '0599777777']);
+        User::factory()->staff()->create(['name' => 'Abu Teacher']);
+
+        $this->getJson('/api/guardians?search=Abu')->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.email', 'dad@mail.test')
+            ->assertJsonPath('data.0.phone', '0599123456')
+            ->assertJsonCount(2, 'data.0.children');
+        $this->getJson('/api/guardians?search=0599123')->assertJsonCount(1, 'data');
+        $this->getJson('/api/guardians?search=dad@')->assertJsonCount(1, 'data');
+        $this->getJson('/api/guardians')->assertJsonCount(2, 'data'); // never staff or students
+    }
+
+    public function test_entering_the_email_of_an_existing_parent_links_the_second_child_to_the_same_account(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/students', $this->body())->assertCreated();
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-1002', 'name_en' => 'Layla', 'guardian_name' => null, 'guardian_phone' => null]))
+            ->assertCreated()->assertJsonPath('data.guardians.0.name', 'Abu Mohammad');
+
+        $this->assertSame(1, User::where('email', 'dad@mail.test')->count());
+        $this->assertSame(2, User::where('email', 'dad@mail.test')->first()->children()->count());
+    }
+
+    public function test_only_admins_search_parents(): void
+    {
+        Sanctum::actingAs(User::factory()->staff()->create());
+        $this->getJson('/api/guardians')->assertForbidden();
+    }
 }

@@ -82,7 +82,7 @@ The admin creates the accounts (admin menu: **Staff**, **Students**).
 - **Students**: the admin does not type the student's email. It is generated as `<english first name>.<student number>@<school code>.edu`
   (e.g. `ahmad.d1001@school2.edu`; `d1001@school2.edu` without an English name). Set `STUDENT_EMAIL_DOMAIN` to use another domain.
   After saving, the admin sees the email and password once. The admin also enters the parent's email, name and phone
-  (a parent with several children gets one account). A parent sees each child's sign-in email on the parent home page.
+  (a parent with several children gets one account: type the same email again, or search "Find an existing parent" by name, phone or email and pick them). A parent sees each child's sign-in email on the parent home page.
 
 Every new account gets the **default password** (`DEFAULT_ACCOUNT_PASSWORD`, `123456789` unless changed in the backend `.env`) and is sent to
 **Change password** at the first sign-in; the default password can never be chosen again. Users can change their password but not their email.
