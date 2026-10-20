@@ -1,6 +1,7 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
+import SwitchSchoolButton from '../../../components/shared/SwitchSchoolButton'
 import { homeFor } from '../../../app/guards'
 import { useSchool } from '../../../tenant/useSchool'
 import { useAuth } from '../AuthProvider'
@@ -33,6 +34,7 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <SwitchSchoolButton />
           <Link to="/login" className="rounded bg-brand px-4 py-1.5 text-sm text-white">
             {t('landing.login')}
           </Link>

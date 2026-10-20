@@ -3,14 +3,15 @@ import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-d
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { routesFor } from '../src/app/router'
-import { registerSchool } from '../src/features/Central/api'
-import { redirectTo } from '../src/features/Central/host'
+import SwitchSchoolButton from '../src/components/shared/SwitchSchoolButton'
+import { loginAdmin, registerSchool, schoolExists } from '../src/features/Central/api'
 import FindSchoolPage from '../src/features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../src/features/Central/RegisterSchoolPage'
 import WelcomePage from '../src/features/Central/WelcomePage'
+import { clearSchool, getSchool, goTo, setSchool } from '../src/tenant/school'
 
-vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn() }))
-vi.mock('../src/features/Central/host', async (orig) => ({ ...(await orig()), redirectTo: vi.fn() }))
+vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn() }))
+vi.mock('../src/tenant/school', async (orig) => ({ ...(await orig()), goTo: vi.fn() }))
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: null, loading: false }) }))
 vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'School Two' } }) }))
 
@@ -18,6 +19,8 @@ const renderPage = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>)
 
 beforeEach(async () => {
   vi.resetAllMocks()
+  clearSchool()
+  localStorage.clear()
   await i18n.changeLanguage('en')
 })
 
@@ -41,84 +44,130 @@ describe('RegisterSchoolPage', () => {
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Secret123' } })
     fireEvent.change(screen.getByLabelText('Confirm password'), { target: { value: 'Secret123' } })
   }
+  const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
-  it('posts the payload and redirects to the new school login', async () => {
-    registerSchool.mockResolvedValue({ code: 'alnoor', domain: 'alnoor.localhost', login_path: '/login' })
+  it('creates the school, selects it, signs the admin in and opens the app on the same URL', async () => {
+    registerSchool.mockResolvedValue({ code: 'alnoor' })
+    loginAdmin.mockResolvedValue()
     renderPage(<RegisterSchoolPage />)
     fill()
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
-    await waitFor(() => expect(redirectTo).toHaveBeenCalledWith(expect.stringMatching(/^https?:\/\/alnoor\.localhost.*\/login$/)))
+    submit()
+    await waitFor(() => expect(goTo).toHaveBeenCalledWith('/'))
     expect(registerSchool).toHaveBeenCalledWith({
       school_name: 'Al Noor', code: 'alnoor', admin_name: 'Admin', admin_email: 'a@alnoor.test',
       password: 'Secret123', password_confirmation: 'Secret123',
     })
+    expect(getSchool()).toBe('alnoor')
+    expect(loginAdmin).toHaveBeenCalledWith('a@alnoor.test', 'Secret123')
   })
 
-  it('shows field errors from a 422', async () => {
+  it('still opens the school when the automatic sign-in fails', async () => {
+    registerSchool.mockResolvedValue({ code: 'alnoor' })
+    loginAdmin.mockRejectedValue(new Error('network'))
+    renderPage(<RegisterSchoolPage />)
+    fill()
+    submit()
+    await waitFor(() => expect(goTo).toHaveBeenCalledWith('/'))
+    expect(getSchool()).toBe('alnoor')
+  })
+
+  it('shows field errors from a 422 and does not select a school', async () => {
     registerSchool.mockRejectedValue({ response: { status: 422, data: { errors: { code: ['This school code is already taken.'] } } } })
     renderPage(<RegisterSchoolPage />)
     fill()
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+    submit()
     expect(await screen.findByText('This school code is already taken.')).toBeInTheDocument()
-    expect(redirectTo).not.toHaveBeenCalled()
+    expect(getSchool()).toBeNull()
+    expect(goTo).not.toHaveBeenCalled()
+  })
+
+  it('shows the server message when registration is closed', async () => {
+    registerSchool.mockRejectedValue({ response: { status: 403, data: { message: 'School registration is currently closed.' } } })
+    renderPage(<RegisterSchoolPage />)
+    fill()
+    submit()
+    expect(await screen.findByText('School registration is currently closed.')).toBeInTheDocument()
   })
 
   it('shows a generic error for other failures', async () => {
     registerSchool.mockRejectedValue({ response: { status: 500, data: { message: 'x' } } })
     renderPage(<RegisterSchoolPage />)
     fill()
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+    submit()
     expect(await screen.findByText('Something went wrong, please try again.')).toBeInTheDocument()
-    expect(redirectTo).not.toHaveBeenCalled()
-  })
-})
-
-describe('RegisterSchoolPage server messages', () => {
-  it('shows the server message when registration is closed or throttled', async () => {
-    registerSchool.mockRejectedValue({ response: { status: 403, data: { message: 'School registration is currently closed.' } } })
-    renderPage(<RegisterSchoolPage />)
-    for (const [label, value] of [['School name', 'A'], ['School code', 'alnoor'], ['Admin name', 'A'], ['Email', 'a@a.test'], ['Password', 'Secret123'], ['Confirm password', 'Secret123']]) {
-      fireEvent.change(screen.getByLabelText(label), { target: { value } })
-    }
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
-    expect(await screen.findByText('School registration is currently closed.')).toBeInTheDocument()
-    expect(screen.queryByText('Something went wrong, please try again.')).not.toBeInTheDocument()
+    expect(goTo).not.toHaveBeenCalled()
   })
 })
 
 describe('FindSchoolPage', () => {
-  it('normalizes the code and redirects to that school login', () => {
+  const enter = (value) => {
     renderPage(<FindSchoolPage />)
-    fireEvent.change(screen.getByLabelText('School code'), { target: { value: '  AlNoor ' } })
+    fireEvent.change(screen.getByLabelText('School code'), { target: { value } })
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
-    expect(redirectTo).toHaveBeenCalledWith(expect.stringMatching(/^https?:\/\/alnoor\.localhost.*\/login$/))
+  }
+
+  it('normalizes the code, selects the school and opens its sign-in page', async () => {
+    schoolExists.mockResolvedValue(true)
+    enter('  AlNoor ')
+    await waitFor(() => expect(goTo).toHaveBeenCalledWith('/login'))
+    expect(schoolExists).toHaveBeenCalledWith('alnoor')
+    expect(getSchool()).toBe('alnoor')
   })
 
-  it('rejects an invalid code without redirecting', () => {
-    renderPage(<FindSchoolPage />)
-    fireEvent.change(screen.getByLabelText('School code'), { target: { value: 'al_noor' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  it('says so when the school does not exist and keeps nothing selected', async () => {
+    schoolExists.mockResolvedValue(false)
+    enter('nope')
+    expect(await screen.findByText('School not found. Check the school code.')).toBeInTheDocument()
+    expect(getSchool()).toBeNull()
+    expect(goTo).not.toHaveBeenCalled()
+  })
+
+  it('rejects an invalid code without calling the server', () => {
+    enter('al_noor')
     expect(screen.getByText('Use 3-30 lowercase letters, digits or hyphens.')).toBeInTheDocument()
-    expect(redirectTo).not.toHaveBeenCalled()
+    expect(schoolExists).not.toHaveBeenCalled()
+  })
+
+  it('shows a generic error when the server cannot be reached', async () => {
+    schoolExists.mockRejectedValue(new Error('network'))
+    enter('alnoor')
+    expect(await screen.findByText('Something went wrong, please try again.')).toBeInTheDocument()
+    expect(getSchool()).toBeNull()
+  })
+})
+
+describe('SwitchSchoolButton', () => {
+  it('forgets the selected school and goes back to the start page', () => {
+    setSchool('alnoor')
+    render(<SwitchSchoolButton />)
+    fireEvent.click(screen.getByRole('button', { name: 'Switch school' }))
+    expect(getSchool()).toBeNull()
+    expect(goTo).toHaveBeenCalledWith('/')
+  })
+
+  it('has an Arabic label', async () => {
+    await i18n.changeLanguage('ar')
+    render(<SwitchSchoolButton />)
+    expect(screen.getByRole('button', { name: 'تبديل المدرسة' })).toBeInTheDocument()
   })
 })
 
 describe('routesFor', () => {
-  const at = (hostname, path = '/') =>
-    render(<RouterProvider router={createMemoryRouter(routesFor(hostname), { initialEntries: [path] })} />)
+  const at = (school, path = '/') =>
+    render(<RouterProvider router={createMemoryRouter(routesFor(school), { initialEntries: [path] })} />)
 
-  it('serves the welcome page on a central host', () => {
-    at('localhost')
+  it('serves the welcome page when no school is selected', () => {
+    at(null)
     expect(screen.getByRole('link', { name: 'Create account' })).toBeInTheDocument()
   })
 
-  it('keeps the school landing on a school host', () => {
-    at('school2.localhost')
+  it('serves the school landing once a school is selected', () => {
+    at('alnoor')
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your whole school in one place')
   })
 
-  it('does not expose register on a school host and redirects unknown central paths home', () => {
-    at('localhost', '/nope')
+  it('sends unknown paths back to the welcome page when no school is selected', () => {
+    at(null, '/nope')
     expect(screen.getByRole('link', { name: 'Create account' })).toBeInTheDocument()
   })
 })

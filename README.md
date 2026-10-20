@@ -35,38 +35,40 @@ php artisan tenants:migrate         # all schools
 cd backend
 copy .env.example .env          # then set DB_PORT / DB_PASSWORD, and run: php artisan key:generate
 php artisan migrate --path=database/migrations/central
-php artisan school:create school2 "School 2" school2.localhost --admin-email=admin@school2.test --admin-password=Admin12345
+php artisan school:create school2 "School 2" --admin-email=admin@school2.test --admin-password=Admin12345
 php artisan school:seed-demo school2     # demo admin, teachers, year, grades, subjects, classrooms (APP_ENV=local only)
 php artisan serve
 
 cd ../frontend
 npm install
-npm run dev -- --host
+npm run dev
 ```
 
-Open `http://school2.localhost:<vite port>` (not `localhost`: the school is resolved from the host name)
-and sign in with `admin@school2.test` / `Admin12345`.
+Open `http://localhost:<vite port>`, choose **Sign in**, type the school code `school2`, then sign in with
+`admin@school2.test` / `Admin12345`. The URL never changes: use **Switch school** to enter another school's code.
 
-## Central site (main domain)
+## One public URL, many schools
 
-On the main domain (`localhost`, `127.0.0.1`) the app shows a welcome page:
+The site has a single URL. Every school has its own database; the school is chosen **inside** the app by its code and sent
+to the API in the `X-School` header (the code is also the tenant id). A token is looked up in that school's own database,
+so a token from one school never works in another.
 
-- **Create account** (`/register`): registers a new school. Calls `POST /api/central/register` (public, 5 per hour per IP),
-  which creates the school, its database and its first admin, then redirects to `<code>.<base domain>/login`.
-- **Sign in** (`/find-school`): the user types the school code and is sent to that school's login page.
+- No school selected: a welcome page with **Create account** (`/register`) and **Sign in** (`/find-school`).
+  - **Create account** registers a new school (`POST /api/central/register`: public, 5 per hour per IP), creates its
+    database and first admin, signs the admin in and opens the admin area.
+  - **Sign in** asks for the school code, checks it exists, then opens that school's login page.
+- School selected: the school's landing page, login and role areas. **Switch school** forgets the selection (each school keeps
+  its own sign-in in the browser) and returns to the welcome page.
+- Production: serve the frontend and `/api` from the same domain (reverse proxy). No sub-domains or wildcard DNS are needed.
+- School codes are 3-30 lowercase letters, digits or hyphens (the same rule for the website, `school:create` and the Super Admin API).
 
-On a school domain (`school2.localhost`) the app shows that school's landing page and login, as before.
+Settings (backend `.env`):
 
-Settings:
-
-| Where | Variable | Default | Purpose |
-|---|---|---|---|
-| backend `.env` | `TENANCY_BASE_DOMAIN` | `localhost` | schools live at `<code>.<base domain>` |
-| backend `.env` | `REGISTRATION_ENABLED` | `false` (`true` in `.env.example`) | turns public registration on/off; off unless set |
-| backend `.env` | `REGISTRATION_DAILY_LIMIT` | `50` | max registrations per day across all IPs |
-| backend `.env` | `TRUSTED_PROXIES` | none (`*` when `APP_ENV=local`) | IPs/CIDRs of your load balancer; without it `X-Forwarded-For` is ignored so IP limits cannot be spoofed |
-| frontend `.env` | `VITE_CENTRAL_HOSTS` | `localhost,127.0.0.1` | hosts that show the central site |
-| frontend `.env` | `VITE_BASE_DOMAIN` | `localhost` | base domain used to build school links (both `VITE_*` are required in production builds) |
+| Variable | Default | Purpose |
+|---|---|---|
+| `REGISTRATION_ENABLED` | `false` (`true` in `.env.example`) | turns public registration on/off; off unless set |
+| `REGISTRATION_DAILY_LIMIT` | `50` | max registrations per day across all IPs |
+| `TRUSTED_PROXIES` | none (`*` when `APP_ENV=local`) | IPs/CIDRs of your load balancer; without it `X-Forwarded-For` is ignored so IP limits cannot be spoofed |
 
 Before opening registration to the internet add email verification and a CAPTCHA.
 

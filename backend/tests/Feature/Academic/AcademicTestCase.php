@@ -5,8 +5,7 @@ namespace Tests\Feature\Academic;
 use App\Models\User;
 use App\Shared\Enums\Role;
 use Laravel\Sanctum\Sanctum;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Tests\TenantTestCase;
 
 abstract class AcademicTestCase extends TenantTestCase
@@ -15,7 +14,7 @@ abstract class AcademicTestCase extends TenantTestCase
     {
         parent::setUp();
 
-        $this->withoutMiddleware([InitializeTenancyByDomain::class, PreventAccessFromCentralDomains::class]);
+        $this->withoutMiddleware([InitializeTenancyByRequestData::class]);
     }
 
     protected function actAsAdmin(): User

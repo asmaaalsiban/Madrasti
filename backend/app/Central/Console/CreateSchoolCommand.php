@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Central\Console;
 
 use App\Central\Actions\CreateSchool;
+use App\Central\Rules\SchoolCode;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -13,7 +14,7 @@ class CreateSchoolCommand extends Command
     protected $signature = 'school:create
         {id : Short unique id, used for the database name (e.g. school1)}
         {name : School name}
-        {domain : Domain (e.g. school1.localhost)}
+        {domain? : Optional domain (schools are normally chosen by code with the X-School header)}
         {--admin-name=Admin}
         {--admin-email= : First admin email}
         {--admin-password= : First admin password}
@@ -24,6 +25,12 @@ class CreateSchoolCommand extends Command
 
     public function handle(CreateSchool $action): int
     {
+        if (! SchoolCode::isValid((string) $this->argument('id'))) {
+            $this->error('The school code must be 3-30 lowercase letters, digits or hyphens (not starting or ending with a hyphen) and must not be a reserved word.');
+
+            return self::FAILURE;
+        }
+
         $email = $this->option('admin-email') ?: $this->ask('Admin email');
         $password = $this->option('admin-password') ?: $this->secret('Admin password (min 8 chars)');
 
@@ -50,7 +57,7 @@ class CreateSchoolCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info("School '{$tenant->name}' created. Domain: {$this->argument('domain')}");
+        $this->info("School '{$tenant->name}' created (code: {$tenant->getTenantKey()}).");
 
         return self::SUCCESS;
     }

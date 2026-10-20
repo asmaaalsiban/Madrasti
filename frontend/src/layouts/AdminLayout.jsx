@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
+import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
 import { useAuth } from '../features/Auth/AuthProvider'
 import { useSchool } from '../tenant/useSchool'
 
@@ -50,6 +51,7 @@ export default function AdminLayout() {
       <div className="flex-1">
         <header className="flex items-center justify-end gap-2 border-b bg-white px-4 py-3">
           <LanguageSwitcher />
+          <SwitchSchoolButton />
           <button type="button" className="rounded border px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</button>
         </header>
         <main className="mx-auto max-w-5xl p-4"><Outlet /></main>

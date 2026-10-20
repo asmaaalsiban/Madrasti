@@ -11,12 +11,12 @@ use Throwable;
 
 /**
  * Onboards a school: tenant row -> database + migrations + seeds (TenancyServiceProvider pipeline)
- * -> domain -> first admin. Cleans up if anything fails.
+ * -> optional domain -> first admin. Cleans up if anything fails.
  */
 class CreateSchool
 {
     /**
-     * @param  array{id: string, name: string, domain: string, admin_name: string, admin_email: string, admin_password: string, primary_color?: ?string, default_locale?: ?string}  $data
+     * @param  array{id: string, name: string, domain?: ?string, admin_name: string, admin_email: string, admin_password: string, primary_color?: ?string, default_locale?: ?string}  $data
      */
     public function handle(array $data): Tenant
     {
@@ -33,7 +33,9 @@ class CreateSchool
                 'is_active' => true,
             ]);
 
-            $tenant->domains()->create(['domain' => $data['domain']]);
+            if (! empty($data['domain'])) {
+                $tenant->domains()->create(['domain' => $data['domain']]);
+            }
 
             $tenant->run(function () use ($data): void {
                 User::create([

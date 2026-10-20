@@ -38,8 +38,8 @@ src/
   pages/{auth,admin,teacher,student,parent}   # role dashboards
   components/{ui,shared}                       # Shadcn UI + shared parts
   i18n/locales/{ar,en}                         # keys grouped by module
-  features/Central/  # main-domain site: WelcomePage, RegisterSchoolPage, FindSchoolPage, host helpers
-  tenant/       # loads school name/logo/colors from API by domain
+  features/Central/  # start pages when no school is selected: WelcomePage, RegisterSchoolPage, FindSchoolPage
+  tenant/       # selected school (code in localStorage, sent as X-School) and its name/logo/colors
 ```
 
 Rules: functional components only, no hardcoded strings, logical CSS properties

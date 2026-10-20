@@ -3,15 +3,15 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
 |--------------------------------------------------------------------------
 | School (tenant) API
 |--------------------------------------------------------------------------
 |
-| The school is resolved from the request domain (e.g. alnoor.localhost).
+| The school is resolved from the X-School request header (e.g. X-School: alnoor), so every school
+| shares one public URL.
 | Every route inside routes/tenant/*.php runs against that school's database.
 | Loaded by App\Providers\TenancyServiceProvider.
 |
@@ -19,6 +19,5 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 Route::middleware([
     'api',
-    InitializeTenancyByDomain::class,
-    PreventAccessFromCentralDomains::class,
+    InitializeTenancyByRequestData::class,
 ])->prefix('api')->group(base_path('routes/tenant/api.php'));
