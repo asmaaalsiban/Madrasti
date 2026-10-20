@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { today } from '../../../lib/dates'
@@ -18,6 +18,7 @@ export default function TakeAttendancePage() {
   const [statuses, setStatuses] = useState({})
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const dirty = useRef(false) // unsaved taps must survive a background refetch
 
   const rooms = useQuery({ queryKey: ['attendance', 'classrooms'], queryFn: async () => (await api.get('/attendance/classrooms')).data.data })
   const activeRoom = classroomId || rooms.data?.[0]?.id
@@ -28,7 +29,7 @@ export default function TakeAttendancePage() {
   })
 
   useEffect(() => {
-    if (!roster.data) return
+    if (!roster.data || dirty.current) return
     setStatuses(Object.fromEntries(roster.data.students.map((s) => [s.id, s.status ?? 'present'])))
   }, [roster.data])
 
@@ -40,6 +41,7 @@ export default function TakeAttendancePage() {
     }),
     onSuccess: () => {
       setError('')
+      dirty.current = false
       client.invalidateQueries({ queryKey: ['attendance'] })
       setSaved(true)
     },
@@ -63,13 +65,13 @@ export default function TakeAttendancePage() {
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
           {t('attendance.classroom')}
-          <select className="mt-1 block rounded border p-2" value={activeRoom ?? ''} onChange={(e) => { setSaved(false); setError(''); setClassroomId(Number(e.target.value)) }}>
+          <select className="mt-1 block rounded border p-2" value={activeRoom ?? ''} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setClassroomId(Number(e.target.value)) }}>
             {(rooms.data ?? []).map((r) => <option key={r.id} value={r.id}>{[r.name, label(r)].filter(Boolean).join(' · ')}</option>)}
           </select>
         </label>
         <label className="text-sm">
           {t('attendance.date')}
-          <input type="date" dir="ltr" className="mt-1 block rounded border p-2" value={date} max={today()} onChange={(e) => { setSaved(false); setError(''); setDate(e.target.value) }} />
+          <input type="date" dir="ltr" className="mt-1 block rounded border p-2" value={date} max={today()} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setDate(e.target.value) }} />
         </label>
       </div>
 
@@ -93,7 +95,7 @@ export default function TakeAttendancePage() {
                     type="button"
                     aria-pressed={on}
                     className={`rounded border px-3 py-1.5 text-sm ${on ? ACTIVE[status] : 'bg-white'}`}
-                    onClick={() => { setSaved(false); setStatuses({ ...statuses, [s.id]: status }) }}
+                    onClick={() => { dirty.current = true; setSaved(false); setStatuses({ ...statuses, [s.id]: status }) }}
                   >
                     {t(`attendance.${status}`)}
                   </button>

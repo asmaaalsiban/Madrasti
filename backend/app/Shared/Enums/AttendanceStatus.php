@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Enums;
 
-/** What the teacher records for a student each day (the table also knows "excused", which the screens do not use yet). */
+/** What the teacher records for a student each day ("excused" exists in the table but the screens do not offer it yet). */
 enum AttendanceStatus: string
 {
     case Present = 'present';
     case Late = 'late';
     case Absent = 'absent';
+    case Excused = 'excused';
 
     /**
      * @return list<string>

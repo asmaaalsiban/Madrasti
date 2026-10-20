@@ -255,6 +255,7 @@
     "close": "إغلاق",
     "childSummary": "غياب: {{absent}} · تأخر: {{late}}",
     "showDates": "عرض التواريخ",
-    "hideDates": "إخفاء التواريخ"
+    "hideDates": "إخفاء التواريخ",
+    "loading": "جارٍ التحميل…"
   }
 }

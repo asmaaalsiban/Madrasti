@@ -41,10 +41,12 @@ class AttendanceController extends Controller
     public function show(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
+            'classroom_id' => ['required', 'integer'],
             'date' => ['required', 'date_format:Y-m-d'],
         ]);
-        $classroom = Classroom::findOrFail($data['classroom_id']);
+        // An unknown id answers like a forbidden one, so nobody can probe which classrooms exist.
+        $classroom = Classroom::find($data['classroom_id']);
+        abort_if($classroom === null, 403);
         Gate::authorize('take-attendance', $classroom);
 
         $students = Enrollment::query()

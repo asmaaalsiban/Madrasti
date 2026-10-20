@@ -32,7 +32,7 @@ class SaveAttendanceRequest extends FormRequest
             'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'records' => ['required', 'array', 'min:1', 'max:200'],
             'records.*.student_id' => ['required', 'integer', 'distinct'],
-            'records.*.status' => ['required', Rule::enum(AttendanceStatus::class)],
+            'records.*.status' => ['required', Rule::enum(AttendanceStatus::class)->only([AttendanceStatus::Present, AttendanceStatus::Late, AttendanceStatus::Absent])],
             'records.*.note' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -50,7 +50,7 @@ class SaveAttendanceRequest extends FormRequest
                 $validator->errors()->add('date', __('attendance.date_outside_year'));
             }
 
-            $enrolled = Enrollment::where('classroom_id', $classroom->id)->pluck('student_id')->all();
+            $enrolled = Enrollment::where('classroom_id', $classroom->id)->whereHas('student')->pluck('student_id')->all();
             foreach ($this->input('records') as $i => $record) {
                 if (! in_array((int) $record['student_id'], $enrolled, true)) {
                     $validator->errors()->add("records.$i.student_id", __('attendance.student_outside_classroom'));

@@ -170,7 +170,7 @@ class AttendanceTest extends AcademicTestCase
 
         $this->assertCount(1, $this->sent);
         $this->assertSame('0599000111', $this->sent[0][0]);
-        $this->assertStringContainsString('Student 2', $this->sent[0][1]);
+        $this->assertStringContainsString('طالب 2', $this->sent[0][1]);
         $this->assertDatabaseHas('absence_notifications', ['status' => 'sent', 'phone' => '0599000111', 'channel' => 'log']);
     }
 
@@ -303,5 +303,52 @@ class AttendanceTest extends AcademicTestCase
 
         Sanctum::actingAs(User::factory()->staff(StaffType::Teacher)->create());
         $this->getJson("/api/attendance/students/{$this->students[0]->id}")->assertForbidden();
+    }
+
+    public function test_a_broken_messaging_setup_does_not_break_the_save(): void
+    {
+        $this->guardianOf($this->students[0]);
+        config(['messaging.driver' => 'missing']);
+        $this->app->forgetInstance(MessageSender::class);
+        $this->app->offsetUnset(MessageSender::class);
+        $this->app->bind(MessageSender::class, fn () => throw new \RuntimeException('no driver'));
+        Sanctum::actingAs($this->teacher);
+
+        $this->save(['absent'])->assertOk();
+        $this->assertDatabaseHas('student_attendances', ['student_id' => $this->students[0]->id, 'status' => 'absent']);
+    }
+
+    public function test_the_message_uses_the_school_language_not_the_users(): void
+    {
+        $this->guardianOf($this->students[0]);
+        app()->setLocale('en'); // the teacher's UI language
+        Sanctum::actingAs($this->teacher);
+
+        $this->save(['absent'])->assertOk();
+
+        $this->assertStringContainsString('طالب 1', $this->sent[0][1]);
+    }
+
+    public function test_an_excused_row_does_not_break_the_screens_and_cannot_be_sent(): void
+    {
+        StudentAttendance::insert(['student_id' => $this->students[0]->id, 'classroom_id' => $this->room->id, 'date' => '2026-10-19', 'status' => 'excused', 'marked_by' => $this->teacher->id]);
+        Sanctum::actingAs($this->teacher);
+
+        $this->getJson("/api/attendance/students/{$this->students[0]->id}")->assertOk();
+        $this->putJson('/api/attendance', ['classroom_id' => $this->room->id, 'date' => '2026-10-20', 'records' => [['student_id' => $this->students[0]->id, 'status' => 'excused']]])->assertUnprocessable();
+    }
+
+    public function test_the_previous_years_homeroom_teacher_loses_access_and_deleted_students_cannot_be_saved(): void
+    {
+        $oldYear = AcademicYear::factory()->create(['is_current' => false]);
+        $old = User::factory()->staff(StaffType::Teacher)->create();
+        $oldRoom = Classroom::factory()->create(['academic_year_id' => $oldYear->id, 'homeroom_teacher_id' => $old->id]);
+        Enrollment::create(['student_id' => $this->students[0]->id, 'classroom_id' => $oldRoom->id, 'academic_year_id' => $oldYear->id]);
+        Sanctum::actingAs($old);
+        $this->getJson("/api/attendance/students/{$this->students[0]->id}")->assertForbidden();
+
+        $this->students[2]->delete();
+        Sanctum::actingAs($this->teacher);
+        $this->save([])->assertUnprocessable();
     }
 }

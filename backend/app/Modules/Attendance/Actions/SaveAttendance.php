@@ -35,7 +35,12 @@ class SaveAttendance
         });
 
         foreach ($absent as $id) {
-            SendAbsenceNotice::dispatch($id);
+            try {
+                SendAbsenceNotice::dispatch($id);
+            } catch (\Throwable $e) {
+                // The attendance is already saved; a messaging problem must not turn it into an error.
+                report($e);
+            }
         }
     }
 }

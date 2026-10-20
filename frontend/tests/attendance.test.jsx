@@ -135,7 +135,7 @@ describe('AttendanceReportPage', () => {
     serveReport()
     renderPage(<AttendanceReportPage />)
     expect(await screen.findByText('Ahmad')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '7' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Absent: 7' })).toBeInTheDocument()
     expect(screen.getByText('Layla')).toBeInTheDocument()
   })
 
@@ -143,7 +143,7 @@ describe('AttendanceReportPage', () => {
     serveReport()
     renderPage(<AttendanceReportPage />)
     await screen.findByText('Ahmad')
-    fireEvent.click(screen.getByRole('button', { name: '7' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Absent: 7' }))
     const dialog = await screen.findByRole('dialog', { name: 'Absence dates: Ahmad' })
     expect(await within(dialog).findByText('2026-10-18')).toBeInTheDocument()
     expect(within(dialog).getByText('2026-10-12')).toBeInTheDocument()

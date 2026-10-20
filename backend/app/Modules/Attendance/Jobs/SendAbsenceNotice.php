@@ -16,11 +16,19 @@ use Throwable;
 
 /**
  * Tells the parents of an absent student. Safe to run again: a parent who already got the message for this
- * absence is skipped, and a failed one is tried again. A provider failure is recorded, never thrown.
+ * absence is skipped, and a failed one is tried again (queue retries, or the next save). A provider failure is recorded first.
  */
 class SendAbsenceNotice implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, SerializesModels;
+
+    public int $tries = 3;
+
+    /** @return list<int> */
+    public function backoff(): array
+    {
+        return [60, 300];
+    }
 
     public function __construct(public readonly int $attendanceId) {}
 
@@ -31,11 +39,14 @@ class SendAbsenceNotice implements ShouldQueue
             return;
         }
 
+        // The school's language, not the language of whoever saved the attendance.
+        $locale = (string) (tenant('default_locale') ?: 'ar');
         $student = $attendance->student;
         $text = __('attendance.absent_message', [
-            'student' => app()->getLocale() === 'ar' ? $student->name_ar : ($student->name_en ?: $student->name_ar),
+            'student' => $locale === 'ar' ? $student->name_ar : ($student->name_en ?: $student->name_ar),
             'date' => $attendance->date->format('Y-m-d'),
-        ]);
+        ], $locale);
+        $retry = false;
 
         foreach ($student->guardians as $guardian) {
             $notice = AbsenceNotification::firstOrCreate(
@@ -59,7 +70,13 @@ class SendAbsenceNotice implements ShouldQueue
             } catch (Throwable $e) {
                 report($e);
                 $notice->update(['phone' => $phone, 'status' => 'failed', 'error' => mb_substr($e->getMessage(), 0, 250)]);
+                $retry = true;
             }
+        }
+
+        // On a real queue the job runs again later (sent parents are skipped); with the sync driver it never throws into the request.
+        if ($retry && $this->job !== null && $this->job->getConnectionName() !== 'sync') {
+            throw new \RuntimeException('Some absence messages failed and will be retried.');
         }
     }
 }

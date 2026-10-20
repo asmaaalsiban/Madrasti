@@ -255,6 +255,7 @@
     "close": "Close",
     "childSummary": "Absent: {{absent}} · Late: {{late}}",
     "showDates": "Show dates",
-    "hideDates": "Hide dates"
+    "hideDates": "Hide dates",
+    "loading": "Loading…"
   }
 }

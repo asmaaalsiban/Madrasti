@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
             Role::Student => $student->user_id === $user->id,
             Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
             Role::Teacher => Enrollment::where('student_id', $student->id)
-                ->whereIn('classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->select('id'))->exists(),
+                ->whereIn('classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->whereHas('academicYear', fn ($q) => $q->where('is_current', true))->select('id'))->exists(),
         });
 
         // Changing a password asks for the current one: 5 tries a minute per user.

@@ -33,7 +33,7 @@ export default function AttendanceReportPage() {
   const rows = report.data?.data ?? []
   const meta = report.data?.meta
   const number = (row, status) => (row[status] > 0 ? (
-    <button type="button" className="font-bold text-brand underline" onClick={() => setOpen({ student: row.student, status })}>{row[status]}</button>
+    <button type="button" aria-label={`${t(`attendance.${status}`)}: ${row[status]}`} className="font-bold text-brand underline" onClick={() => setOpen({ student: row.student, status })}>{row[status]}</button>
   ) : 0)
 
   return (
@@ -88,7 +88,7 @@ export default function AttendanceReportPage() {
       )}
 
       <Modal open={open !== null} title={open ? t(`attendance.${open.status}Dates`, { name: nameOf(open.student) }) : ''} onClose={() => setOpen(null)}>
-        {days.data ? <StatusDates records={days.data.records} /> : <p className="text-sm text-slate-500">…</p>}
+        {days.data ? <StatusDates records={days.data.records} /> : <p className="text-sm text-slate-500">{t('attendance.loading')}</p>}
         <div className="flex justify-end pt-4">
           <button type="button" className="rounded border px-3 py-1.5" onClick={() => setOpen(null)}>{t('attendance.close')}</button>
         </div>
