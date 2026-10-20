@@ -8,7 +8,7 @@ import { loginAdmin, registerSchool, schoolExists } from '../src/features/Centra
 import FindSchoolPage from '../src/features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../src/features/Central/RegisterSchoolPage'
 import WelcomePage from '../src/features/Central/WelcomePage'
-import { getSchool, goTo, setSchool } from '../src/tenant/school'
+import { clearSchool, getSchool, goTo, setSchool } from '../src/tenant/school'
 
 vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn() }))
 vi.mock('../src/tenant/school', async (orig) => ({ ...(await orig()), goTo: vi.fn() }))
@@ -19,6 +19,7 @@ const renderPage = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>)
 
 beforeEach(async () => {
   vi.resetAllMocks()
+  clearSchool()
   localStorage.clear()
   await i18n.changeLanguage('en')
 })

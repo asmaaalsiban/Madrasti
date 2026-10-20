@@ -16,14 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function (): void {
-            // Super Admin API: only reachable on the central domains.
-            // School APIs live in routes/tenant.php (loaded by TenancyServiceProvider).
-            foreach (config('tenancy.central_domains') as $domain) {
-                Route::middleware('api')
-                    ->domain($domain)
-                    ->prefix('api/central')
-                    ->group(base_path('routes/central/api.php'));
-            }
+            // Central API (school registration, Super Admin). One public URL serves every school, so it is not
+            // tied to a host name. School APIs live in routes/tenant.php (loaded by TenancyServiceProvider).
+            Route::middleware('api')
+                ->prefix('api/central')
+                ->group(base_path('routes/central/api.php'));
         },
     )
     ->withCommands([

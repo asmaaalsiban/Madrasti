@@ -59,8 +59,8 @@ so a token from one school never works in another.
   - **Sign in** asks for the school code, checks it exists, then opens that school's login page.
 - School selected: the school's landing page, login and role areas. **Switch school** forgets the selection (each school keeps
   its own sign-in in the browser) and returns to the welcome page.
-- Production: serve the frontend and `/api` from the same domain (reverse proxy) and add that domain to `CENTRAL_DOMAINS`
-  so `/api/central/*` (registration) is reachable. No wildcard DNS is needed.
+- Production: serve the frontend and `/api` from the same domain (reverse proxy). No sub-domains or wildcard DNS are needed.
+- School codes are 3-30 lowercase letters, digits or hyphens (the same rule for the website, `school:create` and the Super Admin API).
 
 Settings (backend `.env`):
 
@@ -69,7 +69,6 @@ Settings (backend `.env`):
 | `REGISTRATION_ENABLED` | `false` (`true` in `.env.example`) | turns public registration on/off; off unless set |
 | `REGISTRATION_DAILY_LIMIT` | `50` | max registrations per day across all IPs |
 | `TRUSTED_PROXIES` | none (`*` when `APP_ENV=local`) | IPs/CIDRs of your load balancer; without it `X-Forwarded-For` is ignored so IP limits cannot be spoofed |
-| `CENTRAL_DOMAINS` | `127.0.0.1,localhost` | hosts that serve `/api/central/*` |
 
 Before opening registration to the internet add email verification and a CAPTCHA.
 

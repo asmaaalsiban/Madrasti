@@ -121,6 +121,12 @@ class RegisterSchoolTest extends TenantTestCase
             ->assertJsonValidationErrors(['school_name', 'code', 'admin_name', 'admin_email', 'password']);
     }
 
+    public function test_registration_works_on_any_host_because_there_is_one_public_url(): void
+    {
+        $this->postJson('http://www.example.org/api/central/register', $this->body())->assertCreated();
+        $this->assertCount(1, $this->calls);
+    }
+
     public function test_disabled_returns_403(): void
     {
         config(['tenancy.registration_enabled' => false]);

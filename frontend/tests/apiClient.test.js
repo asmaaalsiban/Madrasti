@@ -9,6 +9,7 @@ api.defaults.adapter = (config) => {
 }
 
 beforeEach(() => {
+  clearSchool()
   localStorage.clear()
   sent = null
 })
