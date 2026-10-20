@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
@@ -18,6 +18,7 @@ export default function DashboardLayout() {
         <div className="flex items-center gap-2">
           <span className="text-sm">{t(`roles.${user.role}`)}</span>
           <LanguageSwitcher />
+          <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />
           <button type="button" className="rounded border px-3 py-1 text-sm" onClick={logout}>
             {t('common.logout')}

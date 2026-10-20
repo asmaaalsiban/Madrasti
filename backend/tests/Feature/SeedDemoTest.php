@@ -25,9 +25,26 @@ class SeedDemoTest extends TenantTestCase
         $this->assertSame(Role::Admin, $admin->role);
         $this->assertTrue(Hash::check('Admin12345', $admin->password));
         $this->assertSame(3, User::where('role', Role::Teacher)->count());
-        $this->assertSame(['users' => 4, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12], $counts);
+        $this->assertSame(['users' => 11, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 4], $counts);
         $this->assertSame(1, DB::table('academic_years')->where('is_current', true)->count());
         $this->assertSame(3, DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->count());
+    }
+
+    public function test_demo_students_have_accounts_with_the_default_password_and_parents_are_shared(): void
+    {
+        $this->seed_();
+
+        $this->assertFalse(User::where('email', 'admin@demo.test')->value('must_change_password'));
+        $students = User::where('role', Role::Student)->get();
+        $this->assertCount(4, $students);
+        foreach ($students as $student) {
+            $this->assertTrue($student->must_change_password);
+            $this->assertTrue(Hash::check(config('accounts.default_password'), $student->password));
+        }
+        $parents = User::where('role', Role::Guardian)->withCount('children')->get();
+        $this->assertCount(3, $parents);
+        $this->assertSame([1, 1, 2], $parents->pluck('children_count')->sort()->values()->all());
+        $this->assertSame(4, DB::table('enrollments')->count());
     }
 
     public function test_running_twice_does_not_duplicate(): void

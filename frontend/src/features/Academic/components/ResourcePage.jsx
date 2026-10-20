@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
@@ -8,21 +9,28 @@ import { useResource } from '../hooks/useResource'
 
 const inputClass = 'w-full rounded border p-2'
 
+// A select whose options are either static (field.options: [{ value, label }]) or loaded from another resource.
 function SelectField({ field, value, onChange }) {
   const { t, i18n } = useTranslation()
-  const { data } = useResource(field.optionsFrom).useList({ per_page: 100 })
+  const remote = useResource(field.optionsFrom ?? 'unused').useList({ per_page: 100 }, { enabled: Boolean(field.optionsFrom) })
   const label = (o) => o[field.optionLabel] ?? o[`name_${i18n.language}`] ?? o.name
+  const options = field.options
+    ? field.options.map((o) => ({ value: o.value, label: t(o.label) }))
+    : (remote.data?.data ?? []).map((o) => ({ value: o.id, label: label(o) }))
   return (
     <select className={inputClass} aria-label={t(field.label)} value={value ?? ''} onChange={(e) => onChange(e.target.value)}>
       <option value="">{t('academic.fields.select')}</option>
-      {(data?.data ?? []).map((o) => <option key={o.id} value={o.id}>{label(o)}</option>)}
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   )
 }
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
-export default function ResourcePage({ path, title, columns, fields, empty = {} }) {
+// fields: [{ name, label, type?, options?, optionsFrom?, optionLabel?, getValue?(row), hint? }]
+// rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
+export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [] }) {
   const { t } = useTranslation()
+  const client = useQueryClient()
   const { useList, save, remove } = useResource(path)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
@@ -31,14 +39,16 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [toDelete, setToDelete] = useState(null)
+  const [pending, setPending] = useState(null) // { action, row }
   const [notice, setNotice] = useState('')
+  const [status, setStatus] = useState('')
 
   const { data, isLoading } = useList({ search: search || undefined, page })
 
   const openForm = (row) => {
     setErrors({})
     setFormError('')
-    setForm(row?.id ? Object.fromEntries(fields.map((f) => [f.name, row[f.name] ?? ''])) : { ...empty })
+    setForm(row?.id ? Object.fromEntries(fields.map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
     setEditing(row ?? {})
   }
 
@@ -66,6 +76,18 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
     })
   }
 
+  const runAction = async () => {
+    const { action, row } = pending
+    setPending(null)
+    try {
+      await action.run(row)
+      setStatus(t(action.done))
+      client.invalidateQueries({ queryKey: [path] })
+    } catch (err) {
+      setNotice(err.response?.data?.message || t('admin.actions.error'))
+    }
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
@@ -75,6 +97,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
         </button>
       </div>
       {notice && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{notice}</p>}
+      {status && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{status}</p>}
       <DataTable
         columns={columns.map((c) => ({ ...c, label: t(c.label) }))}
         rows={data?.data ?? []}
@@ -85,13 +108,14 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
         lastPage={data?.meta?.last_page ?? 1}
         onPage={setPage}
         onEdit={openForm}
-        onDelete={(row) => { setNotice(''); setToDelete(row) }}
+        extraActions={rowActions.map((a) => ({ key: a.key, label: t(a.label), when: a.when, onClick: (row) => { setNotice(''); setStatus(''); setPending({ action: a, row }) } }))}
+        onDelete={(row) => { setNotice(''); setStatus(''); setToDelete(row) }}
       />
       <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)}>
         <form onSubmit={submit} className="space-y-3">
           {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
           {fields.map((f) => (
-            <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]}>
+            <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (
                 <SelectField field={f} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />
               ) : f.type === 'checkbox' ? (
@@ -100,6 +124,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
                 <input
                   className={inputClass}
                   type={f.type ?? 'text'}
+                  dir={f.type === 'email' ? 'ltr' : undefined}
                   value={form[f.name] ?? ''}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                 />
@@ -113,6 +138,14 @@ export default function ResourcePage({ path, title, columns, fields, empty = {} 
         </form>
       </Modal>
       <ConfirmDialog open={toDelete !== null} message={t('admin.actions.confirmDelete')} onConfirm={confirmDelete} onCancel={() => setToDelete(null)} />
+      <ConfirmDialog
+        open={pending !== null}
+        message={pending ? t(pending.action.confirm) : ''}
+        confirmLabel={pending ? t(pending.action.label) : undefined}
+        danger={false}
+        onConfirm={runAction}
+        onCancel={() => setPending(null)}
+      />
     </section>
   )
 }

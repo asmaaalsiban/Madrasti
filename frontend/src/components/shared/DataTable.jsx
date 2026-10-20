@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 
-export default function DataTable({ columns, rows, loading, search, onSearch, onEdit, onDelete, page = 1, lastPage = 1, onPage }) {
+// extraActions: [{ key, label, onClick(row), when?(row) }] shown between Edit and Delete.
+export default function DataTable({ columns, rows, loading, search, onSearch, onEdit, onDelete, extraActions = [], page = 1, lastPage = 1, onPage }) {
   const { t } = useTranslation()
+  const hasActions = Boolean(onEdit || onDelete || extraActions.length)
   return (
     <div className="space-y-3">
       <input
@@ -16,16 +18,19 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
           <thead className="bg-slate-100">
             <tr>
               {columns.map((c) => <th key={c.key} className="p-2 text-start font-medium sm:p-3">{c.label}</th>)}
-              {(onEdit || onDelete) && <th className="p-2 text-start font-medium sm:p-3">{t('admin.actions.actions')}</th>}
+              {hasActions && <th className="p-2 text-start font-medium sm:p-3">{t('admin.actions.actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-t">
                 {columns.map((c) => <td key={c.key} className="p-2 sm:p-3">{c.render ? c.render(row) : row[c.key]}</td>)}
-                {(onEdit || onDelete) && (
-                  <td className="p-2 sm:p-3"><div className="flex gap-2">
+                {hasActions && (
+                  <td className="p-2 sm:p-3"><div className="flex flex-wrap gap-2">
                     {onEdit && <button type="button" className="text-brand" onClick={() => onEdit(row)}>{t('admin.actions.edit')}</button>}
+                    {extraActions.filter((a) => !a.when || a.when(row)).map((a) => (
+                      <button key={a.key} type="button" className="text-slate-700 underline" onClick={() => a.onClick(row)}>{a.label}</button>
+                    ))}
                     {onDelete && <button type="button" className="text-red-600" onClick={() => onDelete(row)}>{t('admin.actions.delete')}</button>}
                   </div></td>
                 )}

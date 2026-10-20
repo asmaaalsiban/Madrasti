@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
+import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
 import FindSchoolPage from '../features/Central/FindSchoolPage'
@@ -13,6 +14,8 @@ import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
 import OverviewPage from '../features/Academic/pages/OverviewPage'
 import SubjectsPage from '../features/Academic/pages/SubjectsPage'
 import RoleHome from '../features/Auth/pages/RoleHome'
+import StudentsPage from '../features/People/pages/StudentsPage'
+import TeachersPage from '../features/People/pages/TeachersPage'
 import { RequireAuth, RequireRole } from './guards'
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
@@ -23,6 +26,7 @@ export const routes = [
   {
     element: <RequireAuth />,
     children: [
+      { path: '/change-password', element: <ChangePasswordPage /> },
       {
         element: <DashboardLayout />,
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
@@ -42,6 +46,8 @@ export const routes = [
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
               { path: '/admin/subjects', element: <SubjectsPage /> },
+              { path: '/admin/teachers', element: <TeachersPage /> },
+              { path: '/admin/students', element: <StudentsPage /> },
             ],
           },
         ],
