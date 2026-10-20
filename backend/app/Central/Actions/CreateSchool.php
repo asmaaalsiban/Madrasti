@@ -20,6 +20,8 @@ class CreateSchool
      */
     public function handle(array $data): Tenant
     {
+        // Only clean up what this call created: never delete a school that already had this id.
+        $alreadyExisted = Tenant::whereKey($data['id'])->exists();
         $tenant = null;
 
         try {
@@ -45,8 +47,15 @@ class CreateSchool
 
             return $tenant;
         } catch (Throwable $e) {
-            // Deleting the tenant drops its database (DeleteDatabase job) and domains.
-            $tenant?->delete();
+            // Tenant::create() runs the database/migration/seed pipeline, so it can fail after the row exists
+            // and before $tenant is assigned: look it up by id. Deleting drops its database and domains.
+            if (! $alreadyExisted) {
+                try {
+                    ($tenant ?? Tenant::find($data['id']))?->delete();
+                } catch (Throwable $cleanupError) {
+                    report($cleanupError);
+                }
+            }
 
             throw $e;
         }

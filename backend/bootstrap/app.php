@@ -35,8 +35,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => EnsureSuperAdmin::class,
         ]);
 
-        // Dev: Vite proxy forwards the school's host in X-Forwarded-Host. Restrict to real proxies in production.
-        $middleware->trustProxies(at: '*');
+        // Dev: Vite proxy forwards the school's host in X-Forwarded-Host, so trust every proxy locally.
+        // Elsewhere set TRUSTED_PROXIES (comma separated IPs/CIDRs); with none set no forwarded header is trusted,
+        // otherwise anyone could spoof X-Forwarded-For and dodge the IP rate limits.
+        $trustedProxies = env('TRUSTED_PROXIES', env('APP_ENV') === 'local' ? '*' : '');
+        if ($trustedProxies !== '') {
+            $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies)));
+        }
         $middleware->api(append: [
             SetLocale::class,
         ]);

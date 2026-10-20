@@ -38,6 +38,7 @@ src/
   pages/{auth,admin,teacher,student,parent}   # role dashboards
   components/{ui,shared}                       # Shadcn UI + shared parts
   i18n/locales/{ar,en}                         # keys grouped by module
+  features/Central/  # main-domain site: WelcomePage, RegisterSchoolPage, FindSchoolPage, host helpers
   tenant/       # loads school name/logo/colors from API by domain
 ```
 

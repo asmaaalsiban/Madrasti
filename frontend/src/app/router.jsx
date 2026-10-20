@@ -1,8 +1,12 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
+import FindSchoolPage from '../features/Central/FindSchoolPage'
+import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
+import WelcomePage from '../features/Central/WelcomePage'
+import { isCentralHost } from '../features/Central/host'
 import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
 import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
 import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
@@ -46,4 +50,14 @@ export const routes = [
   },
 ]
 
-export const createRouter = () => createBrowserRouter(routes)
+// The main (central) domain has no school: it only offers registration and a school lookup.
+export const centralRoutes = [
+  { path: '/', element: <WelcomePage /> },
+  { path: '/register', element: <RegisterSchoolPage /> },
+  { path: '/find-school', element: <FindSchoolPage /> },
+  { path: '*', element: <Navigate to="/" replace /> },
+]
+
+export const routesFor = (hostname) => (isCentralHost(hostname) ? centralRoutes : routes)
+
+export const createRouter = () => createBrowserRouter(routesFor(window.location.hostname))
