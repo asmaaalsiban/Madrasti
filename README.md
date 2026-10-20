@@ -89,7 +89,7 @@ Every new account gets the **default password** (`DEFAULT_ACCOUNT_PASSWORD`, `12
 The admin can reset a staff member, student or parent to the default password from the same screens.
 
 After updating an existing install run `php artisan tenants:migrate` once (adds `staff_profiles.staff_type/subject_id/floor`; existing teachers become staff of type teacher).
-`school:seed-demo` also adds demo staff (`teacher1@<school>.test`, `nurse1@...`) and four students with parents (`parent1@<school>.test` ..., default password).
+`school:seed-demo` adds demo staff (`teacher1@<school>.test` ... `teacher8@...`, one teacher per subject, and `nurse1@...`) and ten students in every classroom (120, generated names, siblings share a parent `parentN@<school>.test`; default password). It is safe to run again: it only adds what is missing.
 
 ## Attendance
 
