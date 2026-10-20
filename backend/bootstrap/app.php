@@ -1,6 +1,7 @@
 <?php
 
 use App\Central\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\SetLocale;
@@ -28,6 +29,14 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Central/Console',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // Every signed-in school route goes through this group: valid token, active account, password already
+        // changed. Only auth/me, auth/logout and auth/change-password stay outside it. Add new routes to it.
+        $middleware->group('school-user', [
+            'auth:sanctum',
+            EnsureAccountActive::class,
+            EnsurePasswordChanged::class,
+        ]);
+
         $middleware->alias([
             'role' => EnsureRole::class,
             'password.changed' => EnsurePasswordChanged::class,

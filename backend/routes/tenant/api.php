@@ -33,7 +33,7 @@ Route::prefix('auth')->group(function (): void {
 });
 
 // School structure: admin only.
-Route::middleware(['auth:sanctum', 'password.changed', 'role:admin'])->group(function (): void {
+Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);

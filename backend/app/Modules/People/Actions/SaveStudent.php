@@ -54,7 +54,7 @@ class SaveStudent
             $student->user?->update(['name' => $data['name_ar'], 'email' => $data['student_email']]);
 
             $this->place($student, $data['classroom_id'] ?? null);
-            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null);
+            $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, replacePrimary: true);
 
             return $this->loaded($student);
         });
@@ -98,8 +98,12 @@ class SaveStudent
         );
     }
 
-    /** Links the parent account with this email, creating it when it does not exist yet (one parent, many children). */
-    private function linkGuardian(Student $student, ?string $email, ?string $name): void
+    /**
+     * Links the parent account with this email, creating it when it does not exist yet (one parent, many children).
+     * The form edits the primary parent: with $replacePrimary a different email replaces the old primary parent's
+     * link (their account stays), so fixing a mistyped email does not leave the wrong account with access to the child.
+     */
+    private function linkGuardian(Student $student, ?string $email, ?string $name, bool $replacePrimary = false): void
     {
         if ($email === null || $email === '') {
             return;
@@ -113,9 +117,19 @@ class SaveStudent
             ...$this->defaultCredentials(),
         ]);
 
-        $student->guardians()->syncWithoutDetaching([
-            $guardian->id => ['is_primary' => ! $student->guardians()->exists()],
-        ]);
+        $linked = $student->guardians()->whereKey($guardian->id)->exists();
+        $primary = $student->guardians()->wherePivot('is_primary', true)->first();
+
+        if ($replacePrimary && $primary && $primary->id !== $guardian->id) {
+            $student->guardians()->detach($primary->id);
+            $primary = null;
+        }
+
+        if (! $linked) {
+            $student->guardians()->attach($guardian->id, ['is_primary' => $primary === null]);
+        } elseif ($primary === null) {
+            $student->guardians()->updateExistingPivot($guardian->id, ['is_primary' => true]);
+        }
     }
 
     private function loaded(Student $student): Student

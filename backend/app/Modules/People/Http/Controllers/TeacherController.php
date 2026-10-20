@@ -45,6 +45,11 @@ class TeacherController extends AcademicController
         Gate::authorize('update', $teacher);
         $teacher->update($request->validated());
 
+        // A deactivated teacher is signed out everywhere (and refused afterwards by the school-user middleware group).
+        if (! $teacher->is_active) {
+            $teacher->tokens()->delete();
+        }
+
         return new TeacherResource($teacher);
     }
 

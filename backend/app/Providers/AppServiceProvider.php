@@ -47,11 +47,16 @@ class AppServiceProvider extends ServiceProvider
             Limit::perDay((int) config('tenancy.registration_daily_limit'))->by('register-global'),
         ]);
 
-        // 5 login attempts per minute for the same school + login + IP.
-        RateLimiter::for('login', function (Request $request): Limit {
-            $key = (tenant('id') ?? 'central').'|'.Str::lower((string) $request->input('login', $request->input('email'))).'|'.$request->ip();
+        // Login: 5 attempts a minute for the same school + login + IP, and 30 a minute from one IP for a whole school
+        // (new accounts share the default password, so one machine must not be able to try it on many emails).
+        RateLimiter::for('login', function (Request $request): array {
+            $school = tenant('id') ?? 'central';
+            $login = Str::lower((string) $request->input('login', $request->input('email')));
 
-            return Limit::perMinute(5)->by($key);
+            return [
+                Limit::perMinute(5)->by($school.'|'.$login.'|'.$request->ip()),
+                Limit::perMinute(30)->by($school.'|ip|'.$request->ip()),
+            ];
         });
     }
 }

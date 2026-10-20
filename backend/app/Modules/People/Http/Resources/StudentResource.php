@@ -32,7 +32,8 @@ class StudentResource extends JsonResource
             'email' => $this->user?->email,
             'must_change_password' => $this->user?->must_change_password,
             'classroom' => $classroom ? ['id' => $classroom->id, 'name' => $classroom->name] : null,
-            'guardians' => $this->guardians->map(fn ($guardian) => [
+            // The primary parent first: the form edits that one.
+            'guardians' => $this->guardians->sortByDesc(fn ($guardian) => (int) $guardian->pivot->is_primary)->map(fn ($guardian) => [
                 'id' => $guardian->id,
                 'name' => $guardian->name,
                 'email' => $guardian->email,
