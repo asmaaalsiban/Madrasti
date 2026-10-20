@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Central\Http\Controllers\CentralAuthController;
+use App\Central\Http\Controllers\RegisterSchoolController;
 use App\Central\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 | Central API (Super Admin only). Registered per central domain in bootstrap/app.php
 | with prefix "api/central".
 */
+
+// Public self-service school registration (throttled, can be switched off).
+Route::post('register', RegisterSchoolController::class)->middleware('throttle:register');
 
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [CentralAuthController::class, 'login'])->middleware('throttle:login');

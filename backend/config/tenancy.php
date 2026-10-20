@@ -14,6 +14,16 @@ return [
     'domain_model' => Domain::class,
 
     /**
+     * Base domain schools are hosted under: a school with code "alnoor" lives at alnoor.<base_domain>.
+     */
+    'base_domain' => env('TENANCY_BASE_DOMAIN', 'localhost'),
+
+    /**
+     * Public self-service school registration (POST /api/central/register).
+     */
+    'registration_enabled' => (bool) env('REGISTRATION_ENABLED', true),
+
+    /**
      * The list of domains hosting your central app.
      *
      * Only relevant if you're using the domain or subdomain identification middleware.
