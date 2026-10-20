@@ -47,6 +47,13 @@ npm run dev -- --host
 Open `http://school2.localhost:<vite port>` (not `localhost`: the school is resolved from the host name)
 and sign in with `admin@school2.test` / `Admin12345`.
 
+## Finding or fixing a school admin
+
+```
+php artisan school:list                                   # schools, their domains and admin emails
+php artisan school:reset-admin <school id> <email>        # create or repair an admin (asks for the password)
+```
+
 ## Central site (main domain)
 
 On the main domain (`localhost`, `127.0.0.1`) the app shows a welcome page:
