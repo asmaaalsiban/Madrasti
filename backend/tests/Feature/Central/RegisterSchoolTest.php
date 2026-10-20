@@ -19,6 +19,8 @@ class RegisterSchoolTest extends TenantTestCase
     {
         parent::setUp();
 
+        config(['tenancy.registration_enabled' => true]);
+
         Schema::create('tenants', function ($t) {
             $t->string('id')->primary();
             $t->json('data')->nullable();
@@ -170,5 +172,29 @@ class RegisterSchoolTest extends TenantTestCase
         }
 
         $this->postJson('/api/central/register', [])->assertStatus(429);
+    }
+
+    public function test_spoofed_forwarded_for_does_not_bypass_the_throttle(): void
+    {
+        for ($i = 1; $i <= 5; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+                ->postJson('/api/central/register', [], ['X-Forwarded-For' => "1.2.3.$i"])
+                ->assertUnprocessable();
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->postJson('/api/central/register', [], ['X-Forwarded-For' => '1.2.3.99'])
+            ->assertStatus(429);
+    }
+
+    public function test_global_daily_cap_applies_across_ips(): void
+    {
+        config(['tenancy.registration_daily_limit' => 2]);
+
+        foreach (['10.0.0.1', '10.0.0.2'] as $ip) {
+            $this->withServerVariables(['REMOTE_ADDR' => $ip])->postJson('/api/central/register', [])->assertUnprocessable();
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.3'])->postJson('/api/central/register', [])->assertStatus(429);
     }
 }

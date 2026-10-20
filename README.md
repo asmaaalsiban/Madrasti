@@ -62,9 +62,11 @@ Settings:
 | Where | Variable | Default | Purpose |
 |---|---|---|---|
 | backend `.env` | `TENANCY_BASE_DOMAIN` | `localhost` | schools live at `<code>.<base domain>` |
-| backend `.env` | `REGISTRATION_ENABLED` | `true` | turns public registration on/off |
+| backend `.env` | `REGISTRATION_ENABLED` | `false` (`true` in `.env.example`) | turns public registration on/off; off unless set |
+| backend `.env` | `REGISTRATION_DAILY_LIMIT` | `50` | max registrations per day across all IPs |
+| backend `.env` | `TRUSTED_PROXIES` | none (`*` when `APP_ENV=local`) | IPs/CIDRs of your load balancer; without it `X-Forwarded-For` is ignored so IP limits cannot be spoofed |
 | frontend `.env` | `VITE_CENTRAL_HOSTS` | `localhost,127.0.0.1` | hosts that show the central site |
-| frontend `.env` | `VITE_BASE_DOMAIN` | `localhost` | base domain used to build school links |
+| frontend `.env` | `VITE_BASE_DOMAIN` | `localhost` | base domain used to build school links (both `VITE_*` are required in production builds) |
 
 Before opening registration to the internet add email verification and a CAPTCHA.
 

@@ -17,6 +17,9 @@ class RegisterSchoolController extends Controller
 {
     public function __invoke(RegisterSchoolRequest $request, CreateSchool $createSchool): JsonResponse
     {
+        // Creating a database and running every migration can take a while.
+        set_time_limit(300);
+
         $code = $request->validated('code');
         $domain = $code.'.'.config('tenancy.base_domain');
 

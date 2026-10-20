@@ -33,8 +33,11 @@ class AppServiceProvider extends ServiceProvider
             Gate::policy($model, AcademicPolicy::class);
         }
 
-        // Public school registration: 5 per hour per IP (each call creates a database).
-        RateLimiter::for('register', fn (Request $request): Limit => Limit::perHour(5)->by((string) $request->ip()));
+        // Public school registration (each call creates a database): 5 per hour per IP, plus a global daily cap.
+        RateLimiter::for('register', fn (Request $request): array => [
+            Limit::perHour(5)->by('ip|'.$request->ip()),
+            Limit::perDay((int) config('tenancy.registration_daily_limit'))->by('register-global'),
+        ]);
 
         // 5 login attempts per minute for the same school + login + IP.
         RateLimiter::for('login', function (Request $request): Limit {

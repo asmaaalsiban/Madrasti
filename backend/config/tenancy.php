@@ -21,7 +21,11 @@ return [
     /**
      * Public self-service school registration (POST /api/central/register).
      */
-    'registration_enabled' => (bool) env('REGISTRATION_ENABLED', true),
+    // Off unless explicitly enabled: it lets anyone on the internet create a database.
+    'registration_enabled' => (bool) env('REGISTRATION_ENABLED', false),
+
+    // Maximum registrations per day across all IPs.
+    'registration_daily_limit' => (int) env('REGISTRATION_DAILY_LIMIT', 50),
 
     /**
      * The list of domains hosting your central app.

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '../src/api/client'
 import { isCentralHost, isValidSchoolCode, normalizeSchoolCode, schoolUrl } from '../src/features/Central/host'
 import { registerSchool } from '../src/features/Central/api'
@@ -38,5 +38,38 @@ describe('registerSchool', () => {
     const result = await registerSchool(payload)
     expect(api.post).toHaveBeenCalledWith('/central/register', payload)
     expect(result).toEqual({ code: 'alnoor', domain: 'alnoor.localhost', login_path: '/login' })
+  })
+})
+
+describe('production configuration', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+    vi.restoreAllMocks()
+  })
+
+  it('logs a loud error when a production build has no central hosts configured', async () => {
+    vi.stubEnv('PROD', true)
+    vi.stubEnv('VITE_CENTRAL_HOSTS', '')
+    vi.stubEnv('VITE_BASE_DOMAIN', '')
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.resetModules()
+    await import('../src/features/Central/host')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('VITE_CENTRAL_HOSTS'))
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('VITE_BASE_DOMAIN'))
+  })
+
+  it('stays quiet when configured, and in development', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.stubEnv('PROD', true)
+    vi.stubEnv('VITE_CENTRAL_HOSTS', 'madrasti.com,www.madrasti.com')
+    vi.stubEnv('VITE_BASE_DOMAIN', 'madrasti.com')
+    vi.resetModules()
+    await import('../src/features/Central/host')
+    vi.stubEnv('PROD', false)
+    vi.stubEnv('VITE_CENTRAL_HOSTS', '')
+    vi.resetModules()
+    await import('../src/features/Central/host')
+    expect(error).not.toHaveBeenCalled()
   })
 })
