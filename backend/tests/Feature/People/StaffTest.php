@@ -212,4 +212,35 @@ class StaffTest extends AcademicTestCase
         $this->getJson('/api/staff')->assertUnauthorized();
         $this->getJson('/api/staff-types')->assertUnauthorized();
     }
+
+    public function test_an_admin_cannot_delete_deactivate_or_demote_themselves(): void
+    {
+        $principal = User::factory()->staff(StaffType::Principal)->create();
+        Sanctum::actingAs($principal);
+
+        $this->deleteJson("/api/staff/{$principal->id}")->assertForbidden();
+        $this->putJson("/api/staff/{$principal->id}", $this->body(['email' => $principal->email, 'staff_type' => 'principal', 'is_active' => false]))->assertForbidden();
+        $this->putJson("/api/staff/{$principal->id}", $this->body(['email' => $principal->email, 'staff_type' => 'nurse']))->assertForbidden();
+        $this->assertNull($principal->fresh()->deleted_at);
+    }
+
+    public function test_a_teacher_who_can_no_longer_be_a_homeroom_teacher_is_removed_from_the_classroom(): void
+    {
+        $this->actAsAdmin();
+        $teacher = User::factory()->staff(StaffType::Teacher)->create();
+        $room = Classroom::factory()->create(['homeroom_teacher_id' => $teacher->id]);
+
+        $this->putJson("/api/staff/{$teacher->id}", $this->body(['email' => $teacher->email, 'staff_type' => 'nurse']))->assertOk();
+
+        $this->assertNull($room->fresh()->homeroom_teacher_id);
+    }
+
+    public function test_the_homeroom_list_has_only_active_staff(): void
+    {
+        $this->actAsAdmin();
+        User::factory()->staff(StaffType::Teacher)->create(['name' => 'Active One']);
+        User::factory()->staff(StaffType::Teacher)->inactive()->create(['name' => 'Gone One']);
+
+        $this->getJson('/api/staff?homeroom=1')->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Active One');
+    }
 }

@@ -11,6 +11,7 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\People\Services\StudentEmail;
 use App\Shared\Enums\Role;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Creates or updates a student together with the student's login account, the classroom placement
@@ -124,7 +125,13 @@ class SaveStudent
             return;
         }
 
-        $guardian = User::where('email', $email)->first() ?? User::create([
+        $existing = User::where('email', $email)->first();
+        if ($existing !== null && $existing->role !== Role::Guardian) {
+            // e.g. the student's own generated email: rolls the whole save back.
+            throw ValidationException::withMessages(['guardian_email' => __('people.guardian_email_conflict')]);
+        }
+
+        $guardian = $existing ?? User::create([
             'name' => $name ?: __('people.guardian_of', ['name' => $student->name_ar]),
             'email' => $email,
             'phone' => $phone ?: null,

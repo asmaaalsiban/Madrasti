@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\People\Actions;
 
 use App\Models\User;
+use App\Modules\Academic\Models\Classroom;
 use App\Shared\Enums\StaffType;
 use Illuminate\Support\Facades\DB;
 
@@ -55,6 +56,11 @@ class SaveStaff
                 'role' => $role,
             ]);
             $user->staffProfile()->updateOrCreate(['user_id' => $user->id], $this->profile($type, $data));
+
+            // Someone who can no longer be a homeroom teacher must not stay one (it would block edits of the classroom).
+            if (! $type->canBeHomeroom() || ! $user->is_active) {
+                Classroom::where('homeroom_teacher_id', $user->id)->update(['homeroom_teacher_id' => null]);
+            }
 
             // A change of access (e.g. teacher -> principal) must not keep working on old sessions.
             if ($roleChanged || ! $user->is_active) {

@@ -55,6 +55,23 @@ class StudentTest extends AcademicTestCase
         $this->assertDatabaseHas('enrollments', ['student_id' => $id, 'classroom_id' => $room->id, 'academic_year_id' => $room->academic_year_id]);
     }
 
+    public function test_the_students_own_email_cannot_be_used_as_the_parent_email(): void
+    {
+        $this->actAsAdmin();
+
+        $this->postJson('/api/students', $this->body(['guardian_email' => 'mohammad.s1001@school.edu']))
+            ->assertUnprocessable()->assertJsonValidationErrors('guardian_email');
+
+        $this->assertDatabaseMissing('users', ['email' => 'mohammad.s1001@school.edu']);
+        $this->assertDatabaseCount('students', 0);
+    }
+
+    public function test_the_parent_phone_is_returned_so_the_form_can_show_it(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/students', $this->body())->assertCreated()->assertJsonPath('data.guardians.0.phone', '0599123456');
+    }
+
     public function test_the_generated_account_is_only_shown_when_the_student_is_created(): void
     {
         $this->actAsAdmin();

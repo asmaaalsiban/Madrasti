@@ -39,6 +39,7 @@ class StudentResource extends JsonResource
                 'id' => $guardian->id,
                 'name' => $guardian->name,
                 'email' => $guardian->email,
+                'phone' => $guardian->phone,
             ])->values(),
         ];
     }

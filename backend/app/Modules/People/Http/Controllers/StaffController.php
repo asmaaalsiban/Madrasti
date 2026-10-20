@@ -41,7 +41,13 @@ class StaffController extends AcademicController
         $user = $this->baseQuery()->findOrFail($id);
         Gate::authorize('update', $user);
 
-        return new StaffResource($save->update($user, $request->validated()));
+        $data = $request->validated();
+        if ($user->is($request->user()) && (($data['is_active'] ?? true) === false || StaffType::from($data['staff_type'])->accountRole() !== $user->role)) {
+            // Nobody may lock themselves out or drop their own admin access.
+            abort(403);
+        }
+
+        return new StaffResource($save->update($user, $data));
     }
 
     /** Staff are the users that have a staff profile (the school's first admin is not staff). */
@@ -61,6 +67,10 @@ class StaffController extends AcademicController
         }
         if ($request->boolean('homeroom')) {
             $types = array_values(array_intersect($types ?? StaffType::homeroomValues(), StaffType::homeroomValues()));
+        }
+
+        if ($request->boolean('homeroom')) {
+            $query->where('is_active', true);
         }
 
         if ($types !== null) {

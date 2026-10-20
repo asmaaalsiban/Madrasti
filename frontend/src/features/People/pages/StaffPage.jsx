@@ -25,9 +25,8 @@ export default function StaffPage() {
     staleTime: Infinity,
   })
   const byValue = Object.fromEntries(types.map((x) => [x.value, x]))
-  const typeOptions = types
-    .filter((x) => category === 'all' || x.category === category)
-    .map((x) => ({ value: x.value, label: `staff.types.${x.value}` }))
+  // New people start on the first type of the open tab; every type stays selectable (to move someone to another category).
+  const defaultType = types.find((x) => category === 'all' || x.category === category)?.value ?? 'teacher'
 
   const fields = [
     { name: 'name', label: 'academic.fields.name' },
@@ -75,8 +74,8 @@ export default function StaffPage() {
         path="staff"
         title="staff.title"
         columns={columns}
-        fields={fields.map((f) => (f.name === 'staff_type' && category !== 'all' ? { ...f, options: typeOptions } : f))}
-        empty={{ name: '', email: '', phone: '', staff_type: typeOptions[0]?.value ?? 'teacher', subject_id: '', floor: '', is_active: true }}
+        fields={fields}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />

@@ -34,7 +34,7 @@ class UserPolicy
 
     public function delete(User $user, User $target): bool
     {
-        return $user->hasRole(Role::Admin);
+        return $user->hasRole(Role::Admin) && ! $user->is($target);
     }
 
     /**
