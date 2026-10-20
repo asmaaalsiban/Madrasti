@@ -1,3 +1,4 @@
+import PasswordInput from '../../../components/shared/PasswordInput'
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -56,9 +57,8 @@ export default function LoginPage() {
         </label>
         <label className="block text-sm">
           {t('auth.password')}
-          <input
-            type="password"
-            className="mt-1 w-full rounded border p-2"
+          <PasswordInput
+            className="mt-1"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
