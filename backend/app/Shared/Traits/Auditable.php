@@ -33,6 +33,12 @@ trait Auditable
      */
     private static function audit(Model $model, string $action, ?array $old, ?array $new): void
     {
+        // Never store secrets (password hash, remember token): keep the key so the log still shows it changed.
+        $mask = fn (?array $values): ?array => $values === null ? null : collect($values)
+            ->map(fn ($value, $key) => in_array($key, $model->getHidden(), true) ? '[hidden]' : $value)->all();
+        $old = $mask($old);
+        $new = $mask($new);
+
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => $action,

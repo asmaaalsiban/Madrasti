@@ -25,11 +25,12 @@ Route::prefix('auth')->group(function (): void {
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('throttle:change-password');
     });
 });
 
 // School structure: admin only.
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function (): void {
+Route::middleware(['auth:sanctum', 'password.changed', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);

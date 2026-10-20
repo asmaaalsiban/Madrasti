@@ -33,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
             Gate::policy($model, AcademicPolicy::class);
         }
 
+        // Changing a password asks for the current one: 5 tries a minute per user.
+        RateLimiter::for('change-password', fn (Request $request): Limit => Limit::perMinute(5)->by('cp|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
+
         // Public school registration (each call creates a database): 5 per hour per IP, plus a global daily cap.
         RateLimiter::for('register', fn (Request $request): array => [
             Limit::perHour(5)->by('ip|'.$request->ip()),

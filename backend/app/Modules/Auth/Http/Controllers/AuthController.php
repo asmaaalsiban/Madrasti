@@ -6,6 +6,7 @@ namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Auth\Http\Requests\ChangePasswordRequest;
 use App\Modules\Auth\Http\Requests\LoginRequest;
 use App\Modules\Auth\Http\Resources\UserResource;
 use App\Shared\Enums\Role;
@@ -62,6 +63,25 @@ class AuthController extends Controller
     public function me(Request $request): UserResource
     {
         return new UserResource($this->withChildren($request->user()));
+    }
+
+    public function changePassword(ChangePasswordRequest $request): UserResource
+    {
+        $user = $request->user();
+        $user->forceFill([
+            'password' => $request->validated('password'),
+            'must_change_password' => false,
+        ])->save();
+
+        // Sign out every other device; keep the one that just changed the password.
+        $current = $user->currentAccessToken();
+        $tokens = $user->tokens();
+        if ($current instanceof PersonalAccessToken) {
+            $tokens->where('id', '!=', $current->id);
+        }
+        $tokens->delete();
+
+        return new UserResource($this->withChildren($user));
     }
 
     private function withChildren(User $user): User

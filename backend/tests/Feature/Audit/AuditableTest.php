@@ -19,7 +19,7 @@ class AuditableTest extends TenantTestCase
         $subject->update(['name_en' => 'Maths']);
         $subject->delete();
 
-        $logs = AuditLog::orderBy('id')->get();
+        $logs = AuditLog::where('auditable_type', Subject::class)->orderBy('id')->get();
         $this->assertSame(['created', 'updated', 'deleted'], $logs->pluck('action')->all());
         $this->assertSame($admin->id, $logs[0]->user_id);
         $this->assertSame('MTH', $logs[0]->new_values['code']);
@@ -33,6 +33,6 @@ class AuditableTest extends TenantTestCase
     {
         Subject::factory()->create();
 
-        $this->assertNull(AuditLog::first()->user_id);
+        $this->assertNull(AuditLog::where('auditable_type', Subject::class)->first()->user_id);
     }
 }

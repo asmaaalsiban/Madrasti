@@ -1,6 +1,7 @@
 <?php
 
 use App\Central\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => EnsureRole::class,
+            'password.changed' => EnsurePasswordChanged::class,
             'super-admin' => EnsureSuperAdmin::class,
         ]);
 
