@@ -72,16 +72,24 @@ Settings (backend `.env`):
 
 Before opening registration to the internet add email verification and a CAPTCHA.
 
-## Teachers, students and parents
+## Staff, students and parents
 
-The admin creates the accounts (admin menu: **Teachers**, **Students**). For a student the admin enters the student's email and
-the parent's email (a parent with several children gets one account). Every new account gets the **default password**
-(`DEFAULT_ACCOUNT_PASSWORD`, `123456789` unless changed in the backend `.env`) and is sent to **Change password** at the first
-sign-in; the default password can never be chosen again. Users can change their password but not their email (only the admin can).
-The admin can reset a teacher, student or parent to the default password from the same screens.
+The admin creates the accounts (admin menu: **Staff**, **Students**).
 
-After updating an existing install run `php artisan tenants:migrate` once (adds `users.must_change_password` to every school).
-`school:seed-demo` also adds four demo students with parents (`student1@<school>.test` ... / `parent1@<school>.test` ..., default password).
+- **Staff**: one page with a tab per category (teaching, administrative, student affairs, health, technical, services). Each person has a
+  type (teacher, head of department, principal, nurse, driver, ...). Teaching types have one subject; floor supervisors have a floor.
+  Principal, vice principal and general manager get the `admin` role, everyone else the `teacher` role (finer permissions come with each module).
+- **Students**: the admin does not type the student's email. It is generated as `<english first name>.<student number>@<school code>.edu`
+  (e.g. `ahmad.d1001@school2.edu`; `d1001@school2.edu` without an English name). Set `STUDENT_EMAIL_DOMAIN` to use another domain.
+  After saving, the admin sees the email and password once. The admin also enters the parent's email, name and phone
+  (a parent with several children gets one account). A parent sees each child's sign-in email on the parent home page.
+
+Every new account gets the **default password** (`DEFAULT_ACCOUNT_PASSWORD`, `123456789` unless changed in the backend `.env`) and is sent to
+**Change password** at the first sign-in; the default password can never be chosen again. Users can change their password but not their email.
+The admin can reset a staff member, student or parent to the default password from the same screens.
+
+After updating an existing install run `php artisan tenants:migrate` once (adds `staff_profiles.staff_type/subject_id/floor`; existing teachers become staff of type teacher).
+`school:seed-demo` also adds demo staff (`teacher1@<school>.test`, `nurse1@...`) and four students with parents (`parent1@<school>.test` ..., default password).
 
 ## Status
 
