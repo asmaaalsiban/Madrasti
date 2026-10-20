@@ -72,6 +72,17 @@ Settings (backend `.env`):
 
 Before opening registration to the internet add email verification and a CAPTCHA.
 
+## Teachers, students and parents
+
+The admin creates the accounts (admin menu: **Teachers**, **Students**). For a student the admin enters the student's email and
+the parent's email (a parent with several children gets one account). Every new account gets the **default password**
+(`DEFAULT_ACCOUNT_PASSWORD`, `123456789` unless changed in the backend `.env`) and is sent to **Change password** at the first
+sign-in; the default password can never be chosen again. Users can change their password but not their email (only the admin can).
+The admin can reset a teacher, student or parent to the default password from the same screens.
+
+After updating an existing install run `php artisan tenants:migrate` once (adds `users.must_change_password` to every school).
+`school:seed-demo` also adds four demo students with parents (`student1@<school>.test` ... / `parent1@<school>.test` ..., default password).
+
 ## Status
 
 Phase 1 (Foundation): folder structure and migrations are in place.

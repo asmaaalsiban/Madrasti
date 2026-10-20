@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
@@ -12,6 +12,8 @@ const NAV = [
   ['/admin/grade-levels', 'gradeLevels'],
   ['/admin/classrooms', 'classrooms'],
   ['/admin/subjects', 'subjects'],
+  ['/admin/teachers', 'teachers'],
+  ['/admin/students', 'students'],
 ]
 
 export default function AdminLayout() {
@@ -51,6 +53,7 @@ export default function AdminLayout() {
       <div className="flex-1">
         <header className="flex items-center justify-end gap-2 border-b bg-white px-4 py-3">
           <LanguageSwitcher />
+          <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />
           <button type="button" className="rounded border px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</button>
         </header>

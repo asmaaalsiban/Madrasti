@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Central\Actions;
 
 use App\Models\User;
+use App\Modules\People\Actions\SaveStudent;
 use App\Shared\Enums\Role;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,14 @@ class SeedDemoSchool
         ['الصف الرابع', 'Grade 4'], ['الصف الخامس', 'Grade 5'], ['الصف السادس', 'Grade 6'],
     ];
 
+    /** [student number, Arabic name, English name, classroom, parent number]: two siblings share parent 1. */
+    private const STUDENTS = [
+        ['D-1001', 'أحمد خالد', 'Ahmad Khaled', '1-A', 1],
+        ['D-1002', 'ليلى خالد', 'Layla Khaled', '1-A', 1],
+        ['D-1003', 'يوسف سامي', 'Yousef Sami', '1-B', 2],
+        ['D-1004', 'مريم نبيل', 'Mariam Nabil', '2-A', 3],
+    ];
+
     private const SUBJECTS = [
         'ARB' => ['اللغة العربية', 'Arabic'], 'ENG' => ['اللغة الإنجليزية', 'English'],
         'MTH' => ['الرياضيات', 'Math'], 'SCI' => ['العلوم', 'Science'],
@@ -35,7 +44,7 @@ class SeedDemoSchool
     {
         User::updateOrCreate(
             ['email' => $adminEmail],
-            ['name' => 'Admin', 'password' => $adminPassword, 'role' => Role::Admin, 'is_active' => true],
+            ['name' => 'Admin', 'password' => $adminPassword, 'role' => Role::Admin, 'is_active' => true, 'must_change_password' => false],
         );
 
         $teacherIds = [];
@@ -66,13 +75,37 @@ class SeedDemoSchool
             }
         }
 
+        $this->seedStudents($teacherDomain, $yearId);
+
         return [
             'users' => User::count(),
             'academic_years' => DB::table('academic_years')->count(),
             'grade_levels' => DB::table('grade_levels')->count(),
             'subjects' => DB::table('subjects')->count(),
             'classrooms' => DB::table('classrooms')->count(),
+            'students' => DB::table('students')->count(),
         ];
+    }
+
+    /** A few students with their accounts and parents, created the way the admin screen creates them (default password). */
+    private function seedStudents(string $domain, int $yearId): void
+    {
+        $saver = app(SaveStudent::class);
+
+        foreach (self::STUDENTS as $i => [$number, $nameAr, $nameEn, $classroom, $parent]) {
+            if (DB::table('students')->where('student_number', $number)->exists()) {
+                continue;
+            }
+
+            $saver->create([
+                'student_number' => $number,
+                'name_ar' => $nameAr,
+                'name_en' => $nameEn,
+                'student_email' => 'student'.($i + 1).'@'.$domain,
+                'classroom_id' => DB::table('classrooms')->where('name', $classroom)->where('academic_year_id', $yearId)->value('id'),
+                'guardian_email' => 'parent'.$parent.'@'.$domain,
+            ]);
+        }
     }
 
     /**

@@ -7,8 +7,8 @@ export function useResource(path) {
   const invalidate = () => client.invalidateQueries({ queryKey: [path] })
 
   return {
-    useList: (params) =>
-      useQuery({ queryKey: [path, params], queryFn: () => resource.list(params), placeholderData: keepPreviousData }),
+    useList: (params, options = {}) =>
+      useQuery({ queryKey: [path, params], queryFn: () => resource.list(params), placeholderData: keepPreviousData, ...options }),
     save: useMutation({
       mutationFn: ({ id, body }) => (id ? resource.update(id, body) : resource.create(body)),
       onSuccess: invalidate,

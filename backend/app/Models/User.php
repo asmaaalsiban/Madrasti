@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Modules\Academic\Models\Student;
 use App\Shared\Enums\Role;
+use App\Shared\Traits\Auditable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -21,7 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use Auditable, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * @var list<string>
@@ -35,6 +36,7 @@ class User extends Authenticatable
         'locale',
         'avatar_path',
         'is_active',
+        'must_change_password',
     ];
 
     /**
@@ -54,6 +56,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => Role::class,
             'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
         ];
     }
 

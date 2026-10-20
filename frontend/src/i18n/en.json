@@ -10,7 +10,16 @@
     "login": "Email or phone number",
     "password": "Password",
     "submit": "Sign in",
-    "failed": "Could not sign in, please try again."
+    "failed": "Could not sign in, please try again.",
+    "changePassword": {
+      "title": "Change password",
+      "link": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "submit": "Change password",
+      "forced": "Your account uses the default password. Choose your own password to continue."
+    }
   },
   "roles": {
     "admin": "Admin",
@@ -55,7 +64,9 @@
       "academicYears": "Academic years",
       "gradeLevels": "Grade levels",
       "classrooms": "Classrooms",
-      "subjects": "Subjects"
+      "subjects": "Subjects",
+      "teachers": "Teachers",
+      "students": "Students"
     },
     "actions": {
       "add": "Add",
@@ -127,5 +138,32 @@
     "schoolNotFound": "School not found. Check the school code.",
     "schoolCodeHint": "You will type this code when you sign in",
     "changeSchoolCode": "Change school code"
+  },
+  "people": {
+    "teachers": "Teachers",
+    "students": "Students",
+    "fields": {
+      "email": "Email",
+      "phone": "Phone",
+      "active": "Active",
+      "studentNumber": "Student number",
+      "birthDate": "Birth date",
+      "gender": "Gender",
+      "studentEmail": "Student email",
+      "classroom": "Classroom",
+      "guardianEmail": "Parent email",
+      "guardianName": "Parent name",
+      "guardians": "Parents",
+      "homeroomTeacher": "Homeroom teacher"
+    },
+    "male": "Male",
+    "female": "Female",
+    "accountHint": "The account gets the default password and must change it at the first sign-in.",
+    "actions": {
+      "resetPassword": "Reset password",
+      "resetGuardianPassword": "Reset parent password",
+      "resetConfirm": "Reset this password to the default one? The user will have to choose a new password at the next sign-in.",
+      "resetDone": "The password was reset to the default one."
+    }
   }
 }

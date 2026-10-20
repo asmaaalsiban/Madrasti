@@ -11,4 +11,6 @@ return [
         'login' => 'email or phone',
         'password' => 'password',
     ],
+    'password_change_required' => 'You must change your password before you continue.',
+    'password_is_default' => 'Choose a password other than the default one.',
 ];

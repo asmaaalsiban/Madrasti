@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
 import ChangeSchoolCodeButton from '../../../components/shared/ChangeSchoolCodeButton'
-import { homeFor } from '../../../app/guards'
+import { CHANGE_PASSWORD_PATH, homeFor } from '../../../app/guards'
 import { getSchool } from '../../../tenant/school'
 import { useSchool } from '../../../tenant/useSchool'
 import { useAuth } from '../AuthProvider'
@@ -25,7 +25,7 @@ export default function LoginPage() {
     setError('')
     try {
       const u = await login(form.login, form.password)
-      navigate(homeFor(u.role), { replace: true })
+      navigate(u.must_change_password ? CHANGE_PASSWORD_PATH : homeFor(u.role), { replace: true })
     } catch (err) {
       setError(err.response?.data?.errors?.login?.[0] ?? err.response?.data?.message ?? t('auth.failed'))
     } finally {

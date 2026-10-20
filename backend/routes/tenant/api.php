@@ -9,6 +9,9 @@ use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\People\Http\Controllers\StudentController;
+use App\Modules\People\Http\Controllers\TeacherController;
+use App\Modules\People\Http\Controllers\UserPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,14 +28,20 @@ Route::prefix('auth')->group(function (): void {
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('throttle:change-password');
     });
 });
 
 // School structure: admin only.
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function (): void {
+Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
+
+    // People: teachers, students and their accounts.
+    Route::apiResource('teachers', TeacherController::class);
+    Route::apiResource('students', StudentController::class);
+    Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);
 });

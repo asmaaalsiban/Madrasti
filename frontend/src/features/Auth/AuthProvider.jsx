@@ -34,7 +34,10 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout])
+  // Replaces the signed-in user (e.g. after the password was changed and must_change_password is now false).
+  const updateUser = useCallback((next) => setUser(next), [])
+
+  const value = useMemo(() => ({ user, loading, login, logout, updateUser }), [user, loading, login, logout, updateUser])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

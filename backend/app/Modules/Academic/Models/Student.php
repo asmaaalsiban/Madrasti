@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Models;
 
 use App\Models\User;
+use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
-    use SoftDeletes;
+    use Auditable, SoftDeletes;
 
     /**
      * @var list<string>
@@ -32,6 +34,16 @@ class Student extends Model
     protected function casts(): array
     {
         return ['birth_date' => 'date'];
+    }
+
+    /**
+     * Placements in classrooms, one per academic year.
+     *
+     * @return HasMany<Enrollment, $this>
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     /**

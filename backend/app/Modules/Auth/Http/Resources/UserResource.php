@@ -27,6 +27,7 @@ class UserResource extends JsonResource
             'locale' => $this->locale,
             'avatar_path' => $this->avatar_path,
             'is_active' => $this->is_active,
+            'must_change_password' => $this->must_change_password,
             // Only for parents: the children they can follow.
             'children' => $this->whenLoaded('children', fn () => $this->children->map(fn ($student) => [
                 'id' => $student->id,
