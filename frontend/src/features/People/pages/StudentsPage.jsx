@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import GuardianPicker from '../components/GuardianPicker'
 import ResourcePage from '../../Academic/components/ResourcePage'
 
 const fields = [
@@ -16,6 +17,7 @@ const fields = [
     options: [{ value: 'male', label: 'people.male' }, { value: 'female', label: 'people.female' }],
   },
   { name: 'classroom_id', label: 'people.fields.classroom', type: 'select', optionsFrom: 'classrooms', optionLabel: 'name', getValue: (row) => row.classroom?.id },
+  { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
   { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', getValue: (row) => row.guardians?.[0]?.email },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
   { name: 'guardian_phone', label: 'people.fields.guardianPhone', getValue: (row) => row.guardians?.[0]?.phone },

@@ -11,6 +11,7 @@ use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
 use App\Modules\People\Http\Controllers\StudentController;
@@ -47,6 +48,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('staff-types', StaffTypeController::class);
     Route::apiResource('staff', StaffController::class);
     Route::apiResource('students', StudentController::class);
+    Route::get('guardians', [GuardianController::class, 'index']);
     Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);
 });
 

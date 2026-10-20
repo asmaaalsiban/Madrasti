@@ -26,7 +26,7 @@ function SelectField({ field, value, onChange }) {
 }
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
-// fields: [{ name, label, type?, options?, optionsFrom?, optionsParams?, optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
+// fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams?, optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
 // rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
@@ -50,7 +50,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const openForm = (row) => {
     setErrors({})
     setFormError('')
-    setForm(row?.id ? Object.fromEntries(fields.map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
+    setForm(row?.id ? Object.fromEntries(fields.filter((f) => f.type !== 'custom').map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
     setEditing(row ?? {})
   }
 
@@ -120,7 +120,9 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
       <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)}>
         <form onSubmit={submit} className="space-y-3">
           {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
-          {fields.filter((f) => !f.visibleWhen || f.visibleWhen(form)).map((f) => (
+          {fields.filter((f) => !f.visibleWhen || f.visibleWhen(form)).map((f) => f.type === 'custom' ? (
+            <div key={f.name}>{f.render({ form, setForm })}</div>
+          ) : (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (
                 <SelectField field={f} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />
