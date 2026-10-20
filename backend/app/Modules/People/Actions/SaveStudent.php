@@ -84,13 +84,14 @@ class SaveStudent
     }
 
     /** Places the student in the classroom for that classroom's academic year (replacing the placement of that year). */
-    private function place(Student $student, ?int $classroomId): void
+    private function place(Student $student, int|string|null $classroomId): void
     {
-        if ($classroomId === null) {
+        // The browser sends a <select> value as text ("3"); an empty one means no classroom.
+        if ($classroomId === null || $classroomId === '') {
             return;
         }
 
-        $classroom = Classroom::findOrFail($classroomId);
+        $classroom = Classroom::findOrFail((int) $classroomId);
 
         Enrollment::updateOrCreate(
             ['student_id' => $student->id, 'academic_year_id' => $classroom->academic_year_id],

@@ -55,6 +55,23 @@ class StudentTest extends AcademicTestCase
         $this->assertDatabaseHas('enrollments', ['student_id' => $id, 'classroom_id' => $room->id, 'academic_year_id' => $room->academic_year_id]);
     }
 
+    public function test_ids_sent_as_text_by_the_browser_are_accepted(): void
+    {
+        $this->actAsAdmin();
+        $room = Classroom::factory()->create();
+        $other = Classroom::factory()->create(['academic_year_id' => $room->academic_year_id]);
+
+        // A <select> in the browser sends its value as a string ("3"), not a number.
+        $id = $this->postJson('/api/students', $this->body(['classroom_id' => (string) $room->id]))
+            ->assertCreated()->assertJsonPath('data.classroom.id', $room->id)->json('data.id');
+        $this->putJson("/api/students/$id", $this->body(['classroom_id' => (string) $other->id]))
+            ->assertOk()->assertJsonPath('data.classroom.id', $other->id);
+
+        // An empty select arrives as an empty string, which means "no classroom".
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-2', 'student_email' => 'x@school.test', 'guardian_email' => null, 'classroom_id' => '']))
+            ->assertCreated()->assertJsonPath('data.classroom', null);
+    }
+
     public function test_a_student_can_be_registered_without_a_classroom_or_a_parent(): void
     {
         $this->actAsAdmin();
