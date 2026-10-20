@@ -5,11 +5,14 @@ namespace App\Providers;
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Policies\AcademicPolicy;
 use App\Modules\People\Policies\UserPolicy;
+use App\Shared\Enums\Role;
+use App\Shared\Messaging\MessageSender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // The messaging provider (WhatsApp, SMS, ...) is chosen in config/messaging.php.
+        $this->app->bind(MessageSender::class, fn ($app): MessageSender => $app->make(config('messaging.drivers')[config('messaging.driver')]));
     }
 
     /**
@@ -37,6 +41,19 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::policy(User::class, UserPolicy::class);
+
+        // Attendance: an admin, or the homeroom teacher of the classroom.
+        Gate::define('take-attendance', fn (User $user, Classroom $classroom): bool => $user->hasRole(Role::Admin)
+            || ($user->hasRole(Role::Teacher) && $classroom->homeroom_teacher_id === $user->id));
+
+        // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.
+        Gate::define('view-student-attendance', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Student => $student->user_id === $user->id,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => Enrollment::where('student_id', $student->id)
+                ->whereIn('classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->select('id'))->exists(),
+        });
 
         // Changing a password asks for the current one: 5 tries a minute per user.
         RateLimiter::for('change-password', fn (Request $request): Limit => Limit::perMinute(5)->by('cp|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
