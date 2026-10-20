@@ -99,6 +99,10 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // One public URL for every school: the school code travels in this header (never in the query string).
+        Middleware\InitializeTenancyByRequestData::$header = 'X-School';
+        Middleware\InitializeTenancyByRequestData::$queryParameter = null;
+
         $this->bootEvents();
         $this->mapRoutes();
 

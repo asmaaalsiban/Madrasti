@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Central\Http\Requests;
 
-use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class RegisterSchoolRequest extends FormRequest
@@ -39,12 +37,6 @@ class RegisterSchoolRequest extends FormRequest
                 'required', 'string', 'regex:/^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$/',
                 Rule::notIn(self::RESERVED_CODES),
                 Rule::unique('tenants', 'id'),
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    $domain = $value.'.'.config('tenancy.base_domain');
-                    if (DB::table('domains')->where('domain', $domain)->exists()) {
-                        $fail(__('registration.code_taken'));
-                    }
-                },
             ],
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255'],

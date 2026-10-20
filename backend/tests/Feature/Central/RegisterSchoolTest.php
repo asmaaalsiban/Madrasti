@@ -25,15 +25,9 @@ class RegisterSchoolTest extends TenantTestCase
             $t->string('id')->primary();
             $t->json('data')->nullable();
         });
-        Schema::create('domains', function ($t) {
-            $t->increments('id');
-            $t->string('domain')->unique();
-            $t->string('tenant_id');
-        });
 
         $this->bindAction(function (array $data): Tenant {
             DB::table('tenants')->insert(['id' => $data['id']]);
-            DB::table('domains')->insert(['domain' => $data['domain'], 'tenant_id' => $data['id']]);
 
             return new Tenant(['id' => $data['id']]);
         });
@@ -73,12 +67,12 @@ class RegisterSchoolTest extends TenantTestCase
         $this->postJson('/api/central/register', $this->body())
             ->assertCreated()
             ->assertJsonPath('data.code', 'alnoor')
-            ->assertJsonPath('data.domain', 'alnoor.localhost')
-            ->assertJsonPath('data.login_path', '/login');
+            ->assertJsonPath('data.code', 'alnoor')
+            ->assertJsonMissingPath('data.domain');
 
         $this->assertCount(1, $this->calls);
         $this->assertSame('alnoor', $this->calls[0]['id']);
-        $this->assertSame('alnoor.localhost', $this->calls[0]['domain']);
+        $this->assertArrayNotHasKey('domain', $this->calls[0]);
         $this->assertSame('مدرسة النور', $this->calls[0]['name']);
         $this->assertSame('admin@alnoor.test', $this->calls[0]['admin_email']);
         $this->assertSame('Secret123', $this->calls[0]['admin_password']);
@@ -104,13 +98,11 @@ class RegisterSchoolTest extends TenantTestCase
         $this->assertCount(0, $this->calls);
     }
 
-    public function test_rejects_taken_code_and_taken_domain(): void
+    public function test_rejects_a_taken_code(): void
     {
         DB::table('tenants')->insert(['id' => 'taken']);
-        DB::table('domains')->insert(['domain' => 'other.localhost', 'tenant_id' => 'x']);
 
         $this->postJson('/api/central/register', $this->body(['code' => 'taken']))->assertUnprocessable()->assertJsonValidationErrors('code');
-        $this->postJson('/api/central/register', $this->body(['code' => 'other']))->assertUnprocessable()->assertJsonValidationErrors('code');
         $this->assertCount(0, $this->calls);
     }
 

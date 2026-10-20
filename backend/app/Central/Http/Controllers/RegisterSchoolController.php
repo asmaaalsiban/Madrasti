@@ -21,13 +21,11 @@ class RegisterSchoolController extends Controller
         set_time_limit(300);
 
         $code = $request->validated('code');
-        $domain = $code.'.'.config('tenancy.base_domain');
 
         try {
             $createSchool->handle([
                 'id' => $code,
                 'name' => $request->validated('school_name'),
-                'domain' => $domain,
                 'admin_name' => $request->validated('admin_name'),
                 'admin_email' => $request->validated('admin_email'),
                 'admin_password' => $request->validated('password'),
@@ -39,6 +37,6 @@ class RegisterSchoolController extends Controller
             return response()->json(['message' => __('registration.failed')], 500);
         }
 
-        return response()->json(['data' => ['code' => $code, 'domain' => $domain, 'login_path' => '/login']], 201);
+        return response()->json(['data' => ['code' => $code]], 201);
     }
 }

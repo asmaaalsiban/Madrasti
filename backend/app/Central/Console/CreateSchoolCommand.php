@@ -13,7 +13,7 @@ class CreateSchoolCommand extends Command
     protected $signature = 'school:create
         {id : Short unique id, used for the database name (e.g. school1)}
         {name : School name}
-        {domain : Domain (e.g. school1.localhost)}
+        {domain? : Optional domain (schools are normally chosen by code with the X-School header)}
         {--admin-name=Admin}
         {--admin-email= : First admin email}
         {--admin-password= : First admin password}
@@ -50,7 +50,7 @@ class CreateSchoolCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info("School '{$tenant->name}' created. Domain: {$this->argument('domain')}");
+        $this->info("School '{$tenant->name}' created (code: {$tenant->getTenantKey()}).");
 
         return self::SUCCESS;
     }

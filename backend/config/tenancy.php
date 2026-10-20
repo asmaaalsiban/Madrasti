@@ -14,11 +14,6 @@ return [
     'domain_model' => Domain::class,
 
     /**
-     * Base domain schools are hosted under: a school with code "alnoor" lives at alnoor.<base_domain>.
-     */
-    'base_domain' => env('TENANCY_BASE_DOMAIN', 'localhost'),
-
-    /**
      * Public self-service school registration (POST /api/central/register).
      */
     // Off unless explicitly enabled: it lets anyone on the internet create a database.

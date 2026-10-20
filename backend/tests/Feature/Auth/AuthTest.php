@@ -4,8 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Shared\Enums\Role;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Tests\TenantTestCase;
 
 class AuthTest extends TenantTestCase
@@ -14,7 +13,7 @@ class AuthTest extends TenantTestCase
     {
         parent::setUp();
 
-        $this->withoutMiddleware([InitializeTenancyByDomain::class, PreventAccessFromCentralDomains::class]);
+        $this->withoutMiddleware([InitializeTenancyByRequestData::class]);
     }
 
     public function test_user_can_login_with_email(): void
