@@ -32,6 +32,8 @@ class StudentResource extends JsonResource
             'email' => $this->user?->email,
             'must_change_password' => $this->user?->must_change_password,
             'classroom' => $classroom ? ['id' => $classroom->id, 'name' => $classroom->name] : null,
+            // Only present right after the student was created: the generated login the admin hands over.
+            'account' => $this->when($this->resource->getAttribute('generated_account') !== null, fn () => $this->resource->getAttribute('generated_account')),
             // The primary parent first: the form edits that one.
             'guardians' => $this->guardians->sortByDesc(fn ($guardian) => (int) $guardian->pivot->is_primary)->map(fn ($guardian) => [
                 'id' => $guardian->id,

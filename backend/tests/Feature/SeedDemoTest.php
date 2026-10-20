@@ -24,8 +24,13 @@ class SeedDemoTest extends TenantTestCase
         $admin = User::where('email', 'admin@demo.test')->first();
         $this->assertSame(Role::Admin, $admin->role);
         $this->assertTrue(Hash::check('Admin12345', $admin->password));
-        $this->assertSame(3, User::where('role', Role::Teacher)->count());
-        $this->assertSame(['users' => 11, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 4], $counts);
+        $this->assertSame(4, User::where('role', Role::Teacher)->count());
+        $this->assertEqualsCanonicalizing(
+            ['teacher' => 2, 'head_of_department' => 1, 'nurse' => 1],
+            DB::table('staff_profiles')->selectRaw('staff_type, count(*) as n')->groupBy('staff_type')->pluck('n', 'staff_type')->all(),
+        );
+        $this->assertSame(3, DB::table('staff_profiles')->whereNotNull('subject_id')->count());
+        $this->assertSame(['users' => 12, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 4], $counts);
         $this->assertSame(1, DB::table('academic_years')->where('is_current', true)->count());
         $this->assertSame(3, DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->count());
     }
@@ -41,6 +46,10 @@ class SeedDemoTest extends TenantTestCase
             $this->assertTrue($student->must_change_password);
             $this->assertTrue(Hash::check(config('accounts.default_password'), $student->password));
         }
+        $this->assertEqualsCanonicalizing(
+            ['ahmad.d1001@school.edu', 'layla.d1002@school.edu', 'yousef.d1003@school.edu', 'mariam.d1004@school.edu'],
+            $students->pluck('email')->all(),
+        );
         $parents = User::where('role', Role::Guardian)->withCount('children')->get();
         $this->assertCount(3, $parents);
         $this->assertSame([1, 1, 2], $parents->pluck('children_count')->sort()->values()->all());

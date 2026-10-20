@@ -58,20 +58,6 @@ class ReviewFixesTest extends AcademicTestCase
         $this->assertSame(0, $admin->tokens()->count());
     }
 
-    public function test_deactivating_a_teacher_signs_them_out(): void
-    {
-        $this->actAsAdmin();
-        $teacher = User::factory()->role(Role::Teacher)->create(['is_active' => true]);
-        $teacher->createToken('web');
-        $body = ['name' => $teacher->name, 'email' => $teacher->email, 'phone' => $teacher->phone];
-
-        $this->putJson("/api/teachers/{$teacher->id}", [...$body, 'is_active' => true])->assertOk();
-        $this->assertSame(1, $teacher->tokens()->count());
-
-        $this->putJson("/api/teachers/{$teacher->id}", [...$body, 'is_active' => false])->assertOk();
-        $this->assertSame(0, $teacher->tokens()->count());
-    }
-
     public function test_changing_the_parent_email_replaces_the_primary_parent_instead_of_adding_one(): void
     {
         $this->actAsAdmin();

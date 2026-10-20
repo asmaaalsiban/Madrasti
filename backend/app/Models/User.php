@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Modules\Academic\Models\Student;
+use App\Modules\People\Models\StaffProfile;
 use App\Shared\Enums\Role;
 use App\Shared\Traits\Auditable;
 use Database\Factories\UserFactory;
@@ -63,6 +64,16 @@ class User extends Authenticatable
     public function hasRole(Role ...$roles): bool
     {
         return in_array($this->role, $roles, true);
+    }
+
+    /**
+     * Staff details (type, subject) of a member of the school staff.
+     *
+     * @return HasOne<StaffProfile, $this>
+     */
+    public function staffProfile(): HasOne
+    {
+        return $this->hasOne(StaffProfile::class);
     }
 
     /**

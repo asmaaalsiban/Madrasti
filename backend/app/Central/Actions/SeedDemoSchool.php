@@ -7,6 +7,7 @@ namespace App\Central\Actions;
 use App\Models\User;
 use App\Modules\People\Actions\SaveStudent;
 use App\Shared\Enums\Role;
+use App\Shared\Enums\StaffType;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,7 +16,13 @@ use Illuminate\Support\Facades\DB;
  */
 class SeedDemoSchool
 {
-    private const TEACHERS = ['أحمد علي', 'سارة خالد', 'محمد يوسف'];
+    /** [email name, Arabic name, staff type, subject code]: the first three are teaching staff and homeroom teachers. */
+    private const STAFF = [
+        ['teacher1', 'أحمد علي', StaffType::Teacher, 'ARB'],
+        ['teacher2', 'سارة خالد', StaffType::Teacher, 'MTH'],
+        ['teacher3', 'محمد يوسف', StaffType::HeadOfDepartment, 'SCI'],
+        ['nurse1', 'نور حسن', StaffType::Nurse, null],
+    ];
 
     private const GRADES = [
         ['الصف الأول', 'Grade 1'], ['الصف الثاني', 'Grade 2'], ['الصف الثالث', 'Grade 3'],
@@ -47,20 +54,27 @@ class SeedDemoSchool
             ['name' => 'Admin', 'password' => $adminPassword, 'role' => Role::Admin, 'is_active' => true, 'must_change_password' => false],
         );
 
-        $teacherIds = [];
-        foreach (self::TEACHERS as $i => $name) {
-            $teacherIds[] = User::updateOrCreate(
-                ['email' => 'teacher'.($i + 1).'@'.$teacherDomain],
-                ['name' => $name, 'password' => $teacherPassword, 'role' => Role::Teacher, 'is_active' => true],
-            )->id;
-        }
-
         $yearId = $this->firstOrInsert('academic_years', ['name' => '2026/2027'], [
             'starts_on' => '2026-09-01', 'ends_on' => '2027-06-30', 'is_current' => true,
         ]);
 
         foreach (self::SUBJECTS as $code => [$ar, $en]) {
             $this->firstOrInsert('subjects', ['code' => $code], ['name_ar' => $ar, 'name_en' => $en]);
+        }
+
+        $teacherIds = [];
+        foreach (self::STAFF as [$local, $name, $type, $subjectCode]) {
+            $user = User::updateOrCreate(
+                ['email' => $local.'@'.$teacherDomain],
+                ['name' => $name, 'password' => $teacherPassword, 'role' => $type->accountRole(), 'is_active' => true, 'must_change_password' => false],
+            );
+            $user->staffProfile()->updateOrCreate(['user_id' => $user->id], [
+                'staff_type' => $type,
+                'subject_id' => $subjectCode ? DB::table('subjects')->where('code', $subjectCode)->value('id') : null,
+            ]);
+            if ($type->canBeHomeroom()) {
+                $teacherIds[] = $user->id;
+            }
         }
 
         foreach (self::GRADES as $i => [$ar, $en]) {
@@ -92,18 +106,19 @@ class SeedDemoSchool
     {
         $saver = app(SaveStudent::class);
 
-        foreach (self::STUDENTS as $i => [$number, $nameAr, $nameEn, $classroom, $parent]) {
+        foreach (self::STUDENTS as [$number, $nameAr, $nameEn, $classroom, $parent]) {
             if (DB::table('students')->where('student_number', $number)->exists()) {
                 continue;
             }
 
+            // The student's email is generated (e.g. ahmad.d1001@school2.edu).
             $saver->create([
                 'student_number' => $number,
                 'name_ar' => $nameAr,
                 'name_en' => $nameEn,
-                'student_email' => 'student'.($i + 1).'@'.$domain,
                 'classroom_id' => DB::table('classrooms')->where('name', $classroom)->where('academic_year_id', $yearId)->value('id'),
                 'guardian_email' => 'parent'.$parent.'@'.$domain,
+                'guardian_phone' => '059910000'.$parent,
             ]);
         }
     }

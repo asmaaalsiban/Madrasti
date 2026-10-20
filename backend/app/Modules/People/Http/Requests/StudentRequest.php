@@ -26,23 +26,33 @@ class StudentRequest extends FormRequest
             'name_en' => ['nullable', 'string', 'max:255'],
             'birth_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'gender' => ['nullable', Rule::in(['male', 'female'])],
-            'student_email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($student?->user_id)],
             'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_email' => ['nullable', 'email', 'max:255', $this->guardianEmailRule()],
+            'guardian_phone' => ['nullable', 'string', 'max:30', $this->guardianPhoneRule()],
         ];
+    }
+
+    /** The parent phone may only belong to that same parent: users.phone is unique across every account. */
+    private function guardianPhoneRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $email = $this->input('guardian_email');
+            if (! is_string($value) || $value === '' || ! is_string($email) || $email === '') {
+                return; // without a parent email the phone is ignored
+            }
+
+            $owner = User::withTrashed()->where('phone', $value)->first();
+            if ($owner && $owner->email !== $email) {
+                $fail(__('people.guardian_phone_conflict'));
+            }
+        };
     }
 
     /** The parent email must be new, or already belong to a parent account (one parent, many children). */
     private function guardianEmailRule(): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail): void {
-            if ($value === $this->input('student_email')) {
-                $fail(__('people.guardian_email_same_as_student'));
-
-                return;
-            }
-
             $existing = User::withTrashed()->where('email', $value)->first();
             if ($existing && ($existing->trashed() || $existing->role !== Role::Guardian)) {
                 $fail(__('people.guardian_email_conflict'));
@@ -53,11 +63,9 @@ class StudentRequest extends FormRequest
     /** Emails are compared case-insensitively. */
     protected function prepareForValidation(): void
     {
-        foreach (['student_email', 'guardian_email'] as $field) {
-            $value = $this->input($field);
-            if (is_string($value)) {
-                $this->merge([$field => mb_strtolower(trim($value))]);
-            }
+        $email = $this->input('guardian_email');
+        if (is_string($email)) {
+            $this->merge(['guardian_email' => mb_strtolower(trim($email))]);
         }
     }
 }
