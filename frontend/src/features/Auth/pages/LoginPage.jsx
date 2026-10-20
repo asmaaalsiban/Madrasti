@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
-import SwitchSchoolButton from '../../../components/shared/SwitchSchoolButton'
+import ChangeSchoolCodeButton from '../../../components/shared/ChangeSchoolCodeButton'
 import { homeFor } from '../../../app/guards'
+import { getSchool } from '../../../tenant/school'
 import { useSchool } from '../../../tenant/useSchool'
 import { useAuth } from '../AuthProvider'
 
@@ -35,11 +36,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">{school?.name ?? t('common.appName')}</h1>
+        <div className="flex items-center justify-between gap-2">
+          <ChangeSchoolCodeButton />
           <LanguageSwitcher />
         </div>
-        <SwitchSchoolButton className="text-sm text-brand underline" />
+        <div>
+          <h1 className="text-xl font-bold">{school?.name ?? t('common.appName')}</h1>
+          <p dir="ltr" className="text-start text-sm text-slate-500">{getSchool()}</p>
+        </div>
         <h2 className="text-lg">{t('auth.title')}</h2>
         <label className="block text-sm">
           {t('auth.login')}
