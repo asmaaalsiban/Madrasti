@@ -2,21 +2,32 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FormField from '../../components/shared/FormField'
 import CentralShell from './CentralShell'
-import { isValidSchoolCode, normalizeSchoolCode, redirectTo, schoolUrl } from './host'
+import { goTo, isValidSchoolCode, normalizeSchoolCode, setSchool } from '../../tenant/school'
+import { schoolExists } from './api'
 
 export default function FindSchoolPage() {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     const code = normalizeSchoolCode(value)
     if (!isValidSchoolCode(code)) {
       setError(t('central.invalidCode'))
       return
     }
-    redirectTo(schoolUrl(code, '/login'))
+    try {
+      if (!(await schoolExists(code))) {
+        setError(t('central.schoolNotFound'))
+        return
+      }
+    } catch {
+      setError(t('central.genericError'))
+      return
+    }
+    setSchool(code)
+    goTo('/login')
   }
 
   return (

@@ -1,14 +1,17 @@
 import axios from 'axios'
 import i18n from '../i18n'
+import { getSchool } from '../tenant/school'
 
-export const TOKEN_KEY = 'token'
-export const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) } catch { return null } }
-export const setToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
+// One token per school, so switching school never sends another school's token.
+export const tokenKey = () => `token:${getSchool() ?? ''}`
+export const getToken = () => { try { return getSchool() ? localStorage.getItem(tokenKey()) : null } catch { return null } }
+export const setToken = (t) => {
+  if (!getSchool()) return
+  try { t ? localStorage.setItem(tokenKey(), t) : localStorage.removeItem(tokenKey()) } catch { /* ignore */ }
+}
 
-// Dev: call Laravel directly on the same hostname (school1.localhost -> school1.localhost:8000),
-// so the school is resolved from the real Host header. Production: same-origin /api.
-const API_URL = import.meta.env.VITE_API_URL
-  || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:8000/api` : '/api')
+// Same origin: the Vite dev proxy and the production web server forward /api to Laravel.
+const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 // The single API client for the whole app.
 export const api = axios.create({
@@ -20,6 +23,8 @@ api.interceptors.request.use((config) => {
   const token = getToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
   config.headers['Accept-Language'] = i18n.language
+  const school = getSchool()
+  if (school) config.headers['X-School'] = school
   return config
 })
 

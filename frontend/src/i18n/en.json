@@ -113,7 +113,6 @@
     "registerTitle": "Create your school account",
     "schoolName": "School name",
     "schoolCode": "School code",
-    "schoolCodeHint": "Your school address will be: code.domain",
     "adminName": "Admin name",
     "email": "Email",
     "password": "Password",
@@ -123,6 +122,9 @@
     "continue": "Continue",
     "invalidCode": "Use 3-30 lowercase letters, digits or hyphens.",
     "genericError": "Something went wrong, please try again.",
-    "back": "Back"
+    "back": "Back",
+    "switchSchool": "Switch school",
+    "schoolNotFound": "School not found. Check the school code.",
+    "schoolCodeHint": "You will type this code when you sign in"
   }
 }

@@ -6,7 +6,7 @@ import LandingPage from '../features/Auth/pages/LandingPage'
 import FindSchoolPage from '../features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
 import WelcomePage from '../features/Central/WelcomePage'
-import { isCentralHost } from '../features/Central/host'
+import { getSchool } from '../tenant/school'
 import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
 import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
 import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
@@ -50,7 +50,7 @@ export const routes = [
   },
 ]
 
-// The main (central) domain has no school: it only offers registration and a school lookup.
+// No school selected yet: only registration and the school-code lookup are available.
 export const centralRoutes = [
   { path: '/', element: <WelcomePage /> },
   { path: '/register', element: <RegisterSchoolPage /> },
@@ -58,6 +58,6 @@ export const centralRoutes = [
   { path: '*', element: <Navigate to="/" replace /> },
 ]
 
-export const routesFor = (hostname) => (isCentralHost(hostname) ? centralRoutes : routes)
+export const routesFor = (school) => (school ? routes : centralRoutes)
 
-export const createRouter = () => createBrowserRouter(routesFor(window.location.hostname))
+export const createRouter = () => createBrowserRouter(routesFor(getSchool()))

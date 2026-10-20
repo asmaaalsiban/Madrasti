@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FormField from '../../components/shared/FormField'
-import { registerSchool } from './api'
+import { normalizeSchoolCode, goTo, setSchool } from '../../tenant/school'
+import { loginAdmin, registerSchool } from './api'
 import CentralShell from './CentralShell'
-import { normalizeSchoolCode, redirectTo, schoolUrl } from './host'
 
 const EMPTY = { school_name: '', code: '', admin_name: '', admin_email: '', password: '', password_confirmation: '' }
 const inputClass = 'w-full rounded border p-2'
@@ -24,7 +24,10 @@ export default function RegisterSchoolPage() {
     setFormError('')
     try {
       const school = await registerSchool({ ...form, code: normalizeSchoolCode(form.code) })
-      redirectTo(schoolUrl(school.code, school.login_path))
+      setSchool(school.code)
+      // Sign the new admin straight in; if that fails the school sign-in page is still one click away.
+      try { await loginAdmin(form.admin_email, form.password) } catch { /* sign in manually */ }
+      goTo('/')
     } catch (err) {
       const fieldErrors = err.response?.data?.errors
       setErrors(fieldErrors ?? {})
