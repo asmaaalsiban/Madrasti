@@ -47,6 +47,27 @@ npm run dev -- --host
 Open `http://school2.localhost:<vite port>` (not `localhost`: the school is resolved from the host name)
 and sign in with `admin@school2.test` / `Admin12345`.
 
+## Central site (main domain)
+
+On the main domain (`localhost`, `127.0.0.1`) the app shows a welcome page:
+
+- **Create account** (`/register`): registers a new school. Calls `POST /api/central/register` (public, 5 per hour per IP),
+  which creates the school, its database and its first admin, then redirects to `<code>.<base domain>/login`.
+- **Sign in** (`/find-school`): the user types the school code and is sent to that school's login page.
+
+On a school domain (`school2.localhost`) the app shows that school's landing page and login, as before.
+
+Settings:
+
+| Where | Variable | Default | Purpose |
+|---|---|---|---|
+| backend `.env` | `TENANCY_BASE_DOMAIN` | `localhost` | schools live at `<code>.<base domain>` |
+| backend `.env` | `REGISTRATION_ENABLED` | `true` | turns public registration on/off |
+| frontend `.env` | `VITE_CENTRAL_HOSTS` | `localhost,127.0.0.1` | hosts that show the central site |
+| frontend `.env` | `VITE_BASE_DOMAIN` | `localhost` | base domain used to build school links |
+
+Before opening registration to the internet add email verification and a CAPTCHA.
+
 ## Status
 
 Phase 1 (Foundation): folder structure and migrations are in place.
