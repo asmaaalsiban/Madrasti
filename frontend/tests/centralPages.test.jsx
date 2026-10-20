@@ -73,6 +73,19 @@ describe('RegisterSchoolPage', () => {
   })
 })
 
+describe('RegisterSchoolPage server messages', () => {
+  it('shows the server message when registration is closed or throttled', async () => {
+    registerSchool.mockRejectedValue({ response: { status: 403, data: { message: 'School registration is currently closed.' } } })
+    renderPage(<RegisterSchoolPage />)
+    for (const [label, value] of [['School name', 'A'], ['School code', 'alnoor'], ['Admin name', 'A'], ['Email', 'a@a.test'], ['Password', 'Secret123'], ['Confirm password', 'Secret123']]) {
+      fireEvent.change(screen.getByLabelText(label), { target: { value } })
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+    expect(await screen.findByText('School registration is currently closed.')).toBeInTheDocument()
+    expect(screen.queryByText('Something went wrong, please try again.')).not.toBeInTheDocument()
+  })
+})
+
 describe('FindSchoolPage', () => {
   it('normalizes the code and redirects to that school login', () => {
     renderPage(<FindSchoolPage />)
