@@ -1,3 +1,4 @@
+import PasswordInput from '../../../components/shared/PasswordInput'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -44,7 +45,7 @@ export default function ChangePasswordPage() {
 
   const field = (name, label) => (
     <FormField label={t(label)} error={errors[name]?.[0]}>
-      <input type="password" dir="ltr" className="w-full rounded border p-2" value={form[name]} onChange={set(name)} required />
+      <PasswordInput value={form[name]} onChange={set(name)} required />
     </FormField>
   )
 

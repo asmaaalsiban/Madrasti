@@ -19,7 +19,9 @@
       "confirm": "Confirm new password",
       "submit": "Change password",
       "forced": "Your account uses the default password. Choose your own password to continue."
-    }
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "roles": {
     "admin": "Admin",
