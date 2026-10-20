@@ -31,6 +31,9 @@ abstract class AcademicController extends Controller
     /** @var list<string> */
     protected array $searchable = [];
 
+    /** @var array<string, list<string>> relation => columns of the related table that ?search= also looks at */
+    protected array $searchRelations = [];
+
     /** @var list<string> */
     protected array $with = [];
 
@@ -45,13 +48,22 @@ abstract class AcademicController extends Controller
     {
         Gate::authorize('viewAny', $this->model);
 
-        $query = $this->model::query()->with($this->with)->orderBy($this->orderBy, $this->orderDirection);
+        $query = $this->baseQuery()->with($this->with)->orderBy($this->orderBy, $this->orderDirection);
         $search = trim((string) $request->query('search', ''));
-        if ($search !== '' && $this->searchable !== []) {
+        if ($search !== '' && ($this->searchable !== [] || $this->searchRelations !== [])) {
             $term = '%'.Str::of(mb_strtolower($search))->replace(['!', '%', '_'], ['!!', '!%', '!_']).'%';
             $query->where(function (Builder $q) use ($term): void {
                 foreach ($this->searchable as $column) {
                     $q->orWhereRaw("LOWER({$column}) LIKE ? ESCAPE '!'", [$term]);
+                }
+                foreach ($this->searchRelations as $relation => $columns) {
+                    $q->orWhereHas($relation, function (Builder $related) use ($columns, $term): void {
+                        $related->where(function (Builder $r) use ($columns, $term): void {
+                            foreach ($columns as $column) {
+                                $r->orWhereRaw("LOWER({$column}) LIKE ? ESCAPE '!'", [$term]);
+                            }
+                        });
+                    });
                 }
             });
         }
@@ -64,7 +76,7 @@ abstract class AcademicController extends Controller
 
     public function show(int|string $id): JsonResource
     {
-        $model = $this->model::query()->with($this->with)->findOrFail($id);
+        $model = $this->baseQuery()->with($this->with)->findOrFail($id);
         Gate::authorize('view', $model);
 
         return new $this->resource($model);
@@ -72,9 +84,10 @@ abstract class AcademicController extends Controller
 
     public function destroy(int|string $id): JsonResponse
     {
-        $model = $this->model::query()->findOrFail($id);
+        $model = $this->baseQuery()->findOrFail($id);
         Gate::authorize('delete', $model);
         $this->guardDelete($model);
+        $this->deleting($model);
 
         try {
             $model->delete();
@@ -85,6 +98,15 @@ abstract class AcademicController extends Controller
 
         return response()->json(null, 204);
     }
+
+    /** The rows this controller manages (subclasses may narrow it, e.g. users with the teacher role). */
+    protected function baseQuery(): Builder
+    {
+        return $this->model::query();
+    }
+
+    /** Runs just before a row is deleted, after the guards passed. */
+    protected function deleting(Model $model): void {}
 
     /** Extra query filters (e.g. ?grade_level_id=). */
     protected function filter(Builder $query, Request $request): void {}

@@ -9,6 +9,9 @@ use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\People\Http\Controllers\StudentController;
+use App\Modules\People\Http\Controllers\TeacherController;
+use App\Modules\People\Http\Controllers\UserPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,4 +39,9 @@ Route::middleware(['auth:sanctum', 'password.changed', 'role:admin'])->group(fun
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
+
+    // People: teachers, students and their accounts.
+    Route::apiResource('teachers', TeacherController::class);
+    Route::apiResource('students', StudentController::class);
+    Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);
 });
