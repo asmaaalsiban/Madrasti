@@ -11,7 +11,7 @@ vi.mock('../src/api/client', () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
 }))
 
-const renderAt = (path, ui, route = path) =>
+const renderAt = (path, ui, route = path.split('?')[0]) =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <MemoryRouter initialEntries={[path]}>
@@ -23,7 +23,9 @@ const renderAt = (path, ui, route = path) =>
 const options = {
   assignments: [
     { classroom: { id: 3, name: '5-A' }, subject: { id: 7, name_ar: 'الرياضيات', name_en: 'Math' } },
+    { classroom: { id: 3, name: '5-A' }, subject: { id: 8, name_ar: 'العلوم', name_en: 'Science' } },
     { classroom: { id: 4, name: '5-B' }, subject: { id: 7, name_ar: 'الرياضيات', name_en: 'Math' } },
+    { classroom: { id: 4, name: '5-B' }, subject: { id: 9, name_ar: 'الفنية', name_en: 'Art' } },
   ],
   terms: [{ id: 1, name: 'First term' }, { id: 2, name: 'Second term' }],
 }
@@ -56,14 +58,37 @@ describe('AssessmentsPage', () => {
     expect(within(row).getByRole('link', { name: 'Enter scores' })).toHaveAttribute('href', '/teacher/grades/11')
   })
 
-  it('reloads when another classroom or term is picked', async () => {
+  it('picks the classroom first, then one of the subjects taught in it', async () => {
     serve()
     renderAt('/teacher/grades', <AssessmentsPage />)
     await screen.findByRole('row', { name: /Quiz 1/ })
-    fireEvent.change(screen.getByLabelText('Classroom and subject'), { target: { value: '1' } })
+    const subjectOptions = () => within(screen.getByLabelText('Subject')).getAllByRole('option').map((o) => o.textContent)
+    expect(subjectOptions()).toEqual(['Math', 'Science'])
+
+    fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '8' } })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/assessments', { params: { classroom_id: 3, subject_id: 8, term_id: 1 } }))
+
+    fireEvent.change(screen.getByLabelText('Classroom'), { target: { value: '4' } })
+    await waitFor(() => expect(subjectOptions()).toEqual(['Math', 'Art']))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/assessments', { params: { classroom_id: 4, subject_id: 7, term_id: 1 } }))
+
     fireEvent.change(screen.getByLabelText('Term'), { target: { value: '2' } })
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/assessments', { params: { classroom_id: 4, subject_id: 7, term_id: 2 } }))
+  })
+
+  it('keeps the choice in the address, so coming back from a score sheet lands on the same classroom and subject', async () => {
+    serve()
+    renderAt('/teacher/grades?classroom=4&subject=9&term=2', <AssessmentsPage />)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/assessments', { params: { classroom_id: 4, subject_id: 9, term_id: 2 } }))
+    expect(screen.getByLabelText('Classroom')).toHaveValue('4')
+    expect(screen.getByLabelText('Subject')).toHaveValue('9')
+    expect(screen.getByLabelText('Term')).toHaveValue('2')
+  })
+
+  it('falls back to the first choice when the address names something the teacher does not teach', async () => {
+    serve()
+    renderAt('/teacher/grades?classroom=4&subject=8&term=99', <AssessmentsPage />)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/assessments', { params: { classroom_id: 4, subject_id: 7, term_id: 1 } }))
   })
 
   it('creates an assessment for the picked classroom, subject and term', async () => {
