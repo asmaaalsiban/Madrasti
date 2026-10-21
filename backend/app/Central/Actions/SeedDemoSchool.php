@@ -259,6 +259,7 @@ class SeedDemoSchool
                     $rows[] = [
                         'assessment_id' => $assessmentId, 'student_id' => $studentId,
                         'score' => $hash % 15 === 0 ? null : round($max * (55 + $hash % 46) / 100, 1),
+                        'status' => $hash % 15 === 0 ? 'absent' : null, // waits for a makeup exam
                         'remark' => $hash % 15 === 0 ? 'غائب' : null,
                         'created_at' => now(), 'updated_at' => now(),
                     ];

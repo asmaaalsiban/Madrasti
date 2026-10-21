@@ -7,5 +7,6 @@ return [
     'max_below_scores' => 'The maximum score is lower than a score already entered.',
     'student_not_in_classroom' => 'This student is not in the classroom.',
     'score_above_max' => 'The score cannot be higher than the maximum score (:max).',
+    'absent_has_score' => 'A student marked absent cannot have a score. Choose "makeup exam" when the student takes it.',
     'unpublish_first' => 'A published assessment cannot be deleted. Unpublish it first.',
 ];

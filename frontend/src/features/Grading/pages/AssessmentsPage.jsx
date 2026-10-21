@@ -84,9 +84,16 @@ export default function AssessmentsPage() {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t('grading.title')}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" disabled={params === null} onClick={() => openForm(null)}>
-          {t('grading.add')}
-        </button>
+        <div className="flex items-center gap-2">
+          {params && (
+            <Link className="rounded border px-3 py-1.5" to={`${base}/results?${new URLSearchParams({ classroom: params.classroom_id, subject: params.subject_id, term: params.term_id })}`}>
+              {t('grading.results')}
+            </Link>
+          )}
+          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" disabled={params === null} onClick={() => openForm(null)}>
+            {t('grading.add')}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -129,7 +136,10 @@ export default function AssessmentsPage() {
                 <td dir="ltr" className="p-2 text-start sm:p-3">{r.held_on ?? '—'}</td>
                 <td className="p-2 sm:p-3">{r.max_score}</td>
                 <td className="p-2 sm:p-3">{r.weight}%</td>
-                <td dir="ltr" className="p-2 text-start sm:p-3">{r.scored} / {r.students}</td>
+                <td className="p-2 sm:p-3">
+                  <span dir="ltr" className="inline-block">{r.scored} / {r.students}</span>
+                  {r.absent > 0 && <span className="block text-xs text-amber-700">{t('grading.pendingCount', { n: r.absent })}</span>}
+                </td>
                 <td className="p-2 sm:p-3">
                   <span className={`rounded px-2 py-0.5 text-xs ${r.is_published ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                     {t(r.is_published ? 'grading.published' : 'grading.draft')}
