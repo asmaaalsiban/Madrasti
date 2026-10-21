@@ -27,6 +27,8 @@ use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
 use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
+use App\Modules\Scheduling\Http\Controllers\PeriodController;
+use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,6 +61,10 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::put('curriculum', [CurriculumController::class, 'save']);
     Route::post('curriculum/copy', [CurriculumController::class, 'copy']);
     Route::post('curriculum/standard-plan', [CurriculumController::class, 'standardPlan']);
+    Route::get('periods', [PeriodController::class, 'index']);
+    Route::put('periods/setup', [PeriodController::class, 'setup']);
+    Route::post('timetable/generate', [TimetableController::class, 'generate']);
+    Route::get('timetable', [TimetableController::class, 'show']);
     Route::apiResource('terms', TermController::class);
     // The building: buildings > floors > rooms (classrooms and labs).
     Route::apiResource('buildings', BuildingController::class)->except('show');

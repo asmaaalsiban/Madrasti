@@ -18,6 +18,7 @@ use App\Modules\Academic\Models\Term;
 use App\Modules\Academic\Policies\AcademicPolicy;
 use App\Modules\Grading\Models\Assessment;
 use App\Modules\People\Policies\UserPolicy;
+use App\Modules\Scheduling\Models\Period;
 use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -43,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class, Building::class, Floor::class, Room::class, GradeLevelSubject::class] as $model) {
+        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class, Building::class, Floor::class, Room::class, GradeLevelSubject::class, Period::class] as $model) {
             Gate::policy($model, AcademicPolicy::class);
         }
 
