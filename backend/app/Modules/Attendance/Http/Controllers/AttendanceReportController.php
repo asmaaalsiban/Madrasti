@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Gate;
 /** Absence reports: per student for a period, and the dates behind one student's numbers. */
 class AttendanceReportController extends Controller
 {
-    /** How many days each student was absent / late. Admin: any classroom. Teacher: only their own. */
+    /** How many days each student was absent / late (only the students who were at least once). Admin: any classroom. Teacher: only their own. */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -49,6 +49,8 @@ class AttendanceReportController extends Controller
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->whereIn('enrollments.classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->select('id')))
             ->join('students', 'students.id', '=', 'enrollments.student_id')
             ->whereNull('students.deleted_at')
+            // Only students who were absent or late at least once in the period.
+            ->whereIn('students.id', StudentAttendance::query()->select('student_id')->whereIn('status', [AttendanceStatus::Absent->value, AttendanceStatus::Late->value])->whereBetween('date', [$from, $to]))
             ->join('classrooms', 'classrooms.id', '=', 'enrollments.classroom_id')
             ->select('students.id', 'students.student_number', 'students.name_ar', 'students.name_en', 'classrooms.name as classroom')
             ->selectSub($count(AttendanceStatus::Absent), 'absent_count')
