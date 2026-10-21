@@ -298,7 +298,6 @@
     "hint": "أنشئ الاختبارات والتقييمات وأدخل العلامات.",
     "add": "إضافة تقييم",
     "formTitle": "تقييم",
-    "classroomSubject": "الشعبة والمادة",
     "term": "الفصل",
     "weightsUsed": "الأوزان المستخدمة: {{used}} / 100",
     "titleCol": "العنوان",
@@ -329,6 +328,8 @@
       "assignment": "واجب",
       "project": "مشروع",
       "participation": "مشاركة"
-    }
+    },
+    "classroom": "الشعبة",
+    "subject": "المادة"
   }
 }

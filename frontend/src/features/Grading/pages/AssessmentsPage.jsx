@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
@@ -16,8 +16,8 @@ export default function AssessmentsPage() {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const base = useLocation().pathname.startsWith('/admin') ? '/admin/grades' : '/teacher/grades'
-  const [pick, setPick] = useState(0)
-  const [termId, setTermId] = useState('')
+  // The choice lives in the address (?classroom=&subject=&term=), so coming back from a score sheet lands on the same one.
+  const [search, setSearch] = useSearchParams()
   const [editing, setEditing] = useState(null) // row | {} (new) | null
   const [form, setForm] = useState(EMPTY)
   const [errors, setErrors] = useState({})
@@ -26,9 +26,17 @@ export default function AssessmentsPage() {
   const [notice, setNotice] = useState('')
 
   const options = useQuery({ queryKey: ['grading', 'options'], queryFn: async () => (await api.get('/grading/options')).data.data })
-  const assignment = options.data?.assignments[pick]
-  const term = termId || options.data?.terms[0]?.id
-  const params = assignment && term ? { classroom_id: assignment.classroom.id, subject_id: assignment.subject.id, term_id: Number(term) } : null
+  const assignments = options.data?.assignments ?? []
+  const terms = options.data?.terms ?? []
+  const classrooms = [...new Map(assignments.map((a) => [a.classroom.id, a.classroom])).values()]
+  const classroomId = classrooms.find((c) => c.id === Number(search.get('classroom')))?.id ?? classrooms[0]?.id
+  const subjects = assignments.filter((a) => a.classroom.id === classroomId).map((a) => a.subject)
+  const subjectId = subjects.find((s) => s.id === Number(search.get('subject')))?.id ?? subjects[0]?.id
+  const termId = terms.find((x) => x.id === Number(search.get('term')))?.id ?? terms[0]?.id
+  const params = classroomId && subjectId && termId ? { classroom_id: classroomId, subject_id: subjectId, term_id: termId } : null
+
+  // replace: changing a filter must not fill the browser history, so "back" leaves the page in one step.
+  const choose = (change) => setSearch({ classroom: classroomId, subject: subjectId, term: termId, ...change }, { replace: true })
 
   const list = useQuery({
     queryKey: ['assessments', params],
@@ -83,17 +91,21 @@ export default function AssessmentsPage() {
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
-          {t('grading.classroomSubject')}
-          <select className="mt-1 block rounded border p-2" value={pick} onChange={(e) => setPick(Number(e.target.value))}>
-            {(options.data?.assignments ?? []).map((a, i) => (
-              <option key={`${a.classroom.id}-${a.subject.id}`} value={i}>{a.classroom.name} · {a.subject[`name_${i18n.language}`]}</option>
-            ))}
+          {t('grading.classroom')}
+          <select className="mt-1 block rounded border p-2" value={classroomId ?? ''} onChange={(e) => choose({ classroom: e.target.value, subject: '' })}>
+            {classrooms.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </label>
+        <label className="text-sm">
+          {t('grading.subject')}
+          <select className="mt-1 block rounded border p-2" value={subjectId ?? ''} onChange={(e) => choose({ subject: e.target.value })}>
+            {subjects.map((s) => <option key={s.id} value={s.id}>{s[`name_${i18n.language}`]}</option>)}
           </select>
         </label>
         <label className="text-sm">
           {t('grading.term')}
-          <select className="mt-1 block rounded border p-2" value={term ?? ''} onChange={(e) => setTermId(e.target.value)}>
-            {(options.data?.terms ?? []).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+          <select className="mt-1 block rounded border p-2" value={termId ?? ''} onChange={(e) => choose({ term: e.target.value })}>
+            {terms.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
           </select>
         </label>
       </div>

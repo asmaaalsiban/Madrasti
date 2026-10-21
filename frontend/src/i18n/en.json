@@ -298,7 +298,6 @@
     "hint": "Create quizzes and exams and enter the scores.",
     "add": "Add assessment",
     "formTitle": "Assessment",
-    "classroomSubject": "Classroom and subject",
     "term": "Term",
     "weightsUsed": "Weights used: {{used}} / 100",
     "titleCol": "Title",
@@ -329,6 +328,8 @@
       "assignment": "Assignment",
       "project": "Project",
       "participation": "Participation"
-    }
+    },
+    "classroom": "Classroom",
+    "subject": "Subject"
   }
 }
