@@ -23,6 +23,8 @@ import TeacherHome from '../features/Teacher/pages/TeacherHome'
 import AssessmentsPage from '../features/Grading/pages/AssessmentsPage'
 import ResultsPage from '../features/Grading/pages/ResultsPage'
 import ScoreSheetPage from '../features/Grading/pages/ScoreSheetPage'
+import ChildGradesPage from '../features/Parent/pages/ChildGradesPage'
+import StudentHome from '../features/Student/pages/StudentHome'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -32,7 +34,8 @@ const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
-  parent: [{ index: true, element: <ParentHome /> }],
+  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }],
+  student: [{ index: true, element: <StudentHome /> }],
   teacher: [
     { index: true, element: <TeacherHome /> },
     { path: 'attendance', element: <TakeAttendancePage /> },

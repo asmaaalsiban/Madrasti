@@ -33,8 +33,8 @@ export default function ScoreSheetPage() {
     setValues({ ...values, [studentId]: { ...values[studentId], ...patch } })
   }
   const edit = (studentId, field) => (e) => change(studentId, { [field]: e.target.value })
-  // An absent student has no score until the makeup exam.
-  const setStatus = (studentId, status) => change(studentId, status === 'absent' ? { status, score: '' } : { status })
+  // An absent student has no score until the makeup exam, and a retake starts from an empty box (the failing score is kept as the first attempt).
+  const setStatus = (studentId, status) => change(studentId, status === 'absent' || status === 'retake' ? { status, score: '' } : { status })
 
   const save = useMutation({
     mutationFn: (scores) => api.put(`/assessments/${id}/scores`, { scores }),
@@ -71,10 +71,11 @@ export default function ScoreSheetPage() {
   const resultOf = (s) => {
     const v = values[s.id] ?? {}
     if (v.status === 'absent') return 'pending'
+    if (v.status === 'retake' && (v.score === '' || v.score === undefined || v.score === null)) return 'retake'
     if (v.score === '' || v.score === undefined || v.score === null) return null
     return (Number(v.score) / assessment.max_score) * 100 >= passPercent ? 'pass' : 'fail'
   }
-  const pending = students.filter((s) => values[s.id]?.status === 'absent').length
+  const pending = students.filter((s) => ['absent', 'retake'].includes(values[s.id]?.status) && (values[s.id]?.status === 'absent' || values[s.id]?.score === '')).length
   const entered = students.map((s) => values[s.id]?.score).filter((v) => v !== '' && v !== undefined && v !== null)
   const average = entered.length ? round(entered.reduce((a, v) => a + Number(v), 0) / entered.length) : 0
 
@@ -100,11 +101,13 @@ export default function ScoreSheetPage() {
         {students.map((s, i) => {
           const v = values[s.id] ?? { score: '', status: '', remark: '' }
           const result = resultOf(s)
+          const first = s.first_score ?? (v.status === 'retake' && s.status !== 'retake' && s.score !== null ? s.score : null)
           return (
             <li key={s.id} role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center gap-3 p-3">
               <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
               <span className="min-w-32 flex-1">
                 {nameOf(s)}
+                {first !== null && <span className="block text-xs text-slate-500">{t('studentGrades.firstAttempt', { score: first })}</span>}
                 {s.was_absent && v.status === '' && v.score === '' && (
                   <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-amber-700">
                     {t('grading.absentThatDay')}
@@ -116,6 +119,7 @@ export default function ScoreSheetPage() {
                 <option value="">{t('grading.statusNormal')}</option>
                 <option value="absent">{t('grading.statusAbsent')}</option>
                 <option value="makeup">{t('grading.statusMakeup')}</option>
+                <option value="retake">{t('grading.statusRetake')}</option>
               </select>
               <input
                 type="number" min="0" max={assessment.max_score} step="any" dir="ltr" aria-label={t('grading.score')} disabled={v.status === 'absent'}

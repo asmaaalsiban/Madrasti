@@ -306,7 +306,7 @@ describe('ScoreSheetPage pass / fail and makeup exams', () => {
 
   it('says how many makeup exams are pending in the summary', async () => {
     open()
-    expect(await screen.findByText(/Makeup pending: 1/)).toBeInTheDocument()
+    expect(await screen.findByText(/Waiting for another exam: 1/)).toBeInTheDocument()
   })
 })
 
@@ -315,8 +315,8 @@ describe('AssessmentsPage makeup reminder and results link', () => {
     serve()
     renderAt('/teacher/grades?classroom=3&subject=7&term=1', <AssessmentsPage />)
     const row = await screen.findByRole('row', { name: /Quiz 1/ })
-    expect(within(row).getByText('Makeup pending: 1')).toBeInTheDocument()
-    expect(within(screen.getByRole('row', { name: /Midterm/ })).queryByText(/Makeup pending/)).not.toBeInTheDocument()
+    expect(within(row).getByText('Waiting for another exam: 1')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Midterm/ })).queryByText(/Waiting for another exam/)).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Student results' })).toHaveAttribute('href', '/teacher/grades/results?classroom=3&subject=7&term=1')
   })
 })
@@ -363,5 +363,49 @@ describe('ResultsPage', () => {
     renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)
     expect((await screen.findAllByText('ناجح')).length).toBeGreaterThan(0)
     expect(screen.getAllByText('راسب').length).toBeGreaterThan(0)
+  })
+})
+
+describe('ScoreSheetPage retake after failing', () => {
+  const sheet = {
+    assessment: { ...quiz, type: 'exam', max_score: 100, classroom: { id: 3, name: '5-A' }, subject: { id: 7, name_ar: 'الرياضيات', name_en: 'Math' }, term: { id: 1, name: 'First term' } },
+    pass_percent: 50,
+    students: [
+      { id: 21, student_number: 'S-1', name_ar: 'أحمد', name_en: 'Ahmad', score: 38, first_score: null, status: null, was_absent: false, remark: null },
+      { id: 22, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla', score: 52, first_score: 41, status: 'retake', was_absent: false, remark: null },
+      { id: 23, student_number: 'S-3', name_ar: 'يوسف', name_en: 'Yousef', score: null, first_score: 30, status: 'retake', was_absent: false, remark: null },
+    ],
+  }
+  const open = () => {
+    api.get.mockResolvedValue({ data: { data: sheet } })
+    renderAt('/teacher/grades/11', <ScoreSheetPage />, '/teacher/grades/:id')
+  }
+  const row = (name) => screen.getByRole('group', { name })
+
+  it('offers a retake option, keeps the failing score as the first attempt and waits for the new score', async () => {
+    open()
+    api.put.mockResolvedValue({ data: { message: 'ok' } })
+    await screen.findByRole('group', { name: 'Ahmad' })
+    expect(within(row('Ahmad')).getByText('Fail')).toBeInTheDocument() // 38 / 100
+
+    fireEvent.change(within(row('Ahmad')).getByLabelText('Status'), { target: { value: 'retake' } })
+    expect(within(row('Ahmad')).getByLabelText('Score')).toHaveValue(null)
+    expect(within(row('Ahmad')).getByText('Retake pending')).toBeInTheDocument()
+    expect(within(row('Ahmad')).getByText('First attempt: 38')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/assessments/11/scores', { scores: expect.arrayContaining([
+      { student_id: 21, score: null, status: 'retake', remark: null },
+    ]) }))
+  })
+
+  it('shows the retake score with its own result and the first attempt, and a retake still waiting', async () => {
+    open()
+    await screen.findByRole('group', { name: 'Layla' })
+    expect(within(row('Layla')).getByText('Pass')).toBeInTheDocument() // 52 after the retake
+    expect(within(row('Layla')).getByText('First attempt: 41')).toBeInTheDocument()
+    expect(within(row('Yousef')).getByText('Retake pending')).toBeInTheDocument()
+    expect(within(row('Yousef')).getByLabelText('Score')).not.toBeDisabled()
+    expect(screen.getByText(/Waiting for another exam: 1/)).toBeInTheDocument()
   })
 })

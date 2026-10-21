@@ -341,7 +341,7 @@
     "statusMakeup": "امتحان بديل",
     "absentThatDay": "كان غائباً ذلك اليوم",
     "markAbsent": "تسجيله غائباً",
-    "pendingCount": "ينتظر امتحاناً بديلاً: {{n}}",
+    "pendingCount": "ينتظرون امتحاناً آخر: {{n}}",
     "results": "نتائج الطلاب",
     "resultsTitle": "نتائج الطلاب: {{name}}",
     "passedFailed": "ناجح: {{passed}} · راسب: {{failed}}",
@@ -349,6 +349,28 @@
     "student": "الطالب",
     "percent": "النسبة",
     "result": "النتيجة",
-    "gradedCount": "عدد التقييمات"
+    "gradedCount": "عدد التقييمات",
+    "retakePending": "ينتظر إعادة الامتحان",
+    "statusRetake": "إعادة امتحان (بسبب الرسوب)"
+  },
+  "studentGrades": {
+    "myGrades": "علاماتي",
+    "childTitle": "علامات: {{name}}",
+    "linkLabel": "العلامات",
+    "noRecord": "لا يوجد سجل طالب مرتبط بحسابك.",
+    "empty": "لم يتم نشر علامات لهذا الفصل بعد.",
+    "showDetails": "عرض التفاصيل",
+    "hideDetails": "إخفاء التفاصيل",
+    "firstAttempt": "المحاولة الأولى: {{score}}",
+    "statusAbsent": "غائب",
+    "statusMakeup": "امتحان بديل",
+    "statusRetake": "إعادة امتحان",
+    "result": {
+      "pass": "ناجح",
+      "fail": "راسب",
+      "makeup": "ينتظر الامتحان البديل (كنت غائباً)",
+      "retake": "ينتظر إعادة الامتحان",
+      "none": "لا توجد علامات بعد"
+    }
   }
 }

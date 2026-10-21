@@ -46,6 +46,7 @@ export default function ResultsPage() {
                 <td className="space-x-2 p-2 sm:p-3 rtl:space-x-reverse">
                   <ResultBadge kind={r.passed === null ? 'none' : r.passed ? 'pass' : 'fail'} />
                   {r.pending > 0 && <ResultBadge kind="pending" />}
+                  {r.retake > 0 && <ResultBadge kind="retake" />}
                 </td>
                 <td className="p-2 sm:p-3">{r.graded}</td>
               </tr>

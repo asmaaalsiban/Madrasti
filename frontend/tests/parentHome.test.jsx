@@ -58,4 +58,9 @@ describe('ParentHome', () => {
     expect(await screen.findByText('2026-10-18')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/attendance/students/1', { params: expect.any(Object) })
   })
+
+  it('links every child to the grades page', () => {
+    render(<Wrap><ParentHome /></Wrap>)
+    expect(screen.getAllByRole('link', { name: 'Grades' })[0]).toHaveAttribute('href', '/parent/children/1/grades')
+  })
 })

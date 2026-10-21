@@ -316,4 +316,29 @@ class AssessmentTest extends AcademicTestCase
         $this->assertFalse($data['students'][0]['was_absent']);
         $this->assertTrue($data['students'][1]['was_absent']);
     }
+
+    public function test_a_failed_student_gets_a_retake_and_the_first_score_is_kept(): void
+    {
+        $exam = $this->assessment(['type' => 'exam', 'max_score' => 100]);
+        AssessmentScore::create(['assessment_id' => $exam->id, 'student_id' => $this->students[0]->id, 'score' => 38]);
+        Sanctum::actingAs($this->teacher);
+
+        // Marked for a retake: the failing score is set aside, the exam waits for the new score.
+        $this->putJson("/api/assessments/{$exam->id}/scores", ['scores' => [['student_id' => $this->students[0]->id, 'score' => null, 'status' => 'retake']]])->assertOk();
+        $row = AssessmentScore::first();
+        $this->assertSame('retake', $row->status);
+        $this->assertNull($row->score);
+        $this->assertEquals(38, $row->first_score);
+        $this->assertSame(1, $this->getJson('/api/assessments')->json('data.0.absent'), 'a retake waiting for its score is pending too');
+
+        // The retake is taken: the new score arrives, the first one stays.
+        $this->putJson("/api/assessments/{$exam->id}/scores", ['scores' => [['student_id' => $this->students[0]->id, 'score' => 51, 'status' => 'retake']]])->assertOk();
+        $row->refresh();
+        $this->assertEquals(51, $row->score);
+        $this->assertEquals(38, $row->first_score);
+
+        $sheet = $this->getJson("/api/assessments/{$exam->id}")->json('data.students.0');
+        $this->assertSame('retake', $sheet['status']);
+        $this->assertEquals(38, $sheet['first_score']);
+    }
 }

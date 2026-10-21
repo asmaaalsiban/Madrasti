@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ChildAttendance from '../components/ChildAttendance'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -21,6 +22,7 @@ export default function ParentHome() {
               {c.classroom && <p className="text-sm text-slate-600">{c.classroom}</p>}
               <p className="pt-1 text-xs text-slate-500">{t('parent.home.emailHint')}</p>
               <p dir="ltr" className="font-mono text-sm">{c.email}</p>
+              <Link to={`/parent/children/${c.id}/grades`} className="mt-2 inline-block rounded border px-3 py-1 text-sm text-brand">{t('studentGrades.linkLabel')}</Link>
               <ChildAttendance studentId={c.id} />
             </li>
           ))}

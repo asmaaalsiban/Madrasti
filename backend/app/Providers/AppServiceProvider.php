@@ -53,6 +53,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-assessment', fn (User $user, Assessment $assessment): bool => $user->hasRole(Role::Admin)
             || ($user->hasRole(Role::Teacher) && $assessment->teacher_id === $user->id));
 
+        // A student's published grades: admin, the student, their parents.
+        Gate::define('view-student-grades', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Student => $student->user_id === $user->id,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => false,
+        });
+
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.
         Gate::define('view-student-attendance', fn (User $user, Student $student): bool => match ($user->role) {
             Role::Admin => true,
