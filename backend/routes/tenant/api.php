@@ -6,6 +6,7 @@ use App\Modules\Academic\Http\Controllers\AcademicYearController;
 use App\Modules\Academic\Http\Controllers\AdminOverviewController;
 use App\Modules\Academic\Http\Controllers\BuildingController;
 use App\Modules\Academic\Http\Controllers\ClassroomController;
+use App\Modules\Academic\Http\Controllers\CurriculumController;
 use App\Modules\Academic\Http\Controllers\FloorController;
 use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\RoomController;
@@ -54,6 +55,10 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::post('classrooms/generate', [ClassroomController::class, 'generate']);
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
+    Route::get('curriculum', [CurriculumController::class, 'show']);
+    Route::put('curriculum', [CurriculumController::class, 'save']);
+    Route::post('curriculum/copy', [CurriculumController::class, 'copy']);
+    Route::post('curriculum/standard-plan', [CurriculumController::class, 'standardPlan']);
     Route::apiResource('terms', TermController::class);
     // The building: buildings > floors > rooms (classrooms and labs).
     Route::apiResource('buildings', BuildingController::class)->except('show');

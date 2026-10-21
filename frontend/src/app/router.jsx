@@ -27,6 +27,7 @@ import ChildGradesPage from '../features/Parent/pages/ChildGradesPage'
 import StudentHome from '../features/Student/pages/StudentHome'
 import BuildingsPage from '../features/Academic/pages/BuildingsPage'
 import GenerateClassroomsPage from '../features/Academic/pages/GenerateClassroomsPage'
+import CurriculumPage from '../features/Academic/pages/CurriculumPage'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -77,6 +78,7 @@ export const routes = [
               { path: '/admin/classrooms/generate', element: <GenerateClassroomsPage /> },
               { path: '/admin/subjects', element: <SubjectsPage /> },
               { path: '/admin/buildings', element: <BuildingsPage /> },
+              { path: '/admin/curriculum', element: <CurriculumPage /> },
               { path: '/admin/terms', element: <TermsPage /> },
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },

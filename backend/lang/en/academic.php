@@ -13,6 +13,8 @@ return [
     'room_name_taken' => 'Another room in this building has this name.',
     'too_many_sections' => 'A grade can have at most :max sections.',
     'room_taken' => 'Another classroom already uses this room in this academic year.',
+    'curriculum_duplicate' => 'A subject can appear only once for a grade.',
+    'subject_not_in_curriculum' => 'This subject is not in the curriculum of the classroom\'s grade.',
     'year_locked' => 'This classroom has enrolled students, so its academic year cannot be changed.',
     'resources' => [
         'subject' => 'subject',
