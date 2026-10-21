@@ -13,6 +13,8 @@ use App\Modules\Academic\Http\Controllers\TermController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Grading\Http\Controllers\AssessmentController;
+use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
@@ -70,3 +72,14 @@ Route::middleware('school-user')->get('attendance/students/{student}', [Attendan
 
 // A head of department sees the teachers of their subject (the controller checks the staff type).
 Route::middleware(['school-user', 'role:teacher'])->get('department', DepartmentController::class);
+
+// Grades: the teacher of the subject (or an admin) creates assessments and enters the scores.
+Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
+    Route::get('grading/options', GradingOptionsController::class);
+    Route::apiResource('assessments', AssessmentController::class)->except('store', 'update');
+    Route::post('assessments', [AssessmentController::class, 'store']);
+    Route::put('assessments/{assessment}', [AssessmentController::class, 'update']);
+    Route::put('assessments/{assessment}/scores', [AssessmentController::class, 'scores']);
+    Route::post('assessments/{assessment}/publish', [AssessmentController::class, 'publish']);
+    Route::post('assessments/{assessment}/unpublish', [AssessmentController::class, 'unpublish']);
+});

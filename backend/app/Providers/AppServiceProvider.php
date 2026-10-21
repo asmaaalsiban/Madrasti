@@ -12,6 +12,7 @@ use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\Academic\Models\Term;
 use App\Modules\Academic\Policies\AcademicPolicy;
+use App\Modules\Grading\Models\Assessment;
 use App\Modules\People\Policies\UserPolicy;
 use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
@@ -47,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
         // Attendance: an admin, or the homeroom teacher of the classroom.
         Gate::define('take-attendance', fn (User $user, Classroom $classroom): bool => $user->hasRole(Role::Admin)
             || ($user->hasRole(Role::Teacher) && $classroom->homeroom_teacher_id === $user->id));
+
+        // Grades: an admin, or the teacher of the assessment.
+        Gate::define('manage-assessment', fn (User $user, Assessment $assessment): bool => $user->hasRole(Role::Admin)
+            || ($user->hasRole(Role::Teacher) && $assessment->teacher_id === $user->id));
 
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.
         Gate::define('view-student-attendance', fn (User $user, Student $student): bool => match ($user->role) {
