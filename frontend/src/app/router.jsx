@@ -20,6 +20,8 @@ import AttendanceReportPage from '../features/Attendance/pages/AttendanceReportP
 import TakeAttendancePage from '../features/Attendance/pages/TakeAttendancePage'
 import DepartmentPage from '../features/Teacher/pages/DepartmentPage'
 import TeacherHome from '../features/Teacher/pages/TeacherHome'
+import AssessmentsPage from '../features/Grading/pages/AssessmentsPage'
+import ScoreSheetPage from '../features/Grading/pages/ScoreSheetPage'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -35,6 +37,8 @@ const HOME_ROUTES = {
     { path: 'attendance', element: <TakeAttendancePage /> },
     { path: 'attendance/report', element: <AttendanceReportPage /> },
     { path: 'department', element: <DepartmentPage /> },
+    { path: 'grades', element: <AssessmentsPage /> },
+    { path: 'grades/:id', element: <ScoreSheetPage /> },
   ],
 }
 
@@ -68,6 +72,8 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/grades', element: <AssessmentsPage /> },
+              { path: '/admin/grades/:id', element: <ScoreSheetPage /> },
               { path: '/admin/attendance', element: <TakeAttendancePage /> },
               { path: '/admin/attendance-report', element: <AttendanceReportPage /> },
             ],

@@ -8,6 +8,7 @@ export default function TeacherHome() {
   const { user } = useAuth()
   const cards = [
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
+    ['/teacher/grades', 'grading.title', 'grading.hint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
     ...(user?.staff_type === 'head_of_department' ? [['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
   ]

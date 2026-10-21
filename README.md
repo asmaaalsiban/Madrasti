@@ -95,6 +95,10 @@ After updating an existing install run `php artisan tenants:migrate` once (adds 
 
 Admin menu **Terms**: the terms of an academic year (inside the year, no overlap). Admin menu **Teacher assignment**: who teaches which subject in which classroom (one teacher per subject per classroom; the teacher must be an active teaching staff member of that subject). Grades are entered per term, by the assigned teacher, so both come first.
 
+## Grades (teacher side)
+
+The teacher of a subject in a classroom (see *Teacher assignment*) opens **Grades**, picks classroom + subject and the term, and creates assessments (quiz, exam, assignment, project, participation) with a maximum score and a weight (the weights of one subject in one term cannot exceed 100%). **Enter scores** shows every student of the classroom; an empty box means "not graded"; scores cannot exceed the maximum. An assessment is a **draft** until the teacher presses **Publish**; only published ones will be visible to students and parents (next step). A published assessment cannot be deleted. Admins can do the same for any classroom. Every change is in the audit log.
+
 ## Heads of department
 
 A staff member of type *head of department* has a **My department** page (teacher home): the teachers of the same subject, the classrooms each one teaches, their homeroom classroom and whether its attendance was recorded today / on how many of the last 30 days.
