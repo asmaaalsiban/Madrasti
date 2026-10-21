@@ -11,6 +11,8 @@ return [
     'floor_grade_range_reversed' => 'The last grade cannot come before the first grade.',
     'floor_level_taken' => 'This building already has a floor with this level.',
     'room_name_taken' => 'Another room in this building has this name.',
+    'too_many_sections' => 'A grade can have at most :max sections.',
+    'room_taken' => 'Another classroom already uses this room in this academic year.',
     'year_locked' => 'This classroom has enrolled students, so its academic year cannot be changed.',
     'resources' => [
         'subject' => 'subject',

@@ -18,7 +18,7 @@ class GradeLevel extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['name_ar', 'name_en', 'sort_order'];
+    protected $fillable = ['name_ar', 'name_en', 'code', 'sort_order'];
 
     public function classrooms(): HasMany
     {
