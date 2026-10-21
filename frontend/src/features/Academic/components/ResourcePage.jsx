@@ -10,9 +10,9 @@ import { useResource } from '../hooks/useResource'
 const inputClass = 'w-full rounded border p-2'
 
 // A select whose options are either static (field.options: [{ value, label }]) or loaded from another resource.
-function SelectField({ field, value, onChange }) {
+function SelectField({ field, value, onChange, form }) {
   const { t, i18n } = useTranslation()
-  const remote = useResource(field.optionsFrom ?? 'unused').useList({ per_page: 100, ...field.optionsParams }, { enabled: Boolean(field.optionsFrom) })
+  const remote = useResource(field.optionsFrom ?? 'unused').useList({ per_page: 100, ...(typeof field.optionsParams === 'function' ? field.optionsParams(form) : field.optionsParams) }, { enabled: Boolean(field.optionsFrom) })
   const label = (o) => o[field.optionLabel] ?? o[`name_${i18n.language}`] ?? o.name
   const options = field.options
     ? field.options.map((o) => ({ value: o.value, label: t(o.label) }))
@@ -26,7 +26,7 @@ function SelectField({ field, value, onChange }) {
 }
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
-// fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams?, optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
+// fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams? (object, or a function of the form), optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
 // rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
@@ -125,7 +125,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
           ) : (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (
-                <SelectField field={f} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />
+                <SelectField field={f} form={form} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />
               ) : f.type === 'checkbox' ? (
                 <input type="checkbox" checked={Boolean(form[f.name])} onChange={(e) => setForm({ ...form, [f.name]: e.target.checked })} />
               ) : (
