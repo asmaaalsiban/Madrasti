@@ -117,7 +117,7 @@ export default function AssessmentsPage() {
                 <td dir="ltr" className="p-2 text-start sm:p-3">{r.held_on ?? '—'}</td>
                 <td className="p-2 sm:p-3">{r.max_score}</td>
                 <td className="p-2 sm:p-3">{r.weight}%</td>
-                <td className="p-2 sm:p-3">{r.scored} / {r.students}</td>
+                <td dir="ltr" className="p-2 text-start sm:p-3">{r.scored} / {r.students}</td>
                 <td className="p-2 sm:p-3">
                   <span className={`rounded px-2 py-0.5 text-xs ${r.is_published ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                     {t(r.is_published ? 'grading.published' : 'grading.draft')}
