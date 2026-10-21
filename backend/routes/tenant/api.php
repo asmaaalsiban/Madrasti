@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Modules\Academic\Http\Controllers\AcademicYearController;
 use App\Modules\Academic\Http\Controllers\AdminOverviewController;
+use App\Modules\Academic\Http\Controllers\BuildingController;
 use App\Modules\Academic\Http\Controllers\ClassroomController;
+use App\Modules\Academic\Http\Controllers\FloorController;
 use App\Modules\Academic\Http\Controllers\GradeLevelController;
+use App\Modules\Academic\Http\Controllers\RoomController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Academic\Http\Controllers\TeachingAssignmentController;
@@ -51,6 +54,11 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('terms', TermController::class);
+    // The building: buildings > floors > rooms (classrooms and labs).
+    Route::apiResource('buildings', BuildingController::class)->except('show');
+    Route::apiResource('floors', FloorController::class)->only('store', 'update', 'destroy');
+    Route::get('rooms', [RoomController::class, 'index']);
+    Route::put('rooms/{room}', [RoomController::class, 'update']);
     Route::apiResource('teaching-assignments', TeachingAssignmentController::class);
 
     // People: staff (every kind of school employee), students and their accounts.

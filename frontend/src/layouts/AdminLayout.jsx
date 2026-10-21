@@ -10,6 +10,7 @@ import { useSchool } from '../tenant/useSchool'
 const NAV = [
   ['/admin', 'overview', true],
   ['/admin/academic-years', 'academicYears'],
+  ['/admin/buildings', 'buildings'],
   ['/admin/grade-levels', 'gradeLevels'],
   ['/admin/classrooms', 'classrooms'],
   ['/admin/subjects', 'subjects'],

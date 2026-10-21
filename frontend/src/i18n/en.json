@@ -74,7 +74,8 @@
       "attendanceReport": "Absence report",
       "terms": "Terms",
       "teaching": "Teacher assignment",
-      "grades": "Grades"
+      "grades": "Grades",
+      "buildings": "Buildings"
     },
     "actions": {
       "add": "Add",
@@ -371,6 +372,32 @@
       "makeup": "Waiting for the makeup exam (you were absent)",
       "retake": "Waiting for the retake exam",
       "none": "No grades yet"
+    }
+  },
+  "buildings": {
+    "title": "Buildings",
+    "addBuilding": "Add building",
+    "addFloor": "Add floor",
+    "empty": "No buildings yet. Add the first building of the school.",
+    "noFloors": "No floors yet.",
+    "buildingForm": "Building",
+    "floorForm": "Floor",
+    "floor": "Floor",
+    "studentsCol": "Students",
+    "grades": "Grades",
+    "classrooms": "Classrooms",
+    "scienceLabs": "Science labs",
+    "computerLabs": "Computer labs",
+    "level": "Level",
+    "levelHint": "0 is the ground floor, 1 the first floor...",
+    "sameAsBuilding": "Same as the building",
+    "fromGrade": "From grade",
+    "toGrade": "To grade",
+    "range": "{{from}} → {{to}}",
+    "gender": {
+      "male": "Boys",
+      "female": "Girls",
+      "mixed": "Mixed"
     }
   }
 }
