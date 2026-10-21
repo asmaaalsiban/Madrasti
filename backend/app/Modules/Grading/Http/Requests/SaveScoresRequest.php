@@ -25,7 +25,7 @@ class SaveScoresRequest extends FormRequest
             'scores' => ['required', 'array', 'max:300'],
             'scores.*.student_id' => ['required', 'integer', 'distinct'],
             'scores.*.score' => ['nullable', 'numeric', 'min:0'],
-            'scores.*.status' => ['nullable', 'in:absent,makeup'],
+            'scores.*.status' => ['nullable', 'in:absent,makeup,retake'],
             'scores.*.remark' => ['nullable', 'string', 'max:255'],
         ];
     }

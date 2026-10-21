@@ -17,14 +17,14 @@ class AssessmentScore extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['assessment_id', 'student_id', 'score', 'status', 'remark'];
+    protected $fillable = ['assessment_id', 'student_id', 'score', 'first_score', 'status', 'remark'];
 
     /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
-        return ['score' => 'float'];
+        return ['score' => 'float', 'first_score' => 'float'];
     }
 
     public function assessment(): BelongsTo

@@ -31,7 +31,7 @@ class AssessmentController extends Controller
         $query = Assessment::query()->with(self::WITH)
             // Only students who still exist: the score of a deleted student must not make the progress exceed the class size.
             ->withCount(['scores as scored_count' => fn ($q) => $q->whereNotNull('score')->whereHas('student')])
-            ->withCount(['scores as absent_count' => fn ($q) => $q->where('status', 'absent')->whereNull('score')->whereHas('student')])
+            ->withCount(['scores as absent_count' => fn ($q) => $q->whereIn('status', ['absent', 'retake'])->whereNull('score')->whereHas('student')])
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('teacher_id', $user->id))
             ->orderByDesc('held_on')->orderByDesc('id');
         foreach (['classroom_id', 'subject_id', 'term_id'] as $column) {
@@ -75,6 +75,7 @@ class AssessmentController extends Controller
                 'id' => $s->id, 'student_number' => $s->student_number, 'name_ar' => $s->name_ar, 'name_en' => $s->name_en,
                 'score' => $scores->get($s->id)?->score,
                 'status' => $scores->get($s->id)?->status,
+                'first_score' => $scores->get($s->id)?->first_score,
                 'remark' => $scores->get($s->id)?->remark,
                 // Hint for the teacher: the attendance of that day says the student was not at school.
                 'was_absent' => $absentThatDay->contains($s->id),
@@ -115,9 +116,14 @@ class AssessmentController extends Controller
 
                     continue;
                 }
+                // Marked for a retake: the score he had (the failing one) is kept as his first attempt.
+                $first = $existing?->first_score;
+                if ($status === 'retake' && $existing?->status !== 'retake' && $existing?->score !== null) {
+                    $first = $existing->score;
+                }
                 AssessmentScore::updateOrCreate(
                     ['assessment_id' => $assessment->id, 'student_id' => $row['student_id']],
-                    ['score' => $score, 'status' => $status, 'remark' => $remark],
+                    ['score' => $score, 'first_score' => $first, 'status' => $status, 'remark' => $remark],
                 );
             }
         });

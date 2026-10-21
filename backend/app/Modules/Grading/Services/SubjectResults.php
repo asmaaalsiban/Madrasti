@@ -19,7 +19,7 @@ use Illuminate\Support\Collection;
 class SubjectResults
 {
     /**
-     * @return Collection<int, array{student: array<string, mixed>, percent: ?float, passed: ?bool, graded: int, pending: int}>
+     * @return Collection<int, array{student: array<string, mixed>, percent: ?float, passed: ?bool, graded: int, pending: int, retake: int}>
      */
     public function forClassroom(int $classroomId, int $subjectId, int $termId, bool $publishedOnly = false): Collection
     {
@@ -38,7 +38,7 @@ class SubjectResults
     /**
      * @param  Collection<int, Assessment>  $assessments
      * @param  Collection<int, AssessmentScore>  $scores
-     * @return array{percent: ?float, passed: ?bool, graded: int, pending: int}
+     * @return array{percent: ?float, passed: ?bool, graded: int, pending: int, retake: int}
      */
     public function summarize(Collection $assessments, Collection $scores): array
     {
@@ -46,14 +46,20 @@ class SubjectResults
         $weights = 0.0;
         $ratios = [];
         $pending = 0;
+        $retake = 0;
 
         foreach ($scores as $score) {
             $assessment = $assessments->get($score->assessment_id);
             if ($assessment === null) {
                 continue;
             }
-            if ($score->status === 'absent' && $score->score === null) {
+            if ($score->score === null && $score->status === 'absent') {
                 $pending++;
+
+                continue;
+            }
+            if ($score->score === null && $score->status === 'retake') {
+                $retake++; // failed, waiting for the retake exam
 
                 continue;
             }
@@ -77,6 +83,7 @@ class SubjectResults
             'passed' => $percent === null ? null : $percent >= (float) config('grading.pass_percent'),
             'graded' => count($ratios),
             'pending' => $pending,
+            'retake' => $retake,
         ];
     }
 }

@@ -158,4 +158,17 @@ class ResultsTest extends AcademicTestCase
         $this->getJson('/api/grading/results')->assertForbidden();
         $this->getJson('/api/grading/results?classroom_id=abc&subject_id=1&term_id=1')->assertForbidden();
     }
+
+    public function test_a_retake_waiting_for_its_score_is_counted_apart_from_absences(): void
+    {
+        Sanctum::actingAs($this->teacher);
+        $this->score($this->quiz, $this->students[0], 18);
+        $this->score($this->exam, $this->students[0], null, 'retake');
+
+        $row = collect($this->results()['students'])->firstWhere('student.id', $this->students[0]->id);
+
+        $this->assertSame(1, $row['retake']);
+        $this->assertSame(0, $row['pending']);
+        $this->assertEqualsWithDelta(90.0, $row['percent'], 0.01);
+    }
 }

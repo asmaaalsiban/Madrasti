@@ -16,6 +16,7 @@ use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
+use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
@@ -85,3 +86,6 @@ Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): voi
     Route::post('assessments/{assessment}/publish', [AssessmentController::class, 'publish']);
     Route::post('assessments/{assessment}/unpublish', [AssessmentController::class, 'unpublish']);
 });
+
+// The published grades of one student: the student, their parents and admins (checked by a gate).
+Route::middleware('school-user')->get('students/{student}/grades', StudentGradesController::class);
