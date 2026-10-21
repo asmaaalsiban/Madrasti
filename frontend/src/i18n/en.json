@@ -73,7 +73,8 @@
       "attendance": "Take attendance",
       "attendanceReport": "Absence report",
       "terms": "Terms",
-      "teaching": "Teacher assignment"
+      "teaching": "Teacher assignment",
+      "grades": "Grades"
     },
     "actions": {
       "add": "Add",
@@ -291,5 +292,43 @@
     "recorded": "Recorded",
     "notYet": "Not yet",
     "empty": "No teachers in your department yet."
+  },
+  "grading": {
+    "title": "Grades",
+    "hint": "Create quizzes and exams and enter the scores.",
+    "add": "Add assessment",
+    "formTitle": "Assessment",
+    "classroomSubject": "Classroom and subject",
+    "term": "Term",
+    "weightsUsed": "Weights used: {{used}} / 100",
+    "titleCol": "Title",
+    "typeCol": "Type",
+    "dateCol": "Date",
+    "maxCol": "Max",
+    "weightCol": "Weight",
+    "progress": "Scored",
+    "status": "Status",
+    "draft": "Draft",
+    "published": "Published",
+    "enterScores": "Enter scores",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "maxScore": "Maximum score",
+    "weight": "Weight (%)",
+    "weightHint": "Share of this assessment in the term grade of the subject.",
+    "date": "Date",
+    "noAssignments": "No subject is assigned to you yet. Ask the administration to assign your classrooms.",
+    "score": "Score",
+    "remark": "Remark",
+    "saved": "Scores saved.",
+    "scoreTooHigh": "A score cannot be higher than {{max}}.",
+    "summary": "Entered: {{n}} / {{total}} · Average: {{avg}} / {{max}}",
+    "types": {
+      "quiz": "Quiz",
+      "exam": "Exam",
+      "assignment": "Assignment",
+      "project": "Project",
+      "participation": "Participation"
+    }
   }
 }
