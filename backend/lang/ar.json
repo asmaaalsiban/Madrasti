@@ -1,0 +1,12 @@
+{
+    "Server Error": "حدث خطأ في الخادم. حاول مرة أخرى لاحقاً.",
+    "Too Many Attempts.": "محاولات كثيرة. حاول مرة أخرى بعد قليل.",
+    "Unauthenticated.": "يرجى تسجيل الدخول.",
+    "This action is unauthorized.": "غير مسموح لك بتنفيذ هذا الإجراء.",
+    "Not Found.": "غير موجود.",
+    "Forbidden": "غير مسموح.",
+    "Service Unavailable": "الخدمة غير متاحة حالياً.",
+    "Page Expired": "انتهت صلاحية الصفحة.",
+    "The given data was invalid.": "البيانات المدخلة غير صالحة.",
+    "Method Not Allowed": "الطريقة غير مسموحة."
+}

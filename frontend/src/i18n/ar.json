@@ -3,7 +3,8 @@
     "appName": "مدرستي",
     "language": "English",
     "logout": "تسجيل الخروج",
-    "loading": "جاري التحميل..."
+    "loading": "جاري التحميل...",
+    "back": "رجوع"
   },
   "auth": {
     "title": "تسجيل الدخول",

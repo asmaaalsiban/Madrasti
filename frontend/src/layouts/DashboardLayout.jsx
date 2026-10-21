@@ -1,5 +1,6 @@
 import { Link, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import BackButton from '../components/shared/BackButton'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
 import { useAuth } from '../features/Auth/AuthProvider'
@@ -26,6 +27,7 @@ export default function DashboardLayout() {
         </div>
       </header>
       <main className="mx-auto max-w-5xl p-4">
+        <BackButton />
         <Outlet />
       </main>
     </div>

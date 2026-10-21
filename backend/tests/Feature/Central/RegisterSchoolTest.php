@@ -160,7 +160,7 @@ class RegisterSchoolTest extends TenantTestCase
     {
         $this->postJson('/api/central/register', [], ['Accept-Language' => 'ar'])
             ->assertUnprocessable()
-            ->assertJsonPath('errors.code.0', __('validation.required', ['attribute' => 'code'], 'ar'));
+            ->assertJsonPath('errors.code.0', __('validation.required', ['attribute' => 'كود المدرسة'], 'ar'));
     }
 
     public function test_throttles_after_five_requests(): void

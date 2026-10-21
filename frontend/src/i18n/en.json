@@ -3,7 +3,8 @@
     "appName": "Madrasati",
     "language": "العربية",
     "logout": "Log out",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "back": "Back"
   },
   "auth": {
     "title": "Sign in",

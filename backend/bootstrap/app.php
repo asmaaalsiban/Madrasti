@@ -8,9 +8,11 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -53,6 +55,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             SetLocale::class,
         ]);
+        // Laravel runs authentication first; the language must be set before it so a 401 is in the right language too.
+        $middleware->prependToPriorityList(before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class, prepend: SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Our frontend only talks JSON to the API.
@@ -63,5 +67,17 @@ return Application::configure(basePath: dirname(__DIR__))
         // Unknown school domain -> clean 404 instead of a 500.
         $exceptions->render(function (TenantCouldNotBeIdentifiedException $e, Request $request) {
             return response()->json(['message' => __('tenancy.school_not_found')], 404);
+        });
+
+        // The framework's own messages ("Server Error", "Too Many Attempts.", ...) follow the request language (lang/ar.json).
+        $exceptions->respond(function (Response $response, \Throwable $e, Request $request) {
+            if ($response instanceof JsonResponse && is_string($message = $response->getData(true)['message'] ?? null)) {
+                $translated = __($message);
+                if ($translated !== $message) {
+                    $response->setData([...$response->getData(true), 'message' => $translated]);
+                }
+            }
+
+            return $response;
         });
     })->create();
