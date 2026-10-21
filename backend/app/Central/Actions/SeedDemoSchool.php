@@ -232,7 +232,7 @@ class SeedDemoSchool
 
     /**
      * A published assessment set for every subject in every classroom (taught by its assigned teacher), with a score
-     * for every student (fixed values between 55% and 100%, about one in fifteen not graded). Only added when missing.
+     * for every student (fixed values between 35% and 100%, so some students fail, about one in fifteen not graded). Only added when missing.
      */
     private function seedGrades(int $yearId): void
     {
@@ -258,7 +258,7 @@ class SeedDemoSchool
                     $hash = crc32($studentId.'|'.$assessmentId);
                     $rows[] = [
                         'assessment_id' => $assessmentId, 'student_id' => $studentId,
-                        'score' => $hash % 15 === 0 ? null : round($max * (55 + $hash % 46) / 100, 1),
+                        'score' => $hash % 15 === 0 ? null : round($max * (35 + $hash % 66) / 100, 1),
                         'status' => $hash % 15 === 0 ? 'absent' : null, // waits for a makeup exam
                         'remark' => $hash % 15 === 0 ? 'غائب' : null,
                         'created_at' => now(), 'updated_at' => now(),

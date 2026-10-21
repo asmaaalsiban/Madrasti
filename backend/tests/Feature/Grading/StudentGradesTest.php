@@ -180,4 +180,11 @@ class StudentGradesTest extends AcademicTestCase
         $this->actAsAdmin();
         $this->getJson("/api/students/{$this->student->id}/grades")->assertOk();
     }
+
+    public function test_the_student_learns_the_id_of_their_record_from_me(): void
+    {
+        Sanctum::actingAs($this->student->user);
+
+        $this->getJson('/api/auth/me')->assertOk()->assertJsonPath('data.student_id', $this->student->id);
+    }
 }

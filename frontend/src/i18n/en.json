@@ -341,7 +341,7 @@
     "statusMakeup": "Makeup exam",
     "absentThatDay": "Absent that day",
     "markAbsent": "Mark as absent",
-    "pendingCount": "Makeup pending: {{n}}",
+    "pendingCount": "Waiting for another exam: {{n}}",
     "results": "Student results",
     "resultsTitle": "Student results: {{name}}",
     "passedFailed": "Passed: {{passed}} · Failed: {{failed}}",
@@ -349,6 +349,28 @@
     "student": "Student",
     "percent": "Percentage",
     "result": "Result",
-    "gradedCount": "Graded"
+    "gradedCount": "Graded",
+    "retakePending": "Retake pending",
+    "statusRetake": "Retake (failed the exam)"
+  },
+  "studentGrades": {
+    "myGrades": "My grades",
+    "childTitle": "Grades: {{name}}",
+    "linkLabel": "Grades",
+    "noRecord": "No student record is linked to your account.",
+    "empty": "No grades have been published for this term yet.",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "firstAttempt": "First attempt: {{score}}",
+    "statusAbsent": "Absent",
+    "statusMakeup": "Makeup exam",
+    "statusRetake": "Retake exam",
+    "result": {
+      "pass": "Pass",
+      "fail": "Fail",
+      "makeup": "Waiting for the makeup exam (you were absent)",
+      "retake": "Waiting for the retake exam",
+      "none": "No grades yet"
+    }
   }
 }
