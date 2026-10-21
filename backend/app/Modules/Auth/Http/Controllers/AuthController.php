@@ -90,6 +90,10 @@ class AuthController extends Controller
             $user->load(['children.user', 'children.enrollments.classroom']);
         }
 
+        if ($user->role === Role::Teacher) {
+            $user->load('staffProfile');
+        }
+
         return $user;
     }
 }

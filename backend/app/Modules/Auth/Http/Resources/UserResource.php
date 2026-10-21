@@ -28,6 +28,8 @@ class UserResource extends JsonResource
             'avatar_path' => $this->avatar_path,
             'is_active' => $this->is_active,
             'must_change_password' => $this->must_change_password,
+            // Only for staff: what kind of employee (the app shows the tools that fit).
+            'staff_type' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->staff_type->value),
             // Only for parents: the children they can follow.
             'children' => $this->whenLoaded('children', fn () => $this->children->map(fn ($student) => [
                 'id' => $student->id,

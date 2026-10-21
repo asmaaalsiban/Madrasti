@@ -16,6 +16,7 @@ import SubjectsPage from '../features/Academic/pages/SubjectsPage'
 import RoleHome from '../features/Auth/pages/RoleHome'
 import AttendanceReportPage from '../features/Attendance/pages/AttendanceReportPage'
 import TakeAttendancePage from '../features/Attendance/pages/TakeAttendancePage'
+import DepartmentPage from '../features/Teacher/pages/DepartmentPage'
 import TeacherHome from '../features/Teacher/pages/TeacherHome'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
@@ -31,6 +32,7 @@ const HOME_ROUTES = {
     { index: true, element: <TeacherHome /> },
     { path: 'attendance', element: <TakeAttendancePage /> },
     { path: 'attendance/report', element: <AttendanceReportPage /> },
+    { path: 'department', element: <DepartmentPage /> },
   ],
 }
 

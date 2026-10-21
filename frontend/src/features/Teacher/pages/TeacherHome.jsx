@@ -9,6 +9,7 @@ export default function TeacherHome() {
   const cards = [
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
+    ...(user?.staff_type === 'head_of_department' ? [['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
   ]
   return (
     <section className="space-y-4">

@@ -24,17 +24,21 @@ class SeedDemoTest extends TenantTestCase
         $admin = User::where('email', 'admin@demo.test')->first();
         $this->assertSame(Role::Admin, $admin->role);
         $this->assertTrue(Hash::check('Admin12345', $admin->password));
-        $this->assertSame(9, User::where('role', Role::Teacher)->count());
+        $this->assertSame(33, User::where('role', Role::Teacher)->count());
         $this->assertEqualsCanonicalizing(
-            ['teacher' => 7, 'head_of_department' => 1, 'nurse' => 1],
+            ['teacher' => 24, 'head_of_department' => 8, 'nurse' => 1],
             DB::table('staff_profiles')->selectRaw('staff_type, count(*) as n')->groupBy('staff_type')->pluck('n', 'staff_type')->all(),
         );
-        $this->assertSame(8, DB::table('staff_profiles')->whereNotNull('subject_id')->count());
-        $this->assertSame(8, DB::table('staff_profiles')->whereNotNull('subject_id')->distinct()->count('subject_id'), 'one teacher for each subject');
-        $this->assertSame(['users' => 217, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 120], $counts);
+        $this->assertSame(32, DB::table('staff_profiles')->whereNotNull('subject_id')->count());
+        $this->assertSame(8, DB::table('staff_profiles')->where('staff_type', 'head_of_department')->distinct()->count('subject_id'), 'one head for each subject');
+        $this->assertSame([3], array_values(array_unique(DB::table('staff_profiles')->where('staff_type', 'teacher')->selectRaw('subject_id, count(*) as n')->groupBy('subject_id')->pluck('n')->all())), 'three teachers for each subject');
+        $this->assertSame(['users' => 241, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 120], $counts);
         $this->assertSame(1, DB::table('academic_years')->where('is_current', true)->count());
-        $this->assertSame(8, DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->count());
-        $this->assertSame(8, DB::table('classrooms')->distinct()->count('homeroom_teacher_id'), 'a teacher is homeroom teacher of one classroom only');
+        $this->assertSame(12, DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->count());
+        $this->assertSame(12, DB::table('classrooms')->distinct()->count('homeroom_teacher_id'), 'a teacher is homeroom teacher of one classroom only');
+        $this->assertSame(0, DB::table('classrooms')->join('staff_profiles', 'staff_profiles.user_id', '=', 'classrooms.homeroom_teacher_id')->where('staff_type', '!=', 'teacher')->count(), 'heads supervise, they are not homeroom teachers');
+        $this->assertSame(96, DB::table('classroom_subject_teacher')->count(), 'every subject is taught in every classroom');
+        $this->assertSame(4, DB::table('classroom_subject_teacher')->where('subject_id', DB::table('subjects')->where('code', 'MTH')->value('id'))->where('teacher_id', DB::table('users')->where('email', 'teacher7@demo.test')->value('id'))->count(), 'a teacher covers four classrooms of the subject');
     }
 
     public function test_demo_students_have_accounts_with_the_default_password_and_parents_are_shared(): void

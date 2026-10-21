@@ -16,18 +16,13 @@ use Illuminate\Support\Facades\DB;
  */
 class SeedDemoSchool
 {
-    /** [email name, Arabic name, staff type, subject code]: one teacher for each subject, plus a nurse. */
-    private const STAFF = [
-        ['teacher1', 'أحمد علي', StaffType::Teacher, 'ARB'],
-        ['teacher2', 'سارة خالد', StaffType::Teacher, 'MTH'],
-        ['teacher3', 'محمد يوسف', StaffType::HeadOfDepartment, 'SCI'],
-        ['teacher4', 'ليلى حسن', StaffType::Teacher, 'ENG'],
-        ['teacher5', 'خالد عمر', StaffType::Teacher, 'SOC'],
-        ['teacher6', 'هدى إبراهيم', StaffType::Teacher, 'REL'],
-        ['teacher7', 'رنا سعيد', StaffType::Teacher, 'ART'],
-        ['teacher8', 'عمر فؤاد', StaffType::Teacher, 'PE'],
-        ['nurse1', 'نور حسن', StaffType::Nurse, null],
+    private const TEACHERS_PER_SUBJECT = 3;
+
+    private const TEACHER_FIRST_NAMES = [
+        'أحمد', 'سارة', 'محمد', 'ليلى', 'خالد', 'هدى', 'رنا', 'عمر', 'نور', 'يوسف', 'مها', 'سامر', 'دعاء', 'طارق', 'ريم', 'بسام',
     ];
+
+    private const TEACHER_FAMILY_NAMES = ['علي', 'حسن', 'يوسف', 'إبراهيم', 'سعيد', 'فؤاد', 'مراد'];
 
     private const GRADES = [
         ['الصف الأول', 'Grade 1'], ['الصف الثاني', 'Grade 2'], ['الصف الثالث', 'Grade 3'],
@@ -68,7 +63,7 @@ class SeedDemoSchool
         }
 
         $teacherIds = [];
-        foreach (self::STAFF as [$local, $name, $type, $subjectCode]) {
+        foreach ($this->staff() as [$local, $name, $type, $subjectCode]) {
             $user = User::updateOrCreate(
                 ['email' => $local.'@'.$teacherDomain],
                 ['name' => $name, 'password' => $teacherPassword, 'role' => $type->accountRole(), 'is_active' => true, 'must_change_password' => false],
@@ -77,8 +72,8 @@ class SeedDemoSchool
                 'staff_type' => $type,
                 'subject_id' => $subjectCode ? DB::table('subjects')->where('code', $subjectCode)->value('id') : null,
             ]);
-            if ($type->canBeHomeroom()) {
-                $teacherIds[] = $user->id;
+            if ($type === StaffType::Teacher) {
+                $teacherIds[$subjectCode][] = $user->id;
             }
         }
 
@@ -89,11 +84,11 @@ class SeedDemoSchool
                     'name' => ($i + 1).'-'.$section, 'grade_level_id' => $gradeId, 'academic_year_id' => $yearId,
                 ], [
                     'capacity' => 30,
-                    'homeroom_teacher_id' => $teacherIds[$j === 0 ? $i : 6 + $i] ?? null, // sections A of every grade, then B of grades 1-2
                 ]);
             }
         }
 
+        $this->assignTeachers($yearId, $teacherIds);
         $this->seedStudents($teacherDomain, $yearId);
 
         return [
@@ -104,6 +99,60 @@ class SeedDemoSchool
             'classrooms' => DB::table('classrooms')->count(),
             'students' => DB::table('students')->count(),
         ];
+    }
+
+    /**
+     * Per subject: one head of department and three teachers (the nurse comes last).
+     *
+     * @return list<array{0: string, 1: string, 2: StaffType, 3: ?string}>
+     */
+    private function staff(): array
+    {
+        $staff = [];
+        $n = 0;
+        foreach (array_keys(self::SUBJECTS) as $s => $code) {
+            $staff[] = ['head'.($s + 1), $this->teacherName($n++), StaffType::HeadOfDepartment, $code];
+            for ($k = 1; $k <= self::TEACHERS_PER_SUBJECT; $k++) {
+                $staff[] = ['teacher'.($s * self::TEACHERS_PER_SUBJECT + $k), $this->teacherName($n++), StaffType::Teacher, $code];
+            }
+        }
+        $staff[] = ['nurse1', 'نور حسن', StaffType::Nurse, null];
+
+        return $staff;
+    }
+
+    private function teacherName(int $n): string
+    {
+        return self::TEACHER_FIRST_NAMES[$n % count(self::TEACHER_FIRST_NAMES)].' '.self::TEACHER_FAMILY_NAMES[$n % count(self::TEACHER_FAMILY_NAMES)];
+    }
+
+    /**
+     * Gives every classroom a homeroom teacher (nobody twice) and spreads each subject's classrooms over its teachers.
+     * An existing homeroom teacher is kept.
+     *
+     * @param  array<string, list<int>>  $teachersBySubject
+     */
+    private function assignTeachers(int $yearId, array $teachersBySubject): void
+    {
+        $classroomIds = DB::table('classrooms')->where('academic_year_id', $yearId)->orderBy('id')->pluck('id')->all();
+
+        $taken = DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->pluck('homeroom_teacher_id')->all();
+        $free = array_values(array_diff(array_merge(...array_values($teachersBySubject)), $taken));
+        foreach ($classroomIds as $classroomId) {
+            if (DB::table('classrooms')->where('id', $classroomId)->whereNull('homeroom_teacher_id')->exists() && $free !== []) {
+                DB::table('classrooms')->where('id', $classroomId)->update(['homeroom_teacher_id' => array_shift($free)]);
+            }
+        }
+
+        foreach ($teachersBySubject as $code => $teacherIds) {
+            $subjectId = DB::table('subjects')->where('code', $code)->value('id');
+            foreach ($classroomIds as $i => $classroomId) {
+                DB::table('classroom_subject_teacher')->updateOrInsert(
+                    ['classroom_id' => $classroomId, 'subject_id' => $subjectId],
+                    ['teacher_id' => $teacherIds[$i % count($teacherIds)], 'weekly_periods' => 3, 'created_at' => now(), 'updated_at' => now()],
+                );
+            }
+        }
     }
 
     private const STUDENTS_PER_CLASSROOM = 10;

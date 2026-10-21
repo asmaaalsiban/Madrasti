@@ -262,5 +262,18 @@
     "showDates": "Show dates",
     "hideDates": "Hide dates",
     "loading": "Loading…"
+  },
+  "department": {
+    "title": "Department: {{subject}}",
+    "cardTitle": "My department",
+    "cardHint": "The teachers of your subject and their classrooms.",
+    "teacher": "Teacher",
+    "homeroom": "Homeroom",
+    "classrooms": "Teaches",
+    "attendanceToday": "Attendance today",
+    "daysRecorded": "Days recorded (30 days)",
+    "recorded": "Recorded",
+    "notYet": "Not yet",
+    "empty": "No teachers in your department yet."
   }
 }
