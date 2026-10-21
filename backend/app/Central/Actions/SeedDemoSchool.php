@@ -93,6 +93,7 @@ class SeedDemoSchool
 
         $this->assignTeachers($yearId, $teacherIds);
         $this->seedStudents($teacherDomain, $yearId);
+        $this->seedGrades($yearId);
 
         return [
             'users' => User::count(),
@@ -158,6 +159,14 @@ class SeedDemoSchool
         }
     }
 
+    /** [title, type, max score, weight, held on, term index]: the first term is complete (100%), the second has started. */
+    private const ASSESSMENTS = [
+        ['اختبار قصير', 'quiz', 20, 20, '2026-10-05', 0],
+        ['واجب', 'assignment', 10, 20, '2026-11-02', 0],
+        ['الامتحان النهائي', 'exam', 100, 60, '2027-01-15', 0],
+        ['اختبار قصير', 'quiz', 20, 20, '2027-03-02', 1],
+    ];
+
     private const STUDENTS_PER_CLASSROOM = 10;
 
     private const FAMILIES = [
@@ -219,6 +228,44 @@ class SeedDemoSchool
             'guardian_name' => 'ولي أمر '.$family,
             'guardian_phone' => '0599'.str_pad((string) $parent, 6, '0', STR_PAD_LEFT),
         ]);
+    }
+
+    /**
+     * A published assessment set for every subject in every classroom (taught by its assigned teacher), with a score
+     * for every student (fixed values between 55% and 100%, about one in fifteen not graded). Only added when missing.
+     */
+    private function seedGrades(int $yearId): void
+    {
+        $terms = DB::table('terms')->where('academic_year_id', $yearId)->orderBy('starts_on')->pluck('id')->all();
+
+        foreach (DB::table('classroom_subject_teacher')->join('classrooms', 'classrooms.id', '=', 'classroom_subject_teacher.classroom_id')
+            ->where('classrooms.academic_year_id', $yearId)->get(['classroom_subject_teacher.*']) as $assignment) {
+            $studentIds = DB::table('enrollments')->where('classroom_id', $assignment->classroom_id)->pluck('student_id')->all();
+
+            foreach (self::ASSESSMENTS as [$title, $type, $max, $weight, $heldOn, $termIndex]) {
+                $keys = ['classroom_id' => $assignment->classroom_id, 'subject_id' => $assignment->subject_id, 'term_id' => $terms[$termIndex], 'title' => $title];
+                if (DB::table('assessments')->where($keys)->exists()) {
+                    continue;
+                }
+
+                $assessmentId = DB::table('assessments')->insertGetId($keys + [
+                    'teacher_id' => $assignment->teacher_id, 'type' => $type, 'max_score' => $max, 'weight' => $weight,
+                    'held_on' => $heldOn, 'is_published' => true, 'created_at' => now(), 'updated_at' => now(),
+                ]);
+
+                $rows = [];
+                foreach ($studentIds as $studentId) {
+                    $hash = crc32($studentId.'|'.$assessmentId);
+                    $rows[] = [
+                        'assessment_id' => $assessmentId, 'student_id' => $studentId,
+                        'score' => $hash % 15 === 0 ? null : round($max * (55 + $hash % 46) / 100, 1),
+                        'remark' => $hash % 15 === 0 ? 'غائب' : null,
+                        'created_at' => now(), 'updated_at' => now(),
+                    ];
+                }
+                DB::table('assessment_scores')->insert($rows);
+            }
+        }
     }
 
     /**

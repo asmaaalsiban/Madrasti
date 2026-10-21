@@ -106,4 +106,30 @@ class SeedDemoTest extends TenantTestCase
 
         $this->artisan('school:seed-demo', ['tenant' => 'nope'])->expectsOutputToContain("School 'nope' not found.")->assertFailed();
     }
+
+    public function test_demo_grades_exist_for_every_subject_in_every_classroom_and_are_consistent(): void
+    {
+        $this->seed_();
+
+        $this->assertSame(96 * 4, DB::table('assessments')->count());
+        $this->assertSame(0, DB::table('assessments')->where('is_published', false)->count());
+        $firstTermId = DB::table('terms')->orderBy('starts_on')->value('id');
+        $weights = DB::table('assessments')->where('term_id', $firstTermId)->selectRaw('classroom_id, subject_id, sum(weight) as w')->groupBy('classroom_id', 'subject_id')->pluck('w')->map(fn ($w) => (float) $w)->unique()->all();
+        $this->assertSame([100.0], $weights, 'the first term adds up to 100%');
+        $this->assertSame(0, DB::table('assessment_scores')->join('assessments', 'assessments.id', '=', 'assessment_scores.assessment_id')->whereColumn('score', '>', 'max_score')->count());
+        $this->assertSame(96 * 4 * 10, DB::table('assessment_scores')->count(), 'a row for every student of every assessment');
+        $this->assertGreaterThan(3000, DB::table('assessment_scores')->whereNotNull('score')->count());
+        $this->assertSame(0, DB::table('assessments')->join('classroom_subject_teacher as cst', fn ($j) => $j->on('cst.classroom_id', '=', 'assessments.classroom_id')->on('cst.subject_id', '=', 'assessments.subject_id'))->whereColumn('cst.teacher_id', '!=', 'assessments.teacher_id')->count(), 'graded by the assigned teacher');
+    }
+
+    public function test_running_the_seeder_twice_does_not_duplicate_grades(): void
+    {
+        $this->seed_();
+        $assessments = DB::table('assessments')->count();
+        $scores = DB::table('assessment_scores')->count();
+        $this->seed_();
+
+        $this->assertSame($assessments, DB::table('assessments')->count());
+        $this->assertSame($scores, DB::table('assessment_scores')->count());
+    }
 }
