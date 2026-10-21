@@ -96,3 +96,47 @@ describe('TeachingAssignmentsPage', () => {
     expect(await screen.findByRole('heading', { name: 'توزيع المعلمين على المواد والشعب' })).toBeInTheDocument()
   })
 })
+
+describe('Automatic distribution', () => {
+  const preview = {
+    dry_run: true, max_load: 24, assigned: 40,
+    teachers: [
+      { id: 9, name: 'Sara Khaled', subject: 'Math', subject_ar: 'الرياضيات', classrooms: 5, load: 24 },
+      { id: 10, name: 'Omar Ali', subject: 'Math', subject_ar: 'الرياضيات', classrooms: 3, load: 15 },
+    ],
+    unassigned: [{ classroom: '4-C', subject: 'Arabic', subject_ar: 'العربية' }, { classroom: '4-B', subject: 'Arabic', subject_ar: 'العربية' }],
+    shortages: [{ subject: 'Arabic', subject_ar: 'العربية', periods: 12, teachers_needed: 1, teachers_available: 0, teachers_missing: 1 }],
+  }
+
+  it('previews who would teach what, with the missing teachers, then applies it', async () => {
+    api.post.mockResolvedValueOnce({ data: { data: preview } }).mockResolvedValueOnce({ data: { data: { ...preview, dry_run: false } } })
+    renderPage(<TeachingAssignmentsPage />)
+    await screen.findByText('Sara Khaled', { selector: 'td' })
+    fireEvent.click(screen.getByRole('button', { name: 'Distribute automatically' }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByLabelText('Maximum periods per teacher per week')).toHaveValue(24)
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Preview' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/teaching-assignments/auto', { max_load: 24, dry_run: true }))
+    expect(await within(dialog).findByText('40 assignments will be made with 2 teachers.')).toBeInTheDocument()
+    expect(within(dialog).getByText('2 subjects of classrooms still have no teacher.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Arabic: 1 more teacher needed (12 periods).')).toBeInTheDocument()
+    expect(within(dialog).getByText('Omar Ali')).toBeInTheDocument()
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Apply the distribution' }))
+    await waitFor(() => expect(api.post).toHaveBeenLastCalledWith('/teaching-assignments/auto', { max_load: 24 }))
+    expect(await within(dialog).findByText('40 assignments were made.')).toBeInTheDocument()
+  })
+
+  it('sends the maximum load that was typed and shows the server error', async () => {
+    api.post.mockRejectedValue({ response: { status: 422, data: { message: 'The max load must be between 8 and 40.' } } })
+    renderPage(<TeachingAssignmentsPage />)
+    await screen.findByText('Sara Khaled', { selector: 'td' })
+    fireEvent.click(screen.getByRole('button', { name: 'Distribute automatically' }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.change(within(dialog).getByLabelText('Maximum periods per teacher per week'), { target: { value: '18' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Preview' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/teaching-assignments/auto', { max_load: 18, dry_run: true }))
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent('The max load must be between 8 and 40.')
+  })
+})
