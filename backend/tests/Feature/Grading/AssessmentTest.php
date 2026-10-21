@@ -140,6 +140,20 @@ class AssessmentTest extends AcademicTestCase
         $this->getJson('/api/assessments?term_id=999')->assertOk()->assertJsonCount(0, 'data');
     }
 
+    public function test_the_progress_ignores_the_scores_of_deleted_students(): void
+    {
+        $quiz = $this->assessment();
+        foreach ($this->students as $student) {
+            AssessmentScore::create(['assessment_id' => $quiz->id, 'student_id' => $student->id, 'score' => 10]);
+        }
+        $this->students[2]->delete();
+        Sanctum::actingAs($this->teacher);
+
+        $row = $this->getJson('/api/assessments')->assertOk()->json('data.0');
+        $this->assertSame(2, $row['students']);
+        $this->assertSame(2, $row['scored']);
+    }
+
     public function test_a_teacher_does_not_see_the_assessments_of_another_teacher(): void
     {
         $this->assessment();

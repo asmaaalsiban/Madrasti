@@ -29,7 +29,8 @@ class AssessmentController extends Controller
         $user = $request->user();
 
         $query = Assessment::query()->with(self::WITH)
-            ->withCount(['scores as scored_count' => fn ($q) => $q->whereNotNull('score')])
+            // Only students who still exist: the score of a deleted student must not make the progress exceed the class size.
+            ->withCount(['scores as scored_count' => fn ($q) => $q->whereNotNull('score')->whereHas('student')])
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('teacher_id', $user->id))
             ->orderByDesc('held_on')->orderByDesc('id');
         foreach (['classroom_id', 'subject_id', 'term_id'] as $column) {
