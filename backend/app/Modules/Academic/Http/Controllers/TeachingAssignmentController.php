@@ -7,6 +7,8 @@ namespace App\Modules\Academic\Http\Controllers;
 use App\Modules\Academic\Http\Requests\TeachingAssignmentRequest;
 use App\Modules\Academic\Http\Resources\TeachingAssignmentResource;
 use App\Modules\Academic\Models\TeachingAssignment;
+use App\Modules\Academic\Services\AutoTeachingAssigner;
+use App\Modules\Academic\Services\TeacherPlanner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,6 +32,15 @@ class TeachingAssignmentController extends AcademicController
         Gate::authorize('create', TeachingAssignment::class);
 
         return (new TeachingAssignmentResource(TeachingAssignment::create($request->validated())->load($this->with)))->response()->setStatusCode(201);
+    }
+
+    /** Gives every subject of every classroom a teacher, where there is none yet (preview with dry_run). */
+    public function auto(Request $request, AutoTeachingAssigner $assigner, TeacherPlanner $planner): JsonResponse
+    {
+        Gate::authorize('create', TeachingAssignment::class);
+        $data = $request->validate(['max_load' => ['nullable', 'integer', 'between:8,40'], 'dry_run' => ['sometimes', 'boolean']]);
+
+        return response()->json(['data' => $assigner->handle((int) ($data['max_load'] ?? $planner->maxLoad()), $request->boolean('dry_run'))]);
     }
 
     public function update(TeachingAssignmentRequest $request, TeachingAssignment $teachingAssignment): TeachingAssignmentResource
