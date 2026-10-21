@@ -264,5 +264,18 @@
     "showDates": "عرض التواريخ",
     "hideDates": "إخفاء التواريخ",
     "loading": "جارٍ التحميل…"
+  },
+  "department": {
+    "title": "القسم: {{subject}}",
+    "cardTitle": "قسمي",
+    "cardHint": "معلمو مادتك والشعب التي يدرّسونها.",
+    "teacher": "المعلم",
+    "homeroom": "مربي صف",
+    "classrooms": "يدرّس",
+    "attendanceToday": "تحضير اليوم",
+    "daysRecorded": "أيام التحضير (30 يوم)",
+    "recorded": "تم",
+    "notYet": "لم يتم بعد",
+    "empty": "لا يوجد معلمون في قسمك بعد."
   }
 }

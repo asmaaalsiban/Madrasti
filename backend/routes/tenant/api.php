@@ -11,6 +11,7 @@ use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
@@ -62,3 +63,6 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->
 
 // One student's days: admin, the homeroom teacher, the student and the student's parents (checked by a gate).
 Route::middleware('school-user')->get('attendance/students/{student}', [AttendanceReportController::class, 'student']);
+
+// A head of department sees the teachers of their subject (the controller checks the staff type).
+Route::middleware(['school-user', 'role:teacher'])->get('department', DepartmentController::class);
