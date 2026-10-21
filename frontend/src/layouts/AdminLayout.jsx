@@ -16,6 +16,8 @@ const NAV = [
   ['/admin/subjects', 'subjects'],
   ['/admin/curriculum', 'curriculum'],
   ['/admin/terms', 'terms'],
+  ['/admin/school-day', 'schoolDay'],
+  ['/admin/timetable', 'timetable'],
   ['/admin/teaching', 'teaching'],
   ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],

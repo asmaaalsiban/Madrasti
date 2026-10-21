@@ -76,7 +76,9 @@
       "teaching": "Teacher assignment",
       "grades": "Grades",
       "buildings": "Buildings",
-      "curriculum": "Curriculum"
+      "curriculum": "Curriculum",
+      "schoolDay": "School day",
+      "timetable": "Timetable"
     },
     "actions": {
       "add": "Add",
@@ -455,5 +457,46 @@
     "subject": "Subject",
     "classrooms": "Sections",
     "load": "Periods"
+  },
+  "days": {
+    "0": "Sunday",
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday"
+  },
+  "schoolDay": {
+    "title": "School day",
+    "help": "The school days, the periods of a day and their times. Every section uses the same bells.",
+    "days": "School days",
+    "periodsPerDay": "Periods per day",
+    "startsAt": "First period starts at",
+    "periodMinutes": "Period length (minutes)",
+    "gapMinutes": "Break between periods (minutes)",
+    "longBreakAfter": "Break after period",
+    "longBreakHint": "Optional: a longer break after one period (e.g. the 3rd). Leave empty for none.",
+    "longBreakMinutes": "Long break (minutes)",
+    "preview": "A school day",
+    "period": "Period {{number}}",
+    "saved": "School day saved."
+  },
+  "timetable": {
+    "title": "Timetable",
+    "generate": "Generate the timetable",
+    "byClassroom": "By classroom",
+    "byTeacher": "By teacher",
+    "teacher": "Teacher",
+    "locked": "Locked",
+    "noPeriods": "Set up the school day first, then generate the timetable.",
+    "generateTitle": "Generate the timetable",
+    "generateHelp": "Builds the week of every section from the teacher assignments: no teacher in two places, no change of building between two periods, every subject spread over the days. Locked lessons stay. Preview first, nothing is saved until you apply.",
+    "canPlace": "{{placed}} of {{total}} lessons can be placed.",
+    "saved": "The timetable was saved: {{count}} lessons.",
+    "unplaced": "These lessons could not be placed:",
+    "withoutTeacher": "These subjects have no teacher yet (distribute the teachers first):",
+    "noTeacher": "no teacher assigned",
+    "apply": "Apply the timetable"
   }
 }
