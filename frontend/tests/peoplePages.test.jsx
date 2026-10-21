@@ -180,6 +180,20 @@ describe('StudentsPage', () => {
     expect(screen.getByLabelText('Parent email')).toBeInTheDocument()
   })
 
+  it('shows only the students of the classroom picked in the filter', async () => {
+    serve({ students: [student], classrooms: [{ id: 3, name: '6-A' }, { id: 4, name: '6-B' }] })
+    renderPage(<StudentsPage />)
+    await screen.findByText('S-1001')
+    expect(api.get).toHaveBeenCalledWith('/students', { params: expect.not.objectContaining({ classroom_id: expect.anything() }) })
+
+    await screen.findByRole('option', { name: '6-A' })
+    fireEvent.change(screen.getByLabelText('Filter by classroom'), { target: { value: '3' } })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/students', { params: expect.objectContaining({ classroom_id: '3' }) }))
+
+    fireEvent.change(screen.getByLabelText('Filter by classroom'), { target: { value: '' } })
+    await waitFor(() => expect(api.get).toHaveBeenLastCalledWith('/students', { params: expect.not.objectContaining({ classroom_id: expect.anything() }) }))
+  })
+
   it('fills the parent fields from an existing parent found by search', async () => {
     serve({ parents: [dad] })
     renderPage(<StudentsPage />)
@@ -217,7 +231,7 @@ describe('StudentsPage', () => {
     fireEvent.change(screen.getByLabelText('Name (English)'), { target: { value: 'Sara' } })
     fireEvent.change(screen.getByLabelText('Parent email'), { target: { value: 'mum@mail.test' } })
     fireEvent.change(screen.getByLabelText('Parent phone'), { target: { value: '0599555555' } })
-    await screen.findByRole('option', { name: '1-A' })
+    await within(screen.getByRole('dialog')).findByRole('option', { name: '1-A' })
     fireEvent.change(screen.getByLabelText('Classroom'), { target: { value: '3' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 

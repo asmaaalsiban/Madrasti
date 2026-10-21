@@ -180,7 +180,9 @@
       "label": "Find an existing parent",
       "placeholder": "Name, phone or email",
       "none": "No parent found. Type the email below to create a new one."
-    }
+    },
+    "filterClassroom": "Filter by classroom",
+    "allClassrooms": "All classrooms"
   },
   "staff": {
     "title": "Staff",
