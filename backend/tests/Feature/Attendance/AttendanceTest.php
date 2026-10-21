@@ -241,7 +241,7 @@ class AttendanceTest extends AcademicTestCase
             ->assertJsonPath('data.0.late', 0)
             ->assertJsonPath('data.1.student.id', $this->students[1]->id)
             ->assertJsonPath('data.1.late', 2)
-            ->assertJsonPath('data.2.absent', 0)
+            ->assertJsonCount(2, 'data') // the student who was always present is not in the report
             ->assertJsonPath('data.0.classroom', $this->room->name);
     }
 
@@ -255,11 +255,11 @@ class AttendanceTest extends AcademicTestCase
         $this->save(['absent'], '2026-10-20');
 
         $this->getJson('/api/attendance/report?from=2026-10-10&to=2026-10-31')
-            ->assertOk()->assertJsonCount(3, 'data')->assertJsonPath('data.0.absent', 1);
+            ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.absent', 1);
         $this->getJson("/api/attendance/report?classroom_id={$other->id}")->assertForbidden();
 
         $this->actAsAdmin();
-        $this->getJson('/api/attendance/report')->assertOk()->assertJsonCount(4, 'data');
+        $this->getJson('/api/attendance/report')->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.absent', 2);
     }
 
     public function test_the_student_detail_lists_the_dates_of_absence(): void
@@ -350,5 +350,16 @@ class AttendanceTest extends AcademicTestCase
         $this->students[2]->delete();
         Sanctum::actingAs($this->teacher);
         $this->save([])->assertUnprocessable();
+    }
+
+    public function test_a_late_only_student_is_in_the_report_and_a_clean_class_gives_an_empty_report(): void
+    {
+        Sanctum::actingAs($this->teacher);
+        $this->save(['present', 'present', 'present'], '2026-10-19');
+        $this->getJson('/api/attendance/report')->assertOk()->assertJsonCount(0, 'data');
+
+        $this->save(['present', 'late', 'present'], '2026-10-20');
+        $this->getJson('/api/attendance/report')->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.student.id', $this->students[1]->id)->assertJsonPath('data.0.absent', 0)->assertJsonPath('data.0.late', 1);
     }
 }

@@ -264,7 +264,8 @@
     "childSummary": "غياب: {{absent}} · تأخر: {{late}}",
     "showDates": "عرض التواريخ",
     "hideDates": "إخفاء التواريخ",
-    "loading": "جارٍ التحميل…"
+    "loading": "جارٍ التحميل…",
+    "noAbsences": "لا يوجد طلاب لديهم غياب أو تأخر في هذه الفترة."
   },
   "department": {
     "title": "القسم: {{subject}}",

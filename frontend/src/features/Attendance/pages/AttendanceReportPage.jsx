@@ -76,7 +76,7 @@ export default function AttendanceReportPage() {
             ))}
           </tbody>
         </table>
-        {!report.isLoading && rows.length === 0 && <p className="p-6 text-center text-slate-500">{t('admin.actions.empty')}</p>}
+        {!report.isLoading && rows.length === 0 && <p className="p-6 text-center text-slate-500">{t('attendance.noAbsences')}</p>}
       </div>
 
       {meta?.last_page > 1 && (

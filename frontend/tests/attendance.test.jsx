@@ -152,6 +152,14 @@ describe('AttendanceReportPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('says so when nobody was absent or late', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url === '/attendance/report'
+      ? { data: { data: [], meta: { current_page: 1, last_page: 1, from: '2026-09-01', to: '2027-06-30' } } }
+      : { data: { data: [room] } }))
+    renderPage(<AttendanceReportPage />)
+    expect(await screen.findByText('No student was absent or late in this period.')).toBeInTheDocument()
+  })
+
   it('filters by classroom and dates', async () => {
     serveReport()
     renderPage(<AttendanceReportPage />)

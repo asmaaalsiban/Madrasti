@@ -264,7 +264,8 @@
     "childSummary": "Absent: {{absent}} · Late: {{late}}",
     "showDates": "Show dates",
     "hideDates": "Hide dates",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "noAbsences": "No student was absent or late in this period."
   },
   "department": {
     "title": "Department: {{subject}}",
