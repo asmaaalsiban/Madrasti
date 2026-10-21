@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Http\Requests;
 
 use App\Models\User;
+use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\GradeLevelSubject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Shared\Enums\StaffType;
 use Illuminate\Contracts\Validation\Validator;
@@ -37,6 +39,13 @@ class TeachingAssignmentRequest extends FormRequest
                 ->when($this->route('teaching_assignment'), fn ($q, $id) => $q->whereKeyNot($id))->exists();
             if ($taken) {
                 $validator->errors()->add('subject_id', __('academic.subject_already_taught'));
+            }
+
+            // Once a grade has a curriculum, only its subjects can be assigned to its classrooms.
+            $gradeId = Classroom::whereKey($this->input('classroom_id'))->value('grade_level_id');
+            $curriculum = GradeLevelSubject::where('grade_level_id', $gradeId);
+            if ((clone $curriculum)->exists() && ! (clone $curriculum)->where('subject_id', $this->input('subject_id'))->exists()) {
+                $validator->errors()->add('subject_id', __('academic.subject_not_in_curriculum'));
             }
 
             $valid = User::whereKey($this->input('teacher_id'))->where('is_active', true)

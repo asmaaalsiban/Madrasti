@@ -75,7 +75,8 @@
       "terms": "Terms",
       "teaching": "Teacher assignment",
       "grades": "Grades",
-      "buildings": "Buildings"
+      "buildings": "Buildings",
+      "curriculum": "Curriculum"
     },
     "actions": {
       "add": "Add",
@@ -415,5 +416,28 @@
     "willCreate": "{{created}} sections will be created, {{placed}} of them placed in a room.",
     "created": "{{count}} classrooms were created.",
     "unplaced": "No room for: {{names}}. You can place them later from the classrooms page."
+  },
+  "curriculum": {
+    "title": "Curriculum",
+    "help": "The subjects of every grade and their periods per week. An empty box means the grade does not have the subject.",
+    "subjectsLink": "Add subjects",
+    "subject": "Subject",
+    "periodsPerWeek": "Periods per week",
+    "total": "Total periods",
+    "complete": "Complete",
+    "missing": "Missing {{count}}",
+    "over": "Over by {{count}}",
+    "saved": "Curriculum saved.",
+    "copyGrade": "Copy a grade",
+    "standardPlan": "Apply the standard plan (grades 1-10)",
+    "apply": "Apply",
+    "confirmPlan": "Apply the standard plan to grades 1 to 10? It adds the standard subjects and replaces the subjects and periods of these grades.",
+    "planApplied": "The standard plan was applied to {{applied}} grades and {{created}} subjects were added.",
+    "planMissing": "These grades do not exist yet: {{grades}}. Add them, then apply the plan again.",
+    "copyFrom": "Copy from",
+    "copyTo": "Copy to",
+    "copy": "Copy",
+    "copied": "The curriculum was copied to {{count}} grades.",
+    "copyWarning": "The subjects of the grades you tick are replaced."
   }
 }
