@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Building;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
+use App\Modules\Academic\Models\Floor;
 use App\Modules\Academic\Models\GradeLevel;
+use App\Modules\Academic\Models\Room;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
@@ -39,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class] as $model) {
+        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class, Building::class, Floor::class, Room::class] as $model) {
             Gate::policy($model, AcademicPolicy::class);
         }
 

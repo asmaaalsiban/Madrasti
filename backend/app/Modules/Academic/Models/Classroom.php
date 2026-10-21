@@ -19,7 +19,7 @@ class Classroom extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['name', 'grade_level_id', 'academic_year_id', 'homeroom_teacher_id', 'capacity'];
+    protected $fillable = ['name', 'grade_level_id', 'academic_year_id', 'homeroom_teacher_id', 'capacity', 'room_id'];
 
     public function gradeLevel(): BelongsTo
     {
@@ -34,6 +34,11 @@ class Classroom extends Model
     public function homeroomTeacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'homeroom_teacher_id');
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class);
     }
 
     protected static function newFactory(): ClassroomFactory
