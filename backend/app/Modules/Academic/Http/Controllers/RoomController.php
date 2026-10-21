@@ -48,6 +48,7 @@ class RoomController extends Controller
     {
         return [
             'id' => $room->id, 'name' => $room->name, 'kind' => $room->kind, 'capacity' => $room->capacity,
+            'label' => collect([$room->floor?->building?->name, $room->floor?->name, $room->name])->filter()->implode(' · '),
             'floor' => $room->floor?->only(['id', 'name', 'level']),
             'building' => $room->floor?->building?->only(['id', 'name']),
         ];

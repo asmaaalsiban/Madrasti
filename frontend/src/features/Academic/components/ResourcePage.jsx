@@ -30,7 +30,8 @@ function SelectField({ field, value, onChange, form }) {
 // rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
-export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved }) {
+// actions: extra buttons / links next to the Add button.
+export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved, actions = null }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const { useList, save, remove } = useResource(path)
@@ -98,9 +99,12 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t(title)}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => openForm(null)}>
-          {t('admin.actions.add')}
-        </button>
+        <div className="flex items-center gap-2">
+          {actions}
+          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => openForm(null)}>
+            {t('admin.actions.add')}
+          </button>
+        </div>
       </div>
       {notice && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{notice}</p>}
       {status && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{status}</p>}

@@ -51,6 +51,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);
+    Route::post('classrooms/generate', [ClassroomController::class, 'generate']);
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('terms', TermController::class);

@@ -19,7 +19,7 @@ class Classroom extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['name', 'grade_level_id', 'academic_year_id', 'homeroom_teacher_id', 'capacity', 'room_id'];
+    protected $fillable = ['name', 'grade_level_id', 'academic_year_id', 'homeroom_teacher_id', 'capacity', 'gender', 'room_id'];
 
     public function gradeLevel(): BelongsTo
     {

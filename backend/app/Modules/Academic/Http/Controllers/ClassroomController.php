@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Http\Controllers;
 
 use App\Modules\Academic\Http\Requests\ClassroomRequest;
+use App\Modules\Academic\Http\Requests\GenerateClassroomsRequest;
 use App\Modules\Academic\Http\Resources\ClassroomResource;
+use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Services\ClassroomGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +27,7 @@ class ClassroomController extends AcademicController
 
     protected array $searchable = ['name'];
 
-    protected array $with = ['gradeLevel', 'academicYear', 'homeroomTeacher'];
+    protected array $with = ['gradeLevel', 'academicYear', 'homeroomTeacher', 'room.floor.building'];
 
     protected string $orderBy = 'name';
 
@@ -34,6 +37,18 @@ class ClassroomController extends AcademicController
         $classroom = Classroom::create($request->validated());
 
         return (new ClassroomResource($classroom->load($this->with)))->response()->setStatusCode(201);
+    }
+
+    /** Creates the sections of every grade from a plan (sections per grade and gender) and places them in rooms. */
+    public function generate(GenerateClassroomsRequest $request, ClassroomGenerator $generator): JsonResponse
+    {
+        Gate::authorize('create', Classroom::class);
+
+        return response()->json(['data' => $generator->handle(
+            AcademicYear::findOrFail($request->integer('academic_year_id')),
+            $request->validated('plan'),
+            $request->boolean('dry_run'),
+        )]);
     }
 
     public function update(ClassroomRequest $request, Classroom $classroom): ClassroomResource

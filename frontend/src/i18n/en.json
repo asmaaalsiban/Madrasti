@@ -121,7 +121,9 @@
       "classroom": "Classroom",
       "subject": "Subject",
       "teacher": "Teacher",
-      "weeklyPeriods": "Periods per week"
+      "weeklyPeriods": "Periods per week",
+      "gender": "Students",
+      "room": "Room"
     },
     "overview": {
       "title": "Overview"
@@ -399,5 +401,19 @@
       "female": "Girls",
       "mixed": "Mixed"
     }
+  },
+  "generate": {
+    "title": "Generate classrooms",
+    "toClassrooms": "Back to classrooms",
+    "help": "For every grade, type how many sections it has. Mixed, boys and girls sections are placed in free classrooms of the floors that serve the grade. Nothing is saved until you confirm.",
+    "mixed": "Mixed",
+    "boys": "Boys",
+    "girls": "Girls",
+    "total": "Total: {{count}} sections",
+    "preview": "Preview",
+    "create": "Create classrooms",
+    "willCreate": "{{created}} sections will be created, {{placed}} of them placed in a room.",
+    "created": "{{count}} classrooms were created.",
+    "unplaced": "No room for: {{names}}. You can place them later from the classrooms page."
   }
 }

@@ -20,6 +20,8 @@ class ClassroomResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'capacity' => $this->capacity,
+            'gender' => $this->gender,
+            'room' => $this->room ? ['id' => $this->room->id, 'name' => $this->room->name, 'floor' => $this->room->floor?->name, 'building' => $this->room->floor?->building?->name] : null,
             'grade_level_id' => $this->grade_level_id,
             'academic_year_id' => $this->academic_year_id,
             'grade_level' => $this->gradeLevel?->only(['id', 'name_ar', 'name_en']),

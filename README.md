@@ -95,6 +95,10 @@ After updating an existing install run `php artisan tenants:migrate` once (adds 
 
 Admin menu **Buildings**: a school can have several buildings (e.g. boys, girls, secondary), each marked for boys, girls or mixed. A building has floors (level 0 = ground floor); a floor has its own gender (or the building's), the **range of grades** it serves (e.g. grade 6 to 10) and **how many classrooms, science labs and computer labs** it has. The rooms are created from these numbers with generated names (classrooms `001`, `102`...; labs `SL-0-1`, `CL-1-2`) which can be renamed (`PUT /api/rooms/{id}`). Raising a number adds rooms; lowering it removes only unused rooms (a room where a classroom stays, or that a timetable uses, is never removed: the change is refused as a whole). The next step generates the classrooms (sections) of each grade and places them in these rooms.
 
+## Generating the classrooms
+
+`php artisan school:seed-grades <school>` adds the standard levels in order (buds, KG1, KG2, grades 1 to 12 where 12 is the Tawjihi; an existing level keeps its name and only gets its code and place). Then admin menu **Classrooms > Generate classrooms**: for every grade type how many *mixed*, *boys* and *girls* sections it has, press **Preview**, then **Create classrooms**. Sections are named `<code>-<letter>` (`KG1-A`, `4-B`) and each is placed in a free classroom of a floor that serves its grade and fits its gender (a floor of the exact gender is preferred over a mixed one). Sections that find no room are still created and listed so they can be placed by hand (the classroom form has **Students** and **Room** fields; a room hosts one classroom per academic year). Only what is missing is created, so running it again adds nothing; a section without a gender counts as mixed.
+
 ## Terms and teacher assignment
 
 Admin menu **Terms**: the terms of an academic year (inside the year, no overlap). Admin menu **Teacher assignment**: who teaches which subject in which classroom (one teacher per subject per classroom; the teacher must be an active teaching staff member of that subject). Grades are entered per term, by the assigned teacher, so both come first.
