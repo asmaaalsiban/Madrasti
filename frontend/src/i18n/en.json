@@ -439,5 +439,21 @@
     "copy": "Copy",
     "copied": "The curriculum was copied to {{count}} grades.",
     "copyWarning": "The subjects of the grades you tick are replaced."
+  },
+  "autoAssign": {
+    "button": "Distribute automatically",
+    "title": "Distribute the teachers",
+    "help": "Every subject of the curriculum gets a teacher in every classroom that has none yet. A teacher stays in one building and takes as many sections as fit in their weekly load. Existing assignments are kept.",
+    "maxLoad": "Maximum periods per teacher per week",
+    "willAssign": "{{count}} assignments will be made with {{teachers}} teachers.",
+    "assigned": "{{count}} assignments were made.",
+    "unassigned": "{{count}} subjects of classrooms still have no teacher.",
+    "shortage": "{{subject}}: {{count}} more teacher needed ({{periods}} periods).",
+    "apply": "Apply the distribution",
+    "close": "Close",
+    "teacher": "Teacher",
+    "subject": "Subject",
+    "classrooms": "Sections",
+    "load": "Periods"
   }
 }
