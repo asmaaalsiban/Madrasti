@@ -4,6 +4,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import GuardianPicker from '../components/GuardianPicker'
 import ResourcePage from '../../Academic/components/ResourcePage'
+import { useResource } from '../../Academic/hooks/useResource'
 
 const fields = [
   { name: 'student_number', label: 'people.fields.studentNumber' },
@@ -51,10 +52,21 @@ const rowActions = [
 
 export default function StudentsPage() {
   const { t } = useTranslation()
+  const [classroom, setClassroom] = useState('')
+  const classrooms = useResource('classrooms').useList({ per_page: 100 })
   const [account, setAccount] = useState(null)
   return (
     <>
+      <label className="mb-3 block text-sm">
+        {t('people.filterClassroom')}
+        <select className="mt-1 block rounded border p-2" value={classroom} onChange={(e) => setClassroom(e.target.value)}>
+          <option value="">{t('people.allClassrooms')}</option>
+          {(classrooms.data?.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </label>
       <ResourcePage
+        key={classroom}
+        filters={classroom ? { classroom_id: classroom } : {}}
         path="students"
         title="people.students"
         columns={columns}
