@@ -69,6 +69,9 @@ class StaffController extends AcademicController
             $types = array_values(array_intersect($types ?? StaffType::homeroomValues(), StaffType::homeroomValues()));
         }
 
+        if ($request->filled('subject_id')) {
+            $query->whereHas('staffProfile', fn (Builder $q) => $q->where('subject_id', (int) $request->query('subject_id')));
+        }
         if ($request->boolean('homeroom')) {
             $query->where('is_active', true);
         }

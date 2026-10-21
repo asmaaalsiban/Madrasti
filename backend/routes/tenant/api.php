@@ -8,6 +8,8 @@ use App\Modules\Academic\Http\Controllers\ClassroomController;
 use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
+use App\Modules\Academic\Http\Controllers\TeachingAssignmentController;
+use App\Modules\Academic\Http\Controllers\TermController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
@@ -44,6 +46,8 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::apiResource('classrooms', ClassroomController::class);
     Route::apiResource('subjects', SubjectController::class);
+    Route::apiResource('terms', TermController::class);
+    Route::apiResource('teaching-assignments', TeachingAssignmentController::class);
 
     // People: staff (every kind of school employee), students and their accounts.
     Route::get('staff-types', StaffTypeController::class);

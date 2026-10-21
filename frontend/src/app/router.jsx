@@ -12,6 +12,8 @@ import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
 import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
 import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
 import OverviewPage from '../features/Academic/pages/OverviewPage'
+import TeachingAssignmentsPage from '../features/Academic/pages/TeachingAssignmentsPage'
+import TermsPage from '../features/Academic/pages/TermsPage'
 import SubjectsPage from '../features/Academic/pages/SubjectsPage'
 import RoleHome from '../features/Auth/pages/RoleHome'
 import AttendanceReportPage from '../features/Attendance/pages/AttendanceReportPage'
@@ -62,6 +64,8 @@ export const routes = [
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
               { path: '/admin/subjects', element: <SubjectsPage /> },
+              { path: '/admin/terms', element: <TermsPage /> },
+              { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
               { path: '/admin/attendance', element: <TakeAttendancePage /> },

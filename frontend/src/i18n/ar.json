@@ -71,7 +71,9 @@
       "students": "الطلاب",
       "staff": "الكادر",
       "attendance": "تحضير الطلاب",
-      "attendanceReport": "تقرير الغياب"
+      "attendanceReport": "تقرير الغياب",
+      "terms": "الفصول الدراسية",
+      "teaching": "توزيع المعلمين"
     },
     "actions": {
       "add": "إضافة",
@@ -113,13 +115,23 @@
       "gradeLevel": "الصف",
       "academicYear": "السنة الدراسية",
       "capacity": "السعة",
-      "select": "اختر..."
+      "select": "اختر...",
+      "classroom": "الشعبة",
+      "subject": "المادة",
+      "teacher": "المعلم",
+      "weeklyPeriods": "الحصص في الأسبوع"
     },
     "overview": {
       "title": "نظرة عامة"
     },
     "yes": "نعم",
-    "no": "لا"
+    "no": "لا",
+    "terms": {
+      "title": "الفصول الدراسية"
+    },
+    "teaching": {
+      "title": "توزيع المعلمين على المواد والشعب"
+    }
   },
   "central": {
     "createAccount": "إنشاء حساب",

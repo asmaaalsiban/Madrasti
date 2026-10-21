@@ -58,6 +58,9 @@ class SeedDemoSchool
             'starts_on' => '2026-09-01', 'ends_on' => '2027-06-30', 'is_current' => true,
         ]);
 
+        $this->firstOrInsert('terms', ['academic_year_id' => $yearId, 'name' => 'الفصل الأول'], ['starts_on' => '2026-09-01', 'ends_on' => '2027-01-31']);
+        $this->firstOrInsert('terms', ['academic_year_id' => $yearId, 'name' => 'الفصل الثاني'], ['starts_on' => '2027-02-01', 'ends_on' => '2027-06-30']);
+
         foreach (self::SUBJECTS as $code => [$ar, $en]) {
             $this->firstOrInsert('subjects', ['code' => $code], ['name_ar' => $ar, 'name_en' => $en]);
         }

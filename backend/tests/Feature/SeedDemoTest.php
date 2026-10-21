@@ -34,6 +34,7 @@ class SeedDemoTest extends TenantTestCase
         $this->assertSame([3], array_values(array_unique(DB::table('staff_profiles')->where('staff_type', 'teacher')->selectRaw('subject_id, count(*) as n')->groupBy('subject_id')->pluck('n')->all())), 'three teachers for each subject');
         $this->assertSame(['users' => 241, 'academic_years' => 1, 'grade_levels' => 6, 'subjects' => 8, 'classrooms' => 12, 'students' => 120], $counts);
         $this->assertSame(1, DB::table('academic_years')->where('is_current', true)->count());
+        $this->assertSame(2, DB::table('terms')->count(), 'two terms in the year');
         $this->assertSame(12, DB::table('classrooms')->whereNotNull('homeroom_teacher_id')->count());
         $this->assertSame(12, DB::table('classrooms')->distinct()->count('homeroom_teacher_id'), 'a teacher is homeroom teacher of one classroom only');
         $this->assertSame(0, DB::table('classrooms')->join('staff_profiles', 'staff_profiles.user_id', '=', 'classrooms.homeroom_teacher_id')->where('staff_type', '!=', 'teacher')->count(), 'heads supervise, they are not homeroom teachers');

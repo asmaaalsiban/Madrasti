@@ -9,6 +9,8 @@ use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\Subject;
+use App\Modules\Academic\Models\TeachingAssignment;
+use App\Modules\Academic\Models\Term;
 use App\Modules\Academic\Policies\AcademicPolicy;
 use App\Modules\People\Policies\UserPolicy;
 use App\Shared\Enums\Role;
@@ -36,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class] as $model) {
+        foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class] as $model) {
             Gate::policy($model, AcademicPolicy::class);
         }
 

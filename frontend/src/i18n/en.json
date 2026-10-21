@@ -71,7 +71,9 @@
       "students": "Students",
       "staff": "Staff",
       "attendance": "Take attendance",
-      "attendanceReport": "Absence report"
+      "attendanceReport": "Absence report",
+      "terms": "Terms",
+      "teaching": "Teacher assignment"
     },
     "actions": {
       "add": "Add",
@@ -113,13 +115,23 @@
       "gradeLevel": "Grade level",
       "academicYear": "Academic year",
       "capacity": "Capacity",
-      "select": "Select..."
+      "select": "Select...",
+      "classroom": "Classroom",
+      "subject": "Subject",
+      "teacher": "Teacher",
+      "weeklyPeriods": "Periods per week"
     },
     "overview": {
       "title": "Overview"
     },
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "terms": {
+      "title": "Terms"
+    },
+    "teaching": {
+      "title": "Teacher assignment"
+    }
   },
   "central": {
     "createAccount": "Create account",
