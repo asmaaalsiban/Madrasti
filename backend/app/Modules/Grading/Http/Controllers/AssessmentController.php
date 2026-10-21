@@ -31,6 +31,7 @@ class AssessmentController extends Controller
         $query = Assessment::query()->with(self::WITH)
             // Only students who still exist: the score of a deleted student must not make the progress exceed the class size.
             ->withCount(['scores as scored_count' => fn ($q) => $q->whereNotNull('score')->whereHas('student')])
+            ->withCount(['scores as absent_count' => fn ($q) => $q->where('status', 'absent')->whereNull('score')->whereHas('student')])
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('teacher_id', $user->id))
             ->orderByDesc('held_on')->orderByDesc('id');
         foreach (['classroom_id', 'subject_id', 'term_id'] as $column) {
@@ -65,13 +66,20 @@ class AssessmentController extends Controller
             ->join('students', 'students.id', '=', 'enrollments.student_id')->whereNull('students.deleted_at')
             ->orderBy('students.name_ar')->get(['students.id', 'students.student_number', 'students.name_ar', 'students.name_en']);
 
+        $absentThatDay = $assessment->held_on === null ? collect() : DB::table('student_attendances')
+            ->where('date', $assessment->held_on->format('Y-m-d'))->where('status', 'absent')->whereIn('student_id', $students->pluck('id'))->pluck('student_id');
+
         return response()->json(['data' => [
             'assessment' => (new AssessmentResource($assessment->load(self::WITH)))->resolve(),
             'students' => $students->map(fn ($s) => [
                 'id' => $s->id, 'student_number' => $s->student_number, 'name_ar' => $s->name_ar, 'name_en' => $s->name_en,
                 'score' => $scores->get($s->id)?->score,
+                'status' => $scores->get($s->id)?->status,
                 'remark' => $scores->get($s->id)?->remark,
+                // Hint for the teacher: the attendance of that day says the student was not at school.
+                'was_absent' => $absentThatDay->contains($s->id),
             ])->values(),
+            'pass_percent' => (float) config('grading.pass_percent'),
         ]]);
     }
 
@@ -99,16 +107,17 @@ class AssessmentController extends Controller
             foreach ($request->validated('scores') as $row) {
                 $score = isset($row['score']) && $row['score'] !== '' ? $row['score'] : null;
                 $remark = ($row['remark'] ?? '') !== '' ? $row['remark'] : null;
+                $status = $row['status'] ?? null;
                 $existing = AssessmentScore::where('assessment_id', $assessment->id)->where('student_id', $row['student_id'])->first();
 
-                if ($score === null && $remark === null) {
+                if ($score === null && $remark === null && $status === null) {
                     $existing?->delete(); // cleared
 
                     continue;
                 }
                 AssessmentScore::updateOrCreate(
                     ['assessment_id' => $assessment->id, 'student_id' => $row['student_id']],
-                    ['score' => $score, 'remark' => $remark],
+                    ['score' => $score, 'status' => $status, 'remark' => $remark],
                 );
             }
         });

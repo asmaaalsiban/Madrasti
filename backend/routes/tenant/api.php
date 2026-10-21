@@ -15,6 +15,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
+use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
@@ -76,6 +77,7 @@ Route::middleware(['school-user', 'role:teacher'])->get('department', Department
 // Grades: the teacher of the subject (or an admin) creates assessments and enters the scores.
 Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
     Route::get('grading/options', GradingOptionsController::class);
+    Route::get('grading/results', ResultsController::class);
     Route::apiResource('assessments', AssessmentController::class)->except('store', 'update');
     Route::post('assessments', [AssessmentController::class, 'store']);
     Route::put('assessments/{assessment}', [AssessmentController::class, 'update']);

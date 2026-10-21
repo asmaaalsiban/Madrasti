@@ -28,6 +28,8 @@ class AssessmentResource extends JsonResource
             'teacher' => $this->teacher?->only(['id', 'name']),
             // Progress of the score entry (only in the list).
             'scored' => $this->when(isset($this->scored_count), fn () => (int) $this->scored_count),
+            // Students who missed it and wait for a makeup exam.
+            'absent' => $this->when(isset($this->absent_count), fn () => (int) $this->absent_count),
             'students' => $this->when(isset($this->students_count), fn () => (int) $this->students_count),
         ];
     }

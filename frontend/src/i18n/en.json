@@ -330,6 +330,25 @@
       "participation": "Participation"
     },
     "classroom": "Classroom",
-    "subject": "Subject"
+    "subject": "Subject",
+    "pass": "Pass",
+    "fail": "Fail",
+    "makeupPending": "Makeup pending",
+    "notGraded": "Not graded yet",
+    "statusLabel": "Status",
+    "statusNormal": "Graded",
+    "statusAbsent": "Absent (makeup exam pending)",
+    "statusMakeup": "Makeup exam",
+    "absentThatDay": "Absent that day",
+    "markAbsent": "Mark as absent",
+    "pendingCount": "Makeup pending: {{n}}",
+    "results": "Student results",
+    "resultsTitle": "Student results: {{name}}",
+    "passedFailed": "Passed: {{passed}} · Failed: {{failed}}",
+    "passMark": "Pass mark: {{percent}}%",
+    "student": "Student",
+    "percent": "Percentage",
+    "result": "Result",
+    "gradedCount": "Graded"
   }
 }

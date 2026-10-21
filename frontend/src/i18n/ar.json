@@ -330,6 +330,25 @@
       "participation": "مشاركة"
     },
     "classroom": "الشعبة",
-    "subject": "المادة"
+    "subject": "المادة",
+    "pass": "ناجح",
+    "fail": "راسب",
+    "makeupPending": "ينتظر امتحاناً بديلاً",
+    "notGraded": "لم تُرصد علامات",
+    "statusLabel": "الحالة",
+    "statusNormal": "تم تقييمه",
+    "statusAbsent": "غائب (ينتظر امتحاناً بديلاً)",
+    "statusMakeup": "امتحان بديل",
+    "absentThatDay": "كان غائباً ذلك اليوم",
+    "markAbsent": "تسجيله غائباً",
+    "pendingCount": "ينتظر امتحاناً بديلاً: {{n}}",
+    "results": "نتائج الطلاب",
+    "resultsTitle": "نتائج الطلاب: {{name}}",
+    "passedFailed": "ناجح: {{passed}} · راسب: {{failed}}",
+    "passMark": "علامة النجاح: {{percent}}%",
+    "student": "الطالب",
+    "percent": "النسبة",
+    "result": "النتيجة",
+    "gradedCount": "عدد التقييمات"
   }
 }

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { api } from '../src/api/client'
 import AssessmentsPage from '../src/features/Grading/pages/AssessmentsPage'
+import ResultsPage from '../src/features/Grading/pages/ResultsPage'
 import ScoreSheetPage from '../src/features/Grading/pages/ScoreSheetPage'
 
 vi.mock('../src/api/client', () => ({
@@ -29,7 +30,7 @@ const options = {
   ],
   terms: [{ id: 1, name: 'First term' }, { id: 2, name: 'Second term' }],
 }
-const quiz = { id: 11, title: 'Quiz 1', type: 'quiz', max_score: 20, weight: 10, held_on: '2026-10-05', is_published: false, scored: 2, students: 3 }
+const quiz = { id: 11, title: 'Quiz 1', type: 'quiz', max_score: 20, weight: 10, held_on: '2026-10-05', is_published: false, scored: 2, students: 3, absent: 1 }
 const exam = { id: 12, title: 'Midterm', type: 'exam', max_score: 100, weight: 40, held_on: '2026-11-05', is_published: true, scored: 3, students: 3 }
 
 const serve = (rows = [quiz, exam]) => {
@@ -159,10 +160,11 @@ describe('AssessmentsPage', () => {
 describe('ScoreSheetPage', () => {
   const sheet = (published = false) => ({
     assessment: { ...quiz, is_published: published, classroom: { id: 3, name: '5-A' }, subject: { id: 7, name_ar: 'الرياضيات', name_en: 'Math' }, term: { id: 1, name: 'First term' } },
+    pass_percent: 50,
     students: [
-      { id: 21, student_number: 'S-1', name_ar: 'أحمد', name_en: 'Ahmad', score: 18, remark: null },
-      { id: 22, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla', score: null, remark: null },
-      { id: 23, student_number: 'S-3', name_ar: 'يوسف', name_en: 'Yousef', score: 14, remark: 'Good' },
+      { id: 21, student_number: 'S-1', name_ar: 'أحمد', name_en: 'Ahmad', score: 18, status: null, was_absent: false, remark: null },
+      { id: 22, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla', score: null, status: null, was_absent: false, remark: null },
+      { id: 23, student_number: 'S-3', name_ar: 'يوسف', name_en: 'Yousef', score: 14, status: null, was_absent: false, remark: 'Good' },
     ],
   })
   const open = (published) => {
@@ -189,9 +191,9 @@ describe('ScoreSheetPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/assessments/11/scores', { scores: [
-      { student_id: 21, score: null, remark: null },
-      { student_id: 22, score: 12.5, remark: null },
-      { student_id: 23, score: 14, remark: 'Great' },
+      { student_id: 21, score: null, status: null, remark: null },
+      { student_id: 22, score: 12.5, status: null, remark: null },
+      { student_id: 23, score: 14, status: null, remark: 'Great' },
     ] }))
     expect(await screen.findByText('Scores saved.')).toBeInTheDocument()
   })
@@ -224,5 +226,142 @@ describe('ScoreSheetPage', () => {
     await i18n.changeLanguage('ar')
     open()
     expect(await screen.findByRole('group', { name: 'أحمد' })).toBeInTheDocument()
+  })
+})
+
+describe('ScoreSheetPage pass / fail and makeup exams', () => {
+  const data = (over = {}) => ({
+    assessment: { ...quiz, classroom: { id: 3, name: '5-A' }, subject: { id: 7, name_ar: 'الرياضيات', name_en: 'Math' }, term: { id: 1, name: 'First term' } },
+    pass_percent: 50,
+    students: [
+      { id: 21, student_number: 'S-1', name_ar: 'أحمد', name_en: 'Ahmad', score: 18, status: null, was_absent: false, remark: null },
+      { id: 22, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla', score: 9, status: null, was_absent: false, remark: null },
+      { id: 23, student_number: 'S-3', name_ar: 'يوسف', name_en: 'Yousef', score: null, status: 'absent', was_absent: true, remark: 'Sick' },
+      { id: 24, student_number: 'S-4', name_ar: 'مريم', name_en: 'Mariam', score: null, status: null, was_absent: true, remark: null },
+    ],
+    ...over,
+  })
+  const open = () => {
+    api.get.mockResolvedValue({ data: { data: data() } })
+    renderAt('/teacher/grades/11', <ScoreSheetPage />, '/teacher/grades/:id')
+  }
+  const row = (name) => screen.getByRole('group', { name })
+
+  it('shows pass or fail next to each score (50% of the maximum) and pending for absent students', async () => {
+    open()
+    await screen.findByRole('group', { name: 'Ahmad' })
+    expect(within(row('Ahmad')).getByText('Pass')).toBeInTheDocument() // 18 / 20
+    expect(within(row('Layla')).getByText('Fail')).toBeInTheDocument() // 9 / 20 = 45%
+    expect(within(row('Yousef')).getByText('Makeup pending')).toBeInTheDocument()
+    expect(within(row('Mariam')).queryByText('Pass')).not.toBeInTheDocument()
+    expect(within(row('Mariam')).queryByText('Fail')).not.toBeInTheDocument()
+  })
+
+  it('updates the result while typing, and exactly 50% passes', async () => {
+    open()
+    await screen.findByRole('group', { name: 'Ahmad' })
+    fireEvent.change(within(row('Layla')).getByLabelText('Score'), { target: { value: '10' } })
+    expect(within(row('Layla')).getByText('Pass')).toBeInTheDocument()
+    fireEvent.change(within(row('Layla')).getByLabelText('Score'), { target: { value: '9.9' } })
+    expect(within(row('Layla')).getByText('Fail')).toBeInTheDocument()
+  })
+
+  it('an absent student has no score box and the status can be changed to a makeup exam', async () => {
+    open()
+    api.put.mockResolvedValue({ data: { message: 'ok' } })
+    await screen.findByRole('group', { name: 'Ahmad' })
+    expect(within(row('Yousef')).getByLabelText('Score')).toBeDisabled()
+
+    fireEvent.change(within(row('Yousef')).getByLabelText('Status'), { target: { value: 'makeup' } })
+    expect(within(row('Yousef')).getByLabelText('Score')).not.toBeDisabled()
+    fireEvent.change(within(row('Yousef')).getByLabelText('Score'), { target: { value: '15' } })
+    expect(within(row('Yousef')).getByText('Pass')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/assessments/11/scores', { scores: expect.arrayContaining([
+      { student_id: 23, score: 15, status: 'makeup', remark: 'Sick' },
+    ]) }))
+  })
+
+  it('choosing absent clears the score and saves it without one', async () => {
+    open()
+    api.put.mockResolvedValue({ data: { message: 'ok' } })
+    await screen.findByRole('group', { name: 'Ahmad' })
+    fireEvent.change(within(row('Layla')).getByLabelText('Status'), { target: { value: 'absent' } })
+    expect(within(row('Layla')).getByLabelText('Score')).toHaveValue(null)
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/assessments/11/scores', { scores: expect.arrayContaining([
+      { student_id: 22, score: null, status: 'absent', remark: null },
+    ]) }))
+  })
+
+  it('hints that the attendance says the student was absent that day, with a one-click mark', async () => {
+    open()
+    await screen.findByRole('group', { name: 'Mariam' })
+    expect(within(row('Yousef')).queryByRole('button', { name: 'Mark as absent' })).not.toBeInTheDocument() // already marked
+    expect(within(row('Ahmad')).queryByText('Absent that day')).not.toBeInTheDocument()
+    expect(within(row('Mariam')).getByText('Absent that day')).toBeInTheDocument()
+    fireEvent.click(within(row('Mariam')).getByRole('button', { name: 'Mark as absent' }))
+    expect(within(row('Mariam')).getByText('Makeup pending')).toBeInTheDocument()
+  })
+
+  it('says how many makeup exams are pending in the summary', async () => {
+    open()
+    expect(await screen.findByText(/Makeup pending: 1/)).toBeInTheDocument()
+  })
+})
+
+describe('AssessmentsPage makeup reminder and results link', () => {
+  it('shows how many students wait for a makeup exam and links to the student results', async () => {
+    serve()
+    renderAt('/teacher/grades?classroom=3&subject=7&term=1', <AssessmentsPage />)
+    const row = await screen.findByRole('row', { name: /Quiz 1/ })
+    expect(within(row).getByText('Makeup pending: 1')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Midterm/ })).queryByText(/Makeup pending/)).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Student results' })).toHaveAttribute('href', '/teacher/grades/results?classroom=3&subject=7&term=1')
+  })
+})
+
+describe('ResultsPage', () => {
+  const results = {
+    pass_percent: 50,
+    students: [
+      { student: { id: 21, student_number: 'S-1', name_ar: 'أحمد', name_en: 'Ahmad' }, percent: 52, passed: true, graded: 3, pending: 0 },
+      { student: { id: 22, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla' }, percent: 30.5, passed: false, graded: 3, pending: 0 },
+      { student: { id: 23, student_number: 'S-3', name_ar: 'يوسف', name_en: 'Yousef' }, percent: 90, passed: true, graded: 1, pending: 1 },
+      { student: { id: 24, student_number: 'S-4', name_ar: 'مريم', name_en: 'Mariam' }, percent: null, passed: null, graded: 0, pending: 0 },
+    ],
+  }
+  beforeEach(() => {
+    api.get.mockImplementation((url) => {
+      if (url === '/grading/options') return Promise.resolve({ data: { data: options } })
+      if (url === '/grading/results') return Promise.resolve({ data: { data: results } })
+      return Promise.resolve({ data: { data: [] } })
+    })
+  })
+
+  it('lists every student with the percentage and pass or fail', async () => {
+    renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)
+    expect(await screen.findByRole('row', { name: /Ahmad/ })).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/grading/results', { params: { classroom_id: 3, subject_id: 7, term_id: 1 } })
+    expect(within(screen.getByRole('row', { name: /Ahmad/ })).getByText('Pass')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Ahmad/ })).getByText('52%')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Layla/ })).getByText('Fail')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Layla/ })).getByText('30.5%')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Yousef/ })).getByText('Makeup pending')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Mariam/ })).getByText('Not graded yet')).toBeInTheDocument()
+  })
+
+  it('counts passes and fails and shows the pass mark', async () => {
+    renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)
+    expect(await screen.findByText('Passed: 2 · Failed: 1')).toBeInTheDocument()
+    expect(screen.getByText('Pass mark: 50%')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Student results: 5-A · Math' })).toBeInTheDocument()
+  })
+
+  it('has Arabic labels', async () => {
+    await i18n.changeLanguage('ar')
+    renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)
+    expect((await screen.findAllByText('ناجح')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('راسب').length).toBeGreaterThan(0)
   })
 })

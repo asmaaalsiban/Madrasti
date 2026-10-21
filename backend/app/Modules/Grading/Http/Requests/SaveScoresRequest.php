@@ -25,6 +25,7 @@ class SaveScoresRequest extends FormRequest
             'scores' => ['required', 'array', 'max:300'],
             'scores.*.student_id' => ['required', 'integer', 'distinct'],
             'scores.*.score' => ['nullable', 'numeric', 'min:0'],
+            'scores.*.status' => ['nullable', 'in:absent,makeup'],
             'scores.*.remark' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -43,6 +44,9 @@ class SaveScoresRequest extends FormRequest
             foreach ($this->input('scores') as $i => $row) {
                 if (! in_array((int) $row['student_id'], $enrolled, true)) {
                     $validator->errors()->add("scores.$i.student_id", __('grading.student_not_in_classroom'));
+                }
+                if (($row['status'] ?? null) === 'absent' && isset($row['score']) && $row['score'] !== '') {
+                    $validator->errors()->add("scores.$i.status", __('grading.absent_has_score'));
                 }
                 if (isset($row['score']) && $row['score'] !== '' && (float) $row['score'] > $assessment->max_score) {
                     $validator->errors()->add("scores.$i.score", __('grading.score_above_max', ['max' => $assessment->max_score]));

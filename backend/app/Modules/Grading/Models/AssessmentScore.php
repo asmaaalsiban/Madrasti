@@ -17,7 +17,7 @@ class AssessmentScore extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['assessment_id', 'student_id', 'score', 'remark'];
+    protected $fillable = ['assessment_id', 'student_id', 'score', 'status', 'remark'];
 
     /**
      * @return array<string, string>

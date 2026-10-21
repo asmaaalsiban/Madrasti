@@ -14,6 +14,7 @@ use App\Modules\Grading\Models\Assessment;
 use App\Modules\Grading\Models\AssessmentScore;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Academic\AcademicTestCase;
 
@@ -259,5 +260,60 @@ class AssessmentTest extends AcademicTestCase
             $this->getJson('/api/grading/options')->assertForbidden();
             $this->putJson("/api/assessments/{$quiz->id}/scores", ['scores' => []])->assertForbidden();
         }
+    }
+
+    public function test_a_student_can_be_marked_absent_to_take_a_makeup_exam_later(): void
+    {
+        $quiz = $this->assessment();
+        Sanctum::actingAs($this->teacher);
+
+        $this->putJson("/api/assessments/{$quiz->id}/scores", ['scores' => [
+            ['student_id' => $this->students[0]->id, 'score' => 15],
+            ['student_id' => $this->students[1]->id, 'score' => null, 'status' => 'absent', 'remark' => 'Sick'],
+        ]])->assertOk();
+
+        $this->assertDatabaseHas('assessment_scores', ['student_id' => $this->students[1]->id, 'status' => 'absent', 'score' => null]);
+        $row = $this->getJson('/api/assessments')->json('data.0');
+        $this->assertSame(1, $row['absent'], 'the list reminds the teacher how many makeup exams are pending');
+        $this->assertSame(1, $row['scored']);
+
+        // The makeup exam is taken the next day: the score arrives and the status says so.
+        $this->putJson("/api/assessments/{$quiz->id}/scores", ['scores' => [
+            ['student_id' => $this->students[1]->id, 'score' => 12, 'status' => 'makeup', 'remark' => 'Makeup exam'],
+        ]])->assertOk();
+
+        $sheet = $this->getJson("/api/assessments/{$quiz->id}")->json('data.students.1');
+        $this->assertSame('makeup', $sheet['status']);
+        $this->assertEquals(12, $sheet['score']);
+        $this->assertSame(0, $this->getJson('/api/assessments')->json('data.0.absent'));
+    }
+
+    public function test_the_status_rules(): void
+    {
+        $quiz = $this->assessment();
+        Sanctum::actingAs($this->teacher);
+        $put = fn (array $row) => $this->putJson("/api/assessments/{$quiz->id}/scores", ['scores' => [['student_id' => $this->students[0]->id, ...$row]]]);
+
+        $put(['score' => 10, 'status' => 'absent'])->assertUnprocessable()->assertJsonValidationErrors('scores.0.status');
+        $put(['score' => 10, 'status' => 'late'])->assertUnprocessable();
+        $put(['score' => null, 'status' => 'absent'])->assertOk();
+        $put(['score' => 10, 'status' => null])->assertOk();
+        $this->assertNull(AssessmentScore::first()->status);
+    }
+
+    public function test_the_score_sheet_tells_who_was_absent_that_day_in_the_attendance_and_the_pass_mark(): void
+    {
+        $quiz = $this->assessment(['held_on' => '2026-10-05']);
+        DB::table('student_attendances')->insert([
+            'student_id' => $this->students[1]->id, 'classroom_id' => $this->room->id, 'date' => '2026-10-05', 'status' => 'absent',
+            'marked_by' => $this->teacher->id, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        Sanctum::actingAs($this->teacher);
+
+        $data = $this->getJson("/api/assessments/{$quiz->id}")->assertOk()->json('data');
+
+        $this->assertEquals(50, $data['pass_percent']);
+        $this->assertFalse($data['students'][0]['was_absent']);
+        $this->assertTrue($data['students'][1]['was_absent']);
     }
 }
