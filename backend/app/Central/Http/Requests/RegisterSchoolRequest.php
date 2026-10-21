@@ -38,4 +38,12 @@ class RegisterSchoolRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return ['code' => __('validation.attributes.school_code')];
+    }
 }

@@ -56,7 +56,7 @@ class SubjectTest extends AcademicTestCase
 
         $this->postJson('/api/subjects', [], ['Accept-Language' => 'ar'])
             ->assertUnprocessable()
-            ->assertJsonPath('errors.code.0', __('validation.required', ['attribute' => 'code'], 'ar'));
+            ->assertJsonPath('errors.code.0', __('validation.required', ['attribute' => 'الرمز'], 'ar'));
     }
 
     #[DataProvider('nonAdminRoles')]

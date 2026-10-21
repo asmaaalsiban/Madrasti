@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import BackButton from '../components/shared/BackButton'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
 import { useAuth } from '../features/Auth/AuthProvider'
@@ -59,7 +60,7 @@ export default function AdminLayout() {
           <SwitchSchoolButton />
           <button type="button" className="rounded border px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</button>
         </header>
-        <main className="mx-auto max-w-5xl p-4"><Outlet /></main>
+        <main className="mx-auto max-w-5xl p-4"><BackButton /><Outlet /></main>
       </div>
     </div>
   )
