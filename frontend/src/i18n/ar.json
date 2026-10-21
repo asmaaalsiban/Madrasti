@@ -74,7 +74,8 @@
       "attendanceReport": "تقرير الغياب",
       "terms": "الفصول الدراسية",
       "teaching": "توزيع المعلمين",
-      "grades": "العلامات"
+      "grades": "العلامات",
+      "buildings": "المباني"
     },
     "actions": {
       "add": "إضافة",
@@ -371,6 +372,32 @@
       "makeup": "ينتظر الامتحان البديل (كنت غائباً)",
       "retake": "ينتظر إعادة الامتحان",
       "none": "لا توجد علامات بعد"
+    }
+  },
+  "buildings": {
+    "title": "المباني",
+    "addBuilding": "إضافة مبنى",
+    "addFloor": "إضافة طابق",
+    "empty": "لا توجد مبانٍ بعد. أضف أول مبنى في المدرسة.",
+    "noFloors": "لا توجد طوابق بعد.",
+    "buildingForm": "مبنى",
+    "floorForm": "طابق",
+    "floor": "الطابق",
+    "studentsCol": "الطلاب",
+    "grades": "الصفوف",
+    "classrooms": "الغرف الصفية",
+    "scienceLabs": "مختبرات العلوم",
+    "computerLabs": "مختبرات الحاسوب",
+    "level": "رقم الطابق",
+    "levelHint": "0 هو الطابق الأرضي، 1 الطابق الأول...",
+    "sameAsBuilding": "مثل المبنى",
+    "fromGrade": "من الصف",
+    "toGrade": "إلى الصف",
+    "range": "{{from}} ← {{to}}",
+    "gender": {
+      "male": "ذكور",
+      "female": "إناث",
+      "mixed": "مختلط"
     }
   }
 }
