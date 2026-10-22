@@ -214,4 +214,13 @@ class GradePeriodsTest extends AcademicTestCase
         $this->actAsAdmin();
         $this->getJson("/api/students/{$student->id}/timetable")->assertOk();
     }
+
+    public function test_the_admin_sees_a_section_with_a_shorter_day_without_its_missing_periods(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/timetable/generate', ['seed' => 1])->assertOk();
+
+        $this->getJson("/api/timetable?classroom_id={$this->smallRooms[0]->id}")->assertOk()->assertJsonCount(30, 'data.periods');
+        $this->getJson("/api/timetable?classroom_id={$this->bigRooms[0]->id}")->assertOk()->assertJsonCount(35, 'data.periods');
+    }
 }

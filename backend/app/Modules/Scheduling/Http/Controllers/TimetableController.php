@@ -6,6 +6,7 @@ namespace App\Modules\Scheduling\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
@@ -57,7 +58,11 @@ class TimetableController extends Controller
             ->when(isset($data['teacher_id']), fn ($q) => $q->where('teacher_id', $data['teacher_id']))
             ->get();
 
-        return response()->json(['data' => $this->grid($entries, Period::orderBy('day_of_week')->orderBy('number')->get())]);
+        // A section with a shorter day (grades 1-3) is shown without the periods it does not have.
+        $limit = isset($data['classroom_id']) ? Classroom::with('gradeLevel')->find($data['classroom_id'])?->gradeLevel?->periods_per_day : null;
+        $periods = Period::orderBy('day_of_week')->orderBy('number')->when($limit, fn ($q) => $q->where('number', '<=', $limit))->get();
+
+        return response()->json(['data' => $this->grid($entries, $periods)]);
     }
 
     /** The week of the signed-in teacher (their lessons) or student (their section's lessons). */

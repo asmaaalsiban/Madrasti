@@ -22,7 +22,10 @@ export default function ParentHome() {
               {c.classroom && <p className="text-sm text-slate-600">{c.classroom}</p>}
               <p className="pt-1 text-xs text-slate-500">{t('parent.home.emailHint')}</p>
               <p dir="ltr" className="font-mono text-sm">{c.email}</p>
-              <Link to={`/parent/children/${c.id}/grades`} className="mt-2 inline-block rounded border px-3 py-1 text-sm text-brand">{t('studentGrades.linkLabel')}</Link>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Link to={`/parent/children/${c.id}/grades`} className="rounded border px-3 py-1 text-sm text-brand">{t('studentGrades.linkLabel')}</Link>
+                <Link to={`/parent/children/${c.id}/timetable`} className="rounded border px-3 py-1 text-sm text-brand">{t('timetable.linkLabel')}</Link>
+              </div>
               <ChildAttendance studentId={c.id} />
             </li>
           ))}
