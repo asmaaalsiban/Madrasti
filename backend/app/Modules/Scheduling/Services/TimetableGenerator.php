@@ -71,6 +71,7 @@ class TimetableGenerator
                 'locked' => count($ctx['locked']),
                 'unplaced' => $unplaced,
                 'without_teacher' => $ctx['without_teacher'],
+                'out_of_scope' => $ctx['out_of_scope'],
             ],
         ];
     }
@@ -137,7 +138,11 @@ class TimetableGenerator
 
         $classrooms = Classroom::where('academic_year_id', $year->id)->with(['room.floor', 'gradeLevel'])->get()->keyBy('id');
         $subjects = Subject::all()->keyBy('id');
-        $assignments = TeachingAssignment::whereIn('classroom_id', $classrooms->keys())->get();
+        $all = TeachingAssignment::whereIn('classroom_id', $classrooms->keys())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo')->get();
+        // Never put a teacher outside whom they teach, whatever an old assignment says.
+        [$assignments, $outside] = $all->partition(fn ($a) => ($profile = $a->teacher?->staffProfile) === null
+            || $profile->canTeach((int) $classrooms[$a->classroom_id]->gradeLevel->sort_order, $classrooms[$a->classroom_id]->gender ?? 'mixed'));
+        $assignments = $assignments->values();
         $users = User::whereIn('id', $assignments->pluck('teacher_id'))->get()->keyBy('id');
 
         $locked = TimetableEntry::where('academic_year_id', $year->id)->where('is_locked', true)->get();
@@ -158,6 +163,7 @@ class TimetableGenerator
             'limit' => $classrooms->map(fn (Classroom $c) => $c->gradeLevel->periods_per_day ?? PHP_INT_MAX)->all(),
             'classrooms' => $classrooms, 'subjects' => $subjects, 'assignments' => $assignments, 'users' => $users,
             'locked' => $locked, 'unavailable' => $unavailable, 'without_teacher' => $without,
+            'out_of_scope' => $outside->map(fn ($a) => ['classroom' => $classrooms[$a->classroom_id]->name, 'subject' => $subjects[$a->subject_id]->name_en, 'subject_ar' => $subjects[$a->subject_id]->name_ar, 'teacher' => $a->teacher->name])->values()->all(),
             'total' => (int) $assignments->sum('weekly_periods'),
         ];
     }

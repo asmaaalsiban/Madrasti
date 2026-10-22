@@ -29,7 +29,12 @@ class AutoTeachingAssigner
     public function handle(int $maxLoad, bool $dryRun): array
     {
         $demands = $this->planner->demands();
-        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->get();
+        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo')->get();
+        // Assignments made before a teacher's scope existed (or with another scope) are replaced, not kept.
+        $meta = $demands->keyBy('classroom_id');
+        $invalid = $taken->filter(fn ($a) => ($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
+            && ! $profile->canTeach($meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender']))->values();
+        $taken = $taken->reject(fn ($a) => $invalid->contains('id', $a->id))->values();
         $takenKeys = $taken->mapWithKeys(fn ($a) => [$a->classroom_id.'-'.$a->subject_id => true]);
         $buildingOf = $demands->pluck('building_id', 'classroom_id');
 
@@ -68,6 +73,7 @@ class AutoTeachingAssigner
         }
 
         if (! $dryRun) {
+            TeachingAssignment::whereIn('id', $invalid->pluck('id'))->get()->each->delete();
             DB::transaction(fn () => collect($assigned)->each(fn ($a) => TeachingAssignment::create([
                 'classroom_id' => $a['classroom_id'], 'subject_id' => $a['subject_id'], 'teacher_id' => $a['teacher_id'], 'weekly_periods' => $a['periods'],
             ])));
@@ -77,6 +83,7 @@ class AutoTeachingAssigner
             'dry_run' => $dryRun,
             'max_load' => $maxLoad,
             'assigned' => count($assigned),
+            'invalid' => $invalid->count(),
             'teachers' => $this->teacherSummary(collect($assigned), $teachers->flatten(1)->keyBy('id'), $subjects, $load),
             'unassigned' => collect($unassigned)->map(fn ($d) => [
                 'classroom' => $d['classroom'], 'subject' => $subjects[$d['subject_id']]->name_en, 'subject_ar' => $subjects[$d['subject_id']]->name_ar,
