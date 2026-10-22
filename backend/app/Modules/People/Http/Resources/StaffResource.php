@@ -32,6 +32,9 @@ class StaffResource extends JsonResource
             'category' => $profile?->staff_type->category(),
             'subject' => $subject ? ['id' => $subject->id, 'name_ar' => $subject->name_ar, 'name_en' => $subject->name_en] : null,
             'floor' => $profile?->floor,
+            'grade_from' => $profile?->gradeFrom?->only(['id', 'name_ar', 'name_en']),
+            'grade_to' => $profile?->gradeTo?->only(['id', 'name_ar', 'name_en']),
+            'teaches_gender' => $profile?->teaches_gender,
         ];
     }
 }

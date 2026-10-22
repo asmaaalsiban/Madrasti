@@ -115,6 +115,10 @@ Admin menu **Timetable**: **Generate the timetable** builds the week of every se
 
 **Who sees the timetable:** the teacher (**My timetable**: the section they teach in every period, today's column highlighted), the student (the week of their section with the teacher of every lesson) and the parent (a **Timetable** link on each child). Editing a lesson by hand and locking it come next.
 
+## Whom a teacher teaches
+
+On the Staff form a teacher has **Teaches from grade / to grade** (empty = every grade, e.g. basic 1-3, preparatory, secondary) and **Teaches students** (boys, girls, empty = both). The automatic distribution and manual assignment only use teachers who may teach the section: its grade is inside their grades, and its students are theirs (a girls-only teacher gets girls' sections only; a mixed section needs a teacher for both). The timetable is built from the assignments, so nobody is ever put outside their scope.
+
 ## Terms and teacher assignment
 
 Admin menu **Terms**: the terms of an academic year (inside the year, no overlap). Admin menu **Teacher assignment**: who teaches which subject in which classroom (one teacher per subject per classroom; the teacher must be an active teaching staff member of that subject). Grades are entered per term, by the assigned teacher, so both come first.
