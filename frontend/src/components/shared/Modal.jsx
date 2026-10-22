@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
-export default function Modal({ open, title, onClose, children }) {
+// size: 'md' (default) or 'lg' for forms with many fields. A tall dialog scrolls inside the screen instead of running off it.
+export default function Modal({ open, title, onClose, children, size = 'md' }) {
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -10,8 +11,11 @@ export default function Modal({ open, title, onClose, children }) {
 
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center">
+      <div
+        role="dialog" aria-modal="true" aria-label={title}
+        className={`max-h-[calc(100dvh-2rem)] w-full overflow-y-auto rounded-lg bg-white p-5 shadow-lg ${size === 'lg' ? 'max-w-2xl' : 'max-w-md'}`}
+      >
         <h2 className="mb-4 text-lg font-bold">{title}</h2>
         {children}
       </div>

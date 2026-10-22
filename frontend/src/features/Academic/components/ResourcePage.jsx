@@ -121,11 +121,12 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
         extraActions={rowActions.map((a) => ({ key: a.key, label: t(a.label), when: a.when, onClick: (row) => { setNotice(''); setStatus(''); setPending({ action: a, row }) } }))}
         onDelete={(row) => { setNotice(''); setStatus(''); setToDelete(row) }}
       />
-      <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)}>
+      <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)} size={fields.length > 6 ? 'lg' : 'md'}>
         <form onSubmit={submit} className="space-y-3">
           {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
+          <div className="grid gap-3 md:grid-cols-2">
           {fields.filter((f) => !f.visibleWhen || f.visibleWhen(form)).map((f) => f.type === 'custom' ? (
-            <div key={f.name}>{f.render({ form, setForm })}</div>
+            <div key={f.name} className="md:col-span-2">{f.render({ form, setForm })}</div>
           ) : (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (
@@ -143,7 +144,8 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
               )}
             </FormField>
           ))}
-          <div className="flex justify-end gap-2 pt-2">
+          </div>
+          <div className="sticky bottom-0 -mx-1 flex justify-end gap-2 bg-white px-1 pt-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
             <button type="submit" disabled={save.isPending} className="rounded bg-brand px-3 py-1.5 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
           </div>
