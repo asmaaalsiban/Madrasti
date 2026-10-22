@@ -23,16 +23,20 @@ function bells(form) {
 
 // The bells of the school week: school days, periods a day, their length and the breaks.
 export default function SchoolDayPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const [form, setForm] = useState(null)
   const [errors, setErrors] = useState({})
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
+  const [gradePeriods, setGradePeriods] = useState(null) // gradeId -> text
+  const [gradeMessage, setGradeMessage] = useState('')
+  const [gradeError, setGradeError] = useState('')
 
   const { data } = useQuery({ queryKey: ['periods'], queryFn: async () => (await api.get('/periods')).data.data })
   useEffect(() => {
     if (!data || form) return
+    setGradePeriods(Object.fromEntries((data.grades ?? []).map((g) => [g.id, g.periods_per_day === null ? '' : String(g.periods_per_day)])))
     const s = data.setup
     setForm({ ...s, long_break_after: s.long_break_after ?? '', long_break_minutes: s.long_break_minutes ?? '' })
   }, [data, form])
@@ -53,7 +57,13 @@ export default function SchoolDayPage() {
     },
   })
 
-  if (!form) return <p className="text-slate-500">{t('common.loading')}</p>
+  const saveGrades = useMutation({
+    mutationFn: () => api.put('/periods/grades', { grades: data.grades.map((g) => ({ grade_level_id: g.id, periods_per_day: gradePeriods[g.id] === '' ? null : Number(gradePeriods[g.id]) })) }),
+    onSuccess: () => { setGradeError(''); setGradeMessage(t('schoolDay.gradesSaved')); client.invalidateQueries({ queryKey: ['periods'] }); client.invalidateQueries({ queryKey: ['curriculum'] }) },
+    onError: (err) => { setGradeMessage(''); setGradeError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || t('admin.actions.error')) },
+  })
+
+  if (!form || !gradePeriods) return <p className="text-slate-500">{t('common.loading')}</p>
 
   const set = (name) => (e) => { setMessage(''); setForm({ ...form, [name]: e.target.value }) }
   const toggle = (day) => (e) => { setMessage(''); setForm({ ...form, days: e.target.checked ? [...form.days, day] : form.days.filter((d) => d !== day) }) }
@@ -102,6 +112,7 @@ export default function SchoolDayPage() {
           <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
         </form>
 
+        <div className="space-y-4">
         <div className="rounded-lg bg-white p-4 shadow-sm">
           <h2 className="mb-2 font-bold">{t('schoolDay.preview')}</h2>
           <ul className="divide-y text-sm">
@@ -112,6 +123,27 @@ export default function SchoolDayPage() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="space-y-3 rounded-lg bg-white p-4 shadow-sm">
+          <h2 className="font-bold">{t('schoolDay.gradesTitle')}</h2>
+          <p className="text-sm text-slate-600">{t('schoolDay.gradesHelp', { count: form.periods_per_day })}</p>
+          {gradeMessage && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{gradeMessage}</p>}
+          {gradeError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{gradeError}</p>}
+          <ul className="divide-y text-sm">
+            {data.grades.map((g) => (
+              <li key={g.id} className="flex items-center justify-between gap-3 py-1.5">
+                <label htmlFor={`grade-${g.id}`}>{g[`name_${i18n.language}`] || g.name_ar}</label>
+                <input
+                  id={`grade-${g.id}`} type="number" min="1" max={form.periods_per_day} dir="ltr" className="w-20 rounded border p-1.5"
+                  placeholder={String(form.periods_per_day)} value={gradePeriods[g.id]}
+                  onChange={(e) => { setGradeMessage(''); setGradePeriods({ ...gradePeriods, [g.id]: e.target.value }) }}
+                />
+              </li>
+            ))}
+          </ul>
+          <button type="button" disabled={saveGrades.isPending} className="rounded border px-4 py-1.5 disabled:opacity-60" onClick={() => saveGrades.mutate()}>{t('schoolDay.saveGrades')}</button>
+        </div>
         </div>
       </div>
     </section>

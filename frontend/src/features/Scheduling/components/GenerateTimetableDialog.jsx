@@ -39,6 +39,12 @@ export default function GenerateTimetableDialog({ open, onClose }) {
                 <ul className="list-disc ps-5">{report.unplaced.map((u) => <li key={`${u.classroom}-${u.subject}`}>{`${u.classroom} · ${subject(u)}: ${u.count}`}</li>)}</ul>
               </div>
             )}
+            {report.incomplete?.length > 0 && (
+              <div className="rounded bg-amber-50 p-3 text-sm text-amber-800">
+                <p>{t('timetable.incomplete')}</p>
+                <ul className="list-disc ps-5">{report.incomplete.map((c) => <li key={c.classroom}>{t('timetable.incompleteRow', c)}</li>)}</ul>
+              </div>
+            )}
             {report.without_teacher.length > 0 && (
               <div className="rounded bg-amber-50 p-3 text-sm text-amber-800">
                 <p>{t('timetable.withoutTeacher')}</p>

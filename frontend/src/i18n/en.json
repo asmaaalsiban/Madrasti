@@ -424,7 +424,6 @@
     "help": "The subjects of every grade and their periods per week. An empty box means the grade does not have the subject.",
     "subjectsLink": "Add subjects",
     "subject": "Subject",
-    "periodsPerWeek": "Periods per week",
     "total": "Total periods",
     "complete": "Complete",
     "missing": "Missing {{count}}",
@@ -480,7 +479,11 @@
     "longBreakMinutes": "Long break (minutes)",
     "preview": "A school day",
     "period": "Period {{number}}",
-    "saved": "School day saved."
+    "saved": "School day saved.",
+    "gradesTitle": "Periods a day for each grade",
+    "gradesHelp": "Leave a grade empty to give it the whole school day ({{count}} periods). Lower grades and the kindergarten usually have fewer (e.g. 6).",
+    "saveGrades": "Save the periods of the grades",
+    "gradesSaved": "The periods of the grades were saved."
   },
   "timetable": {
     "title": "Timetable",
@@ -497,6 +500,15 @@
     "unplaced": "These lessons could not be placed:",
     "withoutTeacher": "These subjects have no teacher yet (distribute the teachers first):",
     "noTeacher": "no teacher assigned",
-    "apply": "Apply the timetable"
+    "apply": "Apply the timetable",
+    "myTimetable": "My timetable",
+    "myHint": "Your week: which section you teach in every period.",
+    "childTitle": "Timetable: {{name}}",
+    "linkLabel": "Timetable",
+    "notReady": "The timetable has not been prepared yet.",
+    "free": "Free",
+    "empty": "Empty",
+    "incomplete": "These sections have empty periods (their curriculum is shorter than their week):",
+    "incompleteRow": "{{classroom}}: {{lessons}} lessons for {{slots}} periods ({{empty}} empty)"
   }
 }

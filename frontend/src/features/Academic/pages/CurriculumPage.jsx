@@ -13,7 +13,6 @@ export default function CurriculumPage() {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const [values, setValues] = useState({})
-  const [perWeek, setPerWeek] = useState('')
   const [dirty, setDirty] = useState(false)
   const [message, setMessage] = useState({ kind: '', text: '', extra: '' })
   const [confirmPlan, setConfirmPlan] = useState(false)
@@ -24,7 +23,6 @@ export default function CurriculumPage() {
   useEffect(() => {
     if (!data || dirty) return
     setValues(Object.fromEntries(data.cells.map((c) => [key(c.grade_level_id, c.subject_id), String(c.weekly_periods)])))
-    setPerWeek(String(data.periods_per_week))
   }, [data, dirty])
 
   const refresh = () => client.invalidateQueries({ queryKey: ['curriculum'] })
@@ -39,7 +37,7 @@ export default function CurriculumPage() {
           if (n > 0) cells.push({ grade_level_id: g.id, subject_id: s.id, weekly_periods: n })
         }
       }
-      return api.put('/curriculum', { periods_per_week: Number(perWeek), cells })
+      return api.put('/curriculum', { cells })
     },
     onSuccess: () => { setDirty(false); setMessage({ kind: 'ok', text: t('curriculum.saved'), extra: '' }); refresh() },
     onError: fail,
@@ -67,9 +65,8 @@ export default function CurriculumPage() {
   if (!data) return <p className="text-slate-500">{t('common.loading')}</p>
 
   const name = (x) => x[`name_${i18n.language}`] || x.name_ar
-  const target = Number(perWeek) || data.periods_per_week
   const total = (gradeId) => data.subjects.reduce((sum, s) => sum + Number(values[key(gradeId, s.id)] || 0), 0)
-  const status = (sum) => (sum === target ? ['curriculum.complete', 'text-green-700'] : sum < target ? ['curriculum.missing', 'text-amber-700'] : ['curriculum.over', 'text-red-700'])
+  const status = (sum, target) => (sum === target ? ['curriculum.complete', 'text-green-700'] : sum < target ? ['curriculum.missing', 'text-amber-700'] : ['curriculum.over', 'text-red-700'])
   const edit = (gradeId, subjectId) => (e) => { setDirty(true); setMessage({ kind: '', text: '', extra: '' }); setValues({ ...values, [key(gradeId, subjectId)]: e.target.value }) }
 
   return (
@@ -83,11 +80,6 @@ export default function CurriculumPage() {
         </div>
       </div>
       <p className="text-sm text-slate-600">{t('curriculum.help')} <Link to="/admin/subjects" className="text-brand underline">{t('curriculum.subjectsLink')}</Link></p>
-
-      <label className="block text-sm">
-        {t('curriculum.periodsPerWeek')}
-        <input type="number" min="5" max="80" dir="ltr" className="ms-2 w-20 rounded border p-1.5" value={perWeek} onChange={(e) => { setDirty(true); setPerWeek(e.target.value) }} />
-      </label>
 
       {message.kind === 'error' && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{message.text}</p>}
       {message.kind === 'ok' && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{message.text}</p>}
@@ -121,7 +113,8 @@ export default function CurriculumPage() {
               <td className="sticky start-0 bg-slate-50 p-2 font-bold">{t('curriculum.total')}</td>
               {data.grades.map((g) => {
                 const sum = total(g.id)
-                const [label, color] = status(sum)
+                const target = g.weekly_target ?? data.periods_per_week
+                const [label, color] = status(sum, target)
                 return (
                   <td key={g.id} className="p-2 text-center">
                     <span className="block font-bold">{sum}</span>

@@ -1,15 +1,21 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { api } from '../src/api/client'
 import SchoolDayPage from '../src/features/Scheduling/pages/SchoolDayPage'
 import TimetablePage from '../src/features/Scheduling/pages/TimetablePage'
+import StudentTimetablePage from '../src/features/Student/pages/StudentTimetablePage'
+import TeacherTimetablePage from '../src/features/Teacher/pages/TeacherTimetablePage'
+import TeacherHome from '../src/features/Teacher/pages/TeacherHome'
+import ChildTimetablePage from '../src/features/Parent/pages/ChildTimetablePage'
 
 vi.mock('../src/api/client', () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
 }))
+const auth = vi.hoisted(() => ({ user: null }))
+vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: auth.user }) }))
 
 const renderPage = (ui) =>
   render(
@@ -18,7 +24,15 @@ const renderPage = (ui) =>
     </QueryClientProvider>,
   )
 
+const renderPageAt = (path, ui, route) =>
+  render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter initialEntries={[path]}><Routes><Route path={route} element={ui} /></Routes></MemoryRouter>
+    </QueryClientProvider>,
+  )
+
 const paged = (data) => ({ data: { data, meta: { current_page: 1, last_page: 1 } } })
+const gradesList = [{ id: 1, name_en: 'Grade 1', name_ar: 'الصف الأول', code: '1', sort_order: 4, periods_per_day: 6 }, { id: 4, name_en: 'Grade 4', name_ar: 'الصف الرابع', code: '4', sort_order: 7, periods_per_day: null }]
 const setup = { days: [0, 1, 2, 3, 4], periods_per_day: 7, starts_at: '07:45', period_minutes: 45, gap_minutes: 5, long_break_after: 3, long_break_minutes: 20 }
 const periods = [0, 1].flatMap((d) => [1, 2].map((n) => ({ id: d * 2 + n, day_of_week: d, number: n, starts_at: n === 1 ? '07:45' : '08:35', ends_at: n === 1 ? '08:30' : '09:20' })))
 
@@ -28,7 +42,7 @@ beforeEach(async () => {
 })
 
 describe('SchoolDayPage', () => {
-  beforeEach(() => api.get.mockResolvedValue({ data: { data: { setup, periods: [] } } }))
+  beforeEach(() => api.get.mockResolvedValue({ data: { data: { setup, periods: [], grades: gradesList } } }))
 
   it('shows the current setup and a preview of the bells', async () => {
     renderPage(<SchoolDayPage />)
@@ -42,7 +56,7 @@ describe('SchoolDayPage', () => {
   })
 
   it('saves the changed setup', async () => {
-    api.put.mockResolvedValue({ data: { data: { setup, periods: [] } } })
+    api.put.mockResolvedValue({ data: { data: { setup, periods: [], grades: gradesList } } })
     renderPage(<SchoolDayPage />)
     await screen.findByLabelText('Periods per day')
     fireEvent.click(screen.getByRole('checkbox', { name: 'Friday' }))
@@ -64,6 +78,22 @@ describe('SchoolDayPage', () => {
     fireEvent.change(screen.getByLabelText('Periods per day'), { target: { value: '6' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText('Some of the periods this would remove are used by the timetable.')).toBeInTheDocument()
+  })
+
+  it('lets every grade have its own number of periods a day', async () => {
+    api.put.mockResolvedValue({ data: { data: { setup, periods: [], grades: gradesList } } })
+    renderPage(<SchoolDayPage />)
+    expect(await screen.findByLabelText('Grade 1')).toHaveValue(6)
+    expect(screen.getByLabelText('Grade 4')).toHaveValue(null)
+
+    fireEvent.change(screen.getByLabelText('Grade 4'), { target: { value: '5' } })
+    fireEvent.change(screen.getByLabelText('Grade 1'), { target: { value: '' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save the periods of the grades' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/periods/grades', { grades: [
+      { grade_level_id: 1, periods_per_day: null },
+      { grade_level_id: 4, periods_per_day: 5 },
+    ] }))
+    expect(await screen.findByText('The periods of the grades were saved.')).toBeInTheDocument()
   })
 
   it('has Arabic labels', async () => {
@@ -114,7 +144,7 @@ describe('TimetablePage', () => {
 
   it('previews the generation, shows what could not be placed and applies it', async () => {
     serve()
-    const preview = { dry_run: true, seed: 5, attempts: 3, total: 315, placed: 313, locked: 0, unplaced: [{ classroom: '5-A', subject: 'Art', subject_ar: 'فنية', count: 2 }], without_teacher: [{ classroom: '5-B', subject: 'Music', subject_ar: 'موسيقى', periods: 1 }] }
+    const preview = { dry_run: true, seed: 5, attempts: 3, total: 315, placed: 313, locked: 0, incomplete: [{ classroom: '1-A', lessons: 28, slots: 30, empty: 2 }], unplaced: [{ classroom: '5-A', subject: 'Art', subject_ar: 'فنية', count: 2 }], without_teacher: [{ classroom: '5-B', subject: 'Music', subject_ar: 'موسيقى', periods: 1 }] }
     api.post.mockResolvedValueOnce({ data: { data: preview } }).mockResolvedValueOnce({ data: { data: { ...preview, dry_run: false } } })
     renderPage(<TimetablePage />)
     await screen.findByText('Math')
@@ -125,6 +155,7 @@ describe('TimetablePage', () => {
     expect(await within(dialog).findByText('313 of 315 lessons can be placed.')).toBeInTheDocument()
     expect(within(dialog).getByText('5-A · Art: 2')).toBeInTheDocument()
     expect(within(dialog).getByText('5-B · Music: no teacher assigned')).toBeInTheDocument()
+    expect(within(dialog).getByText('1-A: 28 lessons for 30 periods (2 empty)')).toBeInTheDocument()
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Apply the timetable' }))
     await waitFor(() => expect(api.post).toHaveBeenLastCalledWith('/timetable/generate', { seed: 5 }))
@@ -149,3 +180,59 @@ describe('TimetablePage', () => {
     expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['', 'الأحد', 'الإثنين'])
   })
 })
+
+describe('Week views of the teacher, the student and the parent', () => {
+  const week = {
+    title: 'Sara',
+    periods: [0, 1, 2].flatMap((d) => [1, 2].map((n) => ({ id: d * 2 + n, day_of_week: d, number: n, starts_at: n === 1 ? '07:45' : '08:35', ends_at: n === 1 ? '08:30' : '09:20' }))),
+    entries: [
+      { id: 1, period_id: 1, subject: { id: 1, name_en: 'Math', name_ar: 'الرياضيات' }, teacher: { id: 9, name: 'Sara' }, classroom: { id: 3, name: '5-A' }, room: null, is_locked: false },
+      { id: 2, period_id: 3, subject: { id: 2, name_en: 'Art', name_ar: 'الفنية' }, teacher: { id: 9, name: 'Sara' }, classroom: { id: 4, name: '5-B' }, room: null, is_locked: false },
+    ],
+  }
+  beforeEach(() => {
+    api.get.mockResolvedValue({ data: { data: week } })
+    auth.user = { id: 9, role: 'teacher', name: 'Sara', student_id: 21, children: [{ id: 21, name_ar: 'أحمد', name_en: 'Ahmad' }] }
+  })
+
+  it('shows the teacher their own week with the section of every lesson and says when a cell is free', async () => {
+    renderPage(<TeacherTimetablePage />)
+    expect(await screen.findByRole('heading', { name: 'My timetable' })).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/timetable/me')
+    const first = await screen.findByRole('row', { name: /Period 1/ })
+    expect(within(first).getByText('Math')).toBeInTheDocument()
+    expect(within(first).getByText('5-A')).toBeInTheDocument()
+    expect(within(screen.getByRole('row', { name: /Period 2/ })).getAllByText('Free').length).toBeGreaterThan(0)
+  })
+
+  it('shows the student the week of the section with the teacher of every lesson', async () => {
+    renderPage(<StudentTimetablePage />)
+    expect(await screen.findByRole('heading', { name: 'My timetable' })).toBeInTheDocument()
+    expect(await screen.findByText('Math')).toBeInTheDocument()
+    expect(screen.getAllByText('Sara', { selector: 'span' }).length).toBeGreaterThan(0)
+  })
+
+  it('shows a parent the week of one child', async () => {
+    renderPageAt('/parent/children/21/timetable', <ChildTimetablePage />, '/parent/children/:id/timetable')
+    expect(await screen.findByRole('heading', { name: 'Timetable: Ahmad' })).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/students/21/timetable')
+  })
+
+  it('explains when there is no timetable yet', async () => {
+    api.get.mockResolvedValue({ data: { data: { title: null, periods: [], entries: [] } } })
+    renderPage(<StudentTimetablePage />)
+    expect(await screen.findByText('The timetable has not been prepared yet.')).toBeInTheDocument()
+  })
+
+  it('has Arabic labels', async () => {
+    await i18n.changeLanguage('ar')
+    renderPage(<TeacherTimetablePage />)
+    expect(await screen.findByRole('heading', { name: 'جدولي' })).toBeInTheDocument()
+  })
+
+  it('is linked from the teacher home', () => {
+    renderPage(<TeacherHome />)
+    expect(screen.getByRole('link', { name: /My timetable/ })).toHaveAttribute('href', '/teacher/timetable')
+  })
+})
+

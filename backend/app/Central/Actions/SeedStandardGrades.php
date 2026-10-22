@@ -30,7 +30,11 @@ class SeedStandardGrades
             $level = GradeLevel::firstOrNew(['name_en' => $nameEn]);
             $created += $level->exists ? 0 : 1;
             $level->name_ar = $level->exists ? $level->name_ar : $nameAr;
-            $level->fill(['code' => $code, 'sort_order' => $i + 1])->save();
+            $level->fill(['code' => $code, 'sort_order' => $i + 1]);
+            if (in_array($code, ['BUD', 'KG1', 'KG2', '1', '2', '3'], true) && $level->periods_per_day === null) {
+                $level->periods_per_day = 6; // the kindergarten and grades 1-3 have a shorter day; a value the school chose is kept
+            }
+            $level->save();
         }
 
         return $created;

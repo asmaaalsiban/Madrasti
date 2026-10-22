@@ -7,6 +7,7 @@ export default function TeacherHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const cards = [
+    ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
     ['/teacher/grades', 'grading.title', 'grading.hint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],

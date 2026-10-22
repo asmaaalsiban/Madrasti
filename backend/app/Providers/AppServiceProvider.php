@@ -66,6 +66,14 @@ class AppServiceProvider extends ServiceProvider
             Role::Teacher => false,
         });
 
+        // A student's timetable: admin, the student, their parents.
+        Gate::define('view-student-timetable', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Student => $student->user_id === $user->id,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => false,
+        });
+
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.
         Gate::define('view-student-attendance', fn (User $user, Student $student): bool => match ($user->role) {
             Role::Admin => true,

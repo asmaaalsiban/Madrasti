@@ -30,6 +30,9 @@ import GenerateClassroomsPage from '../features/Academic/pages/GenerateClassroom
 import CurriculumPage from '../features/Academic/pages/CurriculumPage'
 import SchoolDayPage from '../features/Scheduling/pages/SchoolDayPage'
 import TimetablePage from '../features/Scheduling/pages/TimetablePage'
+import StudentTimetablePage from '../features/Student/pages/StudentTimetablePage'
+import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage'
+import ChildTimetablePage from '../features/Parent/pages/ChildTimetablePage'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -39,13 +42,14 @@ const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
-  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }],
-  student: [{ index: true, element: <StudentHome /> }],
+  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }],
+  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }],
   teacher: [
     { index: true, element: <TeacherHome /> },
     { path: 'attendance', element: <TakeAttendancePage /> },
     { path: 'attendance/report', element: <AttendanceReportPage /> },
     { path: 'department', element: <DepartmentPage /> },
+    { path: 'timetable', element: <TeacherTimetablePage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
     { path: 'grades/:id', element: <ScoreSheetPage /> },

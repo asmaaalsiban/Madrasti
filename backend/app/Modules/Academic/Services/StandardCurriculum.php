@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Services;
 
 /**
- * The starting curriculum offered to a school for grades 1 to 10: 35 periods a week (7 periods x 5 days), Arabic, English
+ * The starting curriculum offered to a school for grades 1 to 10: 35 periods a week (7 periods x 5 days; grades 1 to 3 have a 6-period day, 30), Arabic, English
  * and maths every day, one science subject up to grade 8 then physics, chemistry, biology and earth science, social
  * studies until grade 6 then history, geography and national education. It is a template: the admin edits it afterwards.
  */
@@ -22,6 +22,9 @@ final class StandardCurriculum
         'BIO' => ['الأحياء', 'Biology'], 'ESC' => ['علوم الأرض', 'Earth Science'],
     ];
 
+    /** Grades with a shorter school day: 6 periods a day, so 30 a week. */
+    public const PERIODS_PER_DAY = ['1' => 6, '2' => 6, '3' => 6];
+
     /**
      * @return array<string, array<string, int>> grade code => subject code => periods per week
      */
@@ -30,7 +33,7 @@ final class StandardCurriculum
         $common = ['ENG' => 5, 'MTH' => 5, 'REL' => 3, 'CMP' => 2, 'PE' => 2];
         $plan = [];
         foreach (['1', '2', '3'] as $g) {
-            $plan[$g] = $common + ['ARB' => 7, 'SCI' => 5, 'SOC' => 2, 'ART' => 1, 'MUS' => 1, 'ACT' => 2];
+            $plan[$g] = ['ENG' => 5, 'MTH' => 5, 'REL' => 3, 'PE' => 2, 'ARB' => 6, 'SCI' => 5, 'SOC' => 1, 'CMP' => 1, 'ART' => 1, 'MUS' => 1]; // 30 periods
         }
         foreach (['4', '5', '6'] as $g) {
             $plan[$g] = $common + ['ARB' => 6, 'SCI' => 5, 'SOC' => 2, 'ART' => 1, 'MUS' => 1, 'VOC' => 1, 'ACT' => 2];

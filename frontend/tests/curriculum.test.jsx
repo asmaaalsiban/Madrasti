@@ -20,9 +20,9 @@ const renderPage = () =>
 const state = {
   periods_per_week: 35,
   grades: [
-    { id: 1, name_en: 'Grade 1', name_ar: 'الصف الأول', code: '1', sort_order: 4 },
-    { id: 2, name_en: 'Grade 2', name_ar: 'الصف الثاني', code: '2', sort_order: 5 },
-    { id: 7, name_en: 'Grade 7', name_ar: 'الصف السابع', code: '7', sort_order: 10 },
+    { id: 1, name_en: 'Grade 1', name_ar: 'الصف الأول', code: '1', sort_order: 4, periods_per_day: null, weekly_target: 35 },
+    { id: 2, name_en: 'Grade 2', name_ar: 'الصف الثاني', code: '2', sort_order: 5, periods_per_day: 6, weekly_target: 30 },
+    { id: 7, name_en: 'Grade 7', name_ar: 'الصف السابع', code: '7', sort_order: 10, periods_per_day: null, weekly_target: 35 },
   ],
   subjects: [
     { id: 10, code: 'MTH', name_en: 'Math', name_ar: 'الرياضيات' },
@@ -60,11 +60,11 @@ describe('CurriculumPage', () => {
     await screen.findByLabelText('Math / Grade 1')
     const totals = screen.getByRole('row', { name: /Total periods/ })
     expect(within(totals).getByText('35')).toBeInTheDocument()
-    expect(within(totals).getByText('Missing 15')).toBeInTheDocument()
+    expect(within(totals).getByText('Missing 10')).toBeInTheDocument() // grade 2 has a 6-period day: 30 a week
     expect(within(totals).getByText('Over by 3')).toBeInTheDocument()
     expect(within(totals).getByText('Complete')).toBeInTheDocument()
 
-    fireEvent.change(cell('Math', 'Grade 2'), { target: { value: '35' } })
+    fireEvent.change(cell('Math', 'Grade 2'), { target: { value: '30' } })
     expect(within(totals).getAllByText('Complete')).toHaveLength(2)
   })
 
@@ -76,11 +76,9 @@ describe('CurriculumPage', () => {
 
     fireEvent.change(cell('Science', 'Grade 1'), { target: { value: '' } })
     fireEvent.change(cell('History', 'Grade 7'), { target: { value: '2' } })
-    fireEvent.change(screen.getByLabelText('Periods per week'), { target: { value: '30' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/curriculum', {
-      periods_per_week: 30,
       cells: [
         { grade_level_id: 1, subject_id: 10, weekly_periods: 30 },
         { grade_level_id: 2, subject_id: 10, weekly_periods: 20 },

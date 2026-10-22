@@ -63,6 +63,7 @@ class TimetableGenerator
         return [
             'entries' => $best['entries'],
             'report' => [
+                'incomplete' => $this->incomplete($ctx, $best['entries']),
                 'seed' => $seed,
                 'attempts' => $attempts,
                 'total' => $ctx['total'],
@@ -72,6 +73,32 @@ class TimetableGenerator
                 'without_teacher' => $ctx['without_teacher'],
             ],
         ];
+    }
+
+    /**
+     * Sections that end up with empty periods: fewer lessons (from the curriculum / assignments) than periods in their week.
+     *
+     * @param  array<string, mixed>  $ctx
+     * @param  list<array<string, int|null>>  $entries
+     * @return list<array<string, int|string>>
+     */
+    private function incomplete(array $ctx, array $entries): array
+    {
+        $lessons = collect($entries)->countBy('classroom_id');
+        foreach ($ctx['locked'] as $entry) {
+            $lessons[$entry->classroom_id] = ($lessons[$entry->classroom_id] ?? 0) + 1;
+        }
+        $planned = $ctx['assignments']->pluck('classroom_id')->unique()->flip();
+        $result = [];
+        foreach ($ctx['classrooms']->sortBy('name') as $classroom) {
+            $slots = collect($ctx['slots'])->filter(fn ($s) => $s['number'] <= $ctx['limit'][$classroom->id])->count();
+            $count = (int) ($lessons[$classroom->id] ?? 0);
+            if ($planned->has($classroom->id) && $count < $slots) {
+                $result[] = ['classroom' => $classroom->name, 'lessons' => $count, 'slots' => $slots, 'empty' => $slots - $count];
+            }
+        }
+
+        return $result;
     }
 
     /** Replaces the unlocked entries of the year with the planned ones and records the run. */
@@ -127,6 +154,8 @@ class TimetableGenerator
 
         return [
             'slots' => $slots, 'slotOf' => $slotOf, 'slotById' => $slotById, 'dayCount' => count($days),
+            // The last period each section has (grades 1-3 and the kindergarten usually have 6 of the school's 7).
+            'limit' => $classrooms->map(fn (Classroom $c) => $c->gradeLevel->periods_per_day ?? PHP_INT_MAX)->all(),
             'classrooms' => $classrooms, 'subjects' => $subjects, 'assignments' => $assignments, 'users' => $users,
             'locked' => $locked, 'unavailable' => $unavailable, 'without_teacher' => $without,
             'total' => (int) $assignments->sum('weekly_periods'),
@@ -244,6 +273,9 @@ class TimetableGenerator
     private function valid(array $ctx, array $lesson, int $slot, array &$classBusy, array &$teacherBusy, array &$teacherBuilding, array &$subjectDay): bool
     {
         $teacher = $lesson['teacher'];
+        if ($ctx['slots'][$slot]['number'] > $ctx['limit'][$lesson['classroom']]) {
+            return false; // this section has no such period
+        }
         if (isset($classBusy[$lesson['classroom']][$slot]) || isset($teacherBusy[$teacher][$slot]) || isset($ctx['unavailable'][$teacher][$slot])) {
             return false;
         }
