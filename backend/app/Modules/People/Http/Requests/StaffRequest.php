@@ -30,6 +30,8 @@ class StaffRequest extends FormRequest
             'grade_from_id' => ['nullable', 'integer', 'exists:grade_levels,id'],
             'grade_to_id' => ['nullable', 'integer', 'exists:grade_levels,id'],
             'teaches_gender' => ['nullable', 'in:male,female'],
+            'classroom_ids' => ['nullable', 'array', 'max:100'],
+            'classroom_ids.*' => ['integer', 'exists:classrooms,id'],
         ];
     }
 

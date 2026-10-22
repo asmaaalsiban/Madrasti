@@ -56,8 +56,8 @@ class TeachingAssignmentRequest extends FormRequest
             } else {
                 // The teacher teaches these grades and these students (boys / girls).
                 $classroom = Classroom::with('gradeLevel')->find($this->input('classroom_id'));
-                $profile = User::find($this->input('teacher_id'))->staffProfile()->with(['gradeFrom', 'gradeTo'])->first();
-                if ($classroom && $profile && ! $profile->canTeach((int) $classroom->gradeLevel->sort_order, $classroom->gender ?? 'mixed')) {
+                $profile = User::find($this->input('teacher_id'))->staffProfile()->with(['gradeFrom', 'gradeTo', 'classrooms'])->first();
+                if ($classroom && $profile && ! $profile->canTeach((int) $classroom->gradeLevel->sort_order, $classroom->gender ?? 'mixed', $classroom->id)) {
                     $validator->errors()->add('teacher_id', __('academic.teacher_outside_scope'));
                 }
             }

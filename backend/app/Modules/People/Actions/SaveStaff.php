@@ -32,9 +32,10 @@ class SaveStaff
                 'password' => config('accounts.default_password'),
                 'must_change_password' => true,
             ]);
-            $user->staffProfile()->create($this->profile($type, $data));
+            $profile = $user->staffProfile()->create($this->profile($type, $data));
+            $profile->classrooms()->sync($type->needsSubject() ? ($data['classroom_ids'] ?? []) : []);
 
-            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo']);
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms']);
         });
     }
 
@@ -55,7 +56,8 @@ class SaveStaff
                 'is_active' => $data['is_active'] ?? $user->is_active,
                 'role' => $role,
             ]);
-            $user->staffProfile()->updateOrCreate(['user_id' => $user->id], $this->profile($type, $data));
+            $profile = $user->staffProfile()->updateOrCreate(['user_id' => $user->id], $this->profile($type, $data));
+            $profile->classrooms()->sync($type->needsSubject() ? ($data['classroom_ids'] ?? []) : []);
 
             // Someone who can no longer be a homeroom teacher must not stay one (it would block edits of the classroom).
             if (! $type->canBeHomeroom() || ! $user->is_active) {
@@ -67,7 +69,7 @@ class SaveStaff
                 $user->tokens()->delete();
             }
 
-            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo']);
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms']);
         });
     }
 

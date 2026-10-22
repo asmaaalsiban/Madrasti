@@ -29,11 +29,11 @@ class AutoTeachingAssigner
     public function handle(int $maxLoad, bool $dryRun): array
     {
         $demands = $this->planner->demands();
-        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo')->get();
+        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo', 'teacher.staffProfile.classrooms')->get();
         // Assignments made before a teacher's scope existed (or with another scope) are replaced, not kept.
         $meta = $demands->keyBy('classroom_id');
         $invalid = $taken->filter(fn ($a) => ($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
-            && ! $profile->canTeach($meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender']))->values();
+            && ! $profile->canTeach($meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id))->values();
         $taken = $taken->reject(fn ($a) => $invalid->contains('id', $a->id))->values();
         $takenKeys = $taken->mapWithKeys(fn ($a) => [$a->classroom_id.'-'.$a->subject_id => true]);
         $buildingOf = $demands->pluck('building_id', 'classroom_id');
@@ -50,7 +50,7 @@ class AutoTeachingAssigner
 
         $teachers = User::query()->where('is_active', true)
             ->whereHas('staffProfile', fn ($q) => $q->whereNotNull('subject_id')->whereIn('staff_type', StaffType::valuesIn('teaching')))
-            ->with(['staffProfile.gradeFrom', 'staffProfile.gradeTo'])->orderBy('id')->get()->groupBy(fn (User $u) => $u->staffProfile->subject_id);
+            ->with(['staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms'])->orderBy('id')->get()->groupBy(fn (User $u) => $u->staffProfile->subject_id);
         $subjects = Subject::all()->keyBy('id');
 
         $pending = $demands->reject(fn ($d) => $takenKeys->has($d['classroom_id'].'-'.$d['subject_id']))
@@ -59,7 +59,7 @@ class AutoTeachingAssigner
         $assigned = [];
         $unassigned = [];
         foreach ($pending as $d) {
-            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeach($d['grade_order'], $d['gender'])), $load, $home, $d['building_id'], $d['periods'], $maxLoad);
+            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeach($d['grade_order'], $d['gender'], $d['classroom_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
             if ($teacher === null) {
                 $unassigned[] = $d;
 
@@ -97,10 +97,16 @@ class AutoTeachingAssigner
      * @param  array<int, int>  $load
      * @param  array<int, int>  $home
      */
-    private function pick(Collection $candidates, array $load, array $home, ?int $building, int $periods, int $maxLoad): ?User
+    private function pick(Collection $candidates, int $classroomId, array $load, array $home, ?int $building, int $periods, int $maxLoad): ?User
     {
         $fits = $candidates->filter(fn (User $t) => ($load[$t->id] ?? 0) + $periods <= $maxLoad
             && ($building === null || ! isset($home[$t->id]) || $home[$t->id] === $building));
+
+        // A teacher the admin chose for this very section comes first.
+        $chosen = $fits->filter(fn (User $t) => $t->staffProfile->classrooms->contains('id', $classroomId));
+        if ($chosen->isNotEmpty()) {
+            return $chosen->sortByDesc(fn (User $t) => $load[$t->id] ?? 0)->first();
+        }
 
         // The most loaded teacher of this building that still fits; otherwise the first free one (nobody has a building yet).
         $sameBuilding = $fits->filter(fn (User $t) => $building !== null && ($home[$t->id] ?? null) === $building)->sortByDesc(fn (User $t) => $load[$t->id] ?? 0);
