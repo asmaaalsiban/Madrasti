@@ -5,6 +5,8 @@ use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\SetLocale;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -56,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
         ]);
         // Laravel runs authentication first; the language must be set before it so a 401 is in the right language too.
-        $middleware->prependToPriorityList(before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class, prepend: SetLocale::class);
+        $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Our frontend only talks JSON to the API.
@@ -69,8 +71,18 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => __('tenancy.school_not_found')], 404);
         });
 
+        // A database problem is explained in plain words (never the SQL): the database is down, or the action failed.
+        $exceptions->render(function (QueryException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+            $down = preg_match('/\[(2002|2003|2006|2013)\]|server has gone away|Connection refused|actively refused/i', $e->getMessage()) === 1;
+
+            return response()->json(['message' => __($down ? 'errors.database_down' : 'errors.database_error')], $down ? 503 : 500);
+        });
+
         // The framework's own messages ("Server Error", "Too Many Attempts.", ...) follow the request language (lang/ar.json).
-        $exceptions->respond(function (Response $response, \Throwable $e, Request $request) {
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
             if ($response instanceof JsonResponse && is_string($message = $response->getData(true)['message'] ?? null)) {
                 $translated = __($message);
                 if ($translated !== $message) {
