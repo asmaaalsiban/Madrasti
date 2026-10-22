@@ -111,4 +111,14 @@ describe('GenerateClassroomsPage', () => {
     expect(screen.getAllByLabelText('مختلط').length).toBe(3)
     expect(screen.getByRole('heading', { name: 'توليد الشعب' })).toBeInTheDocument()
   })
+
+  it('explains a preview that changes nothing and lists what already exists', async () => {
+    api.post.mockResolvedValue({ data: { data: { dry_run: true, created: 0, placed: 0, unplaced: [], classrooms: [], existing: [{ grade_level_id: 3, mixed: 2, male: 0, female: 1 }] } } })
+    renderPage()
+    await screen.findByRole('row', { name: /KG1/ })
+    fill('Grade 4', 'Boys', '2')
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+    expect(await screen.findByText('Nothing new to create: these grades already have the sections you asked for.')).toBeInTheDocument()
+    expect(screen.getByText('Grade 4: 2 mixed, 0 boys, 1 girls already exist')).toBeInTheDocument()
+  })
 })

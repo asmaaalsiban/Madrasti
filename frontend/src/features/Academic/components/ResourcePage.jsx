@@ -51,7 +51,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const openForm = (row) => {
     setErrors({})
     setFormError('')
-    setForm(row?.id ? Object.fromEntries(fields.filter((f) => f.type !== 'custom').map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
+    setForm(row?.id ? Object.fromEntries(fields.filter((f) => f.type !== 'custom' || f.getValue).map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
     setEditing(row ?? {})
   }
 
