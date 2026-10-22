@@ -40,6 +40,7 @@ export default function AutoAssignDialog({ open, onClose }) {
             <p role="status" className="font-medium">
               {result.dry_run ? t('autoAssign.willAssign', { count: result.assigned, teachers: result.teachers.length }) : t('autoAssign.assigned', { count: result.assigned })}
             </p>
+            {result.invalid > 0 && <p className="rounded bg-red-50 p-3 text-sm text-red-800">{t('autoAssign.invalid', { count: result.invalid })}</p>}
             {result.unassigned.length > 0 && (
               <div className="rounded bg-amber-50 p-3 text-sm text-amber-800">
                 <p>{t('autoAssign.unassigned', { count: result.unassigned.length })}</p>

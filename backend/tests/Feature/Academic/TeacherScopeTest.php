@@ -10,6 +10,8 @@ use App\Modules\Academic\Models\GradeLevelSubject;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\Academic\Services\AutoTeachingAssigner;
+use App\Modules\Scheduling\Models\Period;
+use App\Modules\Scheduling\Models\TimetableEntry;
 use App\Shared\Enums\StaffType;
 use Illuminate\Support\Collection;
 
@@ -125,5 +127,30 @@ class TeacherScopeTest extends AcademicTestCase
         $this->postJson('/api/teaching-assignments', $body($girls, $maleTeacher))->assertUnprocessable()->assertJsonValidationErrors('teacher_id');
         $this->postJson('/api/teaching-assignments', $body($upper, $lowerTeacher))->assertUnprocessable()->assertJsonValidationErrors('teacher_id');
         $this->postJson('/api/teaching-assignments', $body($girls, $lowerTeacher))->assertCreated();
+    }
+
+    public function test_an_old_assignment_outside_the_teachers_scope_is_found_replaced_and_never_reaches_the_timetable(): void
+    {
+        $lower = $this->room($this->g2, null, '2-A');
+        $upper = $this->room($this->g8, null, '8-A');
+        $basic = $this->teacher(['grade_from_id' => $this->g2->id, 'grade_to_id' => $this->g2->id]);
+        $other = $this->teacher(['grade_from_id' => $this->g8->id, 'grade_to_id' => $this->g8->id]);
+        // Made before the scope existed: the basic teacher teaches the upper grade too.
+        TeachingAssignment::create(['classroom_id' => $upper->id, 'subject_id' => $this->math->id, 'teacher_id' => $basic->id, 'weekly_periods' => 5]);
+        $this->actAsAdmin();
+        Period::create(['day_of_week' => 0, 'number' => 1, 'starts_at' => '08:00', 'ends_at' => '08:45']);
+
+        $generated = $this->postJson('/api/timetable/generate', ['seed' => 1, 'dry_run' => true])->assertOk();
+        $this->assertSame(['8-A'], collect($generated->json('data.out_of_scope'))->pluck('classroom')->all());
+        $this->assertSame(0, TimetableEntry::where('teacher_id', $basic->id)->count());
+
+        $preview = $this->postJson('/api/teaching-assignments/auto', ['dry_run' => true])->assertOk();
+        $preview->assertJsonPath('data.invalid', 1);
+        $this->assertSame($basic->id, TeachingAssignment::where('classroom_id', $upper->id)->value('teacher_id'), 'a preview changes nothing');
+
+        $this->postJson('/api/teaching-assignments/auto')->assertOk()->assertJsonPath('data.invalid', 1);
+        $this->assertSame($other->id, TeachingAssignment::where('classroom_id', $upper->id)->value('teacher_id'));
+        $this->assertSame($basic->id, TeachingAssignment::where('classroom_id', $lower->id)->value('teacher_id'));
+        $this->postJson('/api/teaching-assignments/auto')->assertOk()->assertJsonPath('data.invalid', 0);
     }
 }

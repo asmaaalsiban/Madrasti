@@ -460,7 +460,8 @@
     "teacher": "Teacher",
     "subject": "Subject",
     "classrooms": "Sections",
-    "load": "Periods"
+    "load": "Periods",
+    "invalid": "{{count}} existing assignments are outside the teacher's grades or students. They will be replaced when you apply."
   },
   "days": {
     "0": "Sunday",
@@ -514,6 +515,7 @@
     "free": "Free",
     "empty": "Empty",
     "incomplete": "These sections have empty periods (their curriculum is shorter than their week):",
-    "incompleteRow": "{{classroom}}: {{lessons}} lessons for {{slots}} periods ({{empty}} empty)"
+    "incompleteRow": "{{classroom}}: {{lessons}} lessons for {{slots}} periods ({{empty}} empty)",
+    "outOfScope": "These assignments are outside the teacher's grades or students, so they were left out (use Distribute automatically to replace them):"
   }
 }
