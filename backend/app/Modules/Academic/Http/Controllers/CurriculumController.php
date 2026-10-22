@@ -10,6 +10,7 @@ use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\GradeLevelSubject;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Services\StandardCurriculum;
+use App\Modules\Scheduling\Services\PeriodSetup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +99,9 @@ class CurriculumController extends Controller
                     $cells[] = [$grade->id, $subjects[$code], $n];
                 }
                 $this->replace($cells, [$grade->id]);
+                if (isset(StandardCurriculum::PERIODS_PER_DAY[$gradeCode]) && $grade->periods_per_day === null) {
+                    $grade->update(['periods_per_day' => StandardCurriculum::PERIODS_PER_DAY[$gradeCode]]); // a value the school chose is kept
+                }
                 $applied[] = (string) $gradeCode;
             }
 
@@ -135,10 +139,13 @@ class CurriculumController extends Controller
     {
         $cells = GradeLevelSubject::get(['grade_level_id', 'subject_id', 'weekly_periods']);
         $setting = DB::table('school_settings')->where('key', 'periods_per_week')->value('value');
+        $schoolDay = app(PeriodSetup::class)->current();
 
         return response()->json(['data' => [
             'periods_per_week' => $setting !== null ? (int) json_decode($setting, true) : self::DEFAULT_PERIODS_PER_WEEK,
-            'grades' => GradeLevel::orderBy('sort_order')->orderBy('id')->get(['id', 'name_ar', 'name_en', 'code', 'sort_order']),
+            // Every grade is compared with its own week: its periods a day (or the school's) x the school days.
+            'grades' => GradeLevel::orderBy('sort_order')->orderBy('id')->get(['id', 'name_ar', 'name_en', 'code', 'sort_order', 'periods_per_day'])
+                ->map(fn (GradeLevel $g) => $g->toArray() + ['weekly_target' => ($g->periods_per_day ?? (int) $schoolDay['periods_per_day']) * count($schoolDay['days'])]),
             'subjects' => Subject::orderBy('name_en')->get(['id', 'code', 'name_ar', 'name_en']),
             'cells' => $cells,
             'totals' => $cells->groupBy('grade_level_id')->map(fn ($rows) => (int) $rows->sum('weekly_periods')),

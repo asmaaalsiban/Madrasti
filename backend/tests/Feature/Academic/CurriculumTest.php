@@ -111,7 +111,7 @@ class CurriculumTest extends AcademicTestCase
         $this->postJson('/api/curriculum/copy', ['from_grade_level_id' => $this->grade1->id, 'to_grade_level_ids' => [$this->grade1->id]])->assertUnprocessable();
     }
 
-    public function test_the_standard_plan_gives_every_grade_from_1_to_10_exactly_35_periods(): void
+    public function test_the_standard_plan_gives_every_grade_from_1_to_10_its_full_week(): void
     {
         $this->actAsAdmin();
         $grades = collect(range(1, 10))->map(fn ($n) => GradeLevel::firstOrCreate(['code' => (string) $n], ['name_ar' => "صف $n", 'name_en' => "Grade $n", 'sort_order' => $n + 3]));
@@ -121,7 +121,8 @@ class CurriculumTest extends AcademicTestCase
 
         $this->assertSame([], $response->json('data.missing_grades'));
         foreach ($grades as $grade) {
-            $this->assertSame(35, (int) DB::table('grade_level_subjects')->where('grade_level_id', $grade->id)->sum('weekly_periods'), "grade {$grade->code}");
+            $expected = in_array($grade->code, ['1', '2', '3'], true) ? 30 : 35; // grades 1-3 have a 6-period day
+            $this->assertSame($expected, (int) DB::table('grade_level_subjects')->where('grade_level_id', $grade->id)->sum('weekly_periods'), "grade {$grade->code}");
         }
         $this->assertSame(0, DB::table('grade_level_subjects')->where('grade_level_id', $kg->id)->count(), 'kindergarten is left alone');
         $periods = fn (string $grade, string $code) => (int) DB::table('grade_level_subjects')

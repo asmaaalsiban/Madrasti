@@ -6,11 +6,14 @@ namespace App\Modules\Scheduling\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Student;
 use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
 use App\Modules\Scheduling\Services\TimetableGenerator;
+use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -54,11 +57,57 @@ class TimetableController extends Controller
             ->when(isset($data['teacher_id']), fn ($q) => $q->where('teacher_id', $data['teacher_id']))
             ->get();
 
-        return response()->json(['data' => [
-            'periods' => Period::orderBy('day_of_week')->orderBy('number')->get()->map(fn (Period $p) => [
+        return response()->json(['data' => $this->grid($entries, Period::orderBy('day_of_week')->orderBy('number')->get())]);
+    }
+
+    /** The week of the signed-in teacher (their lessons) or student (their section's lessons). */
+    public function mine(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->hasRole(Role::Teacher)) {
+            $entries = TimetableEntry::where('teacher_id', $user->id)->with(['subject', 'teacher', 'classroom', 'room'])->get();
+
+            return response()->json(['data' => $this->grid($entries, Period::orderBy('day_of_week')->orderBy('number')->get()) + ['title' => $user->name]]);
+        }
+        abort_unless($user->hasRole(Role::Student) && $user->student !== null, 403);
+
+        return $this->forStudent($user->student);
+    }
+
+    /** The week of the section a student is in (the student, their parents and admins). */
+    public function forStudent(Student $student): JsonResponse
+    {
+        Gate::authorize('view-student-timetable', $student);
+
+        $year = AcademicYear::where('is_current', true)->first();
+        $classroom = $year ? $student->enrollments()->where('academic_year_id', $year->id)->with('classroom.gradeLevel')->first()?->classroom : null;
+        if ($classroom === null) {
+            return response()->json(['data' => ['title' => null, 'periods' => [], 'entries' => []]]);
+        }
+
+        $limit = $classroom->gradeLevel->periods_per_day;
+        $periods = Period::orderBy('day_of_week')->orderBy('number')->when($limit, fn ($q) => $q->where('number', '<=', $limit))->get();
+        $entries = TimetableEntry::where('classroom_id', $classroom->id)->with(['subject', 'teacher', 'classroom', 'room'])->get();
+
+        return response()->json(['data' => $this->grid($entries, $periods) + ['title' => $classroom->name]]);
+    }
+
+    /**
+     * @param  Collection<int, TimetableEntry>  $entries
+     * @param  Collection<int, Period>  $periods
+     * @return array<string, mixed>
+     */
+    private function grid(Collection $entries, Collection $periods): array
+    {
+        $ids = $periods->pluck('id')->flip();
+
+        return [
+            'periods' => $periods->map(fn (Period $p) => [
                 'id' => $p->id, 'day_of_week' => $p->day_of_week, 'number' => $p->number, 'starts_at' => substr($p->starts_at, 0, 5), 'ends_at' => substr($p->ends_at, 0, 5),
             ])->values(),
-            'entries' => $entries->map(fn (TimetableEntry $e) => [
+            'entries' => $entries->filter(fn (TimetableEntry $e) => $ids->has($e->period_id))->map(fn (TimetableEntry $e) => [
                 'id' => $e->id,
                 'period_id' => $e->period_id,
                 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']),
@@ -67,6 +116,6 @@ class TimetableController extends Controller
                 'room' => $e->room?->only(['id', 'name']),
                 'is_locked' => $e->is_locked,
             ])->values(),
-        ]]);
+        ];
     }
 }

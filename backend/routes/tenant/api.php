@@ -63,6 +63,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::post('curriculum/standard-plan', [CurriculumController::class, 'standardPlan']);
     Route::get('periods', [PeriodController::class, 'index']);
     Route::put('periods/setup', [PeriodController::class, 'setup']);
+    Route::put('periods/grades', [PeriodController::class, 'grades']);
     Route::post('timetable/generate', [TimetableController::class, 'generate']);
     Route::get('timetable', [TimetableController::class, 'show']);
     Route::apiResource('terms', TermController::class);
@@ -92,6 +93,10 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->
 
 // One student's days: admin, the homeroom teacher, the student and the student's parents (checked by a gate).
 Route::middleware('school-user')->get('attendance/students/{student}', [AttendanceReportController::class, 'student']);
+
+// The week of the signed-in teacher or student, and of a student (the student, their parents, admins: a gate checks).
+Route::middleware('school-user')->get('timetable/me', [TimetableController::class, 'mine']);
+Route::middleware('school-user')->get('students/{student}/timetable', [TimetableController::class, 'forStudent']);
 
 // A head of department sees the teachers of their subject (the controller checks the staff type).
 Route::middleware(['school-user', 'role:teacher'])->get('department', DepartmentController::class);
