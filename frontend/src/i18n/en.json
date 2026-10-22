@@ -246,8 +246,13 @@
     "fields": {
       "type": "Type",
       "subject": "Subject",
-      "floor": "Floor"
-    }
+      "floor": "Floor",
+      "gradeFrom": "Teaches from grade",
+      "gradeTo": "Teaches to grade",
+      "teachesGender": "Teaches students",
+      "teaches": "Teaches"
+    },
+    "scopeHint": "Leave the grades empty for a teacher who teaches every grade, and the students empty for boys and girls."
   },
   "parent": {
     "home": {

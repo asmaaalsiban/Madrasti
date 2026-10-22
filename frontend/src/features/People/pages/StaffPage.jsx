@@ -37,6 +37,15 @@ export default function StaffPage() {
       name: 'subject_id', label: 'staff.fields.subject', type: 'select', optionsFrom: 'subjects',
       getValue: (row) => row.subject?.id, visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
     },
+    {
+      name: 'grade_from_id', label: 'staff.fields.gradeFrom', type: 'select', optionsFrom: 'grade-levels', getValue: (row) => row.grade_from?.id,
+      visibleWhen: (form) => byValue[form.staff_type]?.needs_subject, hint: 'staff.scopeHint',
+    },
+    { name: 'grade_to_id', label: 'staff.fields.gradeTo', type: 'select', optionsFrom: 'grade-levels', getValue: (row) => row.grade_to?.id, visibleWhen: (form) => byValue[form.staff_type]?.needs_subject },
+    {
+      name: 'teaches_gender', label: 'staff.fields.teachesGender', type: 'select', visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
+      options: [{ value: 'male', label: 'buildings.gender.male' }, { value: 'female', label: 'buildings.gender.female' }],
+    },
     { name: 'floor', label: 'staff.fields.floor', visibleWhen: (form) => byValue[form.staff_type]?.needs_floor },
     { name: 'is_active', label: 'people.fields.active', type: 'checkbox' },
   ]
@@ -48,6 +57,10 @@ export default function StaffPage() {
     {
       key: 'subject', label: 'staff.fields.subject',
       render: (r) => r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : ''),
+    },
+    {
+      key: 'scope', label: 'staff.fields.teaches',
+      render: (r) => (r.grade_from && r.grade_to ? `${r.grade_from[`name_${i18n.language}`]} → ${r.grade_to[`name_${i18n.language}`]}` : '') + (r.teaches_gender ? ` · ${t(`buildings.gender.${r.teaches_gender}`)}` : ''),
     },
     { key: 'phone', label: 'people.fields.phone' },
     { key: 'is_active', label: 'people.fields.active', render: (r) => t(r.is_active ? 'academic.yes' : 'academic.no') },
@@ -75,7 +88,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />

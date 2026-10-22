@@ -25,7 +25,7 @@ class StaffController extends AcademicController
 
     protected array $searchable = ['name', 'email', 'phone'];
 
-    protected array $with = ['staffProfile.subject'];
+    protected array $with = ['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo'];
 
     protected string $orderBy = 'name';
 

@@ -24,7 +24,7 @@ class TeacherPlanner
     }
 
     /**
-     * @return Collection<int, array{classroom_id: int, classroom: string, grade_order: int, subject_id: int, periods: int, building_id: ?int}>
+     * @return Collection<int, array{classroom_id: int, classroom: string, grade_order: int, gender: string, subject_id: int, periods: int, building_id: ?int}>
      */
     public function demands(): Collection
     {
@@ -40,6 +40,7 @@ class TeacherPlanner
                 'classroom_id' => $classroom->id,
                 'classroom' => $classroom->name,
                 'grade_order' => (int) $classroom->gradeLevel->sort_order,
+                'gender' => $classroom->gender ?? 'mixed',
                 'subject_id' => $row->subject_id,
                 'periods' => $row->weekly_periods,
                 'building_id' => $classroom->room?->floor?->building_id,

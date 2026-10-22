@@ -34,7 +34,7 @@ class SaveStaff
             ]);
             $user->staffProfile()->create($this->profile($type, $data));
 
-            return $user->load('staffProfile.subject');
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo']);
         });
     }
 
@@ -67,7 +67,7 @@ class SaveStaff
                 $user->tokens()->delete();
             }
 
-            return $user->load('staffProfile.subject');
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo']);
         });
     }
 
@@ -81,6 +81,9 @@ class SaveStaff
             'staff_type' => $type,
             'subject_id' => $type->needsSubject() ? ($data['subject_id'] ?? null) : null,
             'floor' => $type->needsFloor() ? ($data['floor'] ?? null) : null,
+            'grade_from_id' => $type->needsSubject() ? ($data['grade_from_id'] ?? null) : null,
+            'grade_to_id' => $type->needsSubject() ? ($data['grade_to_id'] ?? null) : null,
+            'teaches_gender' => $type->needsSubject() ? ($data['teaches_gender'] ?? null) : null,
         ];
     }
 }

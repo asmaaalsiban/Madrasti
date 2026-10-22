@@ -15,6 +15,7 @@ return [
     'room_taken' => 'Another classroom already uses this room in this academic year.',
     'curriculum_duplicate' => 'A subject can appear only once for a grade.',
     'subject_not_in_curriculum' => 'This subject is not in the curriculum of the classroom\'s grade.',
+    'teacher_outside_scope' => 'This teacher does not teach the grade or the students (boys / girls) of this classroom.',
     'year_locked' => 'This classroom has enrolled students, so its academic year cannot be changed.',
     'resources' => [
         'subject' => 'subject',

@@ -45,7 +45,7 @@ class AutoTeachingAssigner
 
         $teachers = User::query()->where('is_active', true)
             ->whereHas('staffProfile', fn ($q) => $q->whereNotNull('subject_id')->whereIn('staff_type', StaffType::valuesIn('teaching')))
-            ->with('staffProfile')->orderBy('id')->get()->groupBy(fn (User $u) => $u->staffProfile->subject_id);
+            ->with(['staffProfile.gradeFrom', 'staffProfile.gradeTo'])->orderBy('id')->get()->groupBy(fn (User $u) => $u->staffProfile->subject_id);
         $subjects = Subject::all()->keyBy('id');
 
         $pending = $demands->reject(fn ($d) => $takenKeys->has($d['classroom_id'].'-'.$d['subject_id']))
@@ -54,7 +54,7 @@ class AutoTeachingAssigner
         $assigned = [];
         $unassigned = [];
         foreach ($pending as $d) {
-            $teacher = $this->pick($teachers->get($d['subject_id'], collect()), $load, $home, $d['building_id'], $d['periods'], $maxLoad);
+            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeach($d['grade_order'], $d['gender'])), $load, $home, $d['building_id'], $d['periods'], $maxLoad);
             if ($teacher === null) {
                 $unassigned[] = $d;
 

@@ -38,6 +38,10 @@ const student = {
 }
 
 // Answers the endpoints the pages call.
+const guardianGrades = () => {
+  const base = api.get.getMockImplementation()
+  api.get.mockImplementation((url, c) => (url === '/grade-levels' ? Promise.resolve(paged([{ id: 6, name_en: 'Grade 6', name_ar: 'السادس' }, { id: 10, name_en: 'Grade 10', name_ar: 'العاشر' }])) : base(url, c)))
+}
 const dad = { id: 30, name: 'Abu Mohammad', email: 'dad@mail.test', phone: '0599123456', children: [{ id: 9, name_ar: 'محمد', name_en: 'Mohammad' }] }
 let guardians = []
 
@@ -97,6 +101,34 @@ describe('StaffPage', () => {
     fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'floor_supervisor' } })
     expect(screen.getByLabelText('Floor')).toBeInTheDocument()
     expect(screen.queryByLabelText('Subject')).not.toBeInTheDocument()
+  })
+
+  it('saves whom a teacher teaches: a range of grades and boys or girls only', async () => {
+    serve()
+    guardianGrades()
+    api.post.mockResolvedValue({ data: { data: { id: 6 } } })
+    renderPage(<StaffPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    await within(screen.getByLabelText('Teaches from grade')).findByRole('option', { name: 'Grade 6' })
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Omar' } })
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'omar@school.test' } })
+    fireEvent.change(screen.getByLabelText('Teaches from grade'), { target: { value: '6' } })
+    fireEvent.change(screen.getByLabelText('Teaches to grade'), { target: { value: '10' } })
+    fireEvent.change(screen.getByLabelText('Teaches students'), { target: { value: 'female' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/staff', expect.objectContaining({ grade_from_id: '6', grade_to_id: '10', teaches_gender: 'female' })))
+  })
+
+  it('does not ask a nurse whom they teach', async () => {
+    serve()
+    renderPage(<StaffPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    await screen.findByRole('option', { name: 'Nurse' })
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'nurse' } })
+    expect(screen.queryByLabelText('Teaches from grade')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Teaches students')).not.toBeInTheDocument()
   })
 
   it('creates a teacher with a subject (no password is typed)', async () => {
