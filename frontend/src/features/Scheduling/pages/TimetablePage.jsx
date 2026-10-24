@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import EditLessonDialog from '../components/EditLessonDialog'
 import GenerateTimetableDialog from '../components/GenerateTimetableDialog'
 import TimetableGrid from '../components/TimetableGrid'
 
@@ -12,6 +13,7 @@ export default function TimetablePage() {
   const [classroomId, setClassroomId] = useState('')
   const [teacherId, setTeacherId] = useState('')
   const [generate, setGenerate] = useState(false)
+  const [editing, setEditing] = useState(null)
 
   const classrooms = useQuery({ queryKey: ['timetable', 'classrooms'], queryFn: async () => (await api.get('/classrooms', { params: { per_page: 100 } })).data.data })
   const teachers = useQuery({ queryKey: ['timetable', 'teachers'], queryFn: async () => (await api.get('/staff', { params: { per_page: 100, category: 'teaching' } })).data.data })
@@ -59,7 +61,8 @@ export default function TimetablePage() {
 
       {grid.isSuccess && periods.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('timetable.noPeriods')}</p>}
 
-      {periods.length > 0 && <TimetableGrid periods={periods} entries={grid.data.entries} show={mode === 'classroom' ? 'teacher' : 'classroom'} emptyLabel={mode === 'classroom' ? t('timetable.empty') : null} />}
+      {periods.length > 0 && <TimetableGrid periods={periods} entries={grid.data.entries} show={mode === 'classroom' ? 'teacher' : 'classroom'} emptyLabel={mode === 'classroom' ? t('timetable.empty') : null} onCellClick={mode === 'classroom' ? (period, entry) => setEditing({ period, entry }) : null} />}
+      {editing && <EditLessonDialog classroomId={Number(activeClassroom)} period={editing.period} entry={editing.entry} onClose={() => setEditing(null)} />}
 
       <GenerateTimetableDialog open={generate} onClose={() => setGenerate(false)} />
     </section>

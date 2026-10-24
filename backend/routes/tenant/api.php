@@ -66,6 +66,11 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::put('periods/grades', [PeriodController::class, 'grades']);
     Route::post('timetable/generate', [TimetableController::class, 'generate']);
     Route::get('timetable', [TimetableController::class, 'show']);
+    Route::put('timetable/entries', [TimetableController::class, 'place']);
+    Route::put('timetable/entries/{entry}/lock', [TimetableController::class, 'lock']);
+    Route::delete('timetable/entries/{entry}', [TimetableController::class, 'destroy']);
+    Route::get('teachers/{user}/unavailability', [TimetableController::class, 'unavailability']);
+    Route::put('teachers/{user}/unavailability', [TimetableController::class, 'saveUnavailability']);
     Route::apiResource('terms', TermController::class);
     // The building: buildings > floors > rooms (classrooms and labs).
     Route::apiResource('buildings', BuildingController::class)->except('show');
