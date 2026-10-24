@@ -25,6 +25,7 @@ export default function ParentHome() {
               <div className="mt-2 flex flex-wrap gap-2">
                 <Link to={`/parent/children/${c.id}/grades`} className="rounded border px-3 py-1 text-sm text-brand">{t('studentGrades.linkLabel')}</Link>
                 <Link to={`/parent/children/${c.id}/timetable`} className="rounded border px-3 py-1 text-sm text-brand">{t('timetable.linkLabel')}</Link>
+                <Link to={`/parent/children/${c.id}/homework`} className="rounded border px-3 py-1 text-sm text-brand">{t('homework.title')}</Link>
               </div>
               <ChildAttendance studentId={c.id} />
             </li>

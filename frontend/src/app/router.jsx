@@ -36,6 +36,9 @@ import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage
 import ChildTimetablePage from '../features/Parent/pages/ChildTimetablePage'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
+import HomeworkPage from '../features/Homework/pages/HomeworkPage'
+import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
+import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
@@ -43,14 +46,15 @@ const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
-  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }],
-  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }],
+  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }, { path: 'children/:id/homework', element: <ChildHomeworkPage /> }],
+  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }, { path: 'homework', element: <StudentHomeworkPage /> }],
   teacher: [
     { index: true, element: <TeacherHome /> },
     { path: 'attendance', element: <TakeAttendancePage /> },
     { path: 'attendance/report', element: <AttendanceReportPage /> },
     { path: 'department', element: <DepartmentPage /> },
     { path: 'timetable', element: <TeacherTimetablePage /> },
+    { path: 'homework', element: <HomeworkPage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
     { path: 'grades/:id', element: <ScoreSheetPage /> },
@@ -93,6 +97,7 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/homework', element: <HomeworkPage /> },
               { path: '/admin/grades', element: <AssessmentsPage /> },
               { path: '/admin/grades/results', element: <ResultsPage /> },
               { path: '/admin/grades/:id', element: <ScoreSheetPage /> },
