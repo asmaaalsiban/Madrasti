@@ -5,8 +5,9 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
+import HomeworkImage from '../components/HomeworkImage'
 
-const EMPTY = { pair: '', title: '', description: '', due_on: '' }
+const EMPTY = { pair: '', title: '', description: '', due_on: '', image: null, removeImage: false }
 
 // Teacher (own homework) and admin (all): send homework to a section, edit or delete it.
 export default function HomeworkPage() {
@@ -25,14 +26,24 @@ export default function HomeworkPage() {
     mutationFn: () => {
       const [classroom_id, subject_id] = form.pair.split('-').map(Number)
       const body = { classroom_id, subject_id, title: form.title, description: form.description || null, due_on: form.due_on }
-      return form.id ? api.put(`/homework/${form.id}`, body) : api.post('/homework', body)
+      return (form.id ? api.put(`/homework/${form.id}`, body) : api.post('/homework', body)).then(async (res) => {
+        const id = res.data.data.id
+        if (form.image) {
+          const data = new FormData()
+          data.append('image', form.image)
+          await api.post(`/homework/${id}/image`, data)
+        } else if (form.removeImage) {
+          await api.delete(`/homework/${id}/image`)
+        }
+        return res
+      })
     },
     onSuccess: done,
     onError: (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || t('admin.actions.error')),
   })
   const remove = useMutation({ mutationFn: (id) => api.delete(`/homework/${id}`), onSuccess: done })
 
-  const edit = (h) => setForm({ id: h.id, pair: `${h.classroom.id}-${h.subject.id}`, title: h.title, description: h.description ?? '', due_on: h.due_on })
+  const edit = (h) => setForm({ id: h.id, pair: `${h.classroom.id}-${h.subject.id}`, title: h.title, description: h.description ?? '', due_on: h.due_on, hasImage: h.has_image, image: null, removeImage: false })
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
 
   return (
@@ -51,6 +62,7 @@ export default function HomeworkPage() {
               <span className="text-sm text-slate-600">{h.classroom.name} · {subject(h.subject)}</span>
             </div>
             {h.description && <p className="whitespace-pre-line text-sm text-slate-700">{h.description}</p>}
+            {h.has_image && <HomeworkImage id={h.id} />}
             <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
             <div className="flex gap-2 pt-1">
               <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(h)}>{t('admin.actions.edit')}</button>
@@ -73,6 +85,12 @@ export default function HomeworkPage() {
             <FormField label={t('homework.fields.title')}><input required className="w-full rounded border p-2" value={form.title} onChange={set('title')} /></FormField>
             <FormField label={t('homework.fields.description')}><textarea rows={4} className="w-full rounded border p-2" value={form.description} onChange={set('description')} /></FormField>
             <FormField label={t('homework.fields.dueOn')}><input required type="date" className="w-full rounded border p-2" value={form.due_on} onChange={set('due_on')} /></FormField>
+            <FormField label={t('homework.fields.image')} hint={form.hasImage && !form.removeImage && !form.image ? t('homework.hasImage') : t('homework.imageHint')}>
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="w-full text-sm" onChange={(e) => setForm({ ...form, image: e.target.files[0] ?? null, removeImage: false })} />
+            </FormField>
+            {form.hasImage && !form.image && !form.removeImage && (
+              <button type="button" className="text-sm text-red-700 underline" onClick={() => setForm({ ...form, removeImage: true })}>{t('homework.removeImage')}</button>
+            )}
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
               <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</button>

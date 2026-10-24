@@ -555,7 +555,12 @@
     "fields": {
       "title": "Title",
       "description": "Details",
-      "dueOn": "Due date"
-    }
+      "dueOn": "Due date",
+      "image": "Picture"
+    },
+    "imageAlt": "Homework picture",
+    "imageHint": "Optional: a photo of the page or the task (JPG, PNG or WebP, up to 5 MB).",
+    "hasImage": "This homework has a picture. Choose another to replace it.",
+    "removeImage": "Remove the picture"
   }
 }

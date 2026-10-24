@@ -16,7 +16,7 @@ class HomeworkAssignment extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['classroom_id', 'subject_id', 'teacher_id', 'title', 'description', 'due_at', 'published_at'];
+    protected $fillable = ['classroom_id', 'subject_id', 'teacher_id', 'title', 'description', 'attachment_path', 'due_at', 'published_at'];
 
     /**
      * @return array<string, string>

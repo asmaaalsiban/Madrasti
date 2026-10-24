@@ -66,6 +66,31 @@ describe('HomeworkPage (teacher)', () => {
   })
 })
 
+describe('homework pictures', () => {
+  it('uploads the chosen picture after saving', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/homework' ? [] : { assignments: [{ classroom: { id: 3, name: '5-A' }, subject: math }] } } }))
+    api.post.mockResolvedValue({ data: { data: { ...hw, id: 8 } } })
+    wrap(<HomeworkPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Send homework' }))
+    await screen.findByRole('option', { name: '5-A · Math' })
+    fireEvent.change(screen.getByLabelText('Section and subject'), { target: { value: '3-5' } })
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'With picture' } })
+    fireEvent.change(screen.getByLabelText('Due date'), { target: { value: '2026-11-02' } })
+    const file = new File(['x'], 'page.jpg', { type: 'image/jpeg' })
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/8/image', expect.any(FormData)))
+  })
+
+  it('shows the picture to the student', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:pic')
+    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/homework/me' ? { data: [{ ...hw, has_image: true }] } : new Blob(['x']) }))
+    wrap(<StudentHomeworkPage />)
+    expect(await screen.findByAltText('Homework picture')).toHaveAttribute('src', 'blob:pic')
+    expect(api.get).toHaveBeenCalledWith('/homework/1/image', { responseType: 'blob' })
+  })
+})
+
 describe('homework for students and parents', () => {
   it('shows the student their homework', async () => {
     api.get.mockResolvedValue({ data: { data: [hw] } })

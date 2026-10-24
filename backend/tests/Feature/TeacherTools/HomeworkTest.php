@@ -12,6 +12,8 @@ use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\TeacherTools\Models\HomeworkAssignment;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Academic\AcademicTestCase;
 
@@ -125,5 +127,62 @@ class HomeworkTest extends AcademicTestCase
         Sanctum::actingAs($this->parent);
         $this->postJson('/api/homework', $this->body())->assertForbidden();
         $this->getJson('/api/homework')->assertForbidden();
+    }
+
+    public function test_a_teacher_adds_replaces_and_removes_a_picture_and_it_goes_with_the_homework(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        Sanctum::actingAs($this->teacher);
+
+        $this->post("/api/homework/{$hw->id}/image", ['image' => UploadedFile::fake()->image('a.jpg')], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.has_image', true);
+        $first = $hw->fresh()->attachment_path;
+        Storage::assertExists($first);
+        $this->post("/api/homework/{$hw->id}/image", ['image' => UploadedFile::fake()->image('b.png')], ['Accept' => 'application/json'])->assertOk();
+        Storage::assertMissing($first);
+
+        $this->deleteJson("/api/homework/{$hw->id}/image")->assertNoContent();
+        $this->assertNull($hw->fresh()->attachment_path);
+
+        $this->post("/api/homework/{$hw->id}/image", ['image' => UploadedFile::fake()->image('c.jpg')], ['Accept' => 'application/json'])->assertOk();
+        $path = $hw->fresh()->attachment_path;
+        $this->deleteJson("/api/homework/{$hw->id}")->assertNoContent();
+        Storage::assertMissing($path);
+    }
+
+    public function test_only_pictures_are_accepted_and_only_by_the_owner(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        Sanctum::actingAs($this->teacher);
+        $this->post("/api/homework/{$hw->id}/image", ['image' => UploadedFile::fake()->create('a.pdf', 10, 'application/pdf')], ['Accept' => 'application/json'])->assertUnprocessable();
+        $this->post("/api/homework/{$hw->id}/image", [], ['Accept' => 'application/json'])->assertUnprocessable();
+
+        Sanctum::actingAs(User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create());
+        $this->post("/api/homework/{$hw->id}/image", ['image' => UploadedFile::fake()->image('a.jpg')], ['Accept' => 'application/json'])->assertForbidden();
+    }
+
+    public function test_the_picture_is_served_to_the_section_its_parents_and_the_teacher_only(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        $hw->update(['attachment_path' => UploadedFile::fake()->image('a.jpg')->store('homework')]);
+
+        foreach ([$this->teacher, $this->parent] as $user) {
+            Sanctum::actingAs($user);
+            $this->get("/api/homework/{$hw->id}/image")->assertOk();
+        }
+        $studentUser = User::factory()->role(Role::Student)->create();
+        $this->student->update(['user_id' => $studentUser->id]);
+        Sanctum::actingAs($studentUser);
+        $this->get("/api/homework/{$hw->id}/image")->assertOk();
+
+        foreach ([User::factory()->role(Role::Guardian)->create(), User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create()] as $user) {
+            Sanctum::actingAs($user);
+            $this->get("/api/homework/{$hw->id}/image")->assertForbidden();
+        }
+        Sanctum::actingAs($this->teacher);
+        $this->homework(['title' => 'No picture']);
+        $this->get('/api/homework/'.HomeworkAssignment::where('title', 'No picture')->value('id').'/image')->assertNotFound();
     }
 }

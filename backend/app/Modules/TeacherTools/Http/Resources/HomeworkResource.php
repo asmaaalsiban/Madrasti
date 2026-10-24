@@ -21,6 +21,7 @@ class HomeworkResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'due_on' => $this->due_at->format('Y-m-d'),
+            'has_image' => $this->attachment_path !== null,
             'published_at' => $this->published_at?->toIso8601String(),
             'classroom' => $this->classroom->only(['id', 'name']),
             'subject' => $this->subject->only(['id', 'name_ar', 'name_en']),

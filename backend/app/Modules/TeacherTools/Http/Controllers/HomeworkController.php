@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Homework: a teacher (or an admin) sends it to a section; the student and their parents read it. */
 class HomeworkController extends Controller
@@ -54,9 +56,66 @@ class HomeworkController extends Controller
     public function destroy(Request $request, HomeworkAssignment $homework): Response
     {
         $this->own($request, $homework);
+        $this->forgetImage($homework);
         $homework->delete();
 
         return response()->noContent();
+    }
+
+    /** Adds or replaces the picture of the homework (a photo of the page or the task). */
+    public function storeImage(Request $request, HomeworkAssignment $homework): HomeworkResource
+    {
+        $this->own($request, $homework);
+        $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+
+        $this->forgetImage($homework);
+        $homework->update(['attachment_path' => $request->file('image')->store('homework')]);
+
+        return new HomeworkResource($homework->load(['classroom', 'subject', 'teacher']));
+    }
+
+    public function destroyImage(Request $request, HomeworkAssignment $homework): Response
+    {
+        $this->own($request, $homework);
+        $this->forgetImage($homework);
+        $homework->update(['attachment_path' => null]);
+
+        return response()->noContent();
+    }
+
+    /** The picture: the teacher, admins, and the students of the section and their parents. */
+    public function image(Request $request, HomeworkAssignment $homework): StreamedResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        abort_unless($homework->attachment_path !== null && Storage::exists($homework->attachment_path), 404);
+        abort_unless($this->mayRead($user, $homework), 403);
+
+        return Storage::response($homework->attachment_path);
+    }
+
+    private function mayRead(User $user, HomeworkAssignment $homework): bool
+    {
+        if ($user->hasRole(Role::Admin)) {
+            return true;
+        }
+        if ($user->hasRole(Role::Teacher)) {
+            return $homework->teacher_id === $user->id;
+        }
+        if ($homework->published_at === null) {
+            return false;
+        }
+        $students = $user->hasRole(Role::Student) ? collect([$user->student])->filter() : $user->children;
+        $year = AcademicYear::where('is_current', true)->first();
+
+        return $year !== null && $students->contains(fn (Student $s) => $s->enrollments()->where('academic_year_id', $year->id)->where('classroom_id', $homework->classroom_id)->exists());
+    }
+
+    private function forgetImage(HomeworkAssignment $homework): void
+    {
+        if ($homework->attachment_path !== null) {
+            Storage::delete($homework->attachment_path);
+        }
     }
 
     /** The signed-in student's homework. */
