@@ -80,7 +80,8 @@
       "schoolDay": "School day",
       "timetable": "Timetable",
       "availability": "Teacher availability",
-      "behavior": "Behaviour"
+      "behavior": "Behaviour",
+      "lessonPlans": "Lesson plans"
     },
     "actions": {
       "add": "Add",
@@ -649,5 +650,36 @@
     "none": "No summaries yet.",
     "childTitle": "Daily summary: {{name}}",
     "confirmDelete": "Delete the summary of {{date}}?"
+  },
+  "lessonPlans": {
+    "title": "Lesson plans",
+    "hint": "Plan your weeks and send them for approval.",
+    "help": "Write the plan of a week as a draft, then submit it to the admin. If it is rejected, fix it and submit again. An approved plan that you share reaches the students and their parents.",
+    "weekOf": "A day of the week",
+    "planTitle": "Title",
+    "objectives": "Objectives",
+    "content": "Plan (lessons, activities)",
+    "shareWithParents": "Share with students and parents once approved",
+    "saveDraft": "Save draft",
+    "saved": "Draft saved.",
+    "mine": "My plans",
+    "noneWritten": "You have not written any plan yet.",
+    "submit": "Submit for approval",
+    "confirmDelete": "Delete the plan \"{{title}}\"?",
+    "rejectedWith": "Rejected: {{note}}",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Waiting for approval",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "none": "No lesson plans yet.",
+    "childTitle": "Lesson plans: {{name}}",
+    "reviewTitle": "Lesson plans to review",
+    "nothingToReview": "No plans are waiting for review.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectTitle": "Reject \"{{title}}\"",
+    "rejectNote": "Why (the teacher will see it)"
   }
 }
