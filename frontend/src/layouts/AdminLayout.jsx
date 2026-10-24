@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
+import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
 import { useSchool } from '../tenant/useSchool'
 
@@ -23,6 +24,7 @@ const NAV = [
   ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],
   ['/admin/grades', 'grades'],
+  ['/admin/announcements', 'announcements'],
   ['/admin/behavior', 'behavior'],
   ['/admin/attendance', 'attendance'],
   ['/admin/attendance-report', 'attendanceReport'],
@@ -33,6 +35,7 @@ export default function AdminLayout() {
   const { user, logout } = useAuth()
   const { data: school } = useSchool()
   const [open, setOpen] = useState(false)
+  const unread = useUnreadAnnouncements()
 
   return (
     <div className="min-h-screen md:flex">
@@ -59,6 +62,7 @@ export default function AdminLayout() {
               className={({ isActive }) => `block rounded px-3 py-2 ${isActive ? 'bg-white/20' : 'hover:bg-white/10'}`}
             >
               {t(`admin.nav.${key}`)}
+              {key === 'announcements' && unread > 0 && <span className="ms-2 rounded-full bg-white px-2 text-xs font-bold text-brand">{unread}</span>}
             </NavLink>
           ))}
         </nav>

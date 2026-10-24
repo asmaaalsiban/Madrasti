@@ -90,7 +90,8 @@
       "schoolDay": "School day",
       "timetable": "Timetable",
       "availability": "Teacher availability",
-      "behavior": "Behaviour"
+      "behavior": "Behaviour",
+      "announcements": "Announcements"
     },
     "actions": {
       "add": "Add",
@@ -696,5 +697,29 @@
       "submitted": "This plan is waiting for review. Saving your changes takes it back to a draft: submit it again afterwards.",
       "approved": "This plan is approved. Saving your changes takes it back to a draft and hides it from students and parents until it is approved again."
     }
+  },
+  "announcements": {
+    "title": "Announcements",
+    "add": "New announcement",
+    "edit": "Edit announcement",
+    "none": "No announcements.",
+    "new": "New",
+    "pinned": "Pinned",
+    "unread": "{{count}} unread",
+    "audience": "Send to",
+    "audiences": {
+      "all": "Everyone",
+      "role": "A group (teachers, students, parents)",
+      "classroom": "A section"
+    },
+    "role": "Group",
+    "fields": {
+      "title": "Title",
+      "body": "Text"
+    },
+    "expiresAt": "Show until (optional)",
+    "pin": "Pin to the top",
+    "publish": "Publish",
+    "confirmDelete": "Delete the announcement \"{{title}}\"?"
   }
 }

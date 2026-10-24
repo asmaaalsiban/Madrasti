@@ -48,6 +48,7 @@ import { ChildSummariesPage, StudentSummariesPage } from '../features/DailySumma
 import LessonPlansPage from '../features/LessonPlans/pages/LessonPlansPage'
 import ReviewPlansPage from '../features/LessonPlans/pages/ReviewPlansPage'
 import { ChildPlansPage, StudentPlansPage } from '../features/LessonPlans/pages/PlansPages'
+import AnnouncementsPage from '../features/Announcements/pages/AnnouncementsPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
@@ -103,7 +104,7 @@ export const routes = [
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
-          children: HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }],
+          children: [...(HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }]), { path: 'announcements', element: <AnnouncementsPage /> }],
         })),
       },
       {
@@ -127,6 +128,7 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/announcements', element: <AnnouncementsPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },

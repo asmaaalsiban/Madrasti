@@ -17,6 +17,7 @@ use App\Modules\Academic\Http\Controllers\TermController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Communication\Http\Controllers\AnnouncementController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
@@ -135,6 +136,17 @@ Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
 });
 Route::middleware('school-user')->get('daily-summaries/me', [DailySummaryController::class, 'mine']);
 Route::middleware('school-user')->get('students/{student}/daily-summaries', [DailySummaryController::class, 'forStudent']);
+
+// Announcements: the admin (to everyone, a role or a section) and teachers (to their sections) publish; everyone reads theirs.
+Route::middleware('school-user')->prefix('announcements')->group(function (): void {
+    Route::get('/', [AnnouncementController::class, 'index']);
+    Route::get('unread-count', [AnnouncementController::class, 'unread']);
+    Route::get('options', [AnnouncementController::class, 'options']);
+    Route::post('/', [AnnouncementController::class, 'store']);
+    Route::post('{id}/read', [AnnouncementController::class, 'read'])->whereNumber('id');
+    Route::put('{announcement}', [AnnouncementController::class, 'update']);
+    Route::delete('{announcement}', [AnnouncementController::class, 'destroy']);
+});
 
 // Lesson plans: the teacher writes and submits, the head of department reviews, approved shared plans reach students and parents.
 Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
