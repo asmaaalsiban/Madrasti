@@ -9,10 +9,12 @@ use App\Models\User;
 use App\Modules\Auth\Http\Requests\ChangePasswordRequest;
 use App\Modules\Auth\Http\Requests\LoginRequest;
 use App\Modules\Auth\Http\Resources\UserResource;
+use App\Modules\Auth\Services\PasswordReset;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -47,6 +49,31 @@ class AuthController extends Controller
             'token' => $token,
             'user' => new UserResource($this->withChildren($user)),
         ]);
+    }
+
+    /** Sends the reset code (the same answer whether or not the account exists). */
+    public function forgotPassword(Request $request, PasswordReset $reset): JsonResponse
+    {
+        $data = $request->validate(['login' => ['required', 'string', 'max:255']]);
+        $reset->request($data['login'], app()->getLocale());
+
+        return response()->json(['sent' => true, 'message' => __('auth.reset_requested')]);
+    }
+
+    /** Sets the new password with the code. */
+    public function resetPassword(Request $request, PasswordReset $reset): JsonResponse
+    {
+        $data = $request->validate([
+            'login' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'digits:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', Rule::notIn([config('accounts.default_password')])],
+        ], ['password.not_in' => __('auth.password_is_default')]);
+
+        if (! $reset->reset($data['login'], $data['code'], $data['password'])) {
+            throw ValidationException::withMessages(['code' => [__('auth.reset_invalid')]]);
+        }
+
+        return response()->json(['message' => __('auth.reset_done')]);
     }
 
     public function logout(Request $request): JsonResponse

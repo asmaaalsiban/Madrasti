@@ -3,6 +3,7 @@ import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
+import ForgotPasswordPage from '../features/Auth/pages/ForgotPasswordPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
 import FindSchoolPage from '../features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
@@ -92,6 +93,7 @@ const HOME_ROUTES = {
 export const routes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
   {
     element: <RequireAuth />,
     children: [

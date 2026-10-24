@@ -1,6 +1,6 @@
 import PasswordInput from '../../../components/shared/PasswordInput'
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
 import ChangeSchoolCodeButton from '../../../components/shared/ChangeSchoolCodeButton'
@@ -65,6 +65,7 @@ export default function LoginPage() {
           />
         </label>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+        <Link to="/forgot-password" className="block text-sm text-brand">{t('auth.forgot.link')}</Link>
         <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">
           {t('auth.submit')}
         </button>

@@ -109,6 +109,13 @@ class AppServiceProvider extends ServiceProvider
             Limit::perDay((int) config('tenancy.registration_daily_limit'))->by('register-global'),
         ]);
 
+        // Forgot password: 5 code requests a minute per school + login + IP (and 20 per IP); 10 tries a minute at the code.
+        RateLimiter::for('forgot-password', fn (Request $request): array => [
+            Limit::perMinute(5)->by('fp|'.(tenant('id') ?? 'central').'|'.Str::lower((string) $request->input('login')).'|'.$request->ip()),
+            Limit::perMinute(20)->by('fp|ip|'.$request->ip()),
+        ]);
+        RateLimiter::for('reset-password', fn (Request $request): Limit => Limit::perMinute(10)->by('rp|'.(tenant('id') ?? 'central').'|'.Str::lower((string) $request->input('login')).'|'.$request->ip()));
+
         // Login: 5 attempts a minute for the same school + login + IP, and 30 a minute from one IP for a whole school
         // (new accounts share the default password, so one machine must not be able to try it on many emails).
         RateLimiter::for('login', function (Request $request): array {
