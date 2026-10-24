@@ -30,7 +30,10 @@ class UserResource extends JsonResource
             'must_change_password' => $this->must_change_password,
             // Only for staff: what kind of employee (the app shows the tools that fit).
             'staff_type' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->staff_type->value),
-            // Only for students: the id of their student record (their grades live under it).
+            // Only for staff: the subject they teach (a head of department: the department).
+            'subject' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->subject?->only(['id', 'name_ar', 'name_en'])),
+            // Only for students: their section (latest enrolment) and the id of their student record (their grades live under it).
+            'classroom' => $this->whenLoaded('student', fn () => $this->student?->enrollments->sortByDesc('academic_year_id')->first()?->classroom?->name),
             'student_id' => $this->whenLoaded('student', fn () => $this->student?->id),
             // Only for parents: the children they can follow.
             'children' => $this->whenLoaded('children', fn () => $this->children->map(fn ($student) => [

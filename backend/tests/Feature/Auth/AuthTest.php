@@ -3,7 +3,13 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\Enrollment;
+use App\Modules\Academic\Models\Student;
+use App\Modules\Academic\Models\Subject;
 use App\Shared\Enums\Role;
+use App\Shared\Enums\StaffType;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Tests\TenantTestCase;
 
@@ -69,5 +75,21 @@ class AuthTest extends TenantTestCase
         $this->withToken($token)->postJson('/api/auth/logout')->assertOk();
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_a_student_sees_their_section_and_a_teacher_their_subject_in_me(): void
+    {
+        $year = AcademicYear::factory()->create(['is_current' => true]);
+        $room = Classroom::factory()->create(['name' => '5-A', 'academic_year_id' => $year->id]);
+        $user = User::factory()->role(Role::Student)->create();
+        $student = Student::create(['student_number' => 'S-1', 'name_ar' => 'أحمد خالد', 'name_en' => 'Ahmad Khaled', 'gender' => 'male', 'user_id' => $user->id]);
+        Enrollment::create(['student_id' => $student->id, 'classroom_id' => $room->id, 'academic_year_id' => $year->id]);
+
+        $this->actingAs($user)->getJson('/api/auth/me')->assertOk()->assertJsonPath('data.classroom', '5-A');
+
+        $math = Subject::factory()->create(['name_ar' => 'رياضيات', 'name_en' => 'Math']);
+        $head = User::factory()->staff(StaffType::HeadOfDepartment, ['subject_id' => $math->id])->create();
+        $this->actingAs($head)->getJson('/api/auth/me')->assertOk()
+            ->assertJsonPath('data.staff_type', 'head_of_department')->assertJsonPath('data.subject.name_en', 'Math');
     }
 }
