@@ -633,5 +633,18 @@
     "notes": "Notes",
     "monthRow": "{{month}} ({{weeks}} weeks)",
     "termRow": "{{name}} ({{months}} months)"
+  },
+  "dailySummary": {
+    "title": "Daily summary",
+    "hint": "Write what today's lesson covered.",
+    "help": "Write what you covered in the lesson. Students and their parents read it. Writing again for the same section, subject and day replaces it.",
+    "summary": "What the lesson covered",
+    "replaces": "There is already a summary for this day: saving replaces it.",
+    "saved": "Saved. The students and parents can read it.",
+    "previous": "My previous summaries",
+    "noneWritten": "You have not written any summary yet.",
+    "none": "No summaries yet.",
+    "childTitle": "Daily summary: {{name}}",
+    "confirmDelete": "Delete the summary of {{date}}?"
   }
 }

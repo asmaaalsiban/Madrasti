@@ -9,6 +9,7 @@ export default function TeacherHome() {
   const cards = [
     ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
+    ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint'],
     ['/teacher/behavior', 'behavior.title', 'behavior.hint'],
     ['/teacher/homework', 'homework.title', 'homework.hint'],
     ['/teacher/grades', 'grading.title', 'grading.hint'],

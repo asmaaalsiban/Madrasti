@@ -28,6 +28,21 @@ describe('behaviour routes', () => {
   })
 })
 
+describe('daily summary routes', () => {
+  it('opens the summaries of a student, a parent\'s child and the teacher\'s page', () => {
+    for (const [user, path] of [
+      [{ role: 'student', name: 'S', student_id: 1 }, '/student/summaries'],
+      [{ role: 'parent', name: 'P', children: [{ id: 17 }] }, '/parent/children/17/summaries'],
+      [{ role: 'teacher', name: 'T' }, '/teacher/daily-summary'],
+    ]) {
+      auth.user = user
+      const { unmount } = render(<QueryClientProvider client={new QueryClient()}><RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} /></QueryClientProvider>)
+      expect(screen.queryByText(/404/)).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+})
+
 describe('the signed-in name in the header', () => {
   it('shows the role and the full name of a parent and of a student', async () => {
     auth.user = { role: 'parent', name: 'Mohammad Ali Hassan', children: [] }

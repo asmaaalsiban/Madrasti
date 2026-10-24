@@ -13,6 +13,7 @@ export default function StudentHome() {
         <h1 className="text-xl font-bold">{t('studentGrades.myGrades')}</h1>
         <div className="flex flex-wrap gap-2">
           <Link to="/student/homework" className="rounded border px-3 py-1.5 text-sm text-brand">{t('homework.title')}</Link>
+          <Link to="/student/summaries" className="rounded border px-3 py-1.5 text-sm text-brand">{t('dailySummary.title')}</Link>
           <Link to="/student/behavior" className="rounded border px-3 py-1.5 text-sm text-brand">{t('behavior.title')}</Link>
           <Link to="/student/timetable" className="rounded border px-3 py-1.5 text-sm text-brand">{t('timetable.myTimetable')}</Link>
         </div>
