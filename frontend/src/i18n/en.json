@@ -80,8 +80,7 @@
       "schoolDay": "School day",
       "timetable": "Timetable",
       "availability": "Teacher availability",
-      "behavior": "Behaviour",
-      "lessonPlans": "Lesson plans"
+      "behavior": "Behaviour"
     },
     "actions": {
       "add": "Add",
@@ -654,7 +653,7 @@
   "lessonPlans": {
     "title": "Lesson plans",
     "hint": "Plan your weeks and send them for approval.",
-    "help": "Write the plan of a week as a draft, then submit it to the admin. If it is rejected, fix it and submit again. An approved plan that you share reaches the students and their parents.",
+    "help": "Write the plan of a week as a draft, then submit it to the head of your department. If it is rejected, fix it and submit again. An approved plan that you share reaches the students and their parents.",
     "weekOf": "A day of the week",
     "planTitle": "Title",
     "objectives": "Objectives",
@@ -680,6 +679,7 @@
     "approve": "Approve",
     "reject": "Reject",
     "rejectTitle": "Reject \"{{title}}\"",
-    "rejectNote": "Why (the teacher will see it)"
+    "rejectNote": "Why (the teacher will see it)",
+    "reviewHint": "The plans your department's teachers sent for approval."
   }
 }

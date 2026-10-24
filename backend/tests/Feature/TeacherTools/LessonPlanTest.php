@@ -19,6 +19,8 @@ class LessonPlanTest extends AcademicTestCase
 {
     private User $teacher;
 
+    private User $head;
+
     private Classroom $a;
 
     private Classroom $b;
@@ -35,6 +37,7 @@ class LessonPlanTest extends AcademicTestCase
         $year = AcademicYear::factory()->create(['is_current' => true]);
         $this->math = Subject::factory()->create(['name_en' => 'Math']);
         $this->teacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
+        $this->head = User::factory()->staff(StaffType::HeadOfDepartment, ['subject_id' => $this->math->id])->create();
         $this->a = Classroom::factory()->create(['name' => '5-A', 'academic_year_id' => $year->id]);
         $this->b = Classroom::factory()->create(['name' => '5-B', 'academic_year_id' => $year->id]);
         TeachingAssignment::create(['classroom_id' => $this->a->id, 'subject_id' => $this->math->id, 'teacher_id' => $this->teacher->id, 'weekly_periods' => 4]);
@@ -75,70 +78,6 @@ class LessonPlanTest extends AcademicTestCase
         $this->assertSame(0, LessonPlan::count());
     }
 
-    public function test_the_teacher_submits_the_admin_approves_and_an_approved_plan_is_locked(): void
-    {
-        $plan = $this->plan();
-        Sanctum::actingAs($this->teacher);
-        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk()->assertJsonPath('data.status', 'submitted');
-        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable(); // cannot be changed while waiting
-
-        $admin = $this->actAsAdmin();
-        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve', 'note' => 'Good'])->assertOk()->assertJsonPath('data.status', 'approved');
-        $this->assertSame($admin->id, $plan->fresh()->reviewed_by);
-
-        Sanctum::actingAs($this->teacher);
-        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable();
-        $this->deleteJson("/api/lesson-plans/{$plan->id}")->assertUnprocessable();
-    }
-
-    public function test_a_rejected_plan_comes_back_with_the_note_and_can_be_fixed_and_resubmitted(): void
-    {
-        $plan = $this->plan(['status' => 'submitted']);
-        $this->actAsAdmin();
-        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'reject'])->assertUnprocessable()->assertJsonValidationErrors('note');
-        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'reject', 'note' => 'Add objectives'])->assertOk()->assertJsonPath('data.status', 'rejected')->assertJsonPath('data.review_note', 'Add objectives');
-
-        Sanctum::actingAs($this->teacher);
-        $this->putJson('/api/lesson-plans', $this->body(['objectives' => 'Now with objectives']))->assertOk()->assertJsonPath('data.status', 'draft');
-        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk();
-    }
-
-    public function test_only_a_submitted_plan_is_reviewed_and_only_a_draft_or_rejected_one_is_submitted(): void
-    {
-        $draft = $this->plan();
-        $this->actAsAdmin();
-        $this->postJson("/api/lesson-plans/{$draft->id}/review", ['decision' => 'approve'])->assertUnprocessable();
-
-        $approved = $this->plan(['week_starts_on' => '2026-10-11', 'status' => 'approved']);
-        Sanctum::actingAs($this->teacher);
-        $this->postJson("/api/lesson-plans/{$approved->id}/submit")->assertUnprocessable();
-    }
-
-    public function test_a_teacher_lists_only_their_plans_and_the_admin_lists_what_waits_for_review(): void
-    {
-        $this->plan(['status' => 'submitted']);
-        $other = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
-        $this->plan(['teacher_id' => $other->id, 'week_starts_on' => '2026-10-11', 'title' => 'Theirs']);
-        $this->plan(['week_starts_on' => '2026-10-04', 'title' => 'Draft']);
-
-        Sanctum::actingAs($this->teacher);
-        $this->assertCount(2, $this->getJson('/api/lesson-plans')->assertOk()->json('data'));
-
-        $this->actAsAdmin();
-        $this->assertSame(['Old'], collect($this->getJson('/api/lesson-plans/review')->assertOk()->json('data'))->pluck('title')->all());
-    }
-
-    public function test_a_teacher_cannot_touch_another_teachers_plan(): void
-    {
-        $plan = $this->plan();
-        Sanctum::actingAs(User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create());
-
-        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertForbidden();
-        $this->deleteJson("/api/lesson-plans/{$plan->id}")->assertForbidden();
-        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve'])->assertForbidden();
-        $this->getJson('/api/lesson-plans/review')->assertForbidden();
-    }
-
     public function test_a_draft_is_deleted_by_its_teacher(): void
     {
         $plan = $this->plan();
@@ -170,5 +109,105 @@ class LessonPlanTest extends AcademicTestCase
         $this->putJson('/api/lesson-plans', $this->body())->assertForbidden();
         Sanctum::actingAs($this->teacher);
         $this->getJson('/api/lesson-plans/me')->assertForbidden();
+    }
+
+    public function test_the_teacher_submits_the_head_of_department_approves_and_an_approved_plan_is_locked(): void
+    {
+        $plan = $this->plan();
+        Sanctum::actingAs($this->teacher);
+        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk()->assertJsonPath('data.status', 'submitted');
+        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable(); // cannot be changed while waiting
+
+        Sanctum::actingAs($this->head);
+        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve', 'note' => 'Good'])->assertOk()->assertJsonPath('data.status', 'approved');
+        $this->assertSame($this->head->id, $plan->fresh()->reviewed_by);
+
+        Sanctum::actingAs($this->teacher);
+        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable();
+        $this->deleteJson("/api/lesson-plans/{$plan->id}")->assertUnprocessable();
+    }
+
+    public function test_a_rejected_plan_comes_back_with_the_note_and_can_be_fixed_and_resubmitted(): void
+    {
+        $plan = $this->plan(['status' => 'submitted']);
+        Sanctum::actingAs($this->head);
+        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'reject'])->assertUnprocessable()->assertJsonValidationErrors('note');
+        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'reject', 'note' => 'Add objectives'])->assertOk()->assertJsonPath('data.status', 'rejected')->assertJsonPath('data.review_note', 'Add objectives');
+
+        Sanctum::actingAs($this->teacher);
+        $this->putJson('/api/lesson-plans', $this->body(['objectives' => 'Now with objectives']))->assertOk()->assertJsonPath('data.status', 'draft');
+        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk()->assertJsonPath('data.status', 'submitted');
+    }
+
+    public function test_only_a_submitted_plan_is_reviewed_and_only_a_draft_or_rejected_one_is_submitted(): void
+    {
+        $draft = $this->plan();
+        Sanctum::actingAs($this->head);
+        $this->postJson("/api/lesson-plans/{$draft->id}/review", ['decision' => 'approve'])->assertUnprocessable();
+
+        $approved = $this->plan(['week_starts_on' => '2026-10-11', 'status' => 'approved']);
+        Sanctum::actingAs($this->teacher);
+        $this->postJson("/api/lesson-plans/{$approved->id}/submit")->assertUnprocessable();
+    }
+
+    public function test_a_head_reviews_only_the_plans_of_their_own_department(): void
+    {
+        $this->plan(['status' => 'submitted']);
+        $arabic = Subject::factory()->create(['name_en' => 'Arabic']);
+        $otherTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $arabic->id])->create();
+        $this->plan(['teacher_id' => $otherTeacher->id, 'subject_id' => $arabic->id, 'week_starts_on' => '2026-10-11', 'title' => 'Arabic plan', 'status' => 'submitted']);
+        $this->plan(['week_starts_on' => '2026-10-04', 'title' => 'Draft']);
+
+        Sanctum::actingAs($this->head);
+        $this->assertSame(['Old'], collect($this->getJson('/api/lesson-plans/review')->assertOk()->json('data'))->pluck('title')->all());
+
+        $arabicHead = User::factory()->staff(StaffType::HeadOfDepartment, ['subject_id' => $arabic->id])->create();
+        Sanctum::actingAs($arabicHead);
+        $this->assertSame(['Arabic plan'], collect($this->getJson('/api/lesson-plans/review')->json('data'))->pluck('title')->all());
+        $theirs = LessonPlan::where('title', 'Old')->first();
+        $this->postJson("/api/lesson-plans/{$theirs->id}/review", ['decision' => 'approve'])->assertForbidden();
+    }
+
+    public function test_a_head_of_department_and_a_subject_without_a_head_are_approved_at_once(): void
+    {
+        $own = $this->plan(['teacher_id' => $this->head->id, 'title' => 'Head plan']);
+        Sanctum::actingAs($this->head);
+        $this->postJson("/api/lesson-plans/{$own->id}/submit")->assertOk()->assertJsonPath('data.status', 'approved');
+        $this->getJson('/api/lesson-plans/review')->assertOk()->assertJsonCount(0, 'data');
+
+        $science = Subject::factory()->create(['name_en' => 'Science']);
+        $lone = User::factory()->staff(StaffType::Teacher, ['subject_id' => $science->id])->create();
+        $plan = $this->plan(['teacher_id' => $lone->id, 'subject_id' => $science->id, 'week_starts_on' => '2026-10-11']);
+        Sanctum::actingAs($lone);
+        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk()->assertJsonPath('data.status', 'approved');
+    }
+
+    public function test_a_head_cannot_review_their_own_plan_and_others_cannot_review_at_all(): void
+    {
+        $plan = $this->plan(['status' => 'submitted']);
+        $own = $this->plan(['teacher_id' => $this->head->id, 'week_starts_on' => '2026-10-11', 'status' => 'submitted']);
+        Sanctum::actingAs($this->head);
+        $this->postJson("/api/lesson-plans/{$own->id}/review", ['decision' => 'approve'])->assertForbidden();
+
+        foreach ([$this->teacher, User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create()] as $teacher) {
+            Sanctum::actingAs($teacher);
+            $this->getJson('/api/lesson-plans/review')->assertForbidden();
+            $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve'])->assertForbidden();
+        }
+        $this->actAsAdmin();
+        $this->getJson('/api/lesson-plans/review')->assertForbidden();
+        $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve'])->assertForbidden();
+    }
+
+    public function test_a_teacher_lists_only_their_plans_and_cannot_touch_another_teachers_plan(): void
+    {
+        $mine = $this->plan();
+        $other = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
+        $theirs = $this->plan(['teacher_id' => $other->id, 'week_starts_on' => '2026-10-11', 'title' => 'Theirs']);
+        Sanctum::actingAs($this->teacher);
+        $this->assertSame(['Old'], collect($this->getJson('/api/lesson-plans')->assertOk()->json('data'))->pluck('title')->all());
+        $this->postJson("/api/lesson-plans/{$theirs->id}/submit")->assertForbidden();
+        $this->deleteJson("/api/lesson-plans/{$theirs->id}")->assertForbidden();
+        $this->assertNotNull($mine->fresh());
     }
 }

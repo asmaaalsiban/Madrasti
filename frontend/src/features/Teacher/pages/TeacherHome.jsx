@@ -15,7 +15,7 @@ export default function TeacherHome() {
     ['/teacher/homework', 'homework.title', 'homework.hint'],
     ['/teacher/grades', 'grading.title', 'grading.hint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
-    ...(user?.staff_type === 'head_of_department' ? [['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
+    ...(user?.staff_type === 'head_of_department' ? [['/teacher/lesson-plans/review', 'lessonPlans.reviewTitle', 'lessonPlans.reviewHint'], ['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
   ]
   return (
     <section className="space-y-4">
