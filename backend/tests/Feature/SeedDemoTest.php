@@ -26,7 +26,7 @@ class SeedDemoTest extends TenantTestCase
         $this->assertTrue(Hash::check('Admin12345', $admin->password));
         $this->assertSame(34, User::where('role', Role::Teacher)->count());
         $this->assertEqualsCanonicalizing(
-            ['teacher' => 24, 'head_of_department' => 8, 'nurse' => 1],
+            ['teacher' => 24, 'head_of_department' => 8, 'accountant' => 1, 'nurse' => 1],
             DB::table('staff_profiles')->selectRaw('staff_type, count(*) as n')->groupBy('staff_type')->pluck('n', 'staff_type')->all(),
         );
         $this->assertSame(32, DB::table('staff_profiles')->whereNotNull('subject_id')->count());
