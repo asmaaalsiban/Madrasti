@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
-import HomeworkImage from './HomeworkImage'
+import { HomeworkPhotos } from './HomeworkImage'
 
 // The teacher's list for one homework: who sent an answer (with its text and photo) and who has not.
 export default function SubmissionsDialog({ homework, onClose }) {
@@ -33,7 +33,7 @@ export default function SubmissionsDialog({ homework, onClose }) {
                   {submission && open === student.id && (
                     <div className="mt-2 space-y-2">
                       {submission.body && <p className="whitespace-pre-line text-sm">{submission.body}</p>}
-                      {submission.has_image && <HomeworkImage path={`/homework/submissions/${submission.id}/image`} />}
+                      <HomeworkPhotos ids={submission.images} />
                     </div>
                   )}
                 </li>

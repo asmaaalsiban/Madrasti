@@ -559,11 +559,9 @@
       "image": "Picture"
     },
     "imageAlt": "Homework picture",
-    "imageHint": "Optional: a photo of the page or the task (JPG, PNG or WebP, up to 5 MB).",
-    "hasImage": "This homework has a picture. Choose another to replace it.",
+    "imageHint": "Optional: photos of the page or the task (JPG, PNG or WebP, up to 5 MB each, up to 10). Adding a photo never removes the others.",
     "removeImage": "Remove the picture",
     "addPhoto": "Add a photo",
-    "changePhoto": "Change the photo",
     "answers": "Answers",
     "answersTitle": "Answers: {{title}}",
     "answeredCount": "{{done}} of {{total}} students sent an answer.",
@@ -577,7 +575,12 @@
     "send": "Send",
     "withdraw": "Delete my answer",
     "answer": "Send my answer",
-    "editAnswer": "Edit my answer"
+    "editAnswer": "Edit my answer",
+    "addAnotherPhoto": "Add another photo",
+    "photoCount": "{{count}} of {{max}} photos",
+    "page": "Page {{number}}",
+    "newPage": "New page {{number}}",
+    "removePhoto": "Remove page {{number}}"
   },
   "behavior": {
     "title": "Behaviour",

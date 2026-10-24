@@ -5,11 +5,11 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
-import HomeworkImage from '../components/HomeworkImage'
+import { HomeworkPhotos } from '../components/HomeworkImage'
 import ImagePicker from '../components/ImagePicker'
 import SubmissionsDialog from '../components/SubmissionsDialog'
 
-const EMPTY = { pair: '', title: '', description: '', due_on: '', image: null, removeImage: false }
+const EMPTY = { pair: '', title: '', description: '', due_on: '', files: [], saved: [], dropped: [] }
 
 // Teacher: send homework to a section they teach, edit or delete it, and see who answered.
 export default function HomeworkPage() {
@@ -31,13 +31,12 @@ export default function HomeworkPage() {
       const body = { classroom_id, subject_id, title: form.title, description: form.description || null, due_on: form.due_on }
       return (form.id ? api.put(`/homework/${form.id}`, body) : api.post('/homework', body)).then(async (res) => {
         const id = res.data.data.id
-        if (form.image) {
+        if (form.files.length) {
           const data = new FormData()
-          data.append('image', form.image)
-          await api.post(`/homework/${id}/image`, data)
-        } else if (form.removeImage) {
-          await api.delete(`/homework/${id}/image`)
+          form.files.forEach((f) => data.append('images[]', f))
+          await api.post(`/homework/${id}/images`, data)
         }
+        await Promise.all(form.dropped.map((fileId) => api.delete(`/homework/files/${fileId}`)))
         return res
       })
     },
@@ -46,7 +45,7 @@ export default function HomeworkPage() {
   })
   const remove = useMutation({ mutationFn: (id) => api.delete(`/homework/${id}`), onSuccess: done })
 
-  const edit = (h) => setForm({ id: h.id, pair: `${h.classroom.id}-${h.subject.id}`, title: h.title, description: h.description ?? '', due_on: h.due_on, hasImage: h.has_image, image: null, removeImage: false })
+  const edit = (h) => setForm({ id: h.id, pair: `${h.classroom.id}-${h.subject.id}`, title: h.title, description: h.description ?? '', due_on: h.due_on, files: [], saved: h.images, dropped: [] })
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
 
   return (
@@ -65,7 +64,7 @@ export default function HomeworkPage() {
               <span className="text-sm text-slate-600">{h.classroom.name} · {subject(h.subject)}</span>
             </div>
             {h.description && <p className="whitespace-pre-line text-sm text-slate-700">{h.description}</p>}
-            {h.has_image && <HomeworkImage id={h.id} />}
+            <HomeworkPhotos ids={h.images} />
             <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
             <div className="flex gap-2 pt-1">
               <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setViewing(h)}>{t('homework.answers')}</button>
@@ -92,11 +91,9 @@ export default function HomeworkPage() {
             <div className="space-y-1">
               <span className="block text-sm">{t('homework.fields.image')}</span>
               <ImagePicker
-                file={form.image} onChange={(image) => setForm({ ...form, image, removeImage: false })}
-                saved={Boolean(form.hasImage && !form.removeImage)} onRemoveSaved={() => setForm({ ...form, removeImage: true })}
-              >
-                {form.id && <HomeworkImage id={form.id} />}
-              </ImagePicker>
+                files={form.files} onChange={(files) => setForm({ ...form, files })}
+                saved={form.saved.filter((id) => !form.dropped.includes(id))} onRemoveSaved={(id) => setForm({ ...form, dropped: [...form.dropped, id] })}
+              />
               <p className="text-xs text-slate-500">{t('homework.imageHint')}</p>
             </div>
             <div className="flex justify-end gap-2">

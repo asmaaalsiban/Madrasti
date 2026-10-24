@@ -33,6 +33,7 @@ use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
+use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -153,17 +154,16 @@ Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
     Route::post('homework', [HomeworkController::class, 'store']);
     Route::put('homework/{homework}', [HomeworkController::class, 'update']);
     Route::delete('homework/{homework}', [HomeworkController::class, 'destroy']);
-    Route::post('homework/{homework}/image', [HomeworkController::class, 'storeImage']);
-    Route::delete('homework/{homework}/image', [HomeworkController::class, 'destroyImage']);
+    Route::post('homework/{homework}/images', [HomeworkFileController::class, 'store']);
     Route::get('homework/{homework}/submissions', [HomeworkSubmissionController::class, 'index']);
 });
 Route::middleware(['school-user', 'role:student'])->group(function (): void {
     Route::post('homework/{homework}/submission', [HomeworkSubmissionController::class, 'store']);
     Route::delete('homework/{homework}/submission', [HomeworkSubmissionController::class, 'destroy']);
 });
-Route::middleware('school-user')->get('homework/submissions/{submission}/image', [HomeworkSubmissionController::class, 'image']);
+Route::middleware('school-user')->get('homework/files/{file}', [HomeworkFileController::class, 'show']);
+Route::middleware(['school-user', 'role:teacher,student'])->delete('homework/files/{file}', [HomeworkFileController::class, 'destroy']);
 Route::middleware('school-user')->get('homework/me', [HomeworkController::class, 'mine']);
-Route::middleware('school-user')->get('homework/{homework}/image', [HomeworkController::class, 'image']);
 Route::middleware('school-user')->get('students/{student}/homework', [HomeworkController::class, 'forStudent']);
 
 // The published grades of one student: the student, their parents and admins (checked by a gate).

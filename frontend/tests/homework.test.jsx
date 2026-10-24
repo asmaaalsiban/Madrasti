@@ -15,7 +15,7 @@ const wrap = (ui, path = '/', route = '/') =>
   render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter initialEntries={[path]}><Routes><Route path={route} element={ui} /></Routes></MemoryRouter></QueryClientProvider>)
 
 const math = { id: 5, name_en: 'Math', name_ar: 'رياضيات' }
-const hw = { id: 1, title: 'Page 10', description: 'Solve 1-5', due_on: '2026-11-01', classroom: { id: 3, name: '5-A' }, subject: math, teacher: { id: 9, name: 'Sara' } }
+const hw = { id: 1, title: 'Page 10', description: 'Solve 1-5', due_on: '2026-11-01', classroom: { id: 3, name: '5-A' }, subject: math, teacher: { id: 9, name: 'Sara' }, images: [] }
 
 beforeEach(async () => {
   vi.resetAllMocks()
@@ -66,74 +66,104 @@ describe('HomeworkPage (teacher)', () => {
   })
 })
 
-describe('homework pictures', () => {
-  it('uploads the chosen picture after saving', async () => {
+describe('photos and answers', () => {
+  const photo = (name) => new File(['x'], name, { type: 'image/jpeg' })
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn((f) => `blob:${f.name ?? 'saved'}`)
+    URL.revokeObjectURL = vi.fn()
+  })
+
+  it('shows a camera button and adds each pick to the earlier ones, never replacing them', async () => {
     api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/homework' ? [] : { assignments: [{ classroom: { id: 3, name: '5-A' }, subject: math }] } } }))
     api.post.mockResolvedValue({ data: { data: { ...hw, id: 8 } } })
     wrap(<HomeworkPage />)
     fireEvent.click(await screen.findByRole('button', { name: 'Send homework' }))
+    expect(screen.getByRole('button', { name: /Add a photo/ })).toBeInTheDocument()
     await screen.findByRole('option', { name: '5-A · Math' })
     fireEvent.change(screen.getByLabelText('Section and subject'), { target: { value: '3-5' } })
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'With picture' } })
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'With pictures' } })
     fireEvent.change(screen.getByLabelText('Due date'), { target: { value: '2026-11-02' } })
-    const file = new File(['x'], 'page.jpg', { type: 'image/jpeg' })
-    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [file] } })
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [photo('1.jpg')] } })
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [photo('2.jpg'), photo('3.jpg')] } })
+    expect(screen.getByText('3 of 10 photos')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Remove page 2' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/8/image', expect.any(FormData)))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/8/images', expect.any(FormData)))
+    expect(api.post.mock.calls[1][1].getAll('images[]').map((f) => f.name)).toEqual(['1.jpg', '3.jpg'])
   })
 
-  it('shows the picture to the student', async () => {
-    URL.createObjectURL = vi.fn(() => 'blob:pic')
-    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/homework/me' ? { data: [{ ...hw, has_image: true }] } : new Blob(['x']) }))
-    wrap(<StudentHomeworkPage />)
-    expect(await screen.findByAltText('Homework picture')).toHaveAttribute('src', 'blob:pic')
-    expect(api.get).toHaveBeenCalledWith('/homework/1/image', { responseType: 'blob' })
-  })
-})
-
-describe('photos and answers', () => {
-  it('shows a camera button to add a photo to a homework', async () => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/homework' ? [] : { assignments: [] } } }))
+  it('removes a saved photo of a homework while keeping the others', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url.startsWith('/homework/files') ? { data: new Blob(['x']) } : { data: { data: url === '/homework' ? [{ ...hw, images: [11, 12] }] : { assignments: [{ classroom: { id: 3, name: '5-A' }, subject: math }] } } }))
+    api.put.mockResolvedValue({ data: { data: hw } })
+    api.delete.mockResolvedValue({})
     wrap(<HomeworkPage />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Send homework' }))
-    expect(screen.getByRole('button', { name: /Add a photo/ })).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove page 1' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/homework/files/11'))
+    expect(api.delete).not.toHaveBeenCalledWith('/homework/files/12')
   })
 
-  it('lets the student answer with a text and a photo', async () => {
+  it('shows the student all the pages of a homework', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url.startsWith('/homework/files') ? { data: new Blob(['x']) } : { data: { data: [{ ...hw, images: [21, 22] }] } }))
+    wrap(<StudentHomeworkPage />)
+    expect(await screen.findByAltText('Page 1')).toBeInTheDocument()
+    expect(await screen.findByAltText('Page 2')).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/homework/files/21', { responseType: 'blob' })
+  })
+
+  it('lets the student add page 2 later without losing page 1', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url.startsWith('/homework/files') ? { data: new Blob(['x']) } : { data: { data: [{ ...hw, submission: { id: 4, body: 'Page 1', images: [31], submitted_at: '2026-10-30T10:00:00+00:00', late: false } }] } }))
+    api.post.mockResolvedValue({ data: { data: {} } })
+    wrap(<StudentHomeworkPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit my answer' }))
+    expect(await screen.findByRole('button', { name: 'Remove page 1' })).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [photo('p2.jpg')] } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/1/submission', expect.any(FormData)))
+    const sent = api.post.mock.calls[0][1]
+    expect(sent.getAll('images[]').map((f) => f.name)).toEqual(['p2.jpg'])
+    expect(sent.getAll('remove_file_ids[]')).toEqual([])
+  })
+
+  it('removes a chosen saved page of the answer', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url.startsWith('/homework/files') ? { data: new Blob(['x']) } : { data: { data: [{ ...hw, submission: { id: 4, body: 'x', images: [31, 32], submitted_at: '2026-10-30T10:00:00+00:00', late: false } }] } }))
+    api.post.mockResolvedValue({ data: { data: {} } })
+    wrap(<StudentHomeworkPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit my answer' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove page 2' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect(api.post.mock.calls[0][1].getAll('remove_file_ids[]')).toEqual(['32'])
+  })
+
+  it('lets the student send a first answer and shows the parent the status only', async () => {
     api.get.mockResolvedValue({ data: { data: [{ ...hw, submission: null }] } })
     api.post.mockResolvedValue({ data: { data: {} } })
     wrap(<StudentHomeworkPage />)
     expect(await screen.findByText('Not sent yet')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Send my answer' }))
     fireEvent.change(screen.getByLabelText('Your answer'), { target: { value: 'Done' } })
-    expect(screen.getByRole('button', { name: /Add a photo/ })).toBeInTheDocument()
-    URL.createObjectURL = vi.fn(() => 'blob:x')
-    URL.revokeObjectURL = vi.fn()
-    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [new File(['x'], 'a.jpg', { type: 'image/jpeg' })] } })
-    expect(await screen.findByAltText('Homework picture')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/1/submission', expect.any(FormData)))
-    const sent = api.post.mock.calls[0][1]
-    expect(sent.get('body')).toBe('Done')
-    expect(sent.get('image').name).toBe('a.jpg')
+    expect(api.post.mock.calls[0][1].get('body')).toBe('Done')
   })
 
   it('shows the parent whether the child sent the answer, without a send button', async () => {
-    api.get.mockResolvedValue({ data: { data: [{ ...hw, submission: { id: 4, body: 'x', has_image: false, submitted_at: '2026-10-30T10:00:00+00:00', late: false } }] } })
+    api.get.mockResolvedValue({ data: { data: [{ ...hw, submission: { id: 4, body: 'x', images: [], submitted_at: '2026-10-30T10:00:00+00:00', late: false } }] } })
     wrap(<ChildHomeworkPage />, '/c/7', '/c/:id')
     expect(await screen.findByText('Sent 2026-10-30')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /answer/i })).not.toBeInTheDocument()
   })
 
-  it('shows the teacher who answered and who did not, with the answer and its photo', async () => {
-    URL.createObjectURL = vi.fn(() => 'blob:ans')
+  it('shows the teacher who answered and who did not, with the text and every page', async () => {
     api.get.mockImplementation((url) => {
       if (url === '/homework') return Promise.resolve({ data: { data: [hw] } })
       if (url === '/homework/1/submissions') return Promise.resolve({ data: { data: [
-        { student: { id: 1, name_ar: 'سلمى', name_en: 'Salma' }, submission: { id: 6, body: 'My answer', has_image: true, submitted_at: '2026-10-30T10:00:00+00:00', late: true } },
+        { student: { id: 1, name_ar: 'سلمى', name_en: 'Salma' }, submission: { id: 6, body: 'My answer', images: [41, 42, 43], submitted_at: '2026-10-30T10:00:00+00:00', late: true } },
         { student: { id: 2, name_ar: 'ليث', name_en: 'Layth' }, submission: null },
       ] } })
-      if (url === '/homework/submissions/6/image') return Promise.resolve({ data: new Blob(['x']) })
+      if (url.startsWith('/homework/files')) return Promise.resolve({ data: new Blob(['x']) })
       return Promise.resolve({ data: { data: { assignments: [] } } })
     })
     wrap(<HomeworkPage />)
@@ -142,7 +172,7 @@ describe('photos and answers', () => {
     expect(screen.getByText('Not sent')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Sent 2026-10-30 · late' }))
     expect(screen.getByText('My answer')).toBeInTheDocument()
-    expect(await screen.findByAltText('Homework picture')).toHaveAttribute('src', 'blob:ans')
+    expect(await screen.findByAltText('Page 3')).toBeInTheDocument()
   })
 })
 
