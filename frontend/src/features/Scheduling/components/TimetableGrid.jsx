@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 
 // The week as a grid: periods are rows, school days are columns. Today's column is highlighted.
+// onCellClick(period, entry): makes every cell a button (the admin edits a lesson); marked: Set of period ids shown as taken (a teacher's unavailable periods).
 // show: 'teacher' (the teacher's name in each lesson) or 'classroom' (the section's name); emptyLabel: text of a cell without a lesson.
-export default function TimetableGrid({ periods, entries, show = 'teacher', emptyLabel = null }) {
+export default function TimetableGrid({ periods, entries, show = 'teacher', emptyLabel = null, onCellClick = null, marked = null }) {
   const { t, i18n } = useTranslation()
   const days = [...new Set(periods.map((p) => p.day_of_week))].sort((a, b) => a - b)
   const numbers = [...new Set(periods.map((p) => p.number))].sort((a, b) => a - b)
@@ -37,8 +38,9 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
               {days.map((d) => {
                 const e = entryAt(d, n)
                 const exists = Boolean(periodAt(d, n))
-                return (
-                  <td key={d} className={`border-s p-1.5 text-center align-top ${d === today ? 'bg-brand/5' : ''}`}>
+                const period = periodAt(d, n)
+                const cell = (
+                  <>
                     {e && (
                       <div className={`rounded p-1 ${e.is_locked ? 'bg-amber-50' : 'bg-slate-50'}`}>
                         <span className="block font-medium">{subjectName(e.subject)}</span>
@@ -46,7 +48,15 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
                         {e.is_locked && <span role="img" aria-label={t('timetable.locked')} className="text-xs">🔒</span>}
                       </div>
                     )}
+                    {marked?.has(period?.id) && <span className="text-xs text-red-700">⛔ {t('availability.unavailable')}</span>}
                     {!e && exists && emptyLabel && <span className="text-xs text-slate-400">{emptyLabel}</span>}
+                  </>
+                )
+                return (
+                  <td key={d} className={`border-s p-1.5 text-center align-top ${d === today ? 'bg-brand/5' : ''} ${marked?.has(period?.id) ? 'bg-red-50' : ''}`}>
+                    {onCellClick && exists ? (
+                      <button type="button" className="block min-h-10 w-full rounded hover:bg-slate-100" aria-label={`${t(`days.${d}`)} ${t('schoolDay.period', { number: n })}`} onClick={() => onCellClick(period, e ?? null)}>{cell}</button>
+                    ) : cell}
                   </td>
                 )
               })}

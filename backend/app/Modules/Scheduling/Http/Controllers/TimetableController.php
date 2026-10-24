@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Modules\Scheduling\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
+use App\Modules\Scheduling\Services\TimetableEditor;
 use App\Modules\Scheduling\Services\TimetableGenerator;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -42,6 +46,89 @@ class TimetableController extends Controller
         }
 
         return response()->json(['data' => ['dry_run' => $dryRun] + $planned['report']]);
+    }
+
+    /** Puts a lesson in a cell by hand (replacing what was there); the lesson is locked. */
+    public function place(Request $request, TimetableEditor $editor): JsonResponse
+    {
+        Gate::authorize('update', new Period);
+        $data = $request->validate([
+            'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
+            'period_id' => ['required', 'integer', 'exists:periods,id'],
+            'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+        ]);
+        $year = AcademicYear::where('is_current', true)->first();
+        if ($year === null) {
+            throw ValidationException::withMessages(['academic_year' => [__('scheduling.no_year')]]);
+        }
+
+        $entry = $editor->place($year, Classroom::with('gradeLevel')->findOrFail($data['classroom_id']), Period::findOrFail($data['period_id']), (int) $data['subject_id'], $request->user()->id);
+
+        return response()->json(['data' => $this->entry($entry->load(['subject', 'teacher', 'classroom', 'room']))]);
+    }
+
+    public function lock(Request $request, TimetableEntry $entry): JsonResponse
+    {
+        Gate::authorize('update', new Period);
+        $data = $request->validate(['locked' => ['required', 'boolean']]);
+        $entry->update(['is_locked' => $data['locked']]);
+
+        return response()->json(['data' => $this->entry($entry->load(['subject', 'teacher', 'classroom', 'room']))]);
+    }
+
+    public function destroy(TimetableEntry $entry): Response
+    {
+        Gate::authorize('update', new Period);
+        $entry->delete();
+
+        return response()->noContent();
+    }
+
+    /** The periods a teacher cannot teach in. */
+    public function unavailability(User $user): JsonResponse
+    {
+        Gate::authorize('update', new Period);
+        abort_unless($user->hasRole(Role::Teacher), 404);
+
+        return response()->json(['data' => ['period_ids' => $this->unavailablePeriods($user)]]);
+    }
+
+    /** Replaces the periods a teacher cannot teach in and reports the lessons already placed there. */
+    public function saveUnavailability(Request $request, User $user): JsonResponse
+    {
+        Gate::authorize('update', new Period);
+        abort_unless($user->hasRole(Role::Teacher), 404);
+        $data = $request->validate(['period_ids' => ['present', 'array'], 'period_ids.*' => ['integer', 'distinct', 'exists:periods,id']]);
+
+        DB::transaction(function () use ($user, $data): void {
+            DB::table('teacher_unavailabilities')->where('teacher_id', $user->id)->delete();
+            DB::table('teacher_unavailabilities')->insert(array_map(fn ($id) => ['teacher_id' => $user->id, 'period_id' => $id, 'created_at' => now(), 'updated_at' => now()], $data['period_ids']));
+        });
+
+        $clashes = TimetableEntry::where('teacher_id', $user->id)->whereIn('period_id', $data['period_ids'])->with(['classroom', 'subject'])->get()
+            ->map(fn (TimetableEntry $e) => ['id' => $e->id, 'period_id' => $e->period_id, 'classroom' => $e->classroom->name, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en'])])->values();
+
+        return response()->json(['data' => ['period_ids' => $this->unavailablePeriods($user), 'clashes' => $clashes]]);
+    }
+
+    /** @return list<int> */
+    private function unavailablePeriods(User $user): array
+    {
+        return DB::table('teacher_unavailabilities')->where('teacher_id', $user->id)->orderBy('period_id')->pluck('period_id')->map(fn ($id) => (int) $id)->all();
+    }
+
+    /** @return array<string, mixed> */
+    private function entry(TimetableEntry $e): array
+    {
+        return [
+            'id' => $e->id,
+            'period_id' => $e->period_id,
+            'subject' => $e->subject->only(['id', 'name_ar', 'name_en']),
+            'teacher' => $e->teacher->only(['id', 'name']),
+            'classroom' => $e->classroom->only(['id', 'name']),
+            'room' => $e->room?->only(['id', 'name']),
+            'is_locked' => $e->is_locked,
+        ];
     }
 
     /** The week of one section (classroom_id) or of one teacher (teacher_id). */
@@ -112,15 +199,7 @@ class TimetableController extends Controller
             'periods' => $periods->map(fn (Period $p) => [
                 'id' => $p->id, 'day_of_week' => $p->day_of_week, 'number' => $p->number, 'starts_at' => substr($p->starts_at, 0, 5), 'ends_at' => substr($p->ends_at, 0, 5),
             ])->values(),
-            'entries' => $entries->filter(fn (TimetableEntry $e) => $ids->has($e->period_id))->map(fn (TimetableEntry $e) => [
-                'id' => $e->id,
-                'period_id' => $e->period_id,
-                'subject' => $e->subject->only(['id', 'name_ar', 'name_en']),
-                'teacher' => $e->teacher->only(['id', 'name']),
-                'classroom' => $e->classroom->only(['id', 'name']),
-                'room' => $e->room?->only(['id', 'name']),
-                'is_locked' => $e->is_locked,
-            ])->values(),
+            'entries' => $entries->filter(fn (TimetableEntry $e) => $ids->has($e->period_id))->map(fn (TimetableEntry $e) => $this->entry($e))->values(),
         ];
     }
 }

@@ -78,7 +78,8 @@
       "buildings": "Buildings",
       "curriculum": "Curriculum",
       "schoolDay": "School day",
-      "timetable": "Timetable"
+      "timetable": "Timetable",
+      "availability": "Teacher availability"
     },
     "actions": {
       "add": "Add",
@@ -524,6 +525,19 @@
     "empty": "Empty",
     "incomplete": "These sections have empty periods (their curriculum is shorter than their week):",
     "incompleteRow": "{{classroom}}: {{lessons}} lessons for {{slots}} periods ({{empty}} empty)",
-    "outOfScope": "These assignments are outside the teacher's grades or students, so they were left out (use Distribute automatically to replace them):"
+    "outOfScope": "These assignments are outside the teacher's grades or students, so they were left out (use Distribute automatically to replace them):",
+    "editTitle": "{{day}} · Period {{number}}",
+    "teacherIs": "Teacher: {{name}}",
+    "editHelp": "A lesson placed by hand is locked, so generating the timetable again keeps it. The teacher must be free and available.",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "emptyCell": "Empty this period"
+  },
+  "availability": {
+    "title": "Teacher availability",
+    "help": "Click the periods a teacher cannot teach in (e.g. a part-time teacher). The timetable keeps away from them.",
+    "unavailable": "Unavailable",
+    "saved": "Saved.",
+    "clashes": "Saved. These lessons are already in periods the teacher cannot teach in (change them in the timetable):"
   }
 }

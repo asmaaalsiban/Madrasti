@@ -29,6 +29,7 @@ import BuildingsPage from '../features/Academic/pages/BuildingsPage'
 import GenerateClassroomsPage from '../features/Academic/pages/GenerateClassroomsPage'
 import CurriculumPage from '../features/Academic/pages/CurriculumPage'
 import SchoolDayPage from '../features/Scheduling/pages/SchoolDayPage'
+import TeacherAvailabilityPage from '../features/Scheduling/pages/TeacherAvailabilityPage'
 import TimetablePage from '../features/Scheduling/pages/TimetablePage'
 import StudentTimetablePage from '../features/Student/pages/StudentTimetablePage'
 import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage'
@@ -87,6 +88,7 @@ export const routes = [
               { path: '/admin/curriculum', element: <CurriculumPage /> },
               { path: '/admin/school-day', element: <SchoolDayPage /> },
               { path: '/admin/timetable', element: <TimetablePage /> },
+              { path: '/admin/availability', element: <TeacherAvailabilityPage /> },
               { path: '/admin/terms', element: <TermsPage /> },
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
