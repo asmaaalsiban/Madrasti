@@ -559,11 +559,9 @@
       "image": "صورة"
     },
     "imageAlt": "صورة الواجب",
-    "imageHint": "اختياري: صورة للصفحة أو للمطلوب (JPG أو PNG أو WebP، حتى 5 ميغابايت).",
-    "hasImage": "لهذا الواجب صورة. اختر صورة أخرى لاستبدالها.",
+    "imageHint": "اختياري: صور للصفحة أو للمطلوب (JPG أو PNG أو WebP، حتى 5 ميغابايت للصورة، حتى 10 صور). إضافة صورة لا تحذف الباقي.",
     "removeImage": "حذف الصورة",
     "addPhoto": "إضافة صورة",
-    "changePhoto": "تغيير الصورة",
     "answers": "الإجابات",
     "answersTitle": "الإجابات: {{title}}",
     "answeredCount": "{{done}} من {{total}} طلاب أرسلوا إجابة.",
@@ -577,7 +575,12 @@
     "send": "إرسال",
     "withdraw": "حذف إجابتي",
     "answer": "إرسال إجابتي",
-    "editAnswer": "تعديل إجابتي"
+    "editAnswer": "تعديل إجابتي",
+    "addAnotherPhoto": "إضافة صورة أخرى",
+    "photoCount": "{{count}} من {{max}} صور",
+    "page": "صفحة {{number}}",
+    "newPage": "صفحة جديدة {{number}}",
+    "removePhoto": "حذف صفحة {{number}}"
   },
   "behavior": {
     "title": "السلوك",

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import AnswerDialog from './AnswerDialog'
-import HomeworkImage from './HomeworkImage'
+import { HomeworkPhotos } from './HomeworkImage'
 
 // The homework of a section (student and parent), ordered by due date. canAnswer: the student can send an answer; a parent sees whether their child did.
 export default function HomeworkList({ endpoint, canAnswer = false }) {
@@ -24,7 +24,7 @@ export default function HomeworkList({ endpoint, canAnswer = false }) {
             <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">{subject(h.subject)}</span>
           </div>
           {h.description && <p className="whitespace-pre-line text-sm text-slate-700">{h.description}</p>}
-          {h.has_image && <HomeworkImage id={h.id} />}
+          <HomeworkPhotos ids={h.images} />
           <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
           <div className="flex flex-wrap items-center gap-2 pt-1">
             {h.submission ? <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">{t('homework.sentAt', { date: h.submission.submitted_at.slice(0, 10) })}{h.submission.late ? ` · ${t('homework.late')}` : ''}</span>

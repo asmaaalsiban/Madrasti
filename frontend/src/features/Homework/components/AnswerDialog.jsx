@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
-import HomeworkImage from './HomeworkImage'
 import ImagePicker from './ImagePicker'
 
 // The student's answer to a homework: a text and/or a photo of the notebook. Sending again replaces the answer.
@@ -12,16 +11,16 @@ export default function AnswerDialog({ homework, onClose }) {
   const client = useQueryClient()
   const mine = homework.submission
   const [body, setBody] = useState(mine?.body ?? '')
-  const [image, setImage] = useState(null)
-  const [dropSaved, setDropSaved] = useState(false)
+  const [files, setFiles] = useState([])
+  const [dropped, setDropped] = useState([]) // ids of saved pages to remove
   const [error, setError] = useState('')
 
   const send = useMutation({
     mutationFn: () => {
       const data = new FormData()
       data.append('body', body)
-      if (image) data.append('image', image)
-      if (dropSaved) data.append('remove_image', '1')
+      files.forEach((f) => data.append('images[]', f))
+      dropped.forEach((id) => data.append('remove_file_ids[]', String(id)))
       return api.post(`/homework/${homework.id}/submission`, data)
     },
     onSuccess: () => { client.invalidateQueries({ queryKey: ['homework'] }); onClose() },
@@ -36,9 +35,7 @@ export default function AnswerDialog({ homework, onClose }) {
         <label className="block text-sm">{t('homework.yourAnswer')}<textarea rows={4} className="mt-1 w-full rounded border p-2" value={body} onChange={(e) => setBody(e.target.value)} /></label>
         <div className="space-y-1">
           <span className="block text-sm">{t('homework.fields.image')}</span>
-          <ImagePicker file={image} onChange={(f) => { setImage(f); setDropSaved(false) }} saved={Boolean(mine?.has_image && !dropSaved)} onRemoveSaved={() => setDropSaved(true)}>
-            <HomeworkImage path={`/homework/submissions/${mine?.id}/image`} />
-          </ImagePicker>
+          <ImagePicker files={files} onChange={setFiles} saved={(mine?.images ?? []).filter((id) => !dropped.includes(id))} onRemoveSaved={(id) => setDropped([...dropped, id])} />
         </div>
         <div className="flex flex-wrap justify-between gap-2">
           {mine ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => remove.mutate()}>{t('homework.withdraw')}</button> : <span />}
