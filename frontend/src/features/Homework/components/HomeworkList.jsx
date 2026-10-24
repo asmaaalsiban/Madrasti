@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import HomeworkImage from './HomeworkImage'
 
 // Read-only list of the homework of a section (student and parent): the next due first is not assumed, the API orders it by due date.
 export default function HomeworkList({ endpoint }) {
@@ -19,6 +20,7 @@ export default function HomeworkList({ endpoint }) {
             <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">{subject(h.subject)}</span>
           </div>
           {h.description && <p className="whitespace-pre-line text-sm text-slate-700">{h.description}</p>}
+          {h.has_image && <HomeworkImage id={h.id} />}
           <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
         </li>
       ))}

@@ -125,8 +125,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): voi
     Route::post('homework', [HomeworkController::class, 'store']);
     Route::put('homework/{homework}', [HomeworkController::class, 'update']);
     Route::delete('homework/{homework}', [HomeworkController::class, 'destroy']);
+    Route::post('homework/{homework}/image', [HomeworkController::class, 'storeImage']);
+    Route::delete('homework/{homework}/image', [HomeworkController::class, 'destroyImage']);
 });
 Route::middleware('school-user')->get('homework/me', [HomeworkController::class, 'mine']);
+Route::middleware('school-user')->get('homework/{homework}/image', [HomeworkController::class, 'image']);
 Route::middleware('school-user')->get('students/{student}/homework', [HomeworkController::class, 'forStudent']);
 
 // The published grades of one student: the student, their parents and admins (checked by a gate).
