@@ -153,4 +153,52 @@ class TeacherScopeTest extends AcademicTestCase
         $this->assertSame($basic->id, TeachingAssignment::where('classroom_id', $lower->id)->value('teacher_id'));
         $this->postJson('/api/teaching-assignments/auto')->assertOk()->assertJsonPath('data.invalid', 0);
     }
+
+    public function test_the_staff_form_saves_the_sections_a_teacher_teaches(): void
+    {
+        $a = $this->room($this->g2, null, '2-A');
+        $b = $this->room($this->g2, null, '2-B');
+        $this->actAsAdmin();
+        $body = ['name' => 'Head', 'email' => 'h@x.test', 'staff_type' => 'head_of_department', 'subject_id' => $this->math->id, 'classroom_ids' => [$a->id, $b->id]];
+
+        $id = $this->postJson('/api/staff', $body)->assertCreated()->assertJsonPath('data.classroom_ids', [$a->id, $b->id])->assertJsonCount(2, 'data.classrooms')->json('data.id');
+        $this->putJson("/api/staff/$id", [...$body, 'classroom_ids' => [$b->id]])->assertOk()->assertJsonPath('data.classroom_ids', [$b->id]);
+        $this->putJson("/api/staff/$id", [...$body, 'classroom_ids' => []])->assertOk()->assertJsonPath('data.classroom_ids', []);
+        $this->postJson('/api/staff', [...$body, 'email' => 'z@x.test', 'classroom_ids' => [999]])->assertUnprocessable()->assertJsonValidationErrors('classroom_ids.0');
+        $this->postJson('/api/staff', ['name' => 'Nora', 'email' => 'n@x.test', 'staff_type' => 'nurse', 'classroom_ids' => [$a->id]])->assertCreated()->assertJsonPath('data.classroom_ids', []);
+    }
+
+    public function test_a_teacher_with_chosen_sections_gets_only_those_and_is_preferred_for_them(): void
+    {
+        $a = $this->room($this->g2, null, '2-A');
+        $b = $this->room($this->g2, null, '2-B');
+        $c = $this->room($this->g2, null, '2-C');
+        $general = $this->teacher();
+        $head = $this->teacher();
+        $head->staffProfile->classrooms()->sync([$b->id]);
+        $of = fn (Classroom $room) => TeachingAssignment::where('classroom_id', $room->id)->value('teacher_id');
+
+        $this->assertCount(0, $this->auto());
+
+        $this->assertSame($head->id, $of($b), 'his chosen section goes to him');
+        $this->assertSame($general->id, $of($a));
+        $this->assertSame($general->id, $of($c));
+    }
+
+    public function test_a_teacher_with_chosen_sections_never_teaches_another_section(): void
+    {
+        $a = $this->room($this->g2, null, '2-A');
+        $b = $this->room($this->g2, null, '2-B');
+        $head = $this->teacher();
+        $head->staffProfile->classrooms()->sync([$a->id]);
+
+        $unassigned = $this->auto();
+
+        $this->assertSame(['2-B'], $unassigned->pluck('classroom')->all());
+        TeachingAssignment::query()->delete();
+        $this->actAsAdmin();
+        $this->postJson('/api/teaching-assignments', ['classroom_id' => $b->id, 'subject_id' => $this->math->id, 'teacher_id' => $head->id, 'weekly_periods' => 5])
+            ->assertUnprocessable()->assertJsonValidationErrors('teacher_id');
+        $this->postJson('/api/teaching-assignments', ['classroom_id' => $a->id, 'subject_id' => $this->math->id, 'teacher_id' => $head->id, 'weekly_periods' => 5])->assertCreated();
+    }
 }

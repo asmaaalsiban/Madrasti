@@ -35,6 +35,8 @@ class StaffResource extends JsonResource
             'grade_from' => $profile?->gradeFrom?->only(['id', 'name_ar', 'name_en']),
             'grade_to' => $profile?->gradeTo?->only(['id', 'name_ar', 'name_en']),
             'teaches_gender' => $profile?->teaches_gender,
+            'classroom_ids' => $profile?->classrooms->pluck('id')->sort()->values() ?? [],
+            'classrooms' => $profile?->classrooms->sortBy('name')->map->only(['id', 'name'])->values() ?? [],
         ];
     }
 }

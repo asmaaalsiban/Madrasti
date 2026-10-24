@@ -119,6 +119,10 @@ Admin menu **Timetable**: **Generate the timetable** builds the week of every se
 
 On the Staff form a teacher has **Teaches from grade / to grade** (empty = every grade, e.g. basic 1-3, preparatory, secondary) and **Teaches students** (boys, girls, empty = both). The automatic distribution and manual assignment only use teachers who may teach the section: its grade is inside their grades, and its students are theirs (a girls-only teacher gets girls' sections only; a mixed section needs a teacher for both). The timetable is built from the assignments, so nobody is ever put outside their scope.
 
+## Sections a teacher teaches
+
+On the Staff form, **Sections the teacher teaches** lets the admin tick the exact sections of a teacher (e.g. a head of department with one or two). Empty = any section that fits their grades and students. When sections are chosen the teacher teaches only those: manual assignment to another section is refused, the automatic distribution never uses them elsewhere, and it gives a teacher their chosen section before anybody else.
+
 ## Terms and teacher assignment
 
 Admin menu **Terms**: the terms of an academic year (inside the year, no overlap). Admin menu **Teacher assignment**: who teaches which subject in which classroom (one teacher per subject per classroom; the teacher must be an active teaching staff member of that subject). Grades are entered per term, by the assigned teacher, so both come first.

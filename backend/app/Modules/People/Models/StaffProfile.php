@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\People\Models;
 
 use App\Models\User;
+use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Subject;
 use App\Shared\Enums\StaffType;
 use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Staff details of a user: what kind of employee they are and, for teaching staff, the subject.
@@ -47,12 +49,22 @@ class StaffProfile extends Model
         return $this->belongsTo(GradeLevel::class, 'grade_to_id');
     }
 
+    public function classrooms(): BelongsToMany
+    {
+        return $this->belongsToMany(Classroom::class, 'staff_classrooms')->withTimestamps();
+    }
+
     /**
      * Whether this teacher may teach a section: its grade is inside their grades and its students are the ones they teach
      * (a mixed section needs a teacher who teaches both).
      */
-    public function canTeach(int $gradeOrder, ?string $classroomGender): bool
+    public function canTeach(int $gradeOrder, ?string $classroomGender, ?int $classroomId = null): bool
     {
+        // Sections chosen by the admin limit the teacher to those sections.
+        if ($classroomId !== null && $this->classrooms->isNotEmpty() && ! $this->classrooms->contains('id', $classroomId)) {
+            return false;
+        }
+
         $inGrades = $this->gradeFrom === null || $this->gradeTo === null
             || ($this->gradeFrom->sort_order <= $gradeOrder && $gradeOrder <= $this->gradeTo->sort_order);
 

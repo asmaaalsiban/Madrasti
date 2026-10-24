@@ -24,6 +24,8 @@ class GenerateClassroomsTest extends AcademicTestCase
 
     private GradeLevel $grade5;
 
+    public ?Classroom $classroom4 = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -174,5 +176,16 @@ class GenerateClassroomsTest extends AcademicTestCase
         Sanctum::actingAs(User::factory()->role($role)->create());
 
         $this->postJson('/api/classrooms/generate', $this->plan([]))->assertForbidden();
+    }
+
+    public function test_the_result_tells_what_already_exists_so_a_plan_that_changes_nothing_is_explained(): void
+    {
+        $this->floor('mixed', null, null, 3);
+        $this->classroom4 = Classroom::factory()->create(['name' => '4-A', 'grade_level_id' => $this->grade4->id, 'academic_year_id' => $this->year->id, 'gender' => 'mixed']);
+        $this->actAsAdmin();
+
+        $response = $this->postJson('/api/classrooms/generate', $this->plan([['grade_level_id' => $this->grade4->id, 'male' => 0, 'female' => 0, 'mixed' => 1]], ['dry_run' => true]))->assertOk();
+
+        $response->assertJsonPath('data.created', 0)->assertJsonPath('data.existing.0.grade_level_id', $this->grade4->id)->assertJsonPath('data.existing.0.mixed', 1);
     }
 }

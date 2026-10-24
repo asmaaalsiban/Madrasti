@@ -252,7 +252,13 @@
       "teachesGender": "Teaches students",
       "teaches": "Teaches"
     },
-    "scopeHint": "Leave the grades empty for a teacher who teaches every grade, and the students empty for boys and girls."
+    "scopeHint": "Leave the grades empty for a teacher who teaches every grade, and the students empty for boys and girls.",
+    "sections": {
+      "title": "Sections the teacher teaches",
+      "search": "Search sections",
+      "hint": "Leave empty for any section that fits their grades and students. When you choose sections, the teacher teaches only those (e.g. a head of department with one or two sections).",
+      "column": "Sections"
+    }
   },
   "parent": {
     "home": {
@@ -422,7 +428,9 @@
     "create": "Create classrooms",
     "willCreate": "{{created}} sections will be created, {{placed}} of them placed in a room.",
     "created": "{{count}} classrooms were created.",
-    "unplaced": "No room for: {{names}}. You can place them later from the classrooms page."
+    "unplaced": "No room for: {{names}}. You can place them later from the classrooms page.",
+    "nothingNew": "Nothing new to create: these grades already have the sections you asked for.",
+    "existingRow": "{{grade}}: {{mixed}} mixed, {{boys}} boys, {{girls}} girls already exist"
   },
   "curriculum": {
     "title": "Curriculum",

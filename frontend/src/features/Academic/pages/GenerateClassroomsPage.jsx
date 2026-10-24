@@ -91,6 +91,14 @@ export default function GenerateClassroomsPage() {
           <p role="status" className="font-medium">
             {result.dry_run ? t('generate.willCreate', { created: result.created, placed: result.placed }) : t('generate.created', { count: result.created })}
           </p>
+          {result.created === 0 && (
+            <div className="rounded bg-blue-50 p-3 text-sm text-blue-900">
+              <p>{t('generate.nothingNew')}</p>
+              <ul className="list-disc ps-5">
+                {result.existing.map((e) => <li key={e.grade_level_id}>{t('generate.existingRow', { grade: gradeName(gradeOf(e.grade_level_id) ?? {}), mixed: e.mixed, boys: e.male, girls: e.female })}</li>)}
+              </ul>
+            </div>
+          )}
           {result.unplaced.length > 0 && <p className="rounded bg-amber-50 p-3 text-sm text-amber-800">{t('generate.unplaced', { names: result.unplaced.join(', ') })}</p>}
           <div className="max-h-96 overflow-y-auto">
             <table className="w-full text-start text-sm">

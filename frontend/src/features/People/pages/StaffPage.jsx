@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import SectionPicker from '../components/SectionPicker'
 import ResourcePage from '../../Academic/components/ResourcePage'
 
 const CATEGORIES = ['all', 'teaching', 'administrative', 'student_affairs', 'health', 'technical', 'services']
@@ -46,6 +47,10 @@ export default function StaffPage() {
       name: 'teaches_gender', label: 'staff.fields.teachesGender', type: 'select', visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
       options: [{ value: 'male', label: 'buildings.gender.male' }, { value: 'female', label: 'buildings.gender.female' }],
     },
+    {
+      name: 'classroom_ids', type: 'custom', getValue: (row) => row.classroom_ids ?? [], visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
+      render: ({ form, setForm }) => <SectionPicker value={form.classroom_ids ?? []} onChange={(ids) => setForm({ ...form, classroom_ids: ids })} />,
+    },
     { name: 'floor', label: 'staff.fields.floor', visibleWhen: (form) => byValue[form.staff_type]?.needs_floor },
     { name: 'is_active', label: 'people.fields.active', type: 'checkbox' },
   ]
@@ -62,6 +67,7 @@ export default function StaffPage() {
       key: 'scope', label: 'staff.fields.teaches',
       render: (r) => (r.grade_from && r.grade_to ? `${r.grade_from[`name_${i18n.language}`]} → ${r.grade_to[`name_${i18n.language}`]}` : '') + (r.teaches_gender ? ` · ${t(`buildings.gender.${r.teaches_gender}`)}` : ''),
     },
+    { key: 'sections', label: 'staff.sections.column', render: (r) => (r.classrooms ?? []).map((c) => c.name).join(', ') },
     { key: 'phone', label: 'people.fields.phone' },
     { key: 'is_active', label: 'people.fields.active', render: (r) => t(r.is_active ? 'academic.yes' : 'academic.no') },
   ]
@@ -88,7 +94,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', classroom_ids: [], floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />

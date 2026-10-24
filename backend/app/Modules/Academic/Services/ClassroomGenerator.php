@@ -64,6 +64,10 @@ class ClassroomGenerator
         $dryRun ? $run() : DB::transaction($run);
 
         return [
+            'existing' => collect($plan)->map(fn (array $row) => [
+                'grade_level_id' => $row['grade_level_id'],
+                ...collect(self::GENDERS)->mapWithKeys(fn (string $g) => [$g => $existing->where('grade_level_id', $row['grade_level_id'])->filter(fn (Classroom $c) => ($c->gender ?? 'mixed') === $g)->count()])->all(),
+            ])->values()->all(),
             'dry_run' => $dryRun,
             'created' => count($result),
             'placed' => count(array_filter($result, fn (array $c) => $c['room'] !== null)),

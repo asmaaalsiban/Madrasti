@@ -138,10 +138,10 @@ class TimetableGenerator
 
         $classrooms = Classroom::where('academic_year_id', $year->id)->with(['room.floor', 'gradeLevel'])->get()->keyBy('id');
         $subjects = Subject::all()->keyBy('id');
-        $all = TeachingAssignment::whereIn('classroom_id', $classrooms->keys())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo')->get();
+        $all = TeachingAssignment::whereIn('classroom_id', $classrooms->keys())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo', 'teacher.staffProfile.classrooms')->get();
         // Never put a teacher outside whom they teach, whatever an old assignment says.
         [$assignments, $outside] = $all->partition(fn ($a) => ($profile = $a->teacher?->staffProfile) === null
-            || $profile->canTeach((int) $classrooms[$a->classroom_id]->gradeLevel->sort_order, $classrooms[$a->classroom_id]->gender ?? 'mixed'));
+            || $profile->canTeach((int) $classrooms[$a->classroom_id]->gradeLevel->sort_order, $classrooms[$a->classroom_id]->gender ?? 'mixed', $a->classroom_id));
         $assignments = $assignments->values();
         $users = User::whereIn('id', $assignments->pluck('teacher_id'))->get()->keyBy('id');
 

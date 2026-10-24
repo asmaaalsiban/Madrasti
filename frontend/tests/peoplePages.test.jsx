@@ -120,6 +120,31 @@ describe('StaffPage', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/staff', expect.objectContaining({ grade_from_id: '6', grade_to_id: '10', teaches_gender: 'female' })))
   })
 
+  it('chooses the sections a teacher teaches', async () => {
+    serve({ classrooms: [{ id: 3, name: '5-A' }, { id: 4, name: '5-B' }, { id: 5, name: '6-A' }] })
+    api.post.mockResolvedValue({ data: { data: { id: 6 } } })
+    renderPage(<StaffPage />)
+    await screen.findByText('Nothing to show yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.click(await screen.findByRole('checkbox', { name: '5-B' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: '6-A' }))
+    expect(screen.getByText('Sections the teacher teaches (2)')).toBeInTheDocument()
+    fireEvent.change(screen.getByPlaceholderText('Search sections'), { target: { value: '5-' } })
+    expect(screen.queryByRole('checkbox', { name: '6-A' })).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Head' } })
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'head@school.test' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/staff', expect.objectContaining({ classroom_ids: [4, 5] })))
+  })
+
+  it('shows the sections already chosen for a teacher when editing', async () => {
+    serve({ staff: [{ ...sara, classroom_ids: [3], classrooms: [{ id: 3, name: '5-A' }] }], classrooms: [{ id: 3, name: '5-A' }, { id: 4, name: '5-B' }] })
+    renderPage(<StaffPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+    expect(await screen.findByRole('checkbox', { name: '5-A' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: '5-B' })).not.toBeChecked()
+  })
+
   it('does not ask a nurse whom they teach', async () => {
     serve()
     renderPage(<StaffPage />)
