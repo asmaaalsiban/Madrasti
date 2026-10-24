@@ -30,7 +30,7 @@ const NAV = [
 
 export default function AdminLayout() {
   const { t } = useTranslation()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const { data: school } = useSchool()
   const [open, setOpen] = useState(false)
 
@@ -48,6 +48,7 @@ export default function AdminLayout() {
             {t('admin.menu')}
           </button>
         </div>
+        {user?.name && <p className="px-4 pb-2 text-sm text-white/80">{t('roles.admin')}: <strong>{user.name}</strong></p>}
         <nav className={`${open ? 'block' : 'hidden'} space-y-1 px-2 pb-4 md:block`}>
           {NAV.map(([to, key, end]) => (
             <NavLink

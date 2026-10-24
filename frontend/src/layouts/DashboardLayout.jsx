@@ -17,7 +17,7 @@ export default function DashboardLayout() {
       <header className="flex flex-wrap items-center justify-between gap-2 bg-brand px-4 py-3 text-white">
         <span className="font-bold">{school?.name ?? t('common.appName')}</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm">{t(`roles.${user.role}`)}</span>
+          <span className="text-sm">{t(`roles.${user.role}`)}: <strong>{user.name}</strong></span>
           <LanguageSwitcher />
           <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />
