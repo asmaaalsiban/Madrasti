@@ -19,6 +19,7 @@ use App\Modules\Academic\Policies\AcademicPolicy;
 use App\Modules\Grading\Models\Assessment;
 use App\Modules\People\Policies\UserPolicy;
 use App\Modules\Scheduling\Models\Period;
+use App\Modules\TeacherTools\Services\BehaviorAccess;
 use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -72,6 +73,14 @@ class AppServiceProvider extends ServiceProvider
             Role::Student => $student->user_id === $user->id,
             Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
             Role::Teacher => false,
+        });
+
+        // A student's behaviour results: admin, a teacher who may evaluate the student, the student, their parents.
+        Gate::define('view-student-behavior', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Student => $student->user_id === $user->id,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => app(BehaviorAccess::class)->canEvaluate($user, $student),
         });
 
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.

@@ -79,7 +79,8 @@
       "curriculum": "Curriculum",
       "schoolDay": "School day",
       "timetable": "Timetable",
-      "availability": "Teacher availability"
+      "availability": "Teacher availability",
+      "behavior": "Behaviour"
     },
     "actions": {
       "add": "Add",
@@ -539,5 +540,60 @@
     "unavailable": "Unavailable",
     "saved": "Saved.",
     "clashes": "Saved. These lessons are already in periods the teacher cannot teach in (change them in the timetable):"
+  },
+  "behavior": {
+    "title": "Behaviour",
+    "hint": "Evaluate your students each week.",
+    "childTitle": "Behaviour: {{name}}",
+    "criteriaTitle": "Behaviour criteria",
+    "criteriaHelp": "What students are evaluated on. Add your own, hide a criterion you do not use, or remove it (one already used is only hidden so old results stay).",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "hide": "Hide",
+    "show": "Show",
+    "date": "Date",
+    "weekOf": "Week of {{date}}",
+    "noClassrooms": "You have no sections to evaluate.",
+    "done": "Evaluated",
+    "evaluate": "Evaluate",
+    "results": "Results",
+    "evaluateTitle": "Evaluate {{name}}",
+    "dateLine": "Date of the evaluation: {{date}}",
+    "note": "Note",
+    "visibleToParent": "Show to the parent",
+    "levels": {
+      "1": "Weak",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very good",
+      "5": "Excellent"
+    },
+    "quickNote": "Quick note",
+    "quickHelp": "For a single event today (e.g. helped a friend, or hit a classmate). It is saved with the date above.",
+    "noteType": "Type",
+    "quickText": "What happened",
+    "addNote": "Add the note",
+    "noteAdded": "The note was added.",
+    "type": {
+      "positive": "Positive",
+      "negative": "Negative"
+    },
+    "hiddenFromParent": "hidden from the parent",
+    "tabs": {
+      "weeks": "Weekly",
+      "months": "Monthly",
+      "terms": "Term"
+    },
+    "builtFrom": {
+      "weeks": "Each week is the mean of the teachers' evaluations of that week.",
+      "months": "Each month is the mean of its weekly evaluations.",
+      "terms": "Each term is the mean of its months."
+    },
+    "noResults": "No evaluations yet.",
+    "overall": "Overall",
+    "remarks": "Teachers' remarks",
+    "notes": "Notes",
+    "monthRow": "{{month}} ({{weeks}} weeks)",
+    "termRow": "{{name}} ({{months}} months)"
   }
 }

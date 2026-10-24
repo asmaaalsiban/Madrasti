@@ -9,6 +9,7 @@ export default function TeacherHome() {
   const cards = [
     ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
+    ['/teacher/behavior', 'behavior.title', 'behavior.hint'],
     ['/teacher/grades', 'grading.title', 'grading.hint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
     ...(user?.staff_type === 'head_of_department' ? [['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
