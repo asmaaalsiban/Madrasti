@@ -37,7 +37,7 @@ describe('daily summary routes', () => {
       [{ role: 'teacher', name: 'T' }, '/teacher/lesson-plans'],
       [{ role: 'student', name: 'S', student_id: 1 }, '/student/lesson-plans'],
       [{ role: 'parent', name: 'P', children: [{ id: 17 }] }, '/parent/children/17/lesson-plans'],
-      [{ role: 'admin', name: 'A' }, '/admin/lesson-plans'],
+      [{ role: 'teacher', name: 'H', staff_type: 'head_of_department' }, '/teacher/lesson-plans/review'],
     ]) {
       auth.user = user
       const { unmount } = render(<QueryClientProvider client={new QueryClient()}><RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} /></QueryClientProvider>)
