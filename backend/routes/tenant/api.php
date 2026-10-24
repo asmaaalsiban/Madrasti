@@ -19,6 +19,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
 use App\Modules\Communication\Http\Controllers\NotificationController;
+use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
@@ -144,6 +145,13 @@ Route::middleware('school-user')->prefix('notifications')->group(function (): vo
     Route::get('unread-count', [NotificationController::class, 'unread']);
     Route::post('read-all', [NotificationController::class, 'readAll']);
     Route::post('{id}/read', [NotificationController::class, 'read']);
+});
+
+// Notifications on the phone / browser (web push): availability, allow, stop.
+Route::middleware('school-user')->prefix('push')->group(function (): void {
+    Route::get('config', [PushSubscriptionController::class, 'config']);
+    Route::post('subscribe', [PushSubscriptionController::class, 'subscribe']);
+    Route::post('unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);
 });
 
 // Announcements: the admin (to everyone, a role or a section) and teachers (to their sections) publish; everyone reads theirs.
