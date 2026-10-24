@@ -31,6 +31,7 @@ use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
+use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +122,15 @@ Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): voi
     Route::post('assessments/{assessment}/publish', [AssessmentController::class, 'publish']);
     Route::post('assessments/{assessment}/unpublish', [AssessmentController::class, 'unpublish']);
 });
+
+// Daily summary: the teacher writes what a lesson covered; the section's students and their parents read it.
+Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
+    Route::get('daily-summaries', [DailySummaryController::class, 'index']);
+    Route::put('daily-summaries', [DailySummaryController::class, 'save']);
+    Route::delete('daily-summaries/{summary}', [DailySummaryController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('daily-summaries/me', [DailySummaryController::class, 'mine']);
+Route::middleware('school-user')->get('students/{student}/daily-summaries', [DailySummaryController::class, 'forStudent']);
 
 // Behaviour evaluation: teachers evaluate the students they teach each week (months and terms are built from the weeks).
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->group(function (): void {
