@@ -192,3 +192,11 @@ On the sign-in page, **Forgot my password**: the user types their email or phone
 
 **E-mail settings** (`backend/.env`): in development `MAIL_MAILER=log`, so the e-mail with the code is written to `storage/logs/laravel.log`. For real e-mails use SMTP, for example Gmail with an App Password: `MAIL_MAILER=smtp`, `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME=<address>`, `MAIL_PASSWORD=<app password>`, `MAIL_ENCRYPTION=tls`, `MAIL_FROM_ADDRESS=<address>`. Run `php artisan tenants:migrate` for the new table.
 
+
+## Announcements
+
+Everyone has **Announcements** (a link in the header, and in the admin menu) with a counter of unread ones, checked every 30 seconds (`GET /api/announcements/unread-count`). The list (`GET /api/announcements`) shows the announcements meant for the user, pinned first then newest, new ones marked; opening one marks it read (`POST /api/announcements/{id}/read`).
+
+**Who sees what:** *everyone*; *a group* (all teachers, students, parents or admins); *a section*: the students of that section, their parents (a parent with children in two sections sees both), and the teachers who teach or are homeroom of it. Expired announcements (optional "show until" date) are hidden; an author always sees their own; the admin sees all.
+
+**Who publishes:** the admin to everyone, a group or any section, and can pin to the top; a teacher only to a section they teach (`POST /api/announcements`, `PUT` and `DELETE` by the author or an admin; `GET /api/announcements/options` lists the sections a user may publish to). Students and parents only read. Uses the existing `announcements` table plus the new `announcement_reads`: run `php artisan tenants:migrate`.
