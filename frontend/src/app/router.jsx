@@ -44,6 +44,9 @@ import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
 import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
 import DailySummaryPage from '../features/DailySummary/pages/DailySummaryPage'
 import { ChildSummariesPage, StudentSummariesPage } from '../features/DailySummary/pages/SummariesPages'
+import LessonPlansPage from '../features/LessonPlans/pages/LessonPlansPage'
+import ReviewPlansPage from '../features/LessonPlans/pages/ReviewPlansPage'
+import { ChildPlansPage, StudentPlansPage } from '../features/LessonPlans/pages/PlansPages'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
@@ -58,6 +61,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/summaries', element: <ChildSummariesPage /> },
+    { path: 'children/:id/lesson-plans', element: <ChildPlansPage /> },
   ],
   student: [
     { index: true, element: <StudentHome /> },
@@ -65,6 +69,7 @@ const HOME_ROUTES = {
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
+    { path: 'lesson-plans', element: <StudentPlansPage /> },
   ],
   teacher: [
     { index: true, element: <TeacherHome /> },
@@ -76,6 +81,7 @@ const HOME_ROUTES = {
     { path: 'behavior/students/:id', element: <StudentBehaviorPage staff /> },
     { path: 'homework', element: <HomeworkPage /> },
     { path: 'daily-summary', element: <DailySummaryPage /> },
+    { path: 'lesson-plans', element: <LessonPlansPage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
     { path: 'grades/:id', element: <ScoreSheetPage /> },
@@ -118,6 +124,7 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/lesson-plans', element: <ReviewPlansPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },

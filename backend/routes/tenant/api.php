@@ -35,6 +35,7 @@ use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
+use App\Modules\TeacherTools\Http\Controllers\LessonPlanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -132,6 +133,20 @@ Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
 });
 Route::middleware('school-user')->get('daily-summaries/me', [DailySummaryController::class, 'mine']);
 Route::middleware('school-user')->get('students/{student}/daily-summaries', [DailySummaryController::class, 'forStudent']);
+
+// Lesson plans: the teacher writes and submits, the admin reviews, approved shared plans reach students and parents.
+Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
+    Route::get('lesson-plans', [LessonPlanController::class, 'index']);
+    Route::put('lesson-plans', [LessonPlanController::class, 'save']);
+    Route::post('lesson-plans/{plan}/submit', [LessonPlanController::class, 'submit']);
+    Route::delete('lesson-plans/{plan}', [LessonPlanController::class, 'destroy']);
+});
+Route::middleware(['school-user', 'role:admin'])->group(function (): void {
+    Route::get('lesson-plans/review', [LessonPlanController::class, 'review']);
+    Route::post('lesson-plans/{plan}/review', [LessonPlanController::class, 'decide']);
+});
+Route::middleware('school-user')->get('lesson-plans/me', [LessonPlanController::class, 'mine']);
+Route::middleware('school-user')->get('students/{student}/lesson-plans', [LessonPlanController::class, 'forStudent']);
 
 // Behaviour evaluation: teachers evaluate the students they teach each week (months and terms are built from the weeks).
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->group(function (): void {
