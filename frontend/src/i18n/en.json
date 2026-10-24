@@ -22,7 +22,17 @@
       "forced": "Your account uses the default password. Choose your own password to continue."
     },
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "forgot": {
+      "link": "Forgot my password",
+      "title": "Forgot my password",
+      "help": "Enter your email or phone number. We send a 6-digit code: a student's code goes to the parent's email (the parent gives it to the student); everybody else gets it on their own email.",
+      "sendCode": "Send the code",
+      "code": "Code (6 digits)",
+      "setPassword": "Set the new password",
+      "resend": "Send a new code",
+      "backToLogin": "Back to sign in"
+    }
   },
   "roles": {
     "admin": "Admin",

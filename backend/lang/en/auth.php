@@ -13,4 +13,12 @@ return [
     ],
     'password_change_required' => 'You must change your password before you continue.',
     'password_is_default' => 'Choose a password other than the default one.',
+    'reset_requested' => 'If the account exists, a code was sent. For a student it goes to the parent\'s e-mail.',
+    'reset_invalid' => 'The code is wrong or expired. Ask for a new one.',
+    'reset_done' => 'Your password was changed. You can sign in now.',
+    'reset_mail_subject' => 'Password code for :name',
+    'reset_mail_for_student' => ':name asked to reset the password. Give this code to your child:',
+    'reset_mail_for_self' => 'Hello :name, your password reset code is:',
+    'reset_mail_valid' => 'The code is valid for :minutes minutes and can be used once.',
+    'reset_mail_ignore' => 'If you did not ask for this, ignore this e-mail: nothing changes.',
 ];
