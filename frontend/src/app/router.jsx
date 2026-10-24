@@ -49,10 +49,19 @@ const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
-  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }, { path: 'children/:id/behavior', element: <StudentBehaviorPage /> }],
-  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }, { path: 'behavior', element: <MyBehaviorPage /> }],
-  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }, { path: 'children/:id/homework', element: <ChildHomeworkPage /> }],
-  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }, { path: 'homework', element: <StudentHomeworkPage /> }],
+  parent: [
+    { index: true, element: <ParentHome /> },
+    { path: 'children/:id/grades', element: <ChildGradesPage /> },
+    { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
+    { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
+    { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
+  ],
+  student: [
+    { index: true, element: <StudentHome /> },
+    { path: 'timetable', element: <StudentTimetablePage /> },
+    { path: 'homework', element: <StudentHomeworkPage /> },
+    { path: 'behavior', element: <MyBehaviorPage /> },
+  ],
   teacher: [
     { index: true, element: <TeacherHome /> },
     { path: 'attendance', element: <TakeAttendancePage /> },
