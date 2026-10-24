@@ -107,7 +107,6 @@ export const routes = [
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
-              { path: '/admin/homework', element: <HomeworkPage /> },
               { path: '/admin/grades', element: <AssessmentsPage /> },
               { path: '/admin/grades/results', element: <ResultsPage /> },
               { path: '/admin/grades/:id', element: <ScoreSheetPage /> },

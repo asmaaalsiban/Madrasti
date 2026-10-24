@@ -6,7 +6,6 @@ namespace App\Modules\TeacherTools\Http\Requests;
 
 use App\Models\User;
 use App\Modules\Academic\Models\TeachingAssignment;
-use App\Shared\Enums\Role;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,7 +25,7 @@ class HomeworkRequest extends FormRequest
         ];
     }
 
-    /** The subject must be taught in the section, and a teacher may only use their own sections. */
+    /** The subject must be taught in the section, and only the teacher of the section may send homework. */
     public function after(): array
     {
         return [function (Validator $validator): void {
@@ -36,7 +35,7 @@ class HomeworkRequest extends FormRequest
             /** @var User $user */
             $user = $this->user();
             $assignment = TeachingAssignment::where('classroom_id', $this->input('classroom_id'))->where('subject_id', $this->input('subject_id'))->first();
-            if ($assignment === null || (! $user->hasRole(Role::Admin) && $assignment->teacher_id !== $user->id)) {
+            if ($assignment === null || $assignment->teacher_id !== $user->id) {
                 $validator->errors()->add('classroom_id', __('teacher_tools.not_your_class'));
             }
         }];

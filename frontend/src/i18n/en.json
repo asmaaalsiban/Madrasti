@@ -80,7 +80,6 @@
       "schoolDay": "School day",
       "timetable": "Timetable",
       "availability": "Teacher availability",
-      "homework": "Homework",
       "behavior": "Behaviour"
     },
     "actions": {
@@ -562,7 +561,23 @@
     "imageAlt": "Homework picture",
     "imageHint": "Optional: a photo of the page or the task (JPG, PNG or WebP, up to 5 MB).",
     "hasImage": "This homework has a picture. Choose another to replace it.",
-    "removeImage": "Remove the picture"
+    "removeImage": "Remove the picture",
+    "addPhoto": "Add a photo",
+    "changePhoto": "Change the photo",
+    "answers": "Answers",
+    "answersTitle": "Answers: {{title}}",
+    "answeredCount": "{{done}} of {{total}} students sent an answer.",
+    "sentAt": "Sent {{date}}",
+    "late": "late",
+    "notSent": "Not sent",
+    "notSentYet": "Not sent yet",
+    "close": "Close",
+    "answerTitle": "Answer: {{title}}",
+    "yourAnswer": "Your answer",
+    "send": "Send",
+    "withdraw": "Delete my answer",
+    "answer": "Send my answer",
+    "editAnswer": "Edit my answer"
   },
   "behavior": {
     "title": "Behaviour",

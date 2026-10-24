@@ -6,7 +6,7 @@ export default function StudentHomeworkPage() {
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('homework.title')}</h1>
-      <HomeworkList endpoint="/homework/me" />
+      <HomeworkList endpoint="/homework/me" canAnswer />
     </section>
   )
 }

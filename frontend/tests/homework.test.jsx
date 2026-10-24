@@ -91,6 +91,61 @@ describe('homework pictures', () => {
   })
 })
 
+describe('photos and answers', () => {
+  it('shows a camera button to add a photo to a homework', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/homework' ? [] : { assignments: [] } } }))
+    wrap(<HomeworkPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Send homework' }))
+    expect(screen.getByRole('button', { name: /Add a photo/ })).toBeInTheDocument()
+  })
+
+  it('lets the student answer with a text and a photo', async () => {
+    api.get.mockResolvedValue({ data: { data: [{ ...hw, submission: null }] } })
+    api.post.mockResolvedValue({ data: { data: {} } })
+    wrap(<StudentHomeworkPage />)
+    expect(await screen.findByText('Not sent yet')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Send my answer' }))
+    fireEvent.change(screen.getByLabelText('Your answer'), { target: { value: 'Done' } })
+    expect(screen.getByRole('button', { name: /Add a photo/ })).toBeInTheDocument()
+    URL.createObjectURL = vi.fn(() => 'blob:x')
+    URL.revokeObjectURL = vi.fn()
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [new File(['x'], 'a.jpg', { type: 'image/jpeg' })] } })
+    expect(await screen.findByAltText('Homework picture')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/homework/1/submission', expect.any(FormData)))
+    const sent = api.post.mock.calls[0][1]
+    expect(sent.get('body')).toBe('Done')
+    expect(sent.get('image').name).toBe('a.jpg')
+  })
+
+  it('shows the parent whether the child sent the answer, without a send button', async () => {
+    api.get.mockResolvedValue({ data: { data: [{ ...hw, submission: { id: 4, body: 'x', has_image: false, submitted_at: '2026-10-30T10:00:00+00:00', late: false } }] } })
+    wrap(<ChildHomeworkPage />, '/c/7', '/c/:id')
+    expect(await screen.findByText('Sent 2026-10-30')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /answer/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the teacher who answered and who did not, with the answer and its photo', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:ans')
+    api.get.mockImplementation((url) => {
+      if (url === '/homework') return Promise.resolve({ data: { data: [hw] } })
+      if (url === '/homework/1/submissions') return Promise.resolve({ data: { data: [
+        { student: { id: 1, name_ar: 'سلمى', name_en: 'Salma' }, submission: { id: 6, body: 'My answer', has_image: true, submitted_at: '2026-10-30T10:00:00+00:00', late: true } },
+        { student: { id: 2, name_ar: 'ليث', name_en: 'Layth' }, submission: null },
+      ] } })
+      if (url === '/homework/submissions/6/image') return Promise.resolve({ data: new Blob(['x']) })
+      return Promise.resolve({ data: { data: { assignments: [] } } })
+    })
+    wrap(<HomeworkPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Answers' }))
+    expect(await screen.findByText('1 of 2 students sent an answer.')).toBeInTheDocument()
+    expect(screen.getByText('Not sent')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sent 2026-10-30 · late' }))
+    expect(screen.getByText('My answer')).toBeInTheDocument()
+    expect(await screen.findByAltText('Homework picture')).toHaveAttribute('src', 'blob:ans')
+  })
+})
+
 describe('homework for students and parents', () => {
   it('shows the student their homework', async () => {
     api.get.mockResolvedValue({ data: { data: [hw] } })

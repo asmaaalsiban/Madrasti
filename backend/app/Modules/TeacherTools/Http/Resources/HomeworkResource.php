@@ -26,6 +26,10 @@ class HomeworkResource extends JsonResource
             'classroom' => $this->classroom->only(['id', 'name']),
             'subject' => $this->subject->only(['id', 'name_ar', 'name_en']),
             'teacher' => $this->teacher->only(['id', 'name']),
+            'submission' => $this->whenLoaded('mySubmission', fn () => $this->mySubmission === null ? null : [
+                'id' => $this->mySubmission->id, 'body' => $this->mySubmission->body, 'has_image' => $this->mySubmission->file_path !== null,
+                'submitted_at' => $this->mySubmission->submitted_at->toIso8601String(), 'late' => $this->mySubmission->submitted_at->gt($this->due_at),
+            ]),
         ];
     }
 }

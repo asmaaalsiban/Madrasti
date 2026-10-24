@@ -80,7 +80,6 @@
       "schoolDay": "اليوم الدراسي",
       "timetable": "جدول الحصص",
       "availability": "أوقات المعلمين",
-      "homework": "الواجبات",
       "behavior": "السلوك"
     },
     "actions": {
@@ -562,7 +561,23 @@
     "imageAlt": "صورة الواجب",
     "imageHint": "اختياري: صورة للصفحة أو للمطلوب (JPG أو PNG أو WebP، حتى 5 ميغابايت).",
     "hasImage": "لهذا الواجب صورة. اختر صورة أخرى لاستبدالها.",
-    "removeImage": "حذف الصورة"
+    "removeImage": "حذف الصورة",
+    "addPhoto": "إضافة صورة",
+    "changePhoto": "تغيير الصورة",
+    "answers": "الإجابات",
+    "answersTitle": "الإجابات: {{title}}",
+    "answeredCount": "{{done}} من {{total}} طلاب أرسلوا إجابة.",
+    "sentAt": "أُرسل {{date}}",
+    "late": "متأخر",
+    "notSent": "لم يرسل",
+    "notSentYet": "لم يُرسل بعد",
+    "close": "إغلاق",
+    "answerTitle": "إجابة: {{title}}",
+    "yourAnswer": "إجابتك",
+    "send": "إرسال",
+    "withdraw": "حذف إجابتي",
+    "answer": "إرسال إجابتي",
+    "editAnswer": "تعديل إجابتي"
   },
   "behavior": {
     "title": "السلوك",
