@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
+import PushToggle from './PushToggle'
 
 // The sentence of a notification, written in the reader's language from its kind and parameters.
 export function notificationText(t, language, n) {
@@ -58,6 +59,7 @@ export default function NotificationBell() {
               ))}
             </ul>
           )}
+          <PushToggle />
         </div>
       )}
     </div>

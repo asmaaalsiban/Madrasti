@@ -22,6 +22,8 @@ use App\Modules\Scheduling\Models\Period;
 use App\Modules\TeacherTools\Services\BehaviorAccess;
 use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
+use App\Shared\Push\PushTransport;
+use App\Shared\Push\WebPushTransport;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // The messaging provider (WhatsApp, SMS, ...) is chosen in config/messaging.php.
+        $this->app->bind(PushTransport::class, WebPushTransport::class);
         $this->app->bind(MessageSender::class, fn ($app): MessageSender => $app->make(config('messaging.drivers')[config('messaging.driver')]));
     }
 

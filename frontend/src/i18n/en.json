@@ -739,6 +739,13 @@
       },
       "homework_answer": "{{student}} sent an answer to: {{title}}",
       "unknown": "New notification"
+    },
+    "push": {
+      "enable": "Get notifications on this phone",
+      "disable": "Stop notifications on this phone",
+      "on": "Notifications are on for this device.",
+      "denied": "Notifications are blocked in your browser settings for this site. Allow them there to turn this on.",
+      "addToHome": "On iPhone: open the share menu and choose \"Add to Home Screen\", then open the app from there to turn on notifications."
     }
   }
 }

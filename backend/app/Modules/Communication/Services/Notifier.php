@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
  */
 class Notifier
 {
+    public function __construct(private readonly PushNotifier $push) {}
+
     /**
      * @param  iterable<int>  $userIds
      * @param  array<string, mixed>  $params
@@ -24,10 +26,13 @@ class Notifier
     public function toUsers(iterable $userIds, string $kind, array $params, string $link): void
     {
         $rows = [];
+        $events = [];
         foreach (collect($userIds)->unique() as $id) {
             $rows[] = $this->row((int) $id, $kind, $params, $link);
+            $events[] = ['user' => (int) $id, 'kind' => $kind, 'params' => $params, 'link' => $link];
         }
         $this->insert($rows);
+        $this->push->send($events);
     }
 
     /**
@@ -45,15 +50,21 @@ class Notifier
         $students = Student::with('guardians:users.id')->whereIn('id', Enrollment::where('classroom_id', $classroomId)->where('academic_year_id', $year->id)->select('student_id'))->get();
 
         $rows = [];
+        $events = [];
+        $add = function (int $userId, array $withParams, string $link) use (&$rows, &$events, $kind): void {
+            $rows[] = $this->row($userId, $kind, $withParams, $link);
+            $events[] = ['user' => $userId, 'kind' => $kind, 'params' => $withParams, 'link' => $link];
+        };
         foreach ($students as $student) {
             if ($student->user_id !== null) {
-                $rows[] = $this->row($student->user_id, $kind, $params, "/student/{$path}");
+                $add($student->user_id, $params, "/student/{$path}");
             }
             foreach ($student->guardians as $guardian) {
-                $rows[] = $this->row($guardian->id, $kind, $params + ['child_ar' => $student->name_ar, 'child_en' => $student->name_en ?: $student->name_ar], "/parent/children/{$student->id}/{$path}");
+                $add($guardian->id, $params + ['child_ar' => $student->name_ar, 'child_en' => $student->name_en ?: $student->name_ar], "/parent/children/{$student->id}/{$path}");
             }
         }
         $this->insert($rows);
+        $this->push->send($events);
     }
 
     /** @param  array<string, mixed>  $params */
