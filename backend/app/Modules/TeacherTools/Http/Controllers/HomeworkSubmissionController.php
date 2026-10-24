@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
+use App\Modules\Communication\Services\Notifier;
 use App\Modules\TeacherTools\Models\HomeworkAssignment;
 use App\Modules\TeacherTools\Models\HomeworkFile;
 use App\Modules\TeacherTools\Models\HomeworkSubmission;
@@ -40,7 +41,7 @@ class HomeworkSubmissionController extends Controller
      * The signed-in student sends (or changes) their answer: a text and photos of the pages. New photos are added after the
      * ones already sent (never replacing them); remove_file_ids drops chosen photos.
      */
-    public function store(Request $request, HomeworkAssignment $homework): JsonResponse
+    public function store(Request $request, HomeworkAssignment $homework, Notifier $notifier): JsonResponse
     {
         $student = $this->studentOf($request->user(), $homework);
         $data = $request->validate([
@@ -74,6 +75,10 @@ class HomeworkSubmissionController extends Controller
             return $submission;
         });
         HomeworkFile::forget($drop);
+
+        if ($submission->wasRecentlyCreated) {
+            $notifier->toUsers([$homework->teacher_id], 'homework_answer', ['student_ar' => $student->name_ar, 'student_en' => $student->name_en ?: $student->name_ar, 'title' => $homework->title], '/teacher/homework');
+        }
 
         return response()->json(['data' => $this->shape($submission->load('files'), $homework)]);
     }

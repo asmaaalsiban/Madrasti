@@ -7,6 +7,7 @@ namespace App\Modules\Grading\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Academic\Models\Enrollment;
+use App\Modules\Communication\Services\Notifier;
 use App\Modules\Grading\Http\Requests\AssessmentRequest;
 use App\Modules\Grading\Http\Requests\SaveScoresRequest;
 use App\Modules\Grading\Http\Resources\AssessmentResource;
@@ -144,7 +145,14 @@ class AssessmentController extends Controller
     private function setPublished(Assessment $assessment, bool $published): AssessmentResource
     {
         Gate::authorize('manage-assessment', $assessment);
+        $wasPublished = $assessment->is_published;
         $assessment->update(['is_published' => $published]);
+        if ($published && ! $wasPublished) {
+            $assessment->loadMissing('subject');
+            app(Notifier::class)->toSection($assessment->classroom_id, 'grades', 'grades', [
+                'subject_ar' => $assessment->subject->name_ar, 'subject_en' => $assessment->subject->name_en ?: $assessment->subject->name_ar, 'title' => $assessment->title,
+            ]);
+        }
 
         return new AssessmentResource($assessment->load(self::WITH));
     }

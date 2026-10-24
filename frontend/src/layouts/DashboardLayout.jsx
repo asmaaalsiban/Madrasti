@@ -5,6 +5,7 @@ import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
 import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
+import NotificationBell from '../features/Notifications/NotificationBell'
 import { useSchool } from '../tenant/useSchool'
 
 // Mobile-first shell shared by all four roles.
@@ -25,6 +26,7 @@ export default function DashboardLayout() {
         <span className="font-bold">{school?.name ?? t('common.appName')}</span>
         <div className="flex items-center gap-2">
           <span className="text-sm">{label}: <strong>{user.name}</strong>{detail ? ` · ${detail}` : ''}</span>
+          <NotificationBell />
           <LanguageSwitcher />
           <Link to={`/${user.role}/announcements`} className="rounded border px-3 py-1 text-sm">
             {t('announcements.title')}{unread > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('announcements.unread', { count: unread })}>{unread}</span>}
