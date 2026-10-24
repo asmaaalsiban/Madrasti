@@ -9,6 +9,7 @@ use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Subject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** Homework a teacher sends to one section for one subject; students and their parents see it once published. */
 class HomeworkAssignment extends Model
@@ -39,5 +40,10 @@ class HomeworkAssignment extends Model
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(HomeworkSubmission::class);
     }
 }

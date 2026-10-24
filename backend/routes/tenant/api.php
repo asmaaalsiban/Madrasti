@@ -32,6 +32,7 @@ use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
+use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -136,15 +137,21 @@ Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->g
     Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
 });
 Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
-// Homework: teachers and admins send it, the student and their parents read it.
-Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
+// Homework: teachers send it and see who answered; the student answers; the student and their parents read it.
+Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
     Route::get('homework', [HomeworkController::class, 'index']);
     Route::post('homework', [HomeworkController::class, 'store']);
     Route::put('homework/{homework}', [HomeworkController::class, 'update']);
     Route::delete('homework/{homework}', [HomeworkController::class, 'destroy']);
     Route::post('homework/{homework}/image', [HomeworkController::class, 'storeImage']);
     Route::delete('homework/{homework}/image', [HomeworkController::class, 'destroyImage']);
+    Route::get('homework/{homework}/submissions', [HomeworkSubmissionController::class, 'index']);
 });
+Route::middleware(['school-user', 'role:student'])->group(function (): void {
+    Route::post('homework/{homework}/submission', [HomeworkSubmissionController::class, 'store']);
+    Route::delete('homework/{homework}/submission', [HomeworkSubmissionController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('homework/submissions/{submission}/image', [HomeworkSubmissionController::class, 'image']);
 Route::middleware('school-user')->get('homework/me', [HomeworkController::class, 'mine']);
 Route::middleware('school-user')->get('homework/{homework}/image', [HomeworkController::class, 'image']);
 Route::middleware('school-user')->get('students/{student}/homework', [HomeworkController::class, 'forStudent']);

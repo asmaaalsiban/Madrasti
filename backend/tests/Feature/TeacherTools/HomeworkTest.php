@@ -10,6 +10,7 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\TeacherTools\Models\HomeworkAssignment;
+use App\Modules\TeacherTools\Models\HomeworkSubmission;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
 use Illuminate\Http\UploadedFile;
@@ -76,11 +77,13 @@ class HomeworkTest extends AcademicTestCase
         $this->assertSame(0, HomeworkAssignment::count());
     }
 
-    public function test_an_admin_may_send_to_any_assigned_section(): void
+    public function test_an_admin_does_not_send_homework(): void
     {
         $this->actAsAdmin();
 
-        $this->postJson('/api/homework', $this->body())->assertCreated();
+        $this->postJson('/api/homework', $this->body())->assertForbidden();
+        $this->getJson('/api/homework')->assertForbidden();
+        $this->assertSame(0, HomeworkAssignment::count());
     }
 
     public function test_a_teacher_lists_edits_and_deletes_only_their_own_homework(): void
@@ -184,5 +187,98 @@ class HomeworkTest extends AcademicTestCase
         Sanctum::actingAs($this->teacher);
         $this->homework(['title' => 'No picture']);
         $this->get('/api/homework/'.HomeworkAssignment::where('title', 'No picture')->value('id').'/image')->assertNotFound();
+    }
+
+    private function studentUser(): User
+    {
+        $user = User::factory()->role(Role::Student)->create();
+        $this->student->update(['user_id' => $user->id]);
+
+        return $user;
+    }
+
+    public function test_a_student_answers_with_text_and_a_photo_and_can_replace_or_remove_it(): void
+    {
+        Storage::fake();
+        $hw = $this->homework(['due_at' => '2026-10-01 23:59:59']); // already past, so the answer is late
+        Sanctum::actingAs($this->studentUser());
+
+        $this->post("/api/homework/{$hw->id}/submission", ['body' => 'My answer', 'image' => UploadedFile::fake()->image('a.jpg')], ['Accept' => 'application/json'])
+            ->assertOk()->assertJsonPath('data.has_image', true)->assertJsonPath('data.body', 'My answer');
+        $first = HomeworkSubmission::first()->file_path;
+        Storage::assertExists($first);
+
+        $this->post("/api/homework/{$hw->id}/submission", ['body' => 'Second try', 'image' => UploadedFile::fake()->image('b.png')], ['Accept' => 'application/json'])->assertOk();
+        Storage::assertMissing($first);
+        $this->assertSame(1, HomeworkSubmission::count());
+
+        $this->post("/api/homework/{$hw->id}/submission", ['body' => 'Text only', 'remove_image' => true], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.has_image', false);
+        $this->assertNull(HomeworkSubmission::first()->file_path);
+
+        $this->getJson('/api/homework/me')->assertJsonPath('data.0.submission.body', 'Text only')->assertJsonPath('data.0.submission.late', true);
+        $this->deleteJson("/api/homework/{$hw->id}/submission")->assertNoContent();
+        $this->assertSame(0, HomeworkSubmission::count());
+    }
+
+    public function test_an_empty_answer_and_bad_files_are_refused(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        Sanctum::actingAs($this->studentUser());
+
+        $this->postJson("/api/homework/{$hw->id}/submission", ['body' => ''])->assertUnprocessable()->assertJsonValidationErrors('body');
+        $this->post("/api/homework/{$hw->id}/submission", ['image' => UploadedFile::fake()->create('a.pdf', 10, 'application/pdf')], ['Accept' => 'application/json'])->assertUnprocessable();
+    }
+
+    public function test_only_a_student_of_the_section_may_answer_a_published_homework(): void
+    {
+        $hw = $this->homework();
+        $draft = $this->homework(['published_at' => null]);
+        $elsewhere = $this->homework(['classroom_id' => $this->b->id]);
+        Sanctum::actingAs($this->studentUser());
+        $this->postJson("/api/homework/{$elsewhere->id}/submission", ['body' => 'x'])->assertForbidden();
+        $this->postJson("/api/homework/{$draft->id}/submission", ['body' => 'x'])->assertForbidden();
+
+        Sanctum::actingAs($this->parent);
+        $this->postJson("/api/homework/{$hw->id}/submission", ['body' => 'x'])->assertForbidden();
+        Sanctum::actingAs($this->teacher);
+        $this->postJson("/api/homework/{$hw->id}/submission", ['body' => 'x'])->assertForbidden();
+    }
+
+    public function test_the_teacher_sees_who_answered_and_who_did_not_and_opens_the_photo(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        $other = Student::create(['student_number' => 'S-2', 'name_ar' => 'ب', 'name_en' => 'B', 'gender' => 'male']);
+        Enrollment::create(['student_id' => $other->id, 'classroom_id' => $this->a->id, 'academic_year_id' => $this->a->academic_year_id]);
+        $sub = HomeworkSubmission::create(['homework_assignment_id' => $hw->id, 'student_id' => $this->student->id, 'body' => 'Done', 'file_path' => UploadedFile::fake()->image('a.jpg')->store('homework-answers'), 'submitted_at' => now()]);
+
+        Sanctum::actingAs($this->teacher);
+        $rows = $this->getJson("/api/homework/{$hw->id}/submissions")->assertOk()->json('data');
+        $this->assertCount(2, $rows);
+        $this->assertSame([true, false], collect($rows)->sortBy('student.id')->map(fn ($r) => $r['submission'] !== null)->values()->all());
+        $this->get("/api/homework/submissions/{$sub->id}/image")->assertOk();
+
+        Sanctum::actingAs($this->parent);
+        $this->get("/api/homework/submissions/{$sub->id}/image")->assertOk();
+        Sanctum::actingAs(User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create());
+        $this->get("/api/homework/submissions/{$sub->id}/image")->assertForbidden();
+        $this->getJson("/api/homework/{$hw->id}/submissions")->assertForbidden();
+        Sanctum::actingAs(User::factory()->role(Role::Guardian)->create());
+        $this->get("/api/homework/submissions/{$sub->id}/image")->assertForbidden();
+    }
+
+    public function test_deleting_the_homework_deletes_the_answers_and_their_photos(): void
+    {
+        Storage::fake();
+        $hw = $this->homework();
+        $path = UploadedFile::fake()->image('a.jpg')->store('homework-answers');
+        HomeworkSubmission::create(['homework_assignment_id' => $hw->id, 'student_id' => $this->student->id, 'file_path' => $path, 'submitted_at' => now()]);
+
+        Sanctum::actingAs($this->teacher);
+        $this->deleteJson("/api/homework/{$hw->id}")->assertNoContent();
+
+        Storage::assertMissing($path);
+        $this->assertSame(0, HomeworkSubmission::count());
     }
 }

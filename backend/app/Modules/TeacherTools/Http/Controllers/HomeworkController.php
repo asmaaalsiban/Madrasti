@@ -11,6 +11,7 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\TeacherTools\Http\Requests\HomeworkRequest;
 use App\Modules\TeacherTools\Http\Resources\HomeworkResource;
 use App\Modules\TeacherTools\Models\HomeworkAssignment;
+use App\Modules\TeacherTools\Models\HomeworkSubmission;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** Homework: a teacher (or an admin) sends it to a section; the student and their parents read it. */
+/** Homework: a teacher sends it to a section; the student and their parents read it. */
 class HomeworkController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
@@ -29,7 +30,7 @@ class HomeworkController extends Controller
         $user = $this->staff($request);
 
         $rows = HomeworkAssignment::with(['classroom', 'subject', 'teacher'])
-            ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('teacher_id', $user->id))
+            ->where('teacher_id', $user->id)
             ->when(isset($data['classroom_id']), fn ($q) => $q->where('classroom_id', $data['classroom_id']))
             ->orderByDesc('due_at')->orderByDesc('id')->get();
 
@@ -56,6 +57,7 @@ class HomeworkController extends Controller
     public function destroy(Request $request, HomeworkAssignment $homework): Response
     {
         $this->own($request, $homework);
+        $homework->submissions->each(fn ($sub) => $sub->file_path && Storage::delete($sub->file_path));
         $this->forgetImage($homework);
         $homework->delete();
 
@@ -143,6 +145,9 @@ class HomeworkController extends Controller
         $rows = $classroomId === null ? collect() : HomeworkAssignment::with(['classroom', 'subject', 'teacher'])
             ->where('classroom_id', $classroomId)->whereNotNull('published_at')->orderByDesc('due_at')->orderByDesc('id')->get();
 
+        $mine = HomeworkSubmission::where('student_id', $student->id)->whereIn('homework_assignment_id', $rows->pluck('id'))->get()->keyBy('homework_assignment_id');
+        $rows->each(fn ($h) => $h->setRelation('mySubmission', $mine->get($h->id)));
+
         return HomeworkResource::collection($rows);
     }
 
@@ -150,14 +155,14 @@ class HomeworkController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->hasRole(Role::Admin, Role::Teacher), 403);
+        abort_unless($user->hasRole(Role::Teacher), 403);
 
         return $user;
     }
 
     private function own(Request $request, HomeworkAssignment $homework): void
     {
-        abort_unless($this->staff($request)->hasRole(Role::Admin) || $homework->teacher_id === $request->user()->id, 403);
+        abort_unless($this->staff($request)->id === $homework->teacher_id, 403);
     }
 
     /**

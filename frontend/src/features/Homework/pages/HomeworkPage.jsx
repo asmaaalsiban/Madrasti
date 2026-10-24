@@ -6,16 +6,19 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
 import HomeworkImage from '../components/HomeworkImage'
+import ImagePicker from '../components/ImagePicker'
+import SubmissionsDialog from '../components/SubmissionsDialog'
 
 const EMPTY = { pair: '', title: '', description: '', due_on: '', image: null, removeImage: false }
 
-// Teacher (own homework) and admin (all): send homework to a section, edit or delete it.
+// Teacher: send homework to a section they teach, edit or delete it, and see who answered.
 export default function HomeworkPage() {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const [form, setForm] = useState(null) // null = closed; { id?, ...EMPTY }
   const [error, setError] = useState('')
   const [removing, setRemoving] = useState(null)
+  const [viewing, setViewing] = useState(null)
   const subject = (s) => s[`name_${i18n.language}`] || s.name_ar
 
   const list = useQuery({ queryKey: ['homework', 'staff'], queryFn: async () => (await api.get('/homework')).data.data })
@@ -65,6 +68,7 @@ export default function HomeworkPage() {
             {h.has_image && <HomeworkImage id={h.id} />}
             <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
             <div className="flex gap-2 pt-1">
+              <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setViewing(h)}>{t('homework.answers')}</button>
               <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(h)}>{t('admin.actions.edit')}</button>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(h)}>{t('admin.actions.delete')}</button>
             </div>
@@ -85,12 +89,16 @@ export default function HomeworkPage() {
             <FormField label={t('homework.fields.title')}><input required className="w-full rounded border p-2" value={form.title} onChange={set('title')} /></FormField>
             <FormField label={t('homework.fields.description')}><textarea rows={4} className="w-full rounded border p-2" value={form.description} onChange={set('description')} /></FormField>
             <FormField label={t('homework.fields.dueOn')}><input required type="date" className="w-full rounded border p-2" value={form.due_on} onChange={set('due_on')} /></FormField>
-            <FormField label={t('homework.fields.image')} hint={form.hasImage && !form.removeImage && !form.image ? t('homework.hasImage') : t('homework.imageHint')}>
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="w-full text-sm" onChange={(e) => setForm({ ...form, image: e.target.files[0] ?? null, removeImage: false })} />
-            </FormField>
-            {form.hasImage && !form.image && !form.removeImage && (
-              <button type="button" className="text-sm text-red-700 underline" onClick={() => setForm({ ...form, removeImage: true })}>{t('homework.removeImage')}</button>
-            )}
+            <div className="space-y-1">
+              <span className="block text-sm">{t('homework.fields.image')}</span>
+              <ImagePicker
+                file={form.image} onChange={(image) => setForm({ ...form, image, removeImage: false })}
+                saved={Boolean(form.hasImage && !form.removeImage)} onRemoveSaved={() => setForm({ ...form, removeImage: true })}
+              >
+                {form.id && <HomeworkImage id={form.id} />}
+              </ImagePicker>
+              <p className="text-xs text-slate-500">{t('homework.imageHint')}</p>
+            </div>
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
               <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</button>
@@ -98,6 +106,7 @@ export default function HomeworkPage() {
           </form>
         </Modal>
       )}
+      {viewing && <SubmissionsDialog homework={viewing} onClose={() => setViewing(null)} />}
       <ConfirmDialog open={Boolean(removing)} message={t('homework.confirmDelete', { title: removing?.title })} onConfirm={() => remove.mutate(removing.id)} onCancel={() => setRemoving(null)} />
     </section>
   )
