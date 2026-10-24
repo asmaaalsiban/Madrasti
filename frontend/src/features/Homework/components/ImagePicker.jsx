@@ -9,9 +9,6 @@ export default function ImagePicker({ file, onChange, saved = false, onRemoveSav
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
-  return () => URL.revokeObjectURL(url)
-  }, [file])
-
   return (
     <div className="space-y-2">
       <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('homework.fields.image')} onChange={(e) => onChange(e.target.files[0] ?? null)} />
