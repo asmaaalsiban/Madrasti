@@ -29,6 +29,8 @@ use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +121,21 @@ Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): voi
     Route::post('assessments/{assessment}/unpublish', [AssessmentController::class, 'unpublish']);
 });
 
+// Behaviour evaluation: teachers evaluate the students they teach each week (months and terms are built from the weeks).
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->group(function (): void {
+    Route::get('criteria', [BehaviorCriteriaController::class, 'index']);
+    Route::get('classrooms', [BehaviorController::class, 'classrooms']);
+    Route::get('week', [BehaviorController::class, 'week']);
+    Route::put('evaluations', [BehaviorController::class, 'save']);
+    Route::post('notes', [BehaviorController::class, 'addNote']);
+    Route::delete('notes/{note}', [BehaviorController::class, 'deleteNote']);
+});
+Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->group(function (): void {
+    Route::post('/', [BehaviorCriteriaController::class, 'store']);
+    Route::put('{criterion}', [BehaviorCriteriaController::class, 'update']);
+    Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
 // Homework: teachers and admins send it, the student and their parents read it.
 Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
     Route::get('homework', [HomeworkController::class, 'index']);

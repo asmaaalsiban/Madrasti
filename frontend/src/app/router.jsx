@@ -36,6 +36,9 @@ import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage
 import ChildTimetablePage from '../features/Parent/pages/ChildTimetablePage'
 import StudentsPage from '../features/People/pages/StudentsPage'
 import StaffPage from '../features/People/pages/StaffPage'
+import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
+import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
+import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import HomeworkPage from '../features/Homework/pages/HomeworkPage'
 import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
 import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
@@ -46,6 +49,8 @@ const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
+  parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }, { path: 'children/:id/behavior', element: <StudentBehaviorPage /> }],
+  student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }, { path: 'behavior', element: <MyBehaviorPage /> }],
   parent: [{ index: true, element: <ParentHome /> }, { path: 'children/:id/grades', element: <ChildGradesPage /> }, { path: 'children/:id/timetable', element: <ChildTimetablePage /> }, { path: 'children/:id/homework', element: <ChildHomeworkPage /> }],
   student: [{ index: true, element: <StudentHome /> }, { path: 'timetable', element: <StudentTimetablePage /> }, { path: 'homework', element: <StudentHomeworkPage /> }],
   teacher: [
@@ -54,6 +59,8 @@ const HOME_ROUTES = {
     { path: 'attendance/report', element: <AttendanceReportPage /> },
     { path: 'department', element: <DepartmentPage /> },
     { path: 'timetable', element: <TeacherTimetablePage /> },
+    { path: 'behavior', element: <BehaviorPage base="/teacher" /> },
+    { path: 'behavior/students/:id', element: <StudentBehaviorPage staff /> },
     { path: 'homework', element: <HomeworkPage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
@@ -97,6 +104,9 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
+              { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
+              { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
               { path: '/admin/homework', element: <HomeworkPage /> },
               { path: '/admin/grades', element: <AssessmentsPage /> },
               { path: '/admin/grades/results', element: <ResultsPage /> },
