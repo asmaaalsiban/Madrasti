@@ -6,6 +6,7 @@ import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
 import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
+import NotificationBell from '../features/Notifications/NotificationBell'
 import { useSchool } from '../tenant/useSchool'
 
 const NAV = [
@@ -51,6 +52,7 @@ export default function AdminLayout() {
             {t('admin.menu')}
           </button>
         </div>
+        <div className="px-4 pb-2"><NotificationBell /></div>
         {user?.name && <p className="px-4 pb-2 text-sm text-white/80">{t('roles.admin')}: <strong>{user.name}</strong></p>}
         <nav className={`${open ? 'block' : 'hidden'} space-y-1 px-2 pb-4 md:block`}>
           {NAV.map(([to, key, end]) => (

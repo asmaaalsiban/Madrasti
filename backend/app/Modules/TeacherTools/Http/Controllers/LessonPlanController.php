@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\TeachingAssignment;
+use App\Modules\Communication\Services\Notifier;
 use App\Modules\TeacherTools\Models\LessonPlan;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
@@ -64,7 +65,7 @@ class LessonPlanController extends Controller
         return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
     }
 
-    public function submit(Request $request, LessonPlan $plan): JsonResponse
+    public function submit(Request $request, LessonPlan $plan, Notifier $notifier): JsonResponse
     {
         abort_unless($plan->teacher_id === $request->user()->id, 403);
         if (! $plan->isEditable()) {
@@ -76,6 +77,14 @@ class LessonPlanController extends Controller
         $plan->update($selfApproved
             ? ['status' => 'approved', 'review_note' => null, 'reviewed_by' => $request->user()->id]
             : ['status' => 'submitted', 'review_note' => null]);
+        $plan->loadMissing('teacher');
+        if ($selfApproved) {
+            $this->shareApproved($plan, $notifier);
+        } else {
+            $heads = User::where('is_active', true)->whereKeyNot($plan->teacher_id)
+                ->whereHas('staffProfile', fn ($q) => $q->where('subject_id', $profile?->subject_id)->where('staff_type', StaffType::HeadOfDepartment->value))->pluck('id');
+            $notifier->toUsers($heads, 'plan_submitted', ['teacher' => $plan->teacher->name, 'title' => $plan->title], '/teacher/lesson-plans/review');
+        }
 
         return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
     }
@@ -115,7 +124,7 @@ class LessonPlanController extends Controller
     }
 
     /** Approves or rejects (with a note) a plan of a teacher of the head's own department. */
-    public function decide(Request $request, LessonPlan $plan): JsonResponse
+    public function decide(Request $request, LessonPlan $plan, Notifier $notifier): JsonResponse
     {
         $subjectId = $this->departmentOf($request->user());
         abort_unless($plan->teacher_id !== $request->user()->id && $plan->teacher->staffProfile?->subject_id === $subjectId, 403);
@@ -128,8 +137,21 @@ class LessonPlanController extends Controller
             throw ValidationException::withMessages(['decision' => [__('teacher_tools.plan_not_submitted')]]);
         }
         $plan->update(['status' => $data['decision'] === 'approve' ? 'approved' : 'rejected', 'reviewed_by' => $request->user()->id, 'review_note' => $data['note'] ?? null]);
+        $notifier->toUsers([$plan->teacher_id], 'plan_reviewed', ['title' => $plan->title, 'decision' => $data['decision'], 'note' => $data['note'] ?? null], '/teacher/lesson-plans');
+        if ($plan->status === 'approved') {
+            $this->shareApproved($plan, $notifier);
+        }
 
         return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
+    }
+
+    /** An approved plan the teacher chose to share reaches the section's students and parents. */
+    private function shareApproved(LessonPlan $plan, Notifier $notifier): void
+    {
+        if ($plan->shared_with_parents) {
+            $plan->loadMissing('subject');
+            $notifier->toSection($plan->classroom_id, 'lesson-plans', 'lesson_plan', ['subject_ar' => $plan->subject->name_ar, 'subject_en' => $plan->subject->name_en ?: $plan->subject->name_ar, 'title' => $plan->title]);
+        }
     }
 
     /** The subject of the signed-in head of department (anyone else is refused). */

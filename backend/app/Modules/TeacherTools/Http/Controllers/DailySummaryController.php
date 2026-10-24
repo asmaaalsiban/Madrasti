@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\TeachingAssignment;
+use App\Modules\Communication\Services\Notifier;
 use App\Modules\TeacherTools\Models\DailySummary;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
@@ -36,7 +37,7 @@ class DailySummaryController extends Controller
     }
 
     /** Writes (or replaces) the summary of a subject in a section for a day; it is published at once. */
-    public function save(Request $request): JsonResponse
+    public function save(Request $request, Notifier $notifier): JsonResponse
     {
         $data = $request->validate([
             'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
@@ -53,6 +54,11 @@ class DailySummaryController extends Controller
             ['classroom_id' => $data['classroom_id'], 'subject_id' => $data['subject_id'], 'date' => $data['date'] ?? now()->toDateString()],
             ['teacher_id' => $request->user()->id, 'summary' => $data['summary'], 'published_at' => now()],
         );
+
+        if ($summary->wasRecentlyCreated) {
+            $subject = $summary->subject ?? $summary->load('subject')->subject;
+            $notifier->toSection($summary->classroom_id, 'summaries', 'summary', ['subject_ar' => $subject->name_ar, 'subject_en' => $subject->name_en ?: $subject->name_ar]);
+        }
 
         return response()->json(['data' => $this->shape($summary->load(['classroom', 'subject', 'teacher']))]);
     }

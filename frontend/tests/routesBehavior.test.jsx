@@ -36,6 +36,7 @@ describe('daily summary routes', () => {
       [{ role: 'teacher', name: 'T' }, '/teacher/daily-summary'],
       [{ role: 'teacher', name: 'T' }, '/teacher/lesson-plans'],
       [{ role: 'teacher', name: 'T' }, '/teacher/announcements'],
+      [{ role: 'student', name: 'S', student_id: 1 }, '/student/grades'],
       [{ role: 'student', name: 'S', student_id: 1 }, '/student/announcements'],
       [{ role: 'parent', name: 'P', children: [] }, '/parent/announcements'],
       [{ role: 'admin', name: 'A' }, '/admin/announcements'],

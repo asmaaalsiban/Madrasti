@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Student;
+use App\Modules\Academic\Models\Subject;
+use App\Modules\Communication\Services\Notifier;
 use App\Modules\TeacherTools\Http\Requests\HomeworkRequest;
 use App\Modules\TeacherTools\Http\Resources\HomeworkResource;
 use App\Modules\TeacherTools\Models\HomeworkAssignment;
@@ -36,11 +38,12 @@ class HomeworkController extends Controller
         return HomeworkResource::collection($rows);
     }
 
-    public function store(HomeworkRequest $request): JsonResponse
+    public function store(HomeworkRequest $request, Notifier $notifier): JsonResponse
     {
         $user = $this->staff($request);
         $data = $request->validated();
         $homework = HomeworkAssignment::create($this->fields($data) + ['teacher_id' => $user->id, 'published_at' => now()]);
+        $notifier->toSection($homework->classroom_id, 'homework', 'homework', $this->subjectParams($homework->subject) + ['title' => $homework->title]);
 
         return (new HomeworkResource($homework->load(['classroom', 'subject', 'teacher', 'files'])))->response()->setStatusCode(201);
     }
@@ -92,6 +95,12 @@ class HomeworkController extends Controller
         $rows->each(fn ($h) => $h->setRelation('mySubmission', $mine->get($h->id)));
 
         return HomeworkResource::collection($rows);
+    }
+
+    /** @return array<string, string> */
+    private function subjectParams(Subject $subject): array
+    {
+        return ['subject_ar' => $subject->name_ar, 'subject_en' => $subject->name_en ?: $subject->name_ar];
     }
 
     private function staff(Request $request): User

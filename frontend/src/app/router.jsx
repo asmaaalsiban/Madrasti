@@ -68,6 +68,7 @@ const HOME_ROUTES = {
   student: [
     { index: true, element: <StudentHome /> },
     { path: 'timetable', element: <StudentTimetablePage /> },
+    { path: 'grades', element: <StudentHome /> },
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
