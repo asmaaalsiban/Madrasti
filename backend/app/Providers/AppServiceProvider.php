@@ -83,6 +83,14 @@ class AppServiceProvider extends ServiceProvider
             Role::Teacher => app(BehaviorAccess::class)->canEvaluate($user, $student),
         });
 
+        // A student's homework: admin, the student, their parents.
+        Gate::define('view-student-homework', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Student => $student->user_id === $user->id,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => false,
+        });
+
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.
         Gate::define('view-student-attendance', fn (User $user, Student $student): bool => match ($user->role) {
             Role::Admin => true,

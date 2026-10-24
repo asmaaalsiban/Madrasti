@@ -80,6 +80,7 @@
       "schoolDay": "School day",
       "timetable": "Timetable",
       "availability": "Teacher availability",
+      "homework": "Homework",
       "behavior": "Behaviour"
     },
     "actions": {
@@ -540,6 +541,23 @@
     "unavailable": "Unavailable",
     "saved": "Saved.",
     "clashes": "Saved. These lessons are already in periods the teacher cannot teach in (change them in the timetable):"
+  },
+  "homework": {
+    "title": "Homework",
+    "hint": "Send homework to your sections.",
+    "add": "Send homework",
+    "edit": "Edit homework",
+    "none": "No homework.",
+    "noneSent": "You have not sent any homework yet.",
+    "dueOn": "Due {{date}}",
+    "childTitle": "Homework: {{name}}",
+    "classAndSubject": "Section and subject",
+    "confirmDelete": "Delete the homework \"{{title}}\"?",
+    "fields": {
+      "title": "Title",
+      "description": "Details",
+      "dueOn": "Due date"
+    }
   },
   "behavior": {
     "title": "Behaviour",

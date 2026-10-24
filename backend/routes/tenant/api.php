@@ -17,8 +17,6 @@ use App\Modules\Academic\Http\Controllers\TermController;
 use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
-use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
-use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
@@ -31,6 +29,9 @@ use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
+use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -135,6 +136,15 @@ Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->g
     Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
 });
 Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
+// Homework: teachers and admins send it, the student and their parents read it.
+Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
+    Route::get('homework', [HomeworkController::class, 'index']);
+    Route::post('homework', [HomeworkController::class, 'store']);
+    Route::put('homework/{homework}', [HomeworkController::class, 'update']);
+    Route::delete('homework/{homework}', [HomeworkController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('homework/me', [HomeworkController::class, 'mine']);
+Route::middleware('school-user')->get('students/{student}/homework', [HomeworkController::class, 'forStudent']);
 
 // The published grades of one student: the student, their parents and admins (checked by a gate).
 Route::middleware('school-user')->get('students/{student}/grades', StudentGradesController::class);
