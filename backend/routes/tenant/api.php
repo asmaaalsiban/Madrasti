@@ -139,6 +139,7 @@ Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
     Route::get('lesson-plans', [LessonPlanController::class, 'index']);
     Route::put('lesson-plans', [LessonPlanController::class, 'save']);
     Route::post('lesson-plans/{plan}/submit', [LessonPlanController::class, 'submit']);
+    Route::post('lesson-plans/{plan}/withdraw', [LessonPlanController::class, 'withdraw']);
     Route::delete('lesson-plans/{plan}', [LessonPlanController::class, 'destroy']);
     // Only a head of department passes the controller's check: they review the plans of their department's teachers.
     Route::get('lesson-plans/review', [LessonPlanController::class, 'review']);
