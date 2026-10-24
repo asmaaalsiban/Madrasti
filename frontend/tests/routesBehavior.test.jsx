@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
-import '../src/i18n'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import i18n from '../src/i18n'
 import { routes } from '../src/app/router'
 
 vi.mock('../src/api/client', () => ({ api: { get: vi.fn(() => new Promise(() => {})) } }))
@@ -59,4 +59,19 @@ describe('the signed-in name in the header', () => {
     at('/student')
     expect(await screen.findByText('Salma Ahmad Nasser')).toBeInTheDocument()
   })
+})
+
+describe('who is signed in, shown in the header', () => {
+  beforeEach(() => i18n.changeLanguage('en'))
+
+  const header = async (user, text) => {
+    auth.user = user
+    at('/' + user.role)
+    expect(await screen.findByText((_, node) => node?.tagName === 'SPAN' && node.textContent === text)).toBeInTheDocument()
+  }
+
+  it('shows the student their section', () => header({ role: 'student', name: 'Ahmad Khaled', classroom: '5-A', student_id: 1 }, 'Student: Ahmad Khaled · 5-A'))
+  it('shows a teacher their subject', () => header({ role: 'teacher', name: 'Sara', staff_type: 'teacher', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Teacher: Sara · Math'))
+  it('shows a head of department which department', () => header({ role: 'teacher', name: 'Omar', staff_type: 'head_of_department', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Head of department Math: Omar'))
+  it('shows a parent only the name', () => header({ role: 'parent', name: 'Mohammad', children: [] }, 'Parent: Mohammad'))
 })

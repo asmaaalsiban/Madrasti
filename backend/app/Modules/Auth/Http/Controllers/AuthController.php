@@ -91,10 +91,10 @@ class AuthController extends Controller
         }
 
         if ($user->role === Role::Student) {
-            $user->load('student');
+            $user->load('student.enrollments.classroom');
         }
         if ($user->role === Role::Teacher) {
-            $user->load('staffProfile');
+            $user->load('staffProfile.subject');
         }
 
         return $user;
