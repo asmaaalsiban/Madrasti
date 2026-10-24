@@ -43,10 +43,26 @@ describe('LessonPlansPage (teacher)', () => {
     wrap(<LessonPlansPage />)
     expect(await screen.findByText('Rejected: Add objectives')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Submit for approval' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Edit' })).toHaveLength(4) // every plan can be edited
     fireEvent.click(screen.getAllByRole('button', { name: 'Submit for approval' })[0])
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/lesson-plans/1/submit'))
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[1])
     expect(screen.getByLabelText('Title')).toHaveValue('Plan 2')
+  })
+
+  it('warns before editing an approved plan, and withdraws a plan that is waiting', async () => {
+    serve([plan(3, 'submitted'), plan(4, 'approved')])
+    api.post.mockResolvedValue({ data: { data: {} } })
+    api.put.mockResolvedValue({ data: { data: {} } })
+    wrap(<LessonPlansPage />)
+    await screen.findByText('Plan 4')
+    fireEvent.click(screen.getByRole('button', { name: 'Withdraw' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/lesson-plans/3/withdraw'))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[1])
+    expect(screen.getByRole('note')).toHaveTextContent('hides it from students and parents until it is approved again')
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Plan 4 v2' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/lesson-plans', expect.objectContaining({ title: 'Plan 4 v2' })))
   })
 
   it('deletes a draft and shows the reason when refused', async () => {

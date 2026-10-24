@@ -26,7 +26,7 @@ class LessonPlan extends Model
         return ['week_starts_on' => 'date:Y-m-d', 'shared_with_parents' => 'boolean'];
     }
 
-    /** A plan can be changed or deleted by its teacher until it is submitted, and again if it was rejected. */
+    /** Only a draft or a rejected plan can be submitted. */
     public function isEditable(): bool
     {
         return in_array($this->status, ['draft', 'rejected'], true);

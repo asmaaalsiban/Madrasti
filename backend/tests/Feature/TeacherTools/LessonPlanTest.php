@@ -116,15 +116,37 @@ class LessonPlanTest extends AcademicTestCase
         $plan = $this->plan();
         Sanctum::actingAs($this->teacher);
         $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk()->assertJsonPath('data.status', 'submitted');
-        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable(); // cannot be changed while waiting
 
         Sanctum::actingAs($this->head);
         $this->postJson("/api/lesson-plans/{$plan->id}/review", ['decision' => 'approve', 'note' => 'Good'])->assertOk()->assertJsonPath('data.status', 'approved');
         $this->assertSame($this->head->id, $plan->fresh()->reviewed_by);
 
+        // Changing an approved plan takes it back to a draft: hidden from students until it is approved again.
         Sanctum::actingAs($this->teacher);
-        $this->putJson('/api/lesson-plans', $this->body())->assertUnprocessable();
-        $this->deleteJson("/api/lesson-plans/{$plan->id}")->assertUnprocessable();
+        $this->putJson('/api/lesson-plans', $this->body(['title' => 'Fractions v2']))->assertOk()->assertJsonPath('data.status', 'draft')->assertJsonPath('data.review_note', null);
+        $this->assertNull($plan->fresh()->reviewed_by);
+    }
+
+    public function test_a_submitted_plan_can_be_edited_or_withdrawn_before_the_head_decides(): void
+    {
+        $plan = $this->plan(['status' => 'submitted']);
+        Sanctum::actingAs($this->teacher);
+
+        $this->postJson("/api/lesson-plans/{$plan->id}/withdraw")->assertOk()->assertJsonPath('data.status', 'draft');
+        $this->postJson("/api/lesson-plans/{$plan->id}/withdraw")->assertUnprocessable(); // no longer waiting
+
+        $this->postJson("/api/lesson-plans/{$plan->id}/submit")->assertOk();
+        $this->putJson('/api/lesson-plans', $this->body(['title' => 'Better']))->assertOk()->assertJsonPath('data.status', 'draft');
+        Sanctum::actingAs($this->head);
+        $this->assertCount(0, $this->getJson('/api/lesson-plans/review')->json('data')); // nothing left to review until resubmitted
+    }
+
+    public function test_any_plan_can_be_deleted_by_its_teacher_even_an_approved_one(): void
+    {
+        $plan = $this->plan(['status' => 'approved']);
+        Sanctum::actingAs($this->teacher);
+        $this->deleteJson("/api/lesson-plans/{$plan->id}")->assertNoContent();
+        $this->assertSame(0, LessonPlan::count());
     }
 
     public function test_a_rejected_plan_comes_back_with_the_note_and_can_be_fixed_and_resubmitted(): void
@@ -207,6 +229,7 @@ class LessonPlanTest extends AcademicTestCase
         Sanctum::actingAs($this->teacher);
         $this->assertSame(['Old'], collect($this->getJson('/api/lesson-plans')->assertOk()->json('data'))->pluck('title')->all());
         $this->postJson("/api/lesson-plans/{$theirs->id}/submit")->assertForbidden();
+        $this->postJson("/api/lesson-plans/{$theirs->id}/withdraw")->assertForbidden();
         $this->deleteJson("/api/lesson-plans/{$theirs->id}")->assertForbidden();
         $this->assertNotNull($mine->fresh());
     }

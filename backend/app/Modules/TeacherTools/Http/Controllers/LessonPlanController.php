@@ -36,7 +36,7 @@ class LessonPlanController extends Controller
         return response()->json(['data' => $rows->map(fn (LessonPlan $p) => $this->shape($p))]);
     }
 
-    /** Writes (or rewrites) the draft of the week that contains `date`; an approved or waiting plan cannot be changed. */
+    /** Writes (or rewrites) the plan of the week that contains `date`. Changing a sent or approved plan returns it to a draft. */
     public function save(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -54,14 +54,11 @@ class LessonPlanController extends Controller
         }
 
         $key = ['teacher_id' => $teacher->id, 'classroom_id' => $data['classroom_id'], 'subject_id' => $data['subject_id'], 'week_starts_on' => $this->weekStart($data['date'] ?? now()->toDateString())];
-        $existing = LessonPlan::where($key)->first();
-        if ($existing !== null && ! $existing->isEditable()) {
-            throw ValidationException::withMessages(['title' => [__('teacher_tools.plan_locked')]]);
-        }
-
         $plan = LessonPlan::updateOrCreate($key, [
             'title' => $data['title'], 'objectives' => $data['objectives'] ?? null, 'content' => $data['content'] ?? null,
-            'shared_with_parents' => $data['shared_with_parents'] ?? true, 'status' => 'draft',
+            'shared_with_parents' => $data['shared_with_parents'] ?? true,
+            // Changing a plan that was sent or approved takes it back to a draft: it must be submitted (and approved) again.
+            'status' => 'draft', 'review_note' => null, 'reviewed_by' => null,
         ]);
 
         return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
@@ -83,12 +80,22 @@ class LessonPlanController extends Controller
         return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
     }
 
+    /** Takes a submitted plan back before the head has decided, to change it. */
+    public function withdraw(Request $request, LessonPlan $plan): JsonResponse
+    {
+        abort_unless($plan->teacher_id === $request->user()->id, 403);
+        if ($plan->status !== 'submitted') {
+            throw ValidationException::withMessages(['status' => [__('teacher_tools.plan_not_waiting')]]);
+        }
+        $plan->update(['status' => 'draft']);
+
+        return response()->json(['data' => $this->shape($plan->load(['classroom', 'subject', 'teacher']))]);
+    }
+
+    /** A plan can be deleted by its teacher whatever its status. */
     public function destroy(Request $request, LessonPlan $plan): Response
     {
         abort_unless($plan->teacher_id === $request->user()->id, 403);
-        if (! $plan->isEditable()) {
-            throw ValidationException::withMessages(['status' => [__('teacher_tools.plan_locked')]]);
-        }
         $plan->delete();
 
         return response()->noContent();

@@ -680,6 +680,11 @@
     "reject": "Reject",
     "rejectTitle": "Reject \"{{title}}\"",
     "rejectNote": "Why (the teacher will see it)",
-    "reviewHint": "The plans your department's teachers sent for approval."
+    "reviewHint": "The plans your department's teachers sent for approval.",
+    "withdraw": "Withdraw",
+    "editWarning": {
+      "submitted": "This plan is waiting for review. Saving your changes takes it back to a draft: submit it again afterwards.",
+      "approved": "This plan is approved. Saving your changes takes it back to a draft and hides it from students and parents until it is approved again."
+    }
   }
 }
