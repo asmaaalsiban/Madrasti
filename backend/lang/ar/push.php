@@ -11,5 +11,7 @@ return [
         'reject' => 'رُفضت خطة درسك: :title — :note',
     ],
     'homework_answer' => 'أرسل :student إجابة الواجب: :title',
+    'installment' => 'قسط بقيمة :amount يستحق :due',
+    'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'unknown' => 'إشعار جديد',
 ];

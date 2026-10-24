@@ -25,6 +25,7 @@ const NAV = [
   ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],
   ['/admin/grades', 'grades'],
+  ['/admin/finance', 'finance'],
   ['/admin/announcements', 'announcements'],
   ['/admin/behavior', 'behavior'],
   ['/admin/attendance', 'attendance'],

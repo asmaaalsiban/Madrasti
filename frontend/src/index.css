@@ -11,3 +11,10 @@ body {
   background: #f8fafc;
   color: #0f172a;
 }
+
+/* Printing a receipt: only the receipt is shown. */
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; inset: 0; border: 0; }
+}

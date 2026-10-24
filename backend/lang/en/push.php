@@ -11,5 +11,7 @@ return [
         'reject' => 'Your lesson plan was rejected: :title — :note',
     ],
     'homework_answer' => ':student sent an answer to: :title',
+    'installment' => 'Installment of :amount due :due',
+    'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'unknown' => 'New notification',
 ];

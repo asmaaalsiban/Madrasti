@@ -1,0 +1,190 @@
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import i18n from '../src/i18n'
+import { api } from '../src/api/client'
+import FinanceDashboardPage from '../src/features/Finance/pages/FinanceDashboardPage'
+import FeeStructuresPage from '../src/features/Finance/pages/FeeStructuresPage'
+import AccountsPage from '../src/features/Finance/pages/AccountsPage'
+import StudentAccountPage from '../src/features/Finance/pages/StudentAccountPage'
+import ChildFeesPage from '../src/features/Finance/pages/ChildFeesPage'
+
+vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
+vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: { children: [{ id: 7, name_en: 'Lina', name_ar: 'لينا' }] } }) }))
+vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'Bright School' } }) }))
+
+const wrap = (ui, path = '/', route = '/') => render(
+  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter initialEntries={[path]}><Routes><Route path={route} element={ui} /></Routes></MemoryRouter></QueryClientProvider>,
+)
+
+const statement = {
+  currency: 'JOD', student: { id: 7, name_ar: 'ليلى', name_en: 'Layla', student_number: 'S-1' },
+  totals: { net: '1000.00', paid: '250.00', remaining: '750.00', overdue: '250.00' },
+  fees: [{
+    id: 3, description: 'Tuition', total: '1200.00', discount: '200.00', net: '1000.00', paid: '250.00', remaining: '750.00', overdue: '250.00',
+    installments: [
+      { id: 11, number: 1, due_date: '2026-09-01', amount: '500.00', paid: '250.00', remaining: '250.00', status: 'overdue' },
+      { id: 12, number: 2, due_date: '2026-12-01', amount: '500.00', paid: '0.00', remaining: '500.00', status: 'pending' },
+    ],
+    payments: [{ id: 21, receipt: 'R-000021', amount: '250.00', method: 'cash', reference: null, note: null, paid_on: '2026-09-05', received_by: 'Accountant' }],
+  }],
+}
+
+beforeEach(async () => {
+  vi.resetAllMocks()
+  await i18n.changeLanguage('en')
+  window.print = vi.fn()
+})
+
+describe('FinanceDashboardPage', () => {
+  const serve = (canManage) => api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/finance/summary'
+    ? { expected: '2000.00', collected: '600.00', remaining: '1400.00', overdue: '500.00', collected_this_month: '600.00', students_overdue: 1, currency: 'JOD' }
+    : { currency: 'JOD', can_manage: canManage } } }))
+
+  it('shows the totals and lets the accountant change the currency', async () => {
+    serve(true)
+    api.put.mockResolvedValue({ data: { data: { currency: 'ILS' } } })
+    wrap(<FinanceDashboardPage base="/teacher" />)
+    expect(await screen.findByText('2,000.00 JOD')).toBeInTheDocument()
+    expect(screen.getByText('Students with overdue installments').nextSibling).toHaveTextContent('1')
+    expect(screen.getByRole('link', { name: "Students' accounts" })).toHaveAttribute('href', '/teacher/finance/accounts')
+    fireEvent.change(screen.getByLabelText(/Currency/), { target: { value: 'ILS' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/finance/settings', { currency: 'ILS' }))
+  })
+
+  it('hides the currency form from the admin', async () => {
+    serve(false)
+    wrap(<FinanceDashboardPage base="/admin" />)
+    await screen.findByText('2,000.00 JOD')
+    expect(screen.queryByLabelText(/Currency/)).not.toBeInTheDocument()
+  })
+})
+
+describe('FeeStructuresPage', () => {
+  const serve = (canManage) => api.get.mockImplementation((url) => {
+    if (url === '/finance/fee-structures') return Promise.resolve({ data: { currency: 'JOD', data: [{ id: 1, name: 'Tuition', amount: '1200.00', grade_level: { id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }, students: 3 }] } })
+    if (url === '/finance/options') return Promise.resolve({ data: { data: { grades: [{ id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }], classrooms: [] } } })
+    return Promise.resolve({ data: { data: { currency: 'JOD', can_manage: canManage } } })
+  })
+
+  it('adds a yearly fee', async () => {
+    serve(true)
+    api.post.mockResolvedValue({ data: { data: { id: 2 } } })
+    wrap(<FeeStructuresPage />)
+    expect(await screen.findByText('Tuition · Grade 5')).toBeInTheDocument()
+    expect(screen.getByText(/given to 3 students/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'New yearly fee' }))
+    fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'Bus' } })
+    fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '300' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/fee-structures', { grade_level_id: 5, name: 'Bus', amount: '300' }))
+  })
+
+  it('gives a fee to the grade, split into installments', async () => {
+    serve(true)
+    api.post.mockResolvedValue({ data: { data: { students: 12 } } })
+    wrap(<FeeStructuresPage />)
+    fireEvent.click(await screen.findByRole('button', { name: "Give to the grade's students" }))
+    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-01' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Give' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/fee-structures/1/apply', { installments: 4, first_due: '2026-09-01', every_months: 1, discount: 0 }))
+    expect(await screen.findByRole('status')).toHaveTextContent('given to 12 students')
+  })
+
+  it('is read-only for the admin', async () => {
+    serve(false)
+    wrap(<FeeStructuresPage />)
+    await screen.findByText('Tuition · Grade 5')
+    expect(screen.queryByRole('button', { name: 'New yearly fee' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+})
+
+describe('AccountsPage', () => {
+  it('lists balances with filters and links to the statement', async () => {
+    api.get.mockImplementation((url) => Promise.resolve(url === '/finance/options'
+      ? { data: { data: { grades: [{ id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }], classrooms: [{ id: 3, name: '5-A', grade_level_id: 5 }] } } }
+      : { data: { currency: 'JOD', last_page: 1, data: [{ id: 7, name_ar: 'ليلى', name_en: 'Layla', student_number: 'S-1', classroom: '5-A', net: '1000.00', paid: '250.00', remaining: '750.00', overdue: '250.00' }] } }))
+    wrap(<AccountsPage base="/teacher" />)
+    const link = await screen.findByRole('link', { name: 'Layla' })
+    expect(link).toHaveAttribute('href', '/teacher/finance/students/7')
+    expect(screen.getByText('750.00 JOD')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'overdue' } })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/finance/accounts', { params: { status: 'overdue', page: 1 } }))
+  })
+})
+
+describe('StudentAccountPage', () => {
+  const serve = (canManage) => api.get.mockImplementation((url) => Promise.resolve({ data: { data: url.startsWith('/finance/students/') ? statement : { currency: 'JOD', can_manage: canManage } } }))
+  const open = () => wrap(<StudentAccountPage />, '/s/7', '/s/:id')
+
+  it('shows the statement and records a payment, then offers the receipt', async () => {
+    serve(true)
+    api.post.mockResolvedValue({ data: { data: { id: 22, receipt: 'R-000022', amount: '250.00', method: 'cash', reference: null, paid_on: '2026-10-24', received_by: 'Accountant' } } })
+    open()
+    expect(await screen.findByText('Layla')).toBeInTheDocument()
+    expect(screen.getAllByText('1,000.00 JOD').length).toBeGreaterThan(0)
+    expect(screen.getByText('Overdue', { selector: 'span' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Record a payment' }))
+    fireEvent.change(await screen.findByLabelText('Amount'), { target: { value: '250' } })
+    fireEvent.change(screen.getByLabelText('Reference (cheque / transfer number)'), { target: { value: 'CH-9' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save the payment' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/payments', expect.objectContaining({ student_fee_id: 3, amount: '250', method: 'cash', reference: 'CH-9', installment_id: null })))
+    const receipt = await screen.findByRole('dialog', { name: 'Receipt' })
+    expect(within(receipt).getByText('Bright School')).toBeInTheDocument()
+    expect(within(receipt).getByText('R-000022')).toBeInTheDocument()
+    fireEvent.click(within(receipt).getByRole('button', { name: 'Print' }))
+    expect(window.print).toHaveBeenCalled()
+  })
+
+  it('shows the reason when a payment is refused', async () => {
+    serve(true)
+    api.post.mockRejectedValue({ response: { data: { errors: { amount: ['The payment is more than what is still owed (750.00).'] } } } })
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Record a payment' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Save the payment' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('more than what is still owed')
+  })
+
+  it('cancels a payment after confirmation', async () => {
+    serve(true)
+    api.delete.mockResolvedValue({})
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel payment' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Cancel payment' }).at(-1))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/finance/payments/21'))
+  })
+
+  it('adds a fee for the student', async () => {
+    serve(true)
+    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add a fee' }))
+    fireEvent.change(await screen.findByLabelText('Description'), { target: { value: 'Bus' } })
+    fireEvent.change(screen.getByLabelText('Total'), { target: { value: '300' } })
+    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-15' } })
+    fireEvent.change(screen.getByLabelText('Number of installments'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/students/7/fees', { description: 'Bus', total_amount: '300', discount: '0', installments_count: 5, first_due: '2026-09-15', every_months: 1 }))
+  })
+
+  it('is read-only for the admin', async () => {
+    serve(false)
+    open()
+    await screen.findByText('Layla')
+    for (const name of ['Record a payment', 'Add a fee', 'Cancel payment', 'Receipt']) expect(screen.queryByRole('button', { name })).not.toBeInTheDocument()
+  })
+})
+
+describe('ChildFeesPage', () => {
+  it("shows a parent the child's statement without any buttons", async () => {
+    api.get.mockResolvedValue({ data: { data: statement } })
+    wrap(<ChildFeesPage />, '/c/7', '/c/:id')
+    expect(await screen.findByText('Tuition')).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/students/7/fees')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Lina')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+})

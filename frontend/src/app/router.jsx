@@ -49,6 +49,11 @@ import LessonPlansPage from '../features/LessonPlans/pages/LessonPlansPage'
 import ReviewPlansPage from '../features/LessonPlans/pages/ReviewPlansPage'
 import { ChildPlansPage, StudentPlansPage } from '../features/LessonPlans/pages/PlansPages'
 import AnnouncementsPage from '../features/Announcements/pages/AnnouncementsPage'
+import FinanceDashboardPage from '../features/Finance/pages/FinanceDashboardPage'
+import FeeStructuresPage from '../features/Finance/pages/FeeStructuresPage'
+import AccountsPage from '../features/Finance/pages/AccountsPage'
+import StudentAccountPage from '../features/Finance/pages/StudentAccountPage'
+import ChildFeesPage from '../features/Finance/pages/ChildFeesPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { RequireAuth, RequireRole } from './guards'
 
@@ -62,6 +67,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
+    { path: 'children/:id/fees', element: <ChildFeesPage /> },
     { path: 'children/:id/summaries', element: <ChildSummariesPage /> },
     { path: 'children/:id/lesson-plans', element: <ChildPlansPage /> },
   ],
@@ -86,6 +92,10 @@ const HOME_ROUTES = {
     { path: 'daily-summary', element: <DailySummaryPage /> },
     { path: 'lesson-plans', element: <LessonPlansPage /> },
     { path: 'lesson-plans/review', element: <ReviewPlansPage /> },
+    { path: 'finance', element: <FinanceDashboardPage base="/teacher" /> },
+    { path: 'finance/structures', element: <FeeStructuresPage /> },
+    { path: 'finance/accounts', element: <AccountsPage base="/teacher" /> },
+    { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
     { path: 'grades/:id', element: <ScoreSheetPage /> },
@@ -130,6 +140,10 @@ export const routes = [
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
               { path: '/admin/announcements', element: <AnnouncementsPage /> },
+              { path: '/admin/finance', element: <FinanceDashboardPage base="/admin" /> },
+              { path: '/admin/finance/structures', element: <FeeStructuresPage /> },
+              { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
+              { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
