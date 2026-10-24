@@ -18,6 +18,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
+use App\Modules\Communication\Http\Controllers\ChatController;
 use App\Modules\Communication\Http\Controllers\NotificationController;
 use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
@@ -138,6 +139,20 @@ Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
 });
 Route::middleware('school-user')->get('daily-summaries/me', [DailySummaryController::class, 'mine']);
 Route::middleware('school-user')->get('students/{student}/daily-summaries', [DailySummaryController::class, 'forStudent']);
+
+// Chat: direct conversations and section groups, with photos and read receipts.
+Route::middleware('school-user')->prefix('chat')->group(function (): void {
+    Route::get('contacts', [ChatController::class, 'contacts']);
+    Route::get('unread-count', [ChatController::class, 'unreadCount']);
+    Route::get('conversations', [ChatController::class, 'conversations']);
+    Route::post('conversations', [ChatController::class, 'direct']);
+    Route::post('groups', [ChatController::class, 'group']);
+    Route::get('conversations/{id}', [ChatController::class, 'show'])->whereNumber('id');
+    Route::get('conversations/{id}/messages', [ChatController::class, 'messages'])->whereNumber('id');
+    Route::post('conversations/{id}/messages', [ChatController::class, 'send'])->whereNumber('id');
+    Route::delete('messages/{id}', [ChatController::class, 'destroy'])->whereNumber('id');
+    Route::get('messages/{id}/image', [ChatController::class, 'image'])->whereNumber('id');
+});
 
 // The bell: notifications of the signed-in user.
 Route::middleware('school-user')->prefix('notifications')->group(function (): void {

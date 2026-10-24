@@ -11,5 +11,7 @@ return [
         'reject' => 'رُفضت خطة درسك: :title — :note',
     ],
     'homework_answer' => 'أرسل :student إجابة الواجب: :title',
+    'chat_message' => 'أرسل لك :sender رسالة',
+    'chat_group' => 'كتب :sender في :group',
     'unknown' => 'إشعار جديد',
 ];

@@ -11,5 +11,7 @@ return [
         'reject' => 'Your lesson plan was rejected: :title — :note',
     ],
     'homework_answer' => ':student sent an answer to: :title',
+    'chat_message' => ':sender sent you a message',
+    'chat_group' => ':sender wrote in :group',
     'unknown' => 'New notification',
 ];
