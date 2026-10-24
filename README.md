@@ -162,3 +162,7 @@ After updating run `php artisan tenants:migrate` (adds `absence_notifications`).
 
 Phase 1 (Foundation): folder structure and migrations are in place.
 Laravel and Vite apps are not installed yet (`composer create-project` / `npm create vite`).
+
+## Homework
+
+Teacher menu (and admin menu) **Homework**: send homework to a section for a subject the teacher teaches there (title, details, due date); edit or delete it. A teacher sees and changes only their own homework; an admin all. The section must have the subject assigned (`POST /api/homework`, `PUT/DELETE /api/homework/{id}`, `GET /api/homework`). The student sees the homework of their section (`GET /api/homework/me`, **Homework** link on the student home) and each parent sees it per child (`GET /api/students/{id}/homework`, **Homework** link on the child's card); a gate (`view-student-homework`) limits it to the student, their parents and admins. Uploading answers and attachments come later.

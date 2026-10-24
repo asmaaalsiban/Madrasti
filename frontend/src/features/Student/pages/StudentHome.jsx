@@ -11,7 +11,10 @@ export default function StudentHome() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('studentGrades.myGrades')}</h1>
-        <Link to="/student/timetable" className="rounded border px-3 py-1.5 text-sm text-brand">{t('timetable.myTimetable')}</Link>
+        <div className="flex gap-2">
+          <Link to="/student/homework" className="rounded border px-3 py-1.5 text-sm text-brand">{t('homework.title')}</Link>
+          <Link to="/student/timetable" className="rounded border px-3 py-1.5 text-sm text-brand">{t('timetable.myTimetable')}</Link>
+        </div>
       </div>
       {user?.student_id ? <StudentGrades studentId={user.student_id} /> : <p className="text-slate-600">{t('studentGrades.noRecord')}</p>}
     </section>
