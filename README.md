@@ -163,6 +163,15 @@ After updating run `php artisan tenants:migrate` (adds `absence_notifications`).
 Phase 1 (Foundation): folder structure and migrations are in place.
 Laravel and Vite apps are not installed yet (`composer create-project` / `npm create vite`).
 
+## Behaviour evaluation
+
+Teacher menu (and admin menu) **Behaviour**: pick a section and a date, then **Evaluate** each student for that week. A teacher evaluates the students of the sections they teach or are homeroom of; an admin anyone. An evaluation is a score from 1 to 5 for each **criterion** (or empty = not applicable), a note, and whether the parent sees the note; it is saved with the date (default today, never in the future) and belongs to the week (Sunday to Saturday) of that date. Evaluating the same student again in the same week replaces the teacher's evaluation (`PUT /api/behavior/evaluations`, `GET /api/behavior/week`).
+
+**Everything is built on the weeks** (`BehaviorSummary`): a **week** is the mean of all teachers' evaluations of that week per criterion; a **month** is the mean of its weeks (the row shows how many weeks it has); a **term** is the mean of its months (terms come from the school's terms). Each table also has an overall mean. Results: `GET /api/students/{id}/behavior`, shown to the student (**Behaviour** on their home), to each parent per child, and to the teachers who evaluate the student and admins (gate `view-student-behavior`); parents and students see only remarks and notes marked visible.
+
+**Criteria** (admin, **Behaviour criteria**): a new school starts with 7 (discipline, respect, participation, cooperation, responsibility, cleanliness and care of property, honesty). The admin adds their own (Arabic and English name), hides or shows one, or removes it; a criterion already used is only hidden so old results stay (`/api/behavior/criteria`). The migration adds the tables and the default criteria, so run `php artisan tenants:migrate`.
+
+**Quick notes** for single events (positive or negative, e.g. "helped a friend", "hit a classmate") are added from the same dialog with the date and an option to hide them from the parent; the author or an admin can delete them (`POST /api/behavior/notes`, `DELETE /api/behavior/notes/{id}`).
 ## Homework
 
 Teacher menu (and admin menu) **Homework**: send homework to a section for a subject the teacher teaches there (title, details, due date); edit or delete it. A teacher sees and changes only their own homework; an admin all. The section must have the subject assigned (`POST /api/homework`, `PUT/DELETE /api/homework/{id}`, `GET /api/homework`). The student sees the homework of their section (`GET /api/homework/me`, **Homework** link on the student home) and each parent sees it per child (`GET /api/students/{id}/homework`, **Homework** link on the child's card); a gate (`view-student-homework`) limits it to the student, their parents and admins. Uploading answers and attachments come later.

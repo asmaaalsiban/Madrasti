@@ -23,6 +23,7 @@ const NAV = [
   ['/admin/staff', 'staff'],
   ['/admin/students', 'students'],
   ['/admin/grades', 'grades'],
+  ['/admin/behavior', 'behavior'],
   ['/admin/homework', 'homework'],
   ['/admin/attendance', 'attendance'],
   ['/admin/attendance-report', 'attendanceReport'],
