@@ -9,7 +9,9 @@ use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\FeeStructure;
+use App\Modules\Finance\Models\Payment;
 use App\Modules\Finance\Models\StudentFee;
+use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
 use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Academic\AcademicTestCase;
@@ -216,5 +218,52 @@ class AutoFeesTest extends AcademicTestCase
         $rows = collect($this->getJson('/api/students')->json('data'));
         $this->assertSame('150.00', $rows->firstWhere('id', $with)['transport_fee']);
         $this->assertNull($rows->firstWhere('id', $without)['transport_fee']);
+    }
+
+    public function test_a_first_payment_at_registration_is_taken_on_the_yearly_fee(): void
+    {
+        $response = $this->enrol($this->first, ['fee_discount' => 100, 'first_payment' => 150, 'first_payment_method' => 'bank_transfer'])->assertCreated();
+
+        $response->assertJsonCount(1, 'data.created_payments')->assertJsonPath('data.created_payments.0.amount', '150.00')->assertJsonPath('data.created_payments.0.receipt', 'R-000001');
+        $fee = StudentFee::first();
+        $this->assertSame(['150.00', '0.00', '0.00', '0.00'], $fee->installments->pluck('paid_amount')->all()); // 600 net: 4 x 150, the first is paid
+        $this->assertSame('bank_transfer', Payment::first()->method);
+        $this->assertNotNull(Payment::first()->received_by);
+    }
+
+    public function test_a_first_payment_larger_than_the_yearly_fee_spills_into_the_transport_fee(): void
+    {
+        $this->enrol($this->first, ['transport_fee' => 200, 'first_payment' => 800])->assertCreated()->assertJsonCount(2, 'data.created_payments'); // 700 + 100
+
+        $this->assertSame(['700.00', '100.00'], Payment::orderBy('id')->pluck('amount')->all());
+        $this->assertSame('100.00', StudentFee::where('kind', 'transport')->first()->installments->sum('paid_amount').'.00' === '100.00' ? '100.00' : '');
+    }
+
+    public function test_a_first_payment_more_than_everything_owed_is_refused_and_nothing_is_created(): void
+    {
+        $this->enrol($this->first, ['first_payment' => 701])->assertUnprocessable()->assertJsonValidationErrors('first_payment');
+        $third = Classroom::where('name', '3-A')->first(); // no fees there: nothing to pay
+        $this->enrol($third, ['first_payment' => 50])->assertUnprocessable()->assertJsonValidationErrors('first_payment');
+
+        $this->assertSame(0, Student::count());
+        $this->assertSame(0, Payment::count());
+    }
+
+    public function test_the_accountant_changes_the_transport_fee_from_the_students_account(): void
+    {
+        $id = $this->enrol($this->first)->json('data.id');
+        $accountant = User::factory()->staff(StaffType::Accountant)->create();
+        Sanctum::actingAs($accountant);
+
+        $this->putJson("/api/finance/students/$id/transport", ['amount' => 240])->assertOk();
+        $this->assertSame('240.00', $this->bus($id)->total_amount);
+        $this->putJson("/api/finance/students/$id/transport", ['amount' => 0])->assertOk();
+        $this->assertNull($this->bus($id));
+
+        $stranger = Student::create(['student_number' => 'x', 'name_ar' => 'x', 'name_en' => 'x', 'gender' => 'male']);
+        $this->putJson("/api/finance/students/{$stranger->id}/transport", ['amount' => 10])->assertUnprocessable(); // not in a section
+
+        Sanctum::actingAs(User::factory()->role(Role::Admin)->create());
+        $this->putJson("/api/finance/students/$id/transport", ['amount' => 10])->assertForbidden();
     }
 }

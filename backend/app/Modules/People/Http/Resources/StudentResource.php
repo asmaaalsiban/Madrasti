@@ -37,6 +37,8 @@ class StudentResource extends JsonResource
             'account' => $this->when($this->resource->getAttribute('generated_account') !== null, fn () => $this->resource->getAttribute('generated_account')),
             // Only right after creation: the fees the student got (the grade's yearly fee, transport).
             'created_fees' => $this->when($this->resource->getAttribute('created_fees') !== null, fn () => $this->resource->getAttribute('created_fees')),
+            // Only right after creation: the first payment taken at registration (one receipt per fee it covered).
+            'created_payments' => $this->when($this->resource->getAttribute('created_payments') !== null, fn () => $this->resource->getAttribute('created_payments')),
             // The current transport fee of the student (the form shows it so it can be changed when they move to another area).
             'transport_fee' => $this->whenLoaded('fees', fn () => ($fee = $this->fees->where('kind', 'transport')->sortByDesc('academic_year_id')->first()) ? Money::amount(Money::cents($fee->total_amount)) : null),
             // For the admin only: what the student owes, paid and remaining this year (filled by the list).

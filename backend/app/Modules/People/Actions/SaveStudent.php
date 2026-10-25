@@ -54,7 +54,10 @@ class SaveStudent
             // The yearly fee of the grade is applied by itself; the form may add a transport fee and a discount.
             $fees = $classroom ? $this->billing->onboard($student, $classroom, (float) ($data['fee_discount'] ?? 0), (float) ($data['transport_fee'] ?? 0)) : [];
 
+            $payments = (float) ($data['first_payment'] ?? 0) > 0 ? $this->billing->payFirst($fees, (float) $data['first_payment'], $data['first_payment_method'] ?? 'cash', auth()->user()) : [];
+
             $student = $this->loaded($student);
+            $student->setAttribute('created_payments', array_map(fn ($p) => ['receipt' => $p->receiptNumber(), 'amount' => $p->amount], $payments));
             $student->setAttribute('created_fees', array_map(fn ($f) => ['description' => $f->description, 'net' => Money::amount(Money::cents($f->total_amount) - Money::cents($f->discount)), 'installments' => $f->installments->count()], $fees));
             $student->setAttribute('generated_account', ['email' => $email, 'password' => config('accounts.default_password')]);
 
