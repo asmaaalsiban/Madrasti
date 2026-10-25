@@ -20,8 +20,9 @@ const fields = [
     options: [{ value: 'male', label: 'people.male' }, { value: 'female', label: 'people.female' }],
   },
   { name: 'classroom_id', label: 'people.fields.classroom', type: 'select', optionsFrom: 'classrooms', optionLabel: 'name', getValue: (row) => row.classroom?.id },
-  // Only when adding a student placed in a section: the yearly fee of the grade is applied by itself; these two are per student.
-  { name: 'transport_fee', label: 'people.fields.transportFee', hint: 'people.transportHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
+  // The yearly fee of the grade is applied by itself. The transport fee differs per student and can change when they move to another area
+  // (empty = no transport); the discount is only given when the student is added.
+  { name: 'transport_fee', label: 'people.fields.transportFee', hint: 'people.transportHint', type: 'number', getValue: (row) => row.transport_fee ?? '', visibleWhen: (f) => Boolean(f.classroom_id) },
   { name: 'fee_discount', label: 'people.fields.feeDiscount', hint: 'people.discountHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
   { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
   { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', getValue: (row) => row.guardians?.[0]?.email },

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Models;
 
 use App\Models\User;
+use App\Modules\Finance\Models\StudentFee;
 use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -66,5 +67,10 @@ class Student extends Model
         return $this->belongsToMany(User::class, 'guardian_student', 'student_id', 'guardian_id')
             ->withPivot(['relation', 'is_primary'])
             ->withTimestamps();
+    }
+
+    public function fees(): HasMany
+    {
+        return $this->hasMany(StudentFee::class);
     }
 }

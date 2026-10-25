@@ -138,4 +138,83 @@ class AutoFeesTest extends AcademicTestCase
 
         $this->assertSame(['300.00', '300.00', '300.00'], StudentFee::where('student_id', $student->id)->first()->installments->pluck('amount')->all());
     }
+
+    private function edit(int $id, ?float $transport, ?Classroom $room = null)
+    {
+        return $this->putJson("/api/students/$id", ['student_number' => 'S-edit', 'name_ar' => 'طالب', 'classroom_id' => ($room ?? $this->first)->id, 'transport_fee' => $transport]);
+    }
+
+    private function bus(int $studentId): ?StudentFee
+    {
+        return StudentFee::where('student_id', $studentId)->where('kind', 'transport')->first();
+    }
+
+    public function test_the_transport_fee_can_be_added_changed_and_removed_when_editing_a_student(): void
+    {
+        $id = $this->enrol($this->first)->json('data.id');
+        $this->assertNull($this->bus($id));
+
+        $this->edit($id, 200)->assertOk()->assertJsonPath('data.transport_fee', '200.00'); // the student starts using the bus
+        $this->assertSame(['50.00', '50.00', '50.00', '50.00'], $this->bus($id)->installments->pluck('amount')->all());
+
+        $this->edit($id, 320)->assertOk()->assertJsonPath('data.transport_fee', '320.00'); // moved to a farther area
+        $fee = $this->bus($id)->fresh();
+        $this->assertSame('320.00', $fee->total_amount);
+        $this->assertSame(['80.00', '80.00', '80.00', '80.00'], $fee->installments->pluck('amount')->all());
+        $this->assertSame(1, StudentFee::where('kind', 'transport')->count());
+
+        $this->edit($id, null)->assertOk()->assertJsonPath('data.transport_fee', null); // stops using the bus
+        $this->assertNull($this->bus($id));
+        $this->assertSame(1, StudentFee::where('student_id', $id)->count()); // the yearly fee stays
+    }
+
+    public function test_changing_the_transport_fee_keeps_what_was_paid_and_re_splits_the_rest(): void
+    {
+        $id = $this->enrol($this->first, ['transport_fee' => 200])->json('data.id');
+        $fee = $this->bus($id);
+        $fee->installments->first()->update(['paid_amount' => 50]); // the first 50 is paid
+
+        $this->edit($id, 350)->assertOk(); // 300 left over the three open installments
+        $this->assertSame(['50.00', '100.00', '100.00', '100.00'], $this->bus($id)->fresh()->installments->pluck('amount')->all());
+        $this->assertSame(['50.00', '0.00', '0.00', '0.00'], $this->bus($id)->fresh()->installments->pluck('paid_amount')->all());
+
+        $this->edit($id, 100)->assertOk(); // 50 left over the three open ones: 16.66 / 16.66 / 16.68
+        $this->assertSame(100.0, round((float) array_sum($this->bus($id)->fresh()->installments->pluck('amount')->map(fn ($a) => (float) $a)->all()), 2));
+
+        $this->edit($id, 40)->assertUnprocessable()->assertJsonValidationErrors('transport_fee'); // less than the 50 already paid
+        $this->assertSame('100.00', $this->bus($id)->total_amount);
+    }
+
+    public function test_stopping_the_bus_after_payments_keeps_only_what_was_paid(): void
+    {
+        $id = $this->enrol($this->first, ['transport_fee' => 200])->json('data.id');
+        $this->bus($id)->installments->first()->update(['paid_amount' => 50]);
+
+        $this->edit($id, null)->assertUnprocessable(); // null means 0, below the 50 paid: the accountant must handle the refund
+        $this->edit($id, 50)->assertOk();
+
+        $fee = $this->bus($id)->fresh();
+        $this->assertSame('50.00', $fee->total_amount);
+        $this->assertSame(['50.00'], $fee->installments->pluck('amount')->all()); // the unpaid installments are gone
+    }
+
+    public function test_the_transport_fee_is_found_whatever_the_language_of_the_request(): void
+    {
+        $id = $this->enrol($this->first, ['transport_fee' => 200])->json('data.id');
+
+        $this->withHeader('Accept-Language', 'ar')->edit($id, 240)->assertOk();
+
+        $this->assertSame(1, StudentFee::where('student_id', $id)->where('kind', 'transport')->count());
+        $this->assertSame('240.00', $this->bus($id)->total_amount);
+    }
+
+    public function test_the_student_list_returns_the_current_transport_fee_for_the_form(): void
+    {
+        $with = $this->enrol($this->first, ['transport_fee' => 150])->json('data.id');
+        $without = $this->enrol($this->first)->json('data.id');
+
+        $rows = collect($this->getJson('/api/students')->json('data'));
+        $this->assertSame('150.00', $rows->firstWhere('id', $with)['transport_fee']);
+        $this->assertNull($rows->firstWhere('id', $without)['transport_fee']);
+    }
 }

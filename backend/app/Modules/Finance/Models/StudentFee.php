@@ -18,7 +18,7 @@ class StudentFee extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['student_id', 'academic_year_id', 'fee_structure_id', 'description', 'total_amount', 'discount'];
+    protected $fillable = ['student_id', 'academic_year_id', 'fee_structure_id', 'kind', 'description', 'total_amount', 'discount'];
 
     /**
      * @return array<string, string>

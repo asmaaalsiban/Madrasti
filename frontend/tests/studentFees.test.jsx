@@ -9,7 +9,7 @@ import StudentsPage from '../src/features/People/pages/StudentsPage'
 vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
 
 const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter><StudentsPage /></MemoryRouter></QueryClientProvider>)
-const student = (extra = {}) => ({ id: 7, student_number: 'S-1', name_ar: 'ليلى', name_en: 'Layla', email: 'l@x.test', user_id: 70, classroom: { id: 3, name: '1-A' }, guardians: [], balance: { net: '700.00', paid: '175.00', remaining: '525.00', overdue: '0.00' }, ...extra })
+const student = (extra = {}) => ({ id: 7, student_number: 'S-1', name_ar: 'ليلى', name_en: 'Layla', email: 'l@x.test', user_id: 70, classroom: { id: 3, name: '1-A' }, transport_fee: '200.00', guardians: [], balance: { net: '700.00', paid: '175.00', remaining: '525.00', overdue: '0.00' }, ...extra })
 
 beforeEach(async () => {
   vi.resetAllMocks()
@@ -41,12 +41,28 @@ describe('StudentsPage fees', () => {
     expect(within(dialog).getByLabelText('Discount (an amount, optional)')).toBeInTheDocument()
   })
 
-  it('does not offer them when editing a student', async () => {
+  it('lets the transport fee be changed when editing, with the current amount, but not the discount', async () => {
+    api.put.mockResolvedValue({ data: { data: student() } })
     renderPage()
     await screen.findByRole('link', { name: '525.00 JOD' })
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     const dialog = await screen.findByRole('dialog')
-    expect(within(dialog).queryByLabelText('Transport fee (optional)')).not.toBeInTheDocument()
+    expect(within(dialog).getByLabelText('Transport fee (optional)')).toHaveValue(200)
+    expect(within(dialog).queryByLabelText('Discount (an amount, optional)')).not.toBeInTheDocument()
+    fireEvent.change(within(dialog).getByLabelText('Transport fee (optional)'), { target: { value: '320' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/students/7', expect.objectContaining({ transport_fee: '320' })))
+  })
+
+  it('sends an empty transport fee as nothing when the student stops using the bus', async () => {
+    api.put.mockResolvedValue({ data: { data: student() } })
+    renderPage()
+    await screen.findByRole('link', { name: '525.00 JOD' })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.change(within(dialog).getByLabelText('Transport fee (optional)'), { target: { value: '' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/students/7', expect.objectContaining({ transport_fee: null })))
   })
 
   it('sends the transport fee and discount and shows the fees the student got', async () => {

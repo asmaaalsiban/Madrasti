@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\People\Http\Resources;
 
 use App\Modules\Academic\Models\Student;
+use App\Modules\Finance\Models\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,6 +37,8 @@ class StudentResource extends JsonResource
             'account' => $this->when($this->resource->getAttribute('generated_account') !== null, fn () => $this->resource->getAttribute('generated_account')),
             // Only right after creation: the fees the student got (the grade's yearly fee, transport).
             'created_fees' => $this->when($this->resource->getAttribute('created_fees') !== null, fn () => $this->resource->getAttribute('created_fees')),
+            // The current transport fee of the student (the form shows it so it can be changed when they move to another area).
+            'transport_fee' => $this->whenLoaded('fees', fn () => ($fee = $this->fees->where('kind', 'transport')->sortByDesc('academic_year_id')->first()) ? Money::amount(Money::cents($fee->total_amount)) : null),
             // For the admin only: what the student owes, paid and remaining this year (filled by the list).
             'balance' => $this->when($request->attributes->has('student_balances'), fn () => $request->attributes->get('student_balances')[$this->id] ?? null),
             // The primary parent first: the form edits that one.

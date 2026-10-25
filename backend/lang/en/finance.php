@@ -11,4 +11,5 @@ return [
     'discount_too_big' => 'The discount must be less than the yearly fee of the grade, and the grade needs a yearly fee with a plan.',
     'transport' => 'Transport',
     'no_plan' => 'Give the fee a first installment date, or choose one now.',
+    'below_paid' => 'The new amount cannot be less than what was already paid (:paid).',
 ];

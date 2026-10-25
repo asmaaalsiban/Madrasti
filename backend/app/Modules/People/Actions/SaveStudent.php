@@ -78,6 +78,10 @@ class SaveStudent
             // A student moved to a grade whose yearly fee they do not have yet gets it (fees they have are never touched).
             if ($classroom) {
                 $this->billing->onboard($student, $classroom);
+                // The transport fee follows the student when they move to another area (an empty field = no transport).
+                if (array_key_exists('transport_fee', $data)) {
+                    $this->billing->setTransport($student, $classroom, (float) ($data['transport_fee'] ?? 0));
+                }
             }
 
             return $this->loaded($student);
@@ -173,6 +177,6 @@ class SaveStudent
 
     private function loaded(Student $student): Student
     {
-        return $student->load(['user', 'guardians', 'enrollments.classroom']);
+        return $student->load(['user', 'guardians', 'enrollments.classroom', 'fees']);
     }
 }

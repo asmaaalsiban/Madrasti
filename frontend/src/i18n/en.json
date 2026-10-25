@@ -223,7 +223,7 @@
     },
     "filterClassroom": "Filter by classroom",
     "allClassrooms": "All classrooms",
-    "transportHint": "Leave empty if the student does not use the bus. It depends on where the student lives.",
+    "transportHint": "Leave empty if the student does not use the bus. It depends on where the student lives: change it when they move to another area (what was paid is kept and the unpaid installments are re-split).",
     "discountHint": "The yearly fee of the grade is applied by itself. An amount to take off it (e.g. a sibling discount)."
   },
   "staff": {
