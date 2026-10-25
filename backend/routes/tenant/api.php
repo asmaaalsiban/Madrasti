@@ -189,6 +189,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::get('accounts', [FinanceController::class, 'accounts']);
     Route::get('students/{student}', [FinanceController::class, 'statement']);
     Route::post('students/{student}/fees', [FinanceController::class, 'storeFee']);
+    Route::put('students/{student}/transport', [FinanceController::class, 'setTransport']);
     Route::get('settings', [FinanceController::class, 'settings']);
     Route::put('settings', [FinanceController::class, 'saveSettings']);
     Route::get('fee-structures', [FinanceController::class, 'structures']);

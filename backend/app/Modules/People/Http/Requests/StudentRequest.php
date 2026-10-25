@@ -6,6 +6,7 @@ namespace App\Modules\People\Http\Requests;
 
 use App\Models\User;
 use App\Modules\Academic\Models\Student;
+use App\Modules\Finance\Models\Payment;
 use App\Shared\Enums\Role;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,6 +31,9 @@ class StudentRequest extends FormRequest
             // Only used when the student is created: the transport fee (it differs from student to student) and a discount in money.
             'transport_fee' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
             'fee_discount' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+            // Only used when the student is created: money taken at registration.
+            'first_payment' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+            'first_payment_method' => ['nullable', Rule::in(Payment::METHODS)],
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_email' => ['nullable', 'email', 'max:255', $this->guardianEmailRule()],
             'guardian_phone' => ['nullable', 'string', 'max:30', $this->guardianPhoneRule()],

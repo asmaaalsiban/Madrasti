@@ -8,6 +8,17 @@ import GuardianPicker from '../components/GuardianPicker'
 import ResourcePage from '../../Academic/components/ResourcePage'
 import { useResource } from '../../Academic/hooks/useResource'
 
+// A heading that explains the fee fields below it.
+function FeesHeading() {
+  const { t } = useTranslation()
+  return (
+    <div className="col-span-full border-t pt-3">
+      <h3 className="font-bold">{t('people.feesHeading')}</h3>
+      <p className="text-xs text-slate-500">{t('people.feesHelp')}</p>
+    </div>
+  )
+}
+
 const fields = [
   { name: 'student_number', label: 'people.fields.studentNumber' },
   { name: 'name_ar', label: 'academic.fields.nameAr' },
@@ -20,10 +31,16 @@ const fields = [
     options: [{ value: 'male', label: 'people.male' }, { value: 'female', label: 'people.female' }],
   },
   { name: 'classroom_id', label: 'people.fields.classroom', type: 'select', optionsFrom: 'classrooms', optionLabel: 'name', getValue: (row) => row.classroom?.id },
-  // The yearly fee of the grade is applied by itself. The transport fee differs per student and can change when they move to another area
-  // (empty = no transport); the discount is only given when the student is added.
+  // The money of the student, in one place: the grade's yearly fee is applied by itself (see Finance > Yearly fees); here are what differs per student.
+  // Transport can change between terms (empty = no bus); the discount and the first payment are given when the student is added.
+  { name: 'fees_heading', type: 'custom', visibleWhen: (f) => Boolean(f.classroom_id), render: () => <FeesHeading /> },
   { name: 'transport_fee', label: 'people.fields.transportFee', hint: 'people.transportHint', type: 'number', getValue: (row) => row.transport_fee ?? '', visibleWhen: (f) => Boolean(f.classroom_id) },
   { name: 'fee_discount', label: 'people.fields.feeDiscount', hint: 'people.discountHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
+  { name: 'first_payment', label: 'people.fields.firstPayment', hint: 'people.firstPaymentHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
+  {
+    name: 'first_payment_method', label: 'people.fields.firstPaymentMethod', type: 'select', getValue: () => 'cash', visibleWhen: (f) => f.is_new_student && f.classroom_id && f.first_payment,
+    options: ['cash', 'bank_transfer', 'card', 'cheque', 'online'].map((m) => ({ value: m, label: `finance.methods.${m}` })),
+  },
   { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
   { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', getValue: (row) => row.guardians?.[0]?.email },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
@@ -85,10 +102,10 @@ export default function StudentsPage() {
         fields={fields}
         empty={{
           student_number: '', name_ar: '', name_en: '', birth_date: '', gender: '',
-          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '',
+          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '', first_payment: '', first_payment_method: 'cash',
         }}
         rowActions={rowActions}
-        onSaved={(response, isNew) => isNew && setAccount(response?.data?.account ? { ...response.data.account, fees: response.data.created_fees ?? [] } : null)}
+        onSaved={(response, isNew) => isNew && setAccount(response?.data?.account ? { ...response.data.account, fees: response.data.created_fees ?? [], payments: response.data.created_payments ?? [] } : null)}
       />
       <Modal open={account !== null} title={t('people.accountCreated.title')} onClose={() => setAccount(null)}>
         <p className="mb-3 text-sm text-slate-600">{t('people.accountCreated.text')}</p>
@@ -102,6 +119,12 @@ export default function StudentsPage() {
             <ul className="text-sm text-slate-700">
               {account.fees.map((f) => <li key={f.description}>{f.description}: <span dir="ltr">{f.net}</span> ({t('people.accountCreated.installments', { count: f.installments })})</li>)}
             </ul>
+          </div>
+        )}
+        {account?.payments?.length > 0 && (
+          <div className="mt-3 space-y-1 border-t pt-3">
+            <p className="text-sm font-medium">{t('people.accountCreated.payments')}</p>
+            <ul className="text-sm text-slate-700">{account.payments.map((p) => <li key={p.receipt}><span dir="ltr">{p.receipt}</span>: <span dir="ltr">{p.amount}</span></li>)}</ul>
           </div>
         )}
         <div className="flex justify-end pt-4">

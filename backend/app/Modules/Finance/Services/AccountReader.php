@@ -36,7 +36,7 @@ class AccountReader
             $paid += $feePaid;
             $overdue += $feeOverdue;
             $out[] = [
-                'id' => $fee->id, 'description' => $fee->description, 'total' => $fee->total_amount, 'discount' => $fee->discount, 'net' => Money::amount($net),
+                'id' => $fee->id, 'kind' => $fee->kind, 'description' => $fee->description, 'total' => $fee->total_amount, 'discount' => $fee->discount, 'net' => Money::amount($net),
                 'paid' => Money::amount($feePaid), 'remaining' => Money::amount($net - $feePaid), 'overdue' => Money::amount($feeOverdue),
                 'installments' => $fee->installments->map(fn (Installment $i) => [
                     'id' => $i->id, 'number' => $i->number, 'due_date' => $i->due_date->format('Y-m-d'), 'amount' => $i->amount, 'paid' => $i->paid_amount,

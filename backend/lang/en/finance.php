@@ -12,4 +12,7 @@ return [
     'transport' => 'Transport',
     'no_plan' => 'Give the fee a first installment date, or choose one now.',
     'below_paid' => 'The new amount cannot be less than what was already paid (:paid).',
+    'first_payment_too_big' => 'The first payment cannot be more than the fees owed (:owed), and the student needs a yearly fee or a transport fee.',
+    'first_payment_note' => 'First payment at registration',
+    'not_enrolled' => 'The student is not placed in a section this year.',
 ];

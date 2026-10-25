@@ -19,6 +19,7 @@ export default function StudentAccountPage() {
   const [voiding, setVoiding] = useState(null)
   const [deleting, setDeleting] = useState(null)
   const [adding, setAdding] = useState(null)
+  const [editing, setEditing] = useState(null) // { kind: 'transport' | 'discount', fee?, value }
   const [error, setError] = useState('')
 
   const statement = useQuery({ queryKey: ['finance', 'student', id], queryFn: async () => (await api.get(`/finance/students/${id}`)).data.data })
@@ -29,6 +30,12 @@ export default function StudentAccountPage() {
 
   const voidIt = useMutation({ mutationFn: (pid) => api.delete(`/finance/payments/${pid}`), onSuccess: () => { setVoiding(null); refresh() }, onError: (e) => { setVoiding(null); fail(e) } })
   const deleteFee = useMutation({ mutationFn: (fid) => api.delete(`/finance/fees/${fid}`), onSuccess: () => { setDeleting(null); refresh() }, onError: (e) => { setDeleting(null); fail(e) } })
+  const saveEdit = useMutation({
+    mutationFn: () => (editing.kind === 'transport'
+      ? api.put(`/finance/students/${id}/transport`, { amount: editing.value || 0 })
+      : api.put(`/finance/fees/${editing.fee.id}`, { discount: editing.value || 0 })),
+    onSuccess: () => { setEditing(null); setError(''); refresh() }, onError: fail,
+  })
   const addFee = useMutation({
     mutationFn: () => api.post(`/finance/students/${id}/fees`, { description: adding.description, total_amount: adding.total, discount: adding.discount || 0, installments_count: Number(adding.count), first_due: adding.first_due, every_months: Number(adding.every) }),
     onSuccess: () => { setAdding(null); setError(''); refresh() }, onError: fail,
@@ -43,19 +50,41 @@ export default function StudentAccountPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{student[`name_${i18n.language}`] || student.name_ar} <span className="text-sm font-normal text-slate-500" dir="ltr">{student.student_number}</span></h1>
-        {canManage && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => { setError(''); setAdding({ description: '', total: '', discount: '0', count: '1', first_due: '', every: '1' }) }}>{t('finance.addFee')}</button>}
+        {canManage && (
+          <div className="flex flex-wrap gap-2">
+            {!data.fees.some((f) => f.kind === 'transport') && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => { setError(''); setEditing({ kind: 'transport', value: '' }) }}>{t('finance.addTransport')}</button>}
+            <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => { setError(''); setAdding({ description: '', total: '', discount: '0', count: '1', first_due: '', every: '1' }) }}>{t('finance.addFee')}</button>
+          </div>
+        )}
       </div>
       {error && !adding && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       <Statement
         data={data}
         onPay={canManage ? (fee) => setPaying(fee) : null} onReceipt={canManage ? (p, fee) => setReceipt({ payment: p, fee }) : null}
         onVoid={canManage ? (p) => setVoiding(p) : null} onDeleteFee={canManage ? (fee) => setDeleting(fee) : null}
+        onTransport={canManage ? (fee) => { setError(''); setEditing({ kind: 'transport', fee, value: fee.net }) } : null}
+        onDiscount={canManage ? (fee) => { setError(''); setEditing({ kind: 'discount', fee, value: fee.discount }) } : null}
       />
 
       {paying && <PaymentDialog fee={paying} currency={data.currency} onClose={() => setPaying(null)} onDone={(payment) => { setPaying(null); setReceipt({ payment, fee: paying }) }} />}
       {receipt && <ReceiptDialog payment={receipt.payment} fee={receipt.fee} student={student} currency={data.currency} onClose={() => setReceipt(null)} />}
       <ConfirmDialog open={Boolean(voiding)} message={t('finance.confirmVoid', { receipt: voiding?.receipt })} confirmLabel={t('finance.voidPayment')} onConfirm={() => voidIt.mutate(voiding.id)} onCancel={() => setVoiding(null)} />
       <ConfirmDialog open={Boolean(deleting)} message={t('finance.confirmDeleteFee', { name: deleting?.description })} onConfirm={() => deleteFee.mutate(deleting.id)} onCancel={() => setDeleting(null)} />
+      {editing && (
+        <Modal open title={editing.kind === 'transport' ? t('finance.changeTransport') : t('finance.changeDiscountFor', { name: editing.fee.description })} onClose={() => setEditing(null)}>
+          <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); saveEdit.mutate() }}>
+            {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+            <p className="text-xs text-slate-500">{editing.kind === 'transport' ? t('finance.transportHelp') : t('finance.discountHelp')}</p>
+            <label className="block text-sm">{editing.kind === 'transport' ? t('finance.fields.transportAmount') : t('finance.fields.discount')}
+              <input required type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} />
+            </label>
+            <div className="flex justify-end gap-2">
+              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
+              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={saveEdit.isPending}>{t('admin.actions.save')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
       {adding && (
         <Modal open title={t('finance.addFee')} onClose={() => setAdding(null)}>
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); addFee.mutate() }}>

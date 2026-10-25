@@ -3,7 +3,7 @@ import Money from './Money'
 import StatusBadge from './StatusBadge'
 
 // A student's statement: totals, then every fee with its installments and payments. `actions` adds buttons (accountant).
-export default function Statement({ data, onPay = null, onReceipt = null, onVoid = null, onDeleteFee = null }) {
+export default function Statement({ data, onPay = null, onReceipt = null, onVoid = null, onDeleteFee = null, onTransport = null, onDiscount = null }) {
   const { t } = useTranslation()
   const c = data.currency
   const totals = [['net', data.totals.net], ['paid', data.totals.paid], ['remaining', data.totals.remaining], ['overdue', data.totals.overdue]]
@@ -60,9 +60,11 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
               </ul>
             </div>
           )}
-          {(onPay || onDeleteFee) && (
+          {(onPay || onDeleteFee || onTransport || onDiscount) && (
             <div className="flex gap-2 pt-1">
               {onPay && Number(fee.remaining) > 0 && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => onPay(fee)}>{t('finance.recordPayment')}</button>}
+              {onTransport && fee.kind === 'transport' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onTransport(fee)}>{t('finance.changeTransport')}</button>}
+              {onDiscount && fee.kind !== 'transport' && fee.payments.length === 0 && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</button>}
               {onDeleteFee && fee.payments.length === 0 && <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => onDeleteFee(fee)}>{t('finance.deleteFee')}</button>}
             </div>
           )}

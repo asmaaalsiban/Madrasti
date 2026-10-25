@@ -245,3 +245,9 @@ On the **Add student** form, once a section is chosen, two optional amounts appe
 
 **The transport fee can be changed later** (a student can move to another area between the terms): the **Edit student** form shows the current transport fee; change it, or empty it when the student stops using the bus. What was already paid is kept, the unpaid installments are re-split (a new installment is added if all were closed), the new total can never be less than what was paid (the accountant handles a refund), and emptying it with nothing paid removes the fee. Fees have a `kind` (`yearly`, `transport`, `other`) so the transport fee is found whatever the language of the screen; the migration fills it for fees that exist. Run `php artisan tenants:migrate`.
 
+
+## First payment at registration, and the fee fields in one place
+
+The **Add student** form has a **Fees** section (it appears once a section is chosen; the **Edit** form shows it too): the grade's yearly fee is added by itself, and below it come what differs for this student: **Transport fee** (also on Edit: a student can move to another area), **Discount** (only when adding), and **First payment** with its method (only when adding): the amount received now is taken from the yearly fee first and the rest from transport; it can never be more than the fees owe, it gets a receipt (one per fee it covered, listed in the dialog after saving, printable from the student's account), and if anything is refused the student is not created. The person who registers the student is the receiver of that payment.
+
+The accountant has the same in **Finance > Students' accounts > the student**: **Add / Change the transport fee** (`PUT /finance/students/{id}/transport`), **Change the discount** of a yearly fee (only before any payment), **Record a payment** and **Add a fee**. No migration.

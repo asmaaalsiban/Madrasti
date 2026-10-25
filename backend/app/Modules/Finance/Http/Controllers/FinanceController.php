@@ -148,6 +148,22 @@ class FinanceController extends Controller
         return response()->json(['data' => ['id' => $fee->id]], 201);
     }
 
+    /** Sets the student's transport fee from their account page (0 = no transport); same rules as the student form. */
+    public function setTransport(Request $request, Student $student): JsonResponse
+    {
+        $this->manage($request);
+        $data = $request->validate(['amount' => ['required', 'numeric', 'min:0', 'max:1000000']]);
+        $year = $this->year();
+        $classroomId = $student->enrollments()->where('academic_year_id', $year->id)->value('classroom_id');
+        if ($classroomId === null) {
+            throw ValidationException::withMessages(['amount' => [__('finance.not_enrolled')]]);
+        }
+
+        $fee = $this->billing->setTransport($student, Classroom::findOrFail($classroomId), (float) $data['amount']);
+
+        return response()->json(['data' => ['id' => $fee?->id]]);
+    }
+
     public function updateFee(Request $request, StudentFee $fee): JsonResponse
     {
         $this->manage($request);

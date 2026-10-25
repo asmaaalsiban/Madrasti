@@ -195,7 +195,9 @@
       "guardianPhone": "Parent phone",
       "transportFee": "Transport fee (optional)",
       "feeDiscount": "Discount (an amount, optional)",
-      "remaining": "Remaining fees"
+      "remaining": "Remaining fees",
+      "firstPayment": "First payment (optional)",
+      "firstPaymentMethod": "Payment method"
     },
     "male": "Male",
     "female": "Female",
@@ -214,7 +216,8 @@
       "password": "Password",
       "close": "Close",
       "fees": "Fees applied",
-      "installments": "{{count}} installments"
+      "installments": "{{count}} installments",
+      "payments": "First payment received"
     },
     "guardianPicker": {
       "label": "Find an existing parent",
@@ -224,7 +227,10 @@
     "filterClassroom": "Filter by classroom",
     "allClassrooms": "All classrooms",
     "transportHint": "Leave empty if the student does not use the bus. It depends on where the student lives: change it when they move to another area (what was paid is kept and the unpaid installments are re-split).",
-    "discountHint": "The yearly fee of the grade is applied by itself. An amount to take off it (e.g. a sibling discount)."
+    "discountHint": "The yearly fee of the grade is applied by itself. An amount to take off it (e.g. a sibling discount).",
+    "firstPaymentHint": "The amount received now, taken from the yearly fee first, then transport. It gets a receipt (print it from the student's account).",
+    "feesHeading": "Fees",
+    "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student."
   },
   "staff": {
     "title": "Staff",
@@ -866,7 +872,8 @@
       "firstDue": "First installment due on",
       "everyMonths": "Months between installments",
       "discountAll": "Discount for each student (optional)",
-      "status": "Status"
+      "status": "Status",
+      "transportAmount": "Transport fee (total for the year)"
     },
     "receiptFields": {
       "receiptNo": "Receipt no.",
@@ -903,6 +910,12 @@
     "autoApplyHelp": "A student added to a section of this grade gets this fee by itself, split by the plan above. Turn it off to give it by hand.",
     "planSummary": "{{count}} installments from {{date}}",
     "automatic": "automatic",
-    "manual": "by hand"
+    "manual": "by hand",
+    "changeTransport": "Change the transport fee",
+    "addTransport": "Add a transport fee",
+    "changeDiscount": "Change the discount",
+    "changeDiscountFor": "Discount: {{name}}",
+    "transportHelp": "The fee for the bus, which changes if the student moves to another area. What was paid is kept and the unpaid installments are re-split. 0 removes it.",
+    "discountHelp": "A sum taken off this fee, allowed only while it has no payments. The installments are re-split."
   }
 }

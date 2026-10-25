@@ -186,6 +186,33 @@ class FeeBilling
         });
     }
 
+    /**
+     * The first payment taken at registration: it goes to the first fee (the grade's yearly fee) up to what it owes and the rest to
+     * the next one (transport). One receipt for each fee it touches. It can never be more than the fees owe.
+     *
+     * @param  list<StudentFee>  $fees
+     * @return list<Payment>
+     */
+    public function payFirst(array $fees, float $amount, string $method, User $by): array
+    {
+        $left = Money::cents($amount);
+        $owed = array_sum(array_map(fn (StudentFee $f) => $this->remainingCents($f), $fees));
+        if ($left <= 0 || $left > $owed) {
+            throw ValidationException::withMessages(['first_payment' => [__('finance.first_payment_too_big', ['owed' => Money::amount($owed)])]]);
+        }
+
+        $payments = [];
+        foreach ($fees as $fee) {
+            $take = min($left, $this->remainingCents($fee));
+            if ($take > 0) {
+                $payments[] = $this->recordPayment($fee, Money::amount($take), $method, now()->toDateString(), $by, null, __('finance.first_payment_note'));
+                $left -= $take;
+            }
+        }
+
+        return $payments;
+    }
+
     /** What is still owed on a fee, in cents. */
     public function remainingCents(StudentFee $fee): int
     {
