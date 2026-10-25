@@ -215,6 +215,18 @@ The bell's events also reach the phone or computer of people who allowed it, **e
 
 **Where it works:** Android (Chrome, Edge, Firefox, Samsung) and computers directly; **iPhone (iOS 16.4+) only after "Add to Home Screen"** (the bell explains this). The site must be served over **HTTPS** in production (`localhost` works for testing). Announcements keep their own counter and do not push yet.
 
+## Finance (fees, installments, payments)
+
+**The accountant** is a staff member of type **Accountant** (add them in Staff): their home shows **Finance** instead of the teacher tools. They manage the school's money; **the admin (management) can read everything but not change it**, and **parents** read the statement of their own children (**Fees** on each child's card; students do not see fees). Everyone else is refused (`FinanceAccess`).
+
+- **Yearly fees** (`/finance/fee-structures`): the fee of each grade for the current year (e.g. Tuition, grade 5: 1200). **Give to the grade's students** splits it into equal installments (the last takes the remainder: 1000 in 3 = 333.33 + 333.33 + 333.34) starting on a date and every N months, with an optional discount for each; every enrolled student of that grade gets it once (running it again skips those who have it).
+- **A student's account** (`/finance/students/{id}`): add a fee for one student (bus, books...) with a discount and an even split; see every fee with its installments (paid / partly paid / not due yet / **overdue**), totals and payments; delete a fee or change its discount only while it has no payments (the discount re-splits the installments).
+- **Payments** (`POST /finance/payments`): amount, method (cash, transfer, card, cheque, online), date (not in the future), reference. A payment is **spread over the oldest unpaid installments first** (or the chosen one first), can never be more than what is still owed, and gets a **receipt number** and a printable receipt. A wrong payment is **cancelled** and the installments get the money back. All money changes are in the **audit log**. Amounts are computed in cents, never in floating point.
+- **Balances** (`/finance/accounts`): every enrolled student's fees, paid, remaining and overdue, filtered by grade, section, status (overdue / still owing / settled) and name, paged; **summary** cards: expected, collected, remaining, overdue, collected this month, students with overdue installments. The **currency** is a school setting (default JOD).
+- **Reminders:** every morning `finance:remind` tells the parents (bell and phone) about installments due in the next 3 days and about overdue ones (again every 7 days, until paid). It is scheduled for every school with `tenants:run finance:remind`; in development run `php artisan schedule:work` (or `php artisan tenants:run finance:remind` by hand).
+
+The demo school (`school:seed-demo`) now has an accountant (`accountant1`, same teacher password). Run `php artisan tenants:migrate` for the new `payment_allocations` table.
+
 ## Chat
 
 **Chat** (header link with an unread counter, and the admin menu): conversations on one side, the open one on the other (one at a time on a phone). Messages are text and/or **one photo** (JPG, PNG or WebP up to 5 MB, private to the conversation, `GET /api/chat/messages/{id}/image`); the open conversation refreshes every 4 seconds and the list every 10; a sender can delete their own message.

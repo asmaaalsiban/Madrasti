@@ -92,7 +92,8 @@
       "availability": "Teacher availability",
       "behavior": "Behaviour",
       "announcements": "Announcements",
-      "chat": "Chat"
+      "chat": "Chat",
+      "finance": "Finance"
     },
     "actions": {
       "add": "Add",
@@ -741,7 +742,9 @@
       "homework_answer": "{{student}} sent an answer to: {{title}}",
       "unknown": "New notification",
       "chat_message": "{{sender}} sent you a message",
-      "chat_group": "{{sender}} wrote in {{group}}"
+      "chat_group": "{{sender}} wrote in {{group}}",
+      "installment": "Installment of {{amount}} due {{due}}",
+      "installment_overdue": "Overdue installment of {{amount}} (due {{due}})"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -777,5 +780,117 @@
     "teachersOnly": "Only the teachers can write",
     "groupHelp": "The group holds the students and teachers of the section and follows it when students join or leave.",
     "createGroup": "Create the group"
+  },
+  "finance": {
+    "title": "Finance",
+    "hint": "Fees, installments, payments and balances.",
+    "accounts": "Students' accounts",
+    "accountsHint": "Who owes what, record payments, print receipts.",
+    "structures": "Yearly fees",
+    "structuresHint": "The fee of each grade and giving it to the students.",
+    "feesLink": "Fees",
+    "childTitle": "Fees: {{name}}",
+    "currency": "Currency (e.g. JOD, ILS, USD)",
+    "summary": {
+      "expected": "Expected this year",
+      "collected": "Collected",
+      "remaining": "Remaining",
+      "overdue": "Overdue",
+      "collectedThisMonth": "Collected this month",
+      "studentsOverdue": "Students with overdue installments"
+    },
+    "totals": {
+      "net": "Total fees",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "overdue": "Overdue"
+    },
+    "cols": {
+      "no": "#",
+      "dueDate": "Due date",
+      "amount": "Amount",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "status": "Status",
+      "student": "Student",
+      "classroom": "Section",
+      "net": "Fees",
+      "overdue": "Overdue"
+    },
+    "status": {
+      "paid": "Paid",
+      "partial": "Partly paid",
+      "pending": "Not due yet",
+      "overdue": "Overdue"
+    },
+    "methods": {
+      "cash": "Cash",
+      "bank_transfer": "Bank transfer",
+      "card": "Card",
+      "cheque": "Cheque",
+      "online": "Online"
+    },
+    "noFees": "No fees for this student yet.",
+    "discount": "discount",
+    "payments": "Payments",
+    "receipt": "Receipt",
+    "print": "Print",
+    "voidPayment": "Cancel payment",
+    "recordPayment": "Record a payment",
+    "recordPaymentFor": "Payment: {{fee}}",
+    "owed": "Still owed",
+    "oldestFirst": "The oldest installments first",
+    "deleteFee": "Delete the fee",
+    "addFee": "Add a fee",
+    "save": "Save the payment",
+    "fields": {
+      "amount": "Amount",
+      "method": "Payment method",
+      "paidOn": "Date",
+      "installment": "Apply to",
+      "reference": "Reference (cheque / transfer number)",
+      "note": "Note",
+      "grade": "Grade",
+      "name": "Name",
+      "description": "Description",
+      "total": "Total",
+      "discount": "Discount",
+      "installments": "Number of installments",
+      "firstDue": "First installment due on",
+      "everyMonths": "Months between installments",
+      "discountAll": "Discount for each student (optional)",
+      "status": "Status"
+    },
+    "receiptFields": {
+      "receiptNo": "Receipt no.",
+      "date": "Date",
+      "student": "Student",
+      "for": "For",
+      "amount": "Amount",
+      "method": "Method",
+      "reference": "Reference",
+      "receivedBy": "Received by"
+    },
+    "addStructure": "New yearly fee",
+    "editStructure": "Edit the fee",
+    "noStructures": "No yearly fees yet.",
+    "givenTo": "given to {{count}} students",
+    "giveToStudents": "Give to the grade's students",
+    "applyTitle": "Give \"{{name}}\" to the students",
+    "applyHelp": "Every student of this grade enrolled this year gets the fee, split into equal installments. Students who already have it are skipped.",
+    "apply": "Give",
+    "applied": "The fee was given to {{count}} students.",
+    "confirmDeleteStructure": "Delete the fee \"{{name}}\"?",
+    "confirmDeleteFee": "Delete the fee \"{{name}}\" of this student?",
+    "confirmVoid": "Cancel the payment {{receipt}}? The installments get the money back.",
+    "all": "All",
+    "filter": {
+      "overdue": "Overdue",
+      "owing": "Still owing",
+      "settled": "Settled"
+    },
+    "noAccounts": "No students found.",
+    "prev": "Previous",
+    "next": "Next"
   }
 }

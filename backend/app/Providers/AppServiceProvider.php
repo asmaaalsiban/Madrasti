@@ -16,6 +16,7 @@ use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\Academic\Models\Term;
 use App\Modules\Academic\Policies\AcademicPolicy;
+use App\Modules\Finance\Services\FinanceAccess;
 use App\Modules\Grading\Models\Assessment;
 use App\Modules\People\Policies\UserPolicy;
 use App\Modules\Scheduling\Models\Period;
@@ -92,6 +93,14 @@ class AppServiceProvider extends ServiceProvider
             Role::Student => $student->user_id === $user->id,
             Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
             Role::Teacher => false,
+        });
+
+        // A student's fee statement: management, the accountant, and the student's parents (not the student).
+        Gate::define('view-student-fees', fn (User $user, Student $student): bool => match ($user->role) {
+            Role::Admin => true,
+            Role::Guardian => $student->guardians()->whereKey($user->id)->exists(),
+            Role::Teacher => FinanceAccess::manages($user),
+            Role::Student => false,
         });
 
         // A student's attendance: admin, the student, their parents, or the homeroom teacher of their classroom.

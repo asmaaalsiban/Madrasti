@@ -1,0 +1,83 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { api } from '../../../api/client'
+import ConfirmDialog from '../../../components/shared/ConfirmDialog'
+import Modal from '../../../components/shared/Modal'
+import ApplyFeeDialog from '../components/ApplyFeeDialog'
+import Money from '../components/Money'
+
+// The yearly fee of each grade. The accountant adds them and gives them to the students of the grade; the admin only reads.
+export default function FeeStructuresPage() {
+  const { t, i18n } = useTranslation()
+  const client = useQueryClient()
+  const [form, setForm] = useState(null)
+  const [error, setError] = useState('')
+  const [removing, setRemoving] = useState(null)
+  const [applying, setApplying] = useState(null)
+  const name = (g) => g[`name_${i18n.language}`] || g.name_ar
+
+  const list = useQuery({ queryKey: ['finance', 'structures'], queryFn: async () => (await api.get('/finance/fee-structures')).data })
+  const options = useQuery({ queryKey: ['finance', 'options'], queryFn: async () => (await api.get('/finance/options')).data.data })
+  const settings = useQuery({ queryKey: ['finance', 'settings'], queryFn: async () => (await api.get('/finance/settings')).data.data })
+  const canManage = settings.data?.can_manage
+
+  const done = () => { client.invalidateQueries({ queryKey: ['finance'] }); setForm(null); setError(''); setRemoving(null) }
+  const fail = (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || t('admin.actions.error'))
+  const save = useMutation({
+    mutationFn: () => {
+      const body = { grade_level_id: Number(form.grade_level_id), name: form.name, amount: form.amount }
+      return form.id ? api.put(`/finance/fee-structures/${form.id}`, body) : api.post('/finance/fee-structures', body)
+    },
+    onSuccess: done, onError: fail,
+  })
+  const remove = useMutation({ mutationFn: (id) => api.delete(`/finance/fee-structures/${id}`), onSuccess: done, onError: (err) => { setRemoving(null); fail(err) } })
+  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
+
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('finance.structures')}</h1>
+        {canManage && options.data && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => { setError(''); setForm({ grade_level_id: String(options.data.grades[0]?.id ?? ''), name: '', amount: '' }) }}>{t('finance.addStructure')}</button>}
+      </div>
+      {error && !form && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+      {list.isSuccess && list.data.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('finance.noStructures')}</p>}
+      <ul className="space-y-2">
+        {(list.data?.data ?? []).map((s) => (
+          <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-4">
+            <div>
+              <p className="font-bold">{s.name} · {name(s.grade_level)}</p>
+              <p className="text-sm text-slate-600"><Money value={s.amount} currency={list.data.currency} /> · {t('finance.givenTo', { count: s.students })}</p>
+            </div>
+            {canManage && (
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setApplying(s)}>{t('finance.giveToStudents')}</button>
+                <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => { setError(''); setForm({ id: s.id, grade_level_id: String(s.grade_level.id), name: s.name, amount: s.amount }) }}>{t('admin.actions.edit')}</button>
+                <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(s)}>{t('admin.actions.delete')}</button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {form && (
+        <Modal open title={form.id ? t('finance.editStructure') : t('finance.addStructure')} onClose={() => setForm(null)}>
+          <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
+            {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+            <label className="block text-sm">{t('finance.fields.grade')}
+              <select required className="mt-1 w-full rounded border p-2" value={form.grade_level_id} onChange={set('grade_level_id')}>{(options.data?.grades ?? []).map((g) => <option key={g.id} value={g.id}>{name(g)}</option>)}</select>
+            </label>
+            <label className="block text-sm">{t('finance.fields.name')}<input required className="mt-1 w-full rounded border p-2" value={form.name} onChange={set('name')} /></label>
+            <label className="block text-sm">{t('finance.fields.amount')}<input required type="number" min="0.01" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></label>
+            <div className="flex justify-end gap-2">
+              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
+              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+      {applying && <ApplyFeeDialog structure={applying} onClose={() => setApplying(null)} />}
+      <ConfirmDialog open={Boolean(removing)} message={t('finance.confirmDeleteStructure', { name: removing?.name })} onConfirm={() => remove.mutate(removing.id)} onCancel={() => setRemoving(null)} />
+    </section>
+  )
+}

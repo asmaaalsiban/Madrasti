@@ -6,7 +6,7 @@ import { useAuth } from '../../Auth/AuthProvider'
 export default function TeacherHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const cards = [
+  const teaching = [
     ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
     ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint'],
@@ -17,6 +17,10 @@ export default function TeacherHome() {
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
     ...(user?.staff_type === 'head_of_department' ? [['/teacher/lesson-plans/review', 'lessonPlans.reviewTitle', 'lessonPlans.reviewHint'], ['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
   ]
+  // An accountant is not a teacher: their home is the school's money.
+  const cards = user?.staff_type === 'accountant'
+    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint']]
+    : teaching
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('dashboard.welcome', { name: user?.name })}</h1>

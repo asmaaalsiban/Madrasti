@@ -21,6 +21,8 @@ use App\Modules\Communication\Http\Controllers\AnnouncementController;
 use App\Modules\Communication\Http\Controllers\ChatController;
 use App\Modules\Communication\Http\Controllers\NotificationController;
 use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
+use App\Modules\Finance\Http\Controllers\FinanceController;
+use App\Modules\Finance\Http\Controllers\StudentFeesController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
@@ -179,6 +181,27 @@ Route::middleware('school-user')->prefix('announcements')->group(function (): vo
     Route::put('{announcement}', [AnnouncementController::class, 'update']);
     Route::delete('{announcement}', [AnnouncementController::class, 'destroy']);
 });
+
+// Finance: the accountant manages fees and payments, the admin reads; a parent reads the statement of their child.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->group(function (): void {
+    Route::get('options', [FinanceController::class, 'options']);
+    Route::get('summary', [FinanceController::class, 'summary']);
+    Route::get('accounts', [FinanceController::class, 'accounts']);
+    Route::get('students/{student}', [FinanceController::class, 'statement']);
+    Route::post('students/{student}/fees', [FinanceController::class, 'storeFee']);
+    Route::get('settings', [FinanceController::class, 'settings']);
+    Route::put('settings', [FinanceController::class, 'saveSettings']);
+    Route::get('fee-structures', [FinanceController::class, 'structures']);
+    Route::post('fee-structures', [FinanceController::class, 'storeStructure']);
+    Route::put('fee-structures/{structure}', [FinanceController::class, 'updateStructure']);
+    Route::delete('fee-structures/{structure}', [FinanceController::class, 'destroyStructure']);
+    Route::post('fee-structures/{structure}/apply', [FinanceController::class, 'applyStructure']);
+    Route::put('fees/{fee}', [FinanceController::class, 'updateFee']);
+    Route::delete('fees/{fee}', [FinanceController::class, 'destroyFee']);
+    Route::post('payments', [FinanceController::class, 'pay']);
+    Route::delete('payments/{payment}', [FinanceController::class, 'voidPayment']);
+});
+Route::middleware('school-user')->get('students/{student}/fees', StudentFeesController::class);
 
 // Lesson plans: the teacher writes and submits, the head of department reviews, approved shared plans reach students and parents.
 Route::middleware(['school-user', 'role:teacher'])->group(function (): void {

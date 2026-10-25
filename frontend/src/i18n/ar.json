@@ -92,7 +92,8 @@
       "availability": "أوقات المعلمين",
       "behavior": "السلوك",
       "announcements": "الإعلانات",
-      "chat": "المحادثات"
+      "chat": "المحادثات",
+      "finance": "الماليات"
     },
     "actions": {
       "add": "إضافة",
@@ -741,7 +742,9 @@
       "homework_answer": "أرسل {{student}} إجابة الواجب: {{title}}",
       "unknown": "إشعار جديد",
       "chat_message": "أرسل لك {{sender}} رسالة",
-      "chat_group": "كتب {{sender}} في {{group}}"
+      "chat_group": "كتب {{sender}} في {{group}}",
+      "installment": "قسط بقيمة {{amount}} يستحق {{due}}",
+      "installment_overdue": "قسط متأخر بقيمة {{amount}} (استحقاقه {{due}})"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -777,5 +780,117 @@
     "teachersOnly": "المعلمون فقط يكتبون",
     "groupHelp": "تضم المجموعة طلاب الشعبة ومعلميها، وتتبع الشعبة عند انضمام الطلاب أو خروجهم.",
     "createGroup": "إنشاء المجموعة"
+  },
+  "finance": {
+    "title": "الماليات",
+    "hint": "الرسوم والأقساط والدفعات والأرصدة.",
+    "accounts": "حسابات الطلاب",
+    "accountsHint": "من عليه كم، تسجيل الدفعات وطباعة الإيصالات.",
+    "structures": "الرسوم السنوية",
+    "structuresHint": "رسوم كل صف وتطبيقها على الطلاب.",
+    "feesLink": "الرسوم",
+    "childTitle": "الرسوم: {{name}}",
+    "currency": "العملة (مثل JOD أو ILS أو USD)",
+    "summary": {
+      "expected": "المتوقع هذه السنة",
+      "collected": "المحصّل",
+      "remaining": "المتبقي",
+      "overdue": "المتأخر",
+      "collectedThisMonth": "المحصّل هذا الشهر",
+      "studentsOverdue": "طلاب عليهم أقساط متأخرة"
+    },
+    "totals": {
+      "net": "إجمالي الرسوم",
+      "paid": "المدفوع",
+      "remaining": "المتبقي",
+      "overdue": "المتأخر"
+    },
+    "cols": {
+      "no": "#",
+      "dueDate": "الاستحقاق",
+      "amount": "المبلغ",
+      "paid": "المدفوع",
+      "remaining": "المتبقي",
+      "status": "الحالة",
+      "student": "الطالب",
+      "classroom": "الشعبة",
+      "net": "الرسوم",
+      "overdue": "المتأخر"
+    },
+    "status": {
+      "paid": "مدفوع",
+      "partial": "مدفوع جزئياً",
+      "pending": "لم يحن موعده",
+      "overdue": "متأخر"
+    },
+    "methods": {
+      "cash": "نقداً",
+      "bank_transfer": "تحويل بنكي",
+      "card": "بطاقة",
+      "cheque": "شيك",
+      "online": "إلكتروني"
+    },
+    "noFees": "لا توجد رسوم لهذا الطالب بعد.",
+    "discount": "خصم",
+    "payments": "الدفعات",
+    "receipt": "إيصال",
+    "print": "طباعة",
+    "voidPayment": "إلغاء الدفعة",
+    "recordPayment": "تسجيل دفعة",
+    "recordPaymentFor": "دفعة: {{fee}}",
+    "owed": "المتبقي",
+    "oldestFirst": "الأقساط الأقدم أولاً",
+    "deleteFee": "حذف الرسوم",
+    "addFee": "إضافة رسوم",
+    "save": "حفظ الدفعة",
+    "fields": {
+      "amount": "المبلغ",
+      "method": "طريقة الدفع",
+      "paidOn": "التاريخ",
+      "installment": "تطبيق على",
+      "reference": "المرجع (رقم الشيك / التحويل)",
+      "note": "ملاحظة",
+      "grade": "الصف",
+      "name": "الاسم",
+      "description": "الوصف",
+      "total": "المجموع",
+      "discount": "الخصم",
+      "installments": "عدد الأقساط",
+      "firstDue": "استحقاق القسط الأول",
+      "everyMonths": "عدد الأشهر بين الأقساط",
+      "discountAll": "خصم لكل طالب (اختياري)",
+      "status": "الحالة"
+    },
+    "receiptFields": {
+      "receiptNo": "رقم الإيصال",
+      "date": "التاريخ",
+      "student": "الطالب",
+      "for": "عن",
+      "amount": "المبلغ",
+      "method": "الطريقة",
+      "reference": "المرجع",
+      "receivedBy": "استلمها"
+    },
+    "addStructure": "رسوم سنوية جديدة",
+    "editStructure": "تعديل الرسوم",
+    "noStructures": "لا توجد رسوم سنوية بعد.",
+    "givenTo": "مطبّقة على {{count}} طلاب",
+    "giveToStudents": "تطبيق على طلاب الصف",
+    "applyTitle": "تطبيق \"{{name}}\" على الطلاب",
+    "applyHelp": "كل طالب في هذا الصف مسجّل هذه السنة يحصل على الرسوم مقسّمة إلى أقساط متساوية. من عنده هذه الرسوم يُتخطّى.",
+    "apply": "تطبيق",
+    "applied": "تم تطبيق الرسوم على {{count}} طلاب.",
+    "confirmDeleteStructure": "حذف الرسوم \"{{name}}\"؟",
+    "confirmDeleteFee": "حذف الرسوم \"{{name}}\" لهذا الطالب؟",
+    "confirmVoid": "إلغاء الدفعة {{receipt}}؟ تعود الأموال للأقساط.",
+    "all": "الكل",
+    "filter": {
+      "overdue": "متأخر",
+      "owing": "عليه مبلغ",
+      "settled": "مسدّد"
+    },
+    "noAccounts": "لا يوجد طلاب.",
+    "prev": "السابق",
+    "next": "التالي"
   }
 }

@@ -120,6 +120,7 @@ class SeedDemoSchool
                 $staff[] = ['teacher'.($s * self::TEACHERS_PER_SUBJECT + $k), $this->teacherName($n++), StaffType::Teacher, $code];
             }
         }
+        $staff[] = ['accountant1', 'سامر خليل', StaffType::Accountant, null];
         $staff[] = ['nurse1', 'نور حسن', StaffType::Nurse, null];
 
         return $staff;
