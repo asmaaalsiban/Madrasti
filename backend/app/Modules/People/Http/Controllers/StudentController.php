@@ -29,7 +29,7 @@ class StudentController extends AcademicController
 
     protected array $searchRelations = ['user' => ['email']];
 
-    protected array $with = ['user', 'guardians', 'enrollments.classroom', 'fees'];
+    protected array $with = ['user', 'guardians', 'enrollments.classroom', 'fees.items'];
 
     protected string $orderBy = 'student_number';
 

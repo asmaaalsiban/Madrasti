@@ -27,6 +27,19 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
               <Money value={fee.total} currency={c} />{Number(fee.discount) > 0 && <> − <Money value={fee.discount} currency={c} /> ({t('finance.discount')})</>}
             </span>
           </div>
+          {fee.items?.length > 0 && (
+            <ul className="space-y-0.5 text-sm" aria-label={t('finance.items')}>
+              {fee.items.map((item) => (
+                <li key={item.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{item.kind === 'discount' ? t('finance.discount') : item.description}</span>
+                  <span className="flex items-center gap-2">
+                    <Money value={item.amount} currency={c} />
+                    {onTransport && item.kind === 'transport' && <button type="button" className="text-xs text-brand underline" onClick={() => onTransport(fee, item)}>{t('finance.changeTransport')}</button>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-start text-sm">
               <thead className="bg-slate-50"><tr>{['no', 'dueDate', 'amount', 'paid', 'remaining', 'status'].map((k) => <th key={k} className="p-2 text-start font-medium">{t(`finance.cols.${k}`)}</th>)}</tr></thead>
@@ -50,7 +63,7 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
               <ul className="divide-y text-sm">
                 {fee.payments.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
-                    <span><span dir="ltr">{p.paid_on}</span> · <Money value={p.amount} currency={c} /> · {t(`finance.methods.${p.method}`)} · <span dir="ltr">{p.receipt}</span></span>
+                    <span><span dir="ltr">{p.paid_on}</span> · <Money value={p.amount} currency={c} /> · {t(`finance.methods.${p.method}`)} · <span dir="ltr">{p.receipt}</span>{p.payer_name && <> · {t('finance.paidBy', { name: p.payer_name })}</>}</span>
                     <span className="flex gap-2">
                       {onReceipt && <button type="button" className="text-brand underline" onClick={() => onReceipt(p, fee)}>{t('finance.receipt')}</button>}
                       {onVoid && <button type="button" className="text-red-700 underline" onClick={() => onVoid(p)}>{t('finance.voidPayment')}</button>}
@@ -60,11 +73,10 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
               </ul>
             </div>
           )}
-          {(onPay || onDeleteFee || onTransport || onDiscount) && (
+          {(onPay || onDeleteFee || onDiscount) && (
             <div className="flex gap-2 pt-1">
               {onPay && Number(fee.remaining) > 0 && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => onPay(fee)}>{t('finance.recordPayment')}</button>}
-              {onTransport && fee.kind === 'transport' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onTransport(fee)}>{t('finance.changeTransport')}</button>}
-              {onDiscount && fee.kind !== 'transport' && fee.payments.length === 0 && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</button>}
+              {onDiscount && fee.kind !== 'transport' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</button>}
               {onDeleteFee && fee.payments.length === 0 && <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => onDeleteFee(fee)}>{t('finance.deleteFee')}</button>}
             </div>
           )}

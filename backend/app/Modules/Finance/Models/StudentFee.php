@@ -33,6 +33,11 @@ class StudentFee extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(StudentFeeItem::class)->orderBy('id');
+    }
+
     public function installments(): HasMany
     {
         return $this->hasMany(Installment::class)->orderBy('number');

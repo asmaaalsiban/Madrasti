@@ -119,20 +119,6 @@ class FinanceTest extends AcademicTestCase
         $this->deleteJson("/api/finance/fee-structures/{$structure->id}")->assertUnprocessable(); // already given to students
     }
 
-    public function test_a_custom_fee_with_a_discount_and_a_hand_written_schedule(): void
-    {
-        $student = $this->students['three'];
-        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Bus', 'total_amount' => 300, 'discount' => 50, 'installments_count' => 5, 'first_due' => '2026-09-15'])
-            ->assertCreated();
-        $this->assertSame(['50.00', '50.00', '50.00', '50.00', '50.00'], StudentFee::first()->installments->pluck('amount')->all());
-
-        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Books', 'total_amount' => 100, 'installments' => [['due_date' => '2026-09-01', 'amount' => 30], ['due_date' => '2026-10-01', 'amount' => 60]]])
-            ->assertUnprocessable()->assertJsonValidationErrors('installments'); // 90 is not 100
-        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Books', 'total_amount' => 100, 'installments' => [['due_date' => '2026-09-01', 'amount' => 30], ['due_date' => '2026-10-01', 'amount' => 70]]])->assertCreated();
-        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Free', 'total_amount' => 100, 'discount' => 100, 'installments_count' => 1, 'first_due' => '2026-09-01'])->assertUnprocessable();
-        $this->assertSame(2, StudentFee::count());
-    }
-
     public function test_a_payment_is_spread_over_the_oldest_installments_first(): void
     {
         $fee = $this->applied(1000, 4); // 250 each, due Sep 1, Oct 1, Nov 1, Dec 1 2026
@@ -189,21 +175,6 @@ class FinanceTest extends AcademicTestCase
         $this->assertSame(['0.00', '0.00', '0.00', '0.00'], $fee->fresh()->installments->pluck('paid_amount')->all());
         $this->assertSame(0, Payment::count());
         $this->assertTrue(AuditLog::where('auditable_type', Payment::class)->where('action', 'deleted')->exists());
-    }
-
-    public function test_the_discount_and_deleting_a_fee_are_only_possible_before_any_payment(): void
-    {
-        $fee = $this->applied(1000, 4);
-        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 200])->assertOk();
-        $this->assertSame(['200.00', '200.00', '200.00', '200.00'], $fee->fresh()->installments->pluck('amount')->all());
-        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 1000])->assertUnprocessable();
-
-        $this->pay($fee, 100)->assertCreated();
-        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 100])->assertUnprocessable();
-        $this->deleteJson("/api/finance/fees/{$fee->id}")->assertUnprocessable();
-
-        $other = StudentFee::where('student_id', $this->students['two']->id)->first();
-        $this->deleteJson("/api/finance/fees/{$other->id}")->assertNoContent();
     }
 
     public function test_the_accounts_list_filters_and_shows_balances(): void
@@ -324,5 +295,63 @@ class FinanceTest extends AcademicTestCase
 
         Sanctum::actingAs($this->teacher);
         $this->getJson('/api/finance/options')->assertForbidden();
+    }
+
+    public function test_a_fee_for_a_student_with_no_schedule_creates_one_with_transport_discount_and_a_first_payment(): void
+    {
+        $student = $this->students['three'];
+        $response = $this->postJson("/api/finance/students/{$student->id}/fees", [
+            'description' => 'Tuition', 'total_amount' => 900, 'transport_fee' => 100, 'discount' => 100, 'installments_count' => 9, 'first_due' => '2026-09-01',
+            'first_payment' => 200, 'first_payment_method' => 'cash', 'payer_name' => 'Abu Sami',
+        ])->assertCreated()->assertJsonPath('data.spread', false)->assertJsonCount(1, 'data.payments');
+
+        $fee = StudentFee::first();
+        $this->assertSame('1000.00', $fee->total_amount);
+        $this->assertSame(9, $fee->installments->count()); // 900 net in 9 installments: transport is inside them
+        $this->assertSame(['other', 'transport', 'discount'], $fee->items->pluck('kind')->all());
+        $this->assertSame(['100.00', '100.00', '100.00', '100.00', '100.00', '100.00', '100.00', '100.00', '100.00'], $fee->installments->pluck('amount')->all());
+        $this->assertSame(['100.00', '100.00'], array_slice($fee->installments->pluck('paid_amount')->all(), 0, 2)); // the 200 paid first
+        $this->assertSame('Abu Sami', Payment::first()->payer_name);
+    }
+
+    public function test_a_schedule_that_does_not_add_up_and_a_discount_that_eats_the_fee_are_refused(): void
+    {
+        $student = $this->students['three'];
+        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Books', 'total_amount' => 100, 'installments' => [['due_date' => '2026-09-01', 'amount' => 30], ['due_date' => '2026-10-01', 'amount' => 60]]])
+            ->assertUnprocessable()->assertJsonValidationErrors('installments'); // 90 is not 100
+        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Free', 'total_amount' => 100, 'discount' => 100, 'installments_count' => 1, 'first_due' => '2026-09-01'])->assertUnprocessable();
+        $this->postJson("/api/finance/students/{$student->id}/fees", ['description' => 'Books', 'total_amount' => 100, 'installments' => [['due_date' => '2026-09-01', 'amount' => 30], ['due_date' => '2026-10-01', 'amount' => 70]]])->assertCreated();
+        $this->assertSame(1, StudentFee::count());
+    }
+
+    public function test_the_discount_can_change_at_any_time_but_a_fee_with_payments_cannot_be_deleted(): void
+    {
+        $fee = $this->applied(1000, 4);
+        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 200])->assertOk();
+        $this->assertSame(['200.00', '200.00', '200.00', '200.00'], $fee->fresh()->installments->pluck('amount')->all());
+        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 1000])->assertUnprocessable();
+
+        $this->pay($fee, 100)->assertCreated(); // a part of the first installment
+        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 300])->assertOk(); // 100 more off the open installments
+        $this->assertSame(['100.00', '200.00', '200.00', '200.00'][0], $fee->fresh()->installments[0]->paid_amount);
+        $this->assertSame(700.0, round(array_sum(array_map('floatval', $fee->fresh()->installments->pluck('amount')->all())), 2));
+        $this->assertSame(['yearly', 'discount'], $fee->fresh()->items->pluck('kind')->all());
+        $this->putJson("/api/finance/fees/{$fee->id}", ['discount' => 0])->assertOk();
+        $this->assertSame(['yearly'], $fee->fresh()->items->pluck('kind')->all());
+
+        $this->deleteJson("/api/finance/fees/{$fee->id}")->assertUnprocessable();
+        $other = StudentFee::where('student_id', $this->students['two']->id)->first();
+        $this->deleteJson("/api/finance/fees/{$other->id}")->assertNoContent();
+    }
+
+    public function test_the_payer_name_is_kept_for_the_receipt(): void
+    {
+        $fee = $this->applied(1000, 4);
+        $this->pay($fee, 100, ['payer_name' => 'Abu Mohammad'])->assertCreated()->assertJsonPath('data.payer_name', 'Abu Mohammad');
+
+        $statement = $this->getJson("/api/finance/students/{$this->students['one']->id}")->json('data');
+        $this->assertSame('Abu Mohammad', $statement['fees'][0]['payments'][0]['payer_name']);
+        $this->assertTrue($statement['has_schedule']);
+        $this->assertSame(['yearly'], array_column($statement['fees'][0]['items'], 'kind'));
     }
 }
