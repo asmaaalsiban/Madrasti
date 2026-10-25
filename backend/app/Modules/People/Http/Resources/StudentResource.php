@@ -34,6 +34,10 @@ class StudentResource extends JsonResource
             'classroom' => $classroom ? ['id' => $classroom->id, 'name' => $classroom->name] : null,
             // Only present right after the student was created: the generated login the admin hands over.
             'account' => $this->when($this->resource->getAttribute('generated_account') !== null, fn () => $this->resource->getAttribute('generated_account')),
+            // Only right after creation: the fees the student got (the grade's yearly fee, transport).
+            'created_fees' => $this->when($this->resource->getAttribute('created_fees') !== null, fn () => $this->resource->getAttribute('created_fees')),
+            // For the admin only: what the student owes, paid and remaining this year (filled by the list).
+            'balance' => $this->when($request->attributes->has('student_balances'), fn () => $request->attributes->get('student_balances')[$this->id] ?? null),
             // The primary parent first: the form edits that one.
             'guardians' => $this->guardians->sortByDesc(fn ($guardian) => (int) $guardian->pivot->is_primary)->map(fn ($guardian) => [
                 'id' => $guardian->id,

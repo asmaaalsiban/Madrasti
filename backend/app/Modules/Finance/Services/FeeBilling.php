@@ -6,6 +6,7 @@ namespace App\Modules\Finance\Services;
 
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\FeeStructure;
@@ -80,6 +81,45 @@ class FeeBilling
         }
 
         return $students->count();
+    }
+
+    /**
+     * A student placed in a section gets, automatically, the yearly fee of that grade (split by the fee's own plan) and, if given,
+     * a transport fee (it differs from student to student: where they live). The discount is taken off the first fee of the grade.
+     * Fees the student already has are skipped, so it can run again when the student moves or is saved.
+     *
+     * @return list<StudentFee> the fees that were created
+     */
+    public function onboard(Student $student, Classroom $classroom, float $discount = 0, float $transport = 0): array
+    {
+        $year = $classroom->academicYear ?? AcademicYear::findOrFail($classroom->academic_year_id);
+        $structures = FeeStructure::where('academic_year_id', $year->id)->where('grade_level_id', $classroom->grade_level_id)
+            ->where('auto_apply', true)->whereNotNull('first_due')->orderBy('id')->get();
+        $given = StudentFee::where('student_id', $student->id)->where('academic_year_id', $year->id)->get();
+
+        if ($discount > 0 && ($structures->isEmpty() || Money::cents($discount) >= Money::cents($structures->first()->amount))) {
+            throw ValidationException::withMessages(['fee_discount' => [__('finance.discount_too_big')]]);
+        }
+
+        $created = [];
+        foreach ($structures as $i => $structure) {
+            if ($given->contains('fee_structure_id', $structure->id)) {
+                continue;
+            }
+            $off = $i === 0 ? $discount : 0;
+            $net = Money::cents($structure->amount) - Money::cents($off);
+            $created[] = $this->createFee($student, $year, $structure->name, $structure->amount, $off, $this->evenSchedule($net, $structure->installments_count, $structure->first_due->toDateString(), $structure->every_months), $structure->id);
+        }
+
+        if ($transport > 0 && ! $given->contains(fn (StudentFee $f) => $f->description === __('finance.transport') && $f->fee_structure_id === null)) {
+            $plan = $structures->first();
+            $schedule = $plan
+                ? $this->evenSchedule(Money::cents($transport), $plan->installments_count, $plan->first_due->toDateString(), $plan->every_months)
+                : $this->evenSchedule(Money::cents($transport), 1, now()->addMonthNoOverflow()->startOfMonth()->toDateString());
+            $created[] = $this->createFee($student, $year, __('finance.transport'), $transport, 0, $schedule);
+        }
+
+        return $created;
     }
 
     /** What is still owed on a fee, in cents. */

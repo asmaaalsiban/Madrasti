@@ -78,9 +78,9 @@ class FinanceTest extends AcademicTestCase
 
     public function test_the_accountant_manages_fee_structures_and_the_admin_only_reads(): void
     {
-        $id = $this->postJson('/api/finance/fee-structures', ['grade_level_id' => $this->grade5->id, 'name' => 'Tuition', 'amount' => 1200])->assertCreated()->json('data.id');
-        $this->putJson("/api/finance/fee-structures/$id", ['grade_level_id' => $this->grade5->id, 'name' => 'Tuition 2026', 'amount' => 1250])->assertOk();
-        $this->getJson('/api/finance/fee-structures')->assertOk()->assertJsonPath('data.0.name', 'Tuition 2026')->assertJsonPath('data.0.amount', '1250.00');
+        $id = $this->postJson('/api/finance/fee-structures', ['grade_level_id' => $this->grade5->id, 'name' => 'Tuition', 'amount' => 1200, 'installments_count' => 4, 'first_due' => '2026-09-01', 'every_months' => 1])->assertCreated()->json('data.id');
+        $this->putJson("/api/finance/fee-structures/$id", ['grade_level_id' => $this->grade5->id, 'name' => 'Tuition 2026', 'amount' => 1250, 'installments_count' => 5, 'first_due' => '2026-10-01', 'every_months' => 2, 'auto_apply' => false])->assertOk();
+        $this->getJson('/api/finance/fee-structures')->assertOk()->assertJsonPath('data.0.name', 'Tuition 2026')->assertJsonPath('data.0.amount', '1250.00')->assertJsonPath('data.0.installments_count', 5)->assertJsonPath('data.0.first_due', '2026-10-01')->assertJsonPath('data.0.auto_apply', false);
         $this->postJson('/api/finance/fee-structures', ['grade_level_id' => $this->grade5->id, 'name' => 'x', 'amount' => 0])->assertUnprocessable();
 
         Sanctum::actingAs($this->admin);

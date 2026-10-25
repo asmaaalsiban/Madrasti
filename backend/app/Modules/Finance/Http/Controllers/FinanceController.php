@@ -79,6 +79,7 @@ class FinanceController extends Controller
 
         return response()->json(['data' => $rows->map(fn (FeeStructure $s) => [
             'id' => $s->id, 'name' => $s->name, 'amount' => $s->amount, 'grade_level' => $s->gradeLevel->only(['id', 'name_ar', 'name_en']), 'students' => (int) ($given[$s->id] ?? 0),
+            'installments_count' => $s->installments_count, 'first_due' => $s->first_due?->format('Y-m-d'), 'every_months' => $s->every_months, 'auto_apply' => $s->auto_apply,
         ])->values(), 'currency' => $this->currency()]);
     }
 
@@ -116,11 +117,16 @@ class FinanceController extends Controller
     {
         $this->manage($request);
         $data = $request->validate([
-            'installments' => ['required', 'integer', 'between:1,24'], 'first_due' => ['required', 'date_format:Y-m-d'],
+            'installments' => ['sometimes', 'integer', 'between:1,24'], 'first_due' => ['sometimes', 'date_format:Y-m-d'],
             'every_months' => ['sometimes', 'integer', 'between:1,12'], 'discount' => ['sometimes', 'numeric', 'min:0'],
         ]);
+        $firstDue = $data['first_due'] ?? $structure->first_due?->toDateString();
+        if ($firstDue === null) {
+            throw ValidationException::withMessages(['first_due' => [__('finance.no_plan')]]);
+        }
 
-        $count = $this->billing->applyStructure($structure->load('academicYear'), $data['installments'], $data['first_due'], $data['every_months'] ?? 1, (float) ($data['discount'] ?? 0));
+        // Without options the fee's own plan is used.
+        $count = $this->billing->applyStructure($structure->load('academicYear'), $data['installments'] ?? $structure->installments_count, $firstDue, $data['every_months'] ?? $structure->every_months, (float) ($data['discount'] ?? 0));
 
         return response()->json(['data' => ['students' => $count]]);
     }
@@ -235,6 +241,9 @@ class FinanceController extends Controller
     /** @return array<string, mixed> */
     private function structureData(Request $request): array
     {
-        return $request->validate(['grade_level_id' => ['required', 'integer', 'exists:grade_levels,id'], 'name' => ['required', 'string', 'max:255'], 'amount' => ['required', 'numeric', 'gt:0']]);
+        return $request->validate([
+            'grade_level_id' => ['required', 'integer', 'exists:grade_levels,id'], 'name' => ['required', 'string', 'max:255'], 'amount' => ['required', 'numeric', 'gt:0'],
+            'installments_count' => ['required', 'integer', 'between:1,24'], 'first_due' => ['required', 'date_format:Y-m-d'], 'every_months' => ['required', 'integer', 'between:1,12'], 'auto_apply' => ['sometimes', 'boolean'],
+        ]);
     }
 }

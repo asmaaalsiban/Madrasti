@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
+use App\Modules\Finance\Models\Money;
+use App\Modules\Finance\Services\FeeBilling;
 use App\Modules\People\Services\StudentEmail;
 use App\Shared\Enums\Role;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +26,7 @@ class SaveStudent
     /**
      * @param  array<string, mixed>  $data  validated StudentRequest data
      */
-    public function __construct(private readonly StudentEmail $emails) {}
+    public function __construct(private readonly StudentEmail $emails, private readonly FeeBilling $billing) {}
 
     /**
      * The student's login email is generated; it is returned once, with the default password, as the
@@ -47,10 +49,13 @@ class SaveStudent
 
             $student = Student::create([...$this->studentFields($data), 'user_id' => $account->id]);
 
-            $this->place($student, $data['classroom_id'] ?? null);
+            $classroom = $this->place($student, $data['classroom_id'] ?? null);
             $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, $data['guardian_phone'] ?? null);
+            // The yearly fee of the grade is applied by itself; the form may add a transport fee and a discount.
+            $fees = $classroom ? $this->billing->onboard($student, $classroom, (float) ($data['fee_discount'] ?? 0), (float) ($data['transport_fee'] ?? 0)) : [];
 
             $student = $this->loaded($student);
+            $student->setAttribute('created_fees', array_map(fn ($f) => ['description' => $f->description, 'net' => Money::amount(Money::cents($f->total_amount) - Money::cents($f->discount)), 'installments' => $f->installments->count()], $fees));
             $student->setAttribute('generated_account', ['email' => $email, 'password' => config('accounts.default_password')]);
 
             return $student;
@@ -68,8 +73,12 @@ class SaveStudent
             // The name follows the student record; the generated email and the password are never touched here.
             $student->user?->update(['name' => $data['name_ar']]);
 
-            $this->place($student, $data['classroom_id'] ?? null);
+            $classroom = $this->place($student, $data['classroom_id'] ?? null);
             $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, $data['guardian_phone'] ?? null, replacePrimary: true);
+            // A student moved to a grade whose yearly fee they do not have yet gets it (fees they have are never touched).
+            if ($classroom) {
+                $this->billing->onboard($student, $classroom);
+            }
 
             return $this->loaded($student);
         });
@@ -99,11 +108,11 @@ class SaveStudent
     }
 
     /** Places the student in the classroom for that classroom's academic year (replacing the placement of that year). */
-    private function place(Student $student, int|string|null $classroomId): void
+    private function place(Student $student, int|string|null $classroomId): ?Classroom
     {
         // The browser sends a <select> value as text ("3"); an empty one means no classroom.
         if ($classroomId === null || $classroomId === '') {
-            return;
+            return null;
         }
 
         $classroom = Classroom::findOrFail((int) $classroomId);
@@ -112,6 +121,8 @@ class SaveStudent
             ['student_id' => $student->id, 'academic_year_id' => $classroom->academic_year_id],
             ['classroom_id' => $classroom->id],
         );
+
+        return $classroom;
     }
 
     /**

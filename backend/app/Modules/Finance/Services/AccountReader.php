@@ -93,6 +93,29 @@ class AccountReader
     }
 
     /**
+     * Fees, paid, remaining and overdue of some students this year (the Students page shows them): student id => amounts.
+     *
+     * @param  list<int>  $studentIds
+     * @return array<int, array{net: string, paid: string, remaining: string, overdue: string}>
+     */
+    public function balances(array $studentIds, AcademicYear $year): array
+    {
+        $today = now()->toDateString();
+        $net = DB::table('student_fees')->where('academic_year_id', $year->id)->whereIn('student_id', $studentIds)->groupBy('student_id')->selectRaw('student_id, sum(total_amount - discount) as net')->pluck('net', 'student_id');
+        $paid = DB::table('installments')->join('student_fees', 'student_fees.id', '=', 'installments.student_fee_id')->where('student_fees.academic_year_id', $year->id)->whereIn('student_fees.student_id', $studentIds)
+            ->groupBy('student_fees.student_id')->selectRaw('student_fees.student_id as student_id, sum(installments.paid_amount) as paid, sum(case when installments.due_date < ? and installments.paid_amount < installments.amount then installments.amount - installments.paid_amount else 0 end) as overdue', [$today])->get()->keyBy('student_id');
+
+        $out = [];
+        foreach ($studentIds as $id) {
+            $n = Money::cents($net[$id] ?? 0);
+            $p = Money::cents($paid[$id]->paid ?? 0);
+            $out[$id] = ['net' => Money::amount($n), 'paid' => Money::amount($p), 'remaining' => Money::amount($n - $p), 'overdue' => Money::amount(Money::cents($paid[$id]->overdue ?? 0))];
+        }
+
+        return $out;
+    }
+
+    /**
      * School totals for the year: expected, collected, remaining, overdue, collected this month, and the same per grade.
      *
      * @return array<string, mixed>

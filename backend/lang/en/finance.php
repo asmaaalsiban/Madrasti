@@ -8,4 +8,7 @@ return [
     'not_allowed' => 'You are not allowed to manage the school fees.',
     'already_paid' => 'Fees with payments cannot be deleted. Cancel the payments first.',
     'no_year' => 'There is no current academic year.',
+    'discount_too_big' => 'The discount must be less than the yearly fee of the grade, and the grade needs a yearly fee with a plan.',
+    'transport' => 'Transport',
+    'no_plan' => 'Give the fee a first installment date, or choose one now.',
 ];
