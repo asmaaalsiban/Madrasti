@@ -192,7 +192,10 @@
       "guardianName": "Parent name",
       "guardians": "Parents",
       "homeroomTeacher": "Homeroom teacher",
-      "guardianPhone": "Parent phone"
+      "guardianPhone": "Parent phone",
+      "transportFee": "Transport fee (optional)",
+      "feeDiscount": "Discount (an amount, optional)",
+      "remaining": "Remaining fees"
     },
     "male": "Male",
     "female": "Female",
@@ -209,7 +212,9 @@
       "text": "The student signs in with these details and must change the password. Save them now: the password is shown only once.",
       "email": "Email",
       "password": "Password",
-      "close": "Close"
+      "close": "Close",
+      "fees": "Fees applied",
+      "installments": "{{count}} installments"
     },
     "guardianPicker": {
       "label": "Find an existing parent",
@@ -217,7 +222,9 @@
       "none": "No parent found. Type the email below to create a new one."
     },
     "filterClassroom": "Filter by classroom",
-    "allClassrooms": "All classrooms"
+    "allClassrooms": "All classrooms",
+    "transportHint": "Leave empty if the student does not use the bus. It depends on where the student lives: change it when they move to another area (what was paid is kept and the unpaid installments are re-split).",
+    "discountHint": "The yearly fee of the grade is applied by itself. An amount to take off it (e.g. a sibling discount)."
   },
   "staff": {
     "title": "Staff",
@@ -891,6 +898,11 @@
     },
     "noAccounts": "No students found.",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "autoApply": "Apply automatically to new students of this grade",
+    "autoApplyHelp": "A student added to a section of this grade gets this fee by itself, split by the plan above. Turn it off to give it by hand.",
+    "planSummary": "{{count}} installments from {{date}}",
+    "automatic": "automatic",
+    "manual": "by hand"
   }
 }

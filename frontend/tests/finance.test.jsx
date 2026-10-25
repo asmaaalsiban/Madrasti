@@ -64,7 +64,7 @@ describe('FinanceDashboardPage', () => {
 
 describe('FeeStructuresPage', () => {
   const serve = (canManage) => api.get.mockImplementation((url) => {
-    if (url === '/finance/fee-structures') return Promise.resolve({ data: { currency: 'JOD', data: [{ id: 1, name: 'Tuition', amount: '1200.00', grade_level: { id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }, students: 3 }] } })
+    if (url === '/finance/fee-structures') return Promise.resolve({ data: { currency: 'JOD', data: [{ id: 1, name: 'Tuition', amount: '1200.00', grade_level: { id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }, students: 3, installments_count: 4, first_due: '2026-09-01', every_months: 1, auto_apply: true }] } })
     if (url === '/finance/options') return Promise.resolve({ data: { data: { grades: [{ id: 5, name_ar: 'الخامس', name_en: 'Grade 5' }], classrooms: [] } } })
     return Promise.resolve({ data: { data: { currency: 'JOD', can_manage: canManage } } })
   })
@@ -75,11 +75,15 @@ describe('FeeStructuresPage', () => {
     wrap(<FeeStructuresPage />)
     expect(await screen.findByText('Tuition · Grade 5')).toBeInTheDocument()
     expect(screen.getByText(/given to 3 students/)).toBeInTheDocument()
+    expect(screen.getByText(/4 installments from 2026-09-01 · automatic/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'New yearly fee' }))
     fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'Bus' } })
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '300' } })
+    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-01' } })
+    fireEvent.change(screen.getByLabelText('Number of installments'), { target: { value: '3' } })
+    fireEvent.click(screen.getByLabelText('Apply automatically to new students of this grade'))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/fee-structures', { grade_level_id: 5, name: 'Bus', amount: '300' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/fee-structures', { grade_level_id: 5, name: 'Bus', amount: '300', installments_count: 3, first_due: '2026-09-01', every_months: 1, auto_apply: false }))
   })
 
   it('gives a fee to the grade, split into installments', async () => {
@@ -87,7 +91,7 @@ describe('FeeStructuresPage', () => {
     api.post.mockResolvedValue({ data: { data: { students: 12 } } })
     wrap(<FeeStructuresPage />)
     fireEvent.click(await screen.findByRole('button', { name: "Give to the grade's students" }))
-    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-01' } })
+    expect(screen.getByLabelText('First installment due on')).toHaveValue('2026-09-01') // the fee's own plan
     fireEvent.click(screen.getByRole('button', { name: 'Give' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/fee-structures/1/apply', { installments: 4, first_due: '2026-09-01', every_months: 1, discount: 0 }))
     expect(await screen.findByRole('status')).toHaveTextContent('given to 12 students')

@@ -27,6 +27,9 @@ class StudentRequest extends FormRequest
             'birth_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'gender' => ['nullable', Rule::in(['male', 'female'])],
             'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            // Only used when the student is created: the transport fee (it differs from student to student) and a discount in money.
+            'transport_fee' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+            'fee_discount' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_email' => ['nullable', 'email', 'max:255', $this->guardianEmailRule()],
             'guardian_phone' => ['nullable', 'string', 'max:30', $this->guardianPhoneRule()],

@@ -18,14 +18,14 @@ class FeeStructure extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['academic_year_id', 'grade_level_id', 'name', 'amount'];
+    protected $fillable = ['academic_year_id', 'grade_level_id', 'name', 'amount', 'installments_count', 'first_due', 'every_months', 'auto_apply'];
 
     /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
-        return ['amount' => 'decimal:2'];
+        return ['amount' => 'decimal:2', 'first_due' => 'date:Y-m-d', 'auto_apply' => 'boolean'];
     }
 
     public function academicYear(): BelongsTo

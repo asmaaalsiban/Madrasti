@@ -6,6 +6,7 @@ namespace App\Modules\Finance\Services;
 
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\FeeStructure;
@@ -43,7 +44,7 @@ class FeeBilling
      *
      * @param  list<array{due_date: string, amount: string|float|int}>  $schedule
      */
-    public function createFee(Student $student, AcademicYear $year, string $description, string|float $total, string|float $discount, array $schedule, ?int $structureId = null): StudentFee
+    public function createFee(Student $student, AcademicYear $year, string $description, string|float $total, string|float $discount, array $schedule, ?int $structureId = null, ?string $kind = null): StudentFee
     {
         $net = Money::cents($total) - Money::cents($discount);
         if ($net <= 0 || Money::cents($discount) < 0) {
@@ -53,9 +54,9 @@ class FeeBilling
             throw ValidationException::withMessages(['installments' => [__('finance.schedule_mismatch')]]);
         }
 
-        return DB::transaction(function () use ($student, $year, $description, $total, $discount, $schedule, $structureId): StudentFee {
+        return DB::transaction(function () use ($student, $year, $description, $total, $discount, $schedule, $structureId, $kind): StudentFee {
             $fee = StudentFee::create([
-                'student_id' => $student->id, 'academic_year_id' => $year->id, 'fee_structure_id' => $structureId,
+                'student_id' => $student->id, 'academic_year_id' => $year->id, 'fee_structure_id' => $structureId, 'kind' => $kind ?? ($structureId ? 'yearly' : 'other'),
                 'description' => $description, 'total_amount' => $total, 'discount' => $discount,
             ]);
             foreach (array_values($schedule) as $i => $row) {
@@ -80,6 +81,109 @@ class FeeBilling
         }
 
         return $students->count();
+    }
+
+    /**
+     * A student placed in a section gets, automatically, the yearly fee of that grade (split by the fee's own plan) and, if given,
+     * a transport fee (it differs from student to student: where they live). The discount is taken off the first fee of the grade.
+     * Fees the student already has are skipped, so it can run again when the student moves or is saved.
+     *
+     * @return list<StudentFee> the fees that were created
+     */
+    public function onboard(Student $student, Classroom $classroom, float $discount = 0, float $transport = 0): array
+    {
+        $year = $classroom->academicYear ?? AcademicYear::findOrFail($classroom->academic_year_id);
+        $structures = FeeStructure::where('academic_year_id', $year->id)->where('grade_level_id', $classroom->grade_level_id)
+            ->where('auto_apply', true)->whereNotNull('first_due')->orderBy('id')->get();
+        $given = StudentFee::where('student_id', $student->id)->where('academic_year_id', $year->id)->get();
+
+        if ($discount > 0 && ($structures->isEmpty() || Money::cents($discount) >= Money::cents($structures->first()->amount))) {
+            throw ValidationException::withMessages(['fee_discount' => [__('finance.discount_too_big')]]);
+        }
+
+        $created = [];
+        foreach ($structures as $i => $structure) {
+            if ($given->contains('fee_structure_id', $structure->id)) {
+                continue;
+            }
+            $off = $i === 0 ? $discount : 0;
+            $net = Money::cents($structure->amount) - Money::cents($off);
+            $created[] = $this->createFee($student, $year, $structure->name, $structure->amount, $off, $this->evenSchedule($net, $structure->installments_count, $structure->first_due->toDateString(), $structure->every_months), $structure->id);
+        }
+
+        if ($transport > 0 && ($fee = $this->setTransport($student, $classroom, $transport)) !== null && $fee->wasRecentlyCreated) {
+            $created[] = $fee;
+        }
+
+        return $created;
+    }
+
+    /**
+     * Sets the student's transport fee to an amount (0 = no transport): the area a student lives in can change between the
+     * terms. A new fee is split by the grade's plan; an existing one keeps what was paid and the rest is re-split over the
+     * installments that are still open (a new one is added if all were closed, and open ones are dropped if nothing is left).
+     * The total can never go below what was already paid.
+     */
+    public function setTransport(Student $student, Classroom $classroom, float $amount): ?StudentFee
+    {
+        $year = $classroom->academicYear ?? AcademicYear::findOrFail($classroom->academic_year_id);
+        $fee = StudentFee::with('installments')->where('student_id', $student->id)->where('academic_year_id', $year->id)->where('kind', 'transport')->first();
+        $cents = Money::cents($amount);
+        if ($cents < 0) {
+            throw ValidationException::withMessages(['transport_fee' => [__('finance.bad_amounts')]]);
+        }
+
+        if ($fee === null) {
+            if ($cents === 0) {
+                return null;
+            }
+            $plan = FeeStructure::where('academic_year_id', $year->id)->where('grade_level_id', $classroom->grade_level_id)->where('auto_apply', true)->whereNotNull('first_due')->orderBy('id')->first();
+            $schedule = $plan
+                ? $this->evenSchedule($cents, $plan->installments_count, $plan->first_due->toDateString(), $plan->every_months)
+                : $this->evenSchedule($cents, 1, now()->addMonthNoOverflow()->startOfMonth()->toDateString());
+
+            return $this->createFee($student, $year, __('finance.transport'), $amount, 0, $schedule, null, 'transport');
+        }
+
+        if ($cents === Money::cents($fee->total_amount)) {
+            return $fee;
+        }
+
+        return DB::transaction(function () use ($fee, $cents): ?StudentFee {
+            $paid = $this->paidCents($fee);
+            if ($cents < $paid) {
+                throw ValidationException::withMessages(['transport_fee' => [__('finance.below_paid', ['paid' => Money::amount($paid)])]]);
+            }
+            if ($cents === 0) {
+                $fee->delete();
+
+                return null;
+            }
+
+            $rest = $cents - $paid;
+            $open = $fee->installments->filter(fn (Installment $i) => Money::cents($i->paid_amount) < Money::cents($i->amount))->values();
+            if ($open->isEmpty() && $rest > 0) {
+                $last = $fee->installments->last();
+                $new = Installment::create(['student_fee_id' => $fee->id, 'number' => ($last?->number ?? 0) + 1, 'due_date' => now()->addMonthNoOverflow()->startOfMonth()->toDateString(), 'amount' => '0.00', 'paid_amount' => 0, 'status' => 'pending']);
+                $open = collect([$new]);
+            }
+            $each = $open->isEmpty() ? 0 : intdiv($rest, $open->count());
+            foreach ($open as $i => $installment) {
+                $share = $i === $open->count() - 1 ? $rest - $each * ($open->count() - 1) : $each;
+                $amount = Money::cents($installment->paid_amount) + $share;
+                if ($amount === 0) {
+                    $installment->delete();
+
+                    continue;
+                }
+                $installment->amount = Money::amount($amount);
+                $installment->status = $installment->effectiveStatus();
+                $installment->save();
+            }
+            $fee->update(['total_amount' => Money::amount($cents)]);
+
+            return $fee->load('installments');
+        });
     }
 
     /** What is still owed on a fee, in cents. */

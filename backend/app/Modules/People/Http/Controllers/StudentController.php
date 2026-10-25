@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace App\Modules\People\Http\Controllers;
 
 use App\Modules\Academic\Http\Controllers\AcademicController;
+use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Student;
+use App\Modules\Finance\Services\AccountReader;
 use App\Modules\People\Actions\SaveStudent;
 use App\Modules\People\Http\Requests\StudentRequest;
 use App\Modules\People\Http\Resources\StudentResource;
+use App\Shared\Enums\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
 class StudentController extends AcademicController
@@ -25,9 +29,22 @@ class StudentController extends AcademicController
 
     protected array $searchRelations = ['user' => ['email']];
 
-    protected array $with = ['user', 'guardians', 'enrollments.classroom'];
+    protected array $with = ['user', 'guardians', 'enrollments.classroom', 'fees'];
 
     protected string $orderBy = 'student_number';
+
+    /** The list; for the admin each student also shows what they owe and what remains (fees of the current year). */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $response = parent::index($request);
+        $year = AcademicYear::where('is_current', true)->first();
+        if ($year !== null && $request->user()->hasRole(Role::Admin)) {
+            $ids = $response->collection->map(fn ($r) => $r->resource->id)->all();
+            $request->attributes->set('student_balances', app(AccountReader::class)->balances($ids, $year));
+        }
+
+        return $response;
+    }
 
     public function store(StudentRequest $request, SaveStudent $save): JsonResponse
     {

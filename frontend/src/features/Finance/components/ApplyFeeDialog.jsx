@@ -8,7 +8,7 @@ import Modal from '../../../components/shared/Modal'
 export default function ApplyFeeDialog({ structure, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ installments: '4', first_due: '', every_months: '1', discount: '0' })
+  const [form, setForm] = useState({ installments: String(structure.installments_count ?? 4), first_due: structure.first_due ?? '', every_months: String(structure.every_months ?? 1), discount: '0' })
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
