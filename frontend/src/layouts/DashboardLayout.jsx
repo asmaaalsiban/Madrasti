@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import LanguageSwitcher from '../components/shared/LanguageSwitcher'
 import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
+import useUnreadChat from '../features/Chat/hooks/useUnreadChat'
 import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
 import NotificationBell from '../features/Notifications/NotificationBell'
@@ -14,6 +15,7 @@ export default function DashboardLayout() {
   const { user, logout } = useAuth()
   const { data: school } = useSchool()
   const unread = useUnreadAnnouncements()
+  const unreadChat = useUnreadChat()
   const subject = user.subject ? user.subject[`name_${i18n.language}`] || user.subject.name_ar : null
   const isHead = user.staff_type === 'head_of_department'
   // "Student: Ahmad Khaled · 5-A", "Teacher: Sara · Math", "Head of department Math: Omar", "Parent: Mohammad".
@@ -28,6 +30,9 @@ export default function DashboardLayout() {
           <span className="text-sm">{label}: <strong>{user.name}</strong>{detail ? ` · ${detail}` : ''}</span>
           <NotificationBell />
           <LanguageSwitcher />
+          <Link to={`/${user.role}/chat`} className="rounded border px-3 py-1 text-sm">
+            {t('chat.title')}{unreadChat > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('chat.unread', { count: unreadChat })}>{unreadChat}</span>}
+          </Link>
           <Link to={`/${user.role}/announcements`} className="rounded border px-3 py-1 text-sm">
             {t('announcements.title')}{unread > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('announcements.unread', { count: unread })}>{unread}</span>}
           </Link>

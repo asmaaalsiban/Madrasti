@@ -8,7 +8,7 @@ import AdminLayout from '../src/layouts/AdminLayout'
 vi.mock('../src/features/Auth/AuthProvider', () => ({
   useAuth: () => ({ user: { role: 'admin', name: 'A' }, logout: () => {} }),
 }))
-vi.mock('../src/api/client', () => ({ api: { get: vi.fn(() => Promise.resolve({ data: { data: { count: 3 } } })) } }))
+vi.mock('../src/api/client', () => ({ api: { get: vi.fn((url) => Promise.resolve({ data: { data: url.startsWith('/chat') ? { count: 0 } : { count: 3 } } })) } }))
 vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'مدرسة' } }) }))
 
 describe('AdminLayout', () => {

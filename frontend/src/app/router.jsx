@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
@@ -49,10 +49,20 @@ import LessonPlansPage from '../features/LessonPlans/pages/LessonPlansPage'
 import ReviewPlansPage from '../features/LessonPlans/pages/ReviewPlansPage'
 import { ChildPlansPage, StudentPlansPage } from '../features/LessonPlans/pages/PlansPages'
 import AnnouncementsPage from '../features/Announcements/pages/AnnouncementsPage'
+import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
+import { useAuth } from '../features/Auth/AuthProvider'
 import { RequireAuth, RequireRole } from './guards'
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
+
+// A notification link /chat?c=5 goes to the chat page of whoever opens it.
+function ChatRedirect() {
+  const { user, loading } = useAuth()
+  const { search } = useLocation()
+  if (loading) return null
+  return <Navigate to={user ? `/${user.role}/chat${search}` : '/login'} replace />
+}
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
@@ -96,6 +106,7 @@ export const routes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/chat', element: <ChatRedirect /> },
   {
     element: <RequireAuth />,
     children: [
@@ -105,7 +116,7 @@ export const routes = [
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
-          children: [...(HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }]), { path: 'announcements', element: <AnnouncementsPage /> }],
+          children: [...(HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }]), { path: 'announcements', element: <AnnouncementsPage /> }, { path: 'chat', element: <ChatPage /> }],
         })),
       },
       {
@@ -130,6 +141,7 @@ export const routes = [
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
               { path: '/admin/announcements', element: <AnnouncementsPage /> },
+              { path: '/admin/chat', element: <ChatPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },

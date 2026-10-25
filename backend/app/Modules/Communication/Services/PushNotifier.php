@@ -61,8 +61,9 @@ class PushNotifier
     {
         $p = $event['params'];
         $pick = fn (string $key) => $p["{$key}_{$locale}"] ?? $p["{$key}_ar"] ?? '';
-        $key = 'push.'.$event['kind'].($event['kind'] === 'plan_reviewed' ? '.'.($p['decision'] ?? 'approve') : '');
-        $text = __($key, ['subject' => $pick('subject'), 'title' => $p['title'] ?? '', 'teacher' => $p['teacher'] ?? '', 'student' => $pick('student'), 'note' => $p['note'] ?? ''], $locale);
+        $kind = $event['kind'] === 'chat_message' && filled($p['group'] ?? null) ? 'chat_group' : $event['kind'];
+        $key = 'push.'.$kind.($kind === 'plan_reviewed' ? '.'.($p['decision'] ?? 'approve') : '');
+        $text = __($key, ['subject' => $pick('subject'), 'title' => $p['title'] ?? '', 'teacher' => $p['teacher'] ?? '', 'student' => $pick('student'), 'note' => $p['note'] ?? '', 'sender' => $p['sender'] ?? '', 'group' => $p['group'] ?? ''], $locale);
         if ($text === $key) {
             $text = __('push.unknown', [], $locale);
         }
