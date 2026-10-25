@@ -251,3 +251,10 @@ On the **Add student** form, once a section is chosen, two optional amounts appe
 The **Add student** form has a **Fees** section (it appears once a section is chosen; the **Edit** form shows it too): the grade's yearly fee is added by itself, and below it come what differs for this student: **Transport fee** (also on Edit: a student can move to another area), **Discount** (only when adding), and **First payment** with its method (only when adding): the amount received now is taken from the yearly fee first and the rest from transport; it can never be more than the fees owe, it gets a receipt (one per fee it covered, listed in the dialog after saving, printable from the student's account), and if anything is refused the student is not created. The person who registers the student is the receiver of that payment.
 
 The accountant has the same in **Finance > Students' accounts > the student**: **Add / Change the transport fee** (`PUT /finance/students/{id}/transport`), **Change the discount** of a yearly fee (only before any payment), **Record a payment** and **Add a fee**. No migration.
+
+## One schedule per student, payer name on receipts
+- Each student has one yearly fee with one installment schedule. Transport and discount are lines inside it (`student_fee_items`), not separate schedules.
+- Adding fees to a student who already has a schedule spreads the amount over the **remaining open installments** (e.g. 900 over 9 months, 200 paid → 700 over 7; +100 transport → spread over the same 7).
+- The add-fees dialog sets installments, transport, discount and the first payment together.
+- Paying an installment accepts a `payer_name`; the receipt is written in that name.
+- Requires `php artisan tenants:migrate`.

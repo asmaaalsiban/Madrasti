@@ -19,15 +19,16 @@ const wrap = (ui, path = '/', route = '/') => render(
 )
 
 const statement = {
-  currency: 'JOD', student: { id: 7, name_ar: 'ليلى', name_en: 'Layla', student_number: 'S-1' },
+  currency: 'JOD', payer_default: 'Abu Layla', has_schedule: true, student: { id: 7, name_ar: 'ليلى', name_en: 'Layla', student_number: 'S-1' },
   totals: { net: '1000.00', paid: '250.00', remaining: '750.00', overdue: '250.00' },
   fees: [{
     id: 3, kind: 'yearly', description: 'Tuition', total: '1200.00', discount: '200.00', net: '1000.00', paid: '250.00', remaining: '750.00', overdue: '250.00',
+    items: [{ id: 1, kind: 'yearly', description: 'Tuition', amount: '1100.00' }, { id: 2, kind: 'transport', description: 'Transport', amount: '100.00' }, { id: 3, kind: 'discount', description: 'Discount', amount: '-200.00' }],
     installments: [
       { id: 11, number: 1, due_date: '2026-09-01', amount: '500.00', paid: '250.00', remaining: '250.00', status: 'overdue' },
       { id: 12, number: 2, due_date: '2026-12-01', amount: '500.00', paid: '0.00', remaining: '500.00', status: 'pending' },
     ],
-    payments: [{ id: 21, receipt: 'R-000021', amount: '250.00', method: 'cash', reference: null, note: null, paid_on: '2026-09-05', received_by: 'Accountant' }],
+    payments: [{ id: 21, receipt: 'R-000021', amount: '250.00', method: 'cash', reference: null, note: null, paid_on: '2026-09-05', received_by: 'Accountant', payer_name: 'Abu Layla' }],
   }],
 }
 
@@ -161,42 +162,80 @@ describe('StudentAccountPage', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/finance/payments/21'))
   })
 
-  it('adds a fee for the student', async () => {
+  it('shows what the fee is made of and who paid', async () => {
     serve(true)
-    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
     open()
-    fireEvent.click(await screen.findByRole('button', { name: 'Add a fee' }))
-    fireEvent.change(await screen.findByLabelText('Description'), { target: { value: 'Bus' } })
-    fireEvent.change(screen.getByLabelText('Total'), { target: { value: '300' } })
-    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-15' } })
-    fireEvent.change(screen.getByLabelText('Number of installments'), { target: { value: '5' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/students/7/fees', { description: 'Bus', total_amount: '300', discount: '0', installments_count: 5, first_due: '2026-09-15', every_months: 1 }))
+    const items = await screen.findByRole('list', { name: 'What the fee is made of' })
+    expect(within(items).getByText('Transport')).toBeInTheDocument()
+    expect(within(items).getByText('discount')).toBeInTheDocument()
+    expect(screen.getByText(/paid by Abu Layla/)).toBeInTheDocument()
   })
 
-  it('changes the transport fee and the discount from the account, and adds transport for a student without it', async () => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url.startsWith('/finance/students/') ? { ...statement, fees: [{ ...statement.fees[0], payments: [] }, { ...statement.fees[0], id: 4, kind: 'transport', description: 'Transport', net: '200.00', payments: [] }] } : { currency: 'JOD', can_manage: true } } }))
+  it('adds fees to a student that already has a schedule: spread over the open installments, no schedule of its own', async () => {
+    serve(true)
+    api.post.mockResolvedValue({ data: { data: { id: 3, spread: true } } })
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add fees' }))
+    expect(await screen.findByText(/spread over the 2 installments still open/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('First installment due on')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'transport' } })
+    expect(screen.getByLabelText('Description')).toHaveValue('Transport')
+    fireEvent.change(screen.getByLabelText('Amount to add'), { target: { value: '100' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/students/7/fees', { description: 'Transport', total_amount: '100', kind: 'transport' }))
+  })
+
+  it('creates the whole plan at once for a student with no schedule: fee, transport, discount, installments and first payment', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url.startsWith('/finance/students/') ? { ...statement, has_schedule: false, fees: [] } : { currency: 'JOD', can_manage: true } } }))
+    api.post.mockResolvedValue({ data: { data: { id: 9, spread: false, payments: [{ id: 5, receipt: 'R-000005', amount: '200.00', method: 'cash', reference: null, payer_name: 'Abu Layla', paid_on: '2026-10-25', received_by: 'Accountant' }] } } })
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add a fee' }))
+    fireEvent.change(await screen.findByLabelText('Description'), { target: { value: 'Tuition' } })
+    fireEvent.change(screen.getByLabelText('Total'), { target: { value: '900' } })
+    fireEvent.change(screen.getByLabelText('Transport fee (optional, inside the same installments)'), { target: { value: '100' } })
+    fireEvent.change(screen.getByLabelText('Discount'), { target: { value: '100' } })
+    fireEvent.change(screen.getByLabelText('First installment due on'), { target: { value: '2026-09-01' } })
+    fireEvent.change(screen.getByLabelText('First payment amount'), { target: { value: '200' } })
+    expect(screen.getByLabelText('Paid by (the receipt is written in this name)')).toHaveValue('Abu Layla') // starts with the parent's name
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/students/7/fees', { description: 'Tuition', total_amount: '900', discount: '100', transport_fee: '100', installments_count: 9, first_due: '2026-09-01', every_months: 1, first_payment: '200', first_payment_method: 'cash', payer_name: 'Abu Layla' }))
+    const receipt = await screen.findByRole('dialog', { name: 'Receipt' })
+    expect(within(receipt).getByText('R-000005')).toBeInTheDocument()
+  })
+
+  it('changes the transport line from the account', async () => {
+    serve(true)
     api.put.mockResolvedValue({ data: { data: {} } })
     open()
     fireEvent.click(await screen.findByRole('button', { name: 'Change the transport fee' }))
-    fireEvent.change(await screen.findByLabelText('Transport fee (total for the year)'), { target: { value: '320' } })
+    expect(await screen.findByLabelText('Transport fee (total for the year)')).toHaveValue(100)
+    fireEvent.change(screen.getByLabelText('Transport fee (total for the year)'), { target: { value: '160' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/finance/students/7/transport', { amount: '320' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/finance/students/7/transport', { amount: '160' }))
+  })
+
+  it('changes the discount at any time, even after payments', async () => {
+    serve(true)
+    api.put.mockResolvedValue({ data: { data: {} } })
+    open()
     fireEvent.click(await screen.findByRole('button', { name: 'Change the discount' }))
     fireEvent.change(await screen.findByLabelText('Discount'), { target: { value: '300' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/finance/fees/3', { discount: '300' }))
-    expect(screen.queryByRole('button', { name: 'Add a transport fee' })).not.toBeInTheDocument() // this student already has one
   })
 
-  it('offers to add a transport fee when the student has none', async () => {
+  it('records a payment in the name of who paid', async () => {
     serve(true)
-    api.put.mockResolvedValue({ data: { data: { id: 5 } } })
+    api.post.mockResolvedValue({ data: { data: { id: 22, receipt: 'R-000022', amount: '250.00', method: 'cash', reference: null, payer_name: 'Um Layla', paid_on: '2026-10-25', received_by: 'Accountant' } } })
     open()
-    fireEvent.click(await screen.findByRole('button', { name: 'Add a transport fee' }))
-    fireEvent.change(await screen.findByLabelText('Transport fee (total for the year)'), { target: { value: '200' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/finance/students/7/transport', { amount: '200' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Record a payment' }))
+    const name = await screen.findByLabelText('Paid by (the receipt is written in this name)')
+    expect(name).toHaveValue('Abu Layla')
+    fireEvent.change(name, { target: { value: 'Um Layla' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save the payment' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/finance/payments', expect.objectContaining({ payer_name: 'Um Layla' })))
+    const receipt = await screen.findByRole('dialog', { name: 'Receipt' })
+    expect(within(receipt).getByText('Um Layla')).toBeInTheDocument()
   })
 
   it('is read-only for the admin', async () => {
@@ -211,7 +250,7 @@ describe('ChildFeesPage', () => {
   it("shows a parent the child's statement without any buttons", async () => {
     api.get.mockResolvedValue({ data: { data: statement } })
     wrap(<ChildFeesPage />, '/c/7', '/c/:id')
-    expect(await screen.findByText('Tuition')).toBeInTheDocument()
+    expect((await screen.findAllByText('Tuition')).length).toBeGreaterThan(0)
     expect(api.get).toHaveBeenCalledWith('/students/7/fees')
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Lina')
     expect(screen.queryByRole('button')).not.toBeInTheDocument()

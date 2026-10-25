@@ -15,4 +15,5 @@ return [
     'first_payment_too_big' => 'The first payment cannot be more than the fees owed (:owed), and the student needs a yearly fee or a transport fee.',
     'first_payment_note' => 'First payment at registration',
     'not_enrolled' => 'The student is not placed in a section this year.',
+    'discount_line' => 'Discount',
 ];

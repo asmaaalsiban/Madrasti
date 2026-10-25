@@ -8,16 +8,16 @@ const METHODS = ['cash', 'bank_transfer', 'card', 'cheque', 'online']
 const today = () => new Date().toISOString().slice(0, 10)
 
 // Record a payment against a fee; it is spread over the oldest installments (or the chosen one first).
-export default function PaymentDialog({ fee, currency, onClose, onDone }) {
+export default function PaymentDialog({ fee, currency, payerDefault = '', onClose, onDone }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ amount: fee.remaining, method: 'cash', paid_on: today(), reference: '', note: '', installment_id: '' })
+  const [form, setForm] = useState({ amount: fee.remaining, method: 'cash', paid_on: today(), reference: '', note: '', installment_id: '', payer_name: payerDefault ?? '' })
   const [error, setError] = useState('')
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
 
   const save = useMutation({
     mutationFn: () => api.post('/finance/payments', {
-      student_fee_id: fee.id, amount: form.amount, method: form.method, paid_on: form.paid_on, reference: form.reference || null, note: form.note || null,
+      student_fee_id: fee.id, amount: form.amount, method: form.method, paid_on: form.paid_on, reference: form.reference || null, payer_name: form.payer_name || null, note: form.note || null,
       installment_id: form.installment_id ? Number(form.installment_id) : null,
     }).then((r) => r.data.data),
     onSuccess: (payment) => { client.invalidateQueries({ queryKey: ['finance'] }); onDone(payment) },
@@ -40,6 +40,7 @@ export default function PaymentDialog({ fee, currency, onClose, onDone }) {
             {fee.installments.filter((i) => Number(i.remaining) > 0).map((i) => <option key={i.id} value={i.id}>{`#${i.number} · ${i.due_date} · ${i.remaining}`}</option>)}
           </select>
         </label>
+        <label className="block text-sm">{t('finance.fields.payerName')}<input className="mt-1 w-full rounded border p-2" value={form.payer_name} onChange={set('payer_name')} /></label>
         <label className="block text-sm">{t('finance.fields.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
         <label className="block text-sm">{t('finance.fields.note')}<input className="mt-1 w-full rounded border p-2" value={form.note} onChange={set('note')} /></label>
         <div className="flex justify-end gap-2">

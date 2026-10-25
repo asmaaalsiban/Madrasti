@@ -23,7 +23,7 @@ class AccountReader
      */
     public function statement(Student $student, ?AcademicYear $year = null): array
     {
-        $fees = StudentFee::with(['installments', 'payments.receiver', 'payments.allocations'])->where('student_id', $student->id)
+        $fees = StudentFee::with(['installments', 'items', 'payments.receiver', 'payments.allocations'])->where('student_id', $student->id)
             ->when($year, fn ($q) => $q->where('academic_year_id', $year->id))->orderBy('id')->get();
 
         $total = $paid = $overdue = 0;
@@ -38,6 +38,7 @@ class AccountReader
             $out[] = [
                 'id' => $fee->id, 'kind' => $fee->kind, 'description' => $fee->description, 'total' => $fee->total_amount, 'discount' => $fee->discount, 'net' => Money::amount($net),
                 'paid' => Money::amount($feePaid), 'remaining' => Money::amount($net - $feePaid), 'overdue' => Money::amount($feeOverdue),
+                'items' => $fee->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'description' => $i->description, 'amount' => $i->amount])->values(),
                 'installments' => $fee->installments->map(fn (Installment $i) => [
                     'id' => $i->id, 'number' => $i->number, 'due_date' => $i->due_date->format('Y-m-d'), 'amount' => $i->amount, 'paid' => $i->paid_amount,
                     'remaining' => Money::amount($i->remainingCents()), 'status' => $i->effectiveStatus(),
@@ -50,6 +51,9 @@ class AccountReader
             'student' => ['id' => $student->id, 'name_ar' => $student->name_ar, 'name_en' => $student->name_en, 'student_number' => $student->student_number],
             'totals' => ['net' => Money::amount($total), 'paid' => Money::amount($paid), 'remaining' => Money::amount($total - $paid), 'overdue' => Money::amount($overdue)],
             'fees' => $out,
+            // Who usually pays (the primary parent): the payment form starts with this name.
+            'payer_default' => $student->guardians()->orderByDesc('guardian_student.is_primary')->value('name'),
+            'has_schedule' => app(FeeBilling::class)->hasSchedule($student, $year ?? AcademicYear::where('is_current', true)->first() ?? new AcademicYear(['id' => 0])),
         ];
     }
 
@@ -57,7 +61,7 @@ class AccountReader
     public function payment(Payment $p): array
     {
         return [
-            'id' => $p->id, 'receipt' => $p->receiptNumber(), 'amount' => $p->amount, 'method' => $p->method, 'reference' => $p->reference, 'note' => $p->note,
+            'id' => $p->id, 'receipt' => $p->receiptNumber(), 'amount' => $p->amount, 'method' => $p->method, 'reference' => $p->reference, 'payer_name' => $p->payer_name, 'note' => $p->note,
             'paid_on' => $p->paid_on->format('Y-m-d'), 'received_by' => $p->receiver?->name, 'installments' => $p->allocations->map(fn ($a) => ['installment_id' => $a->installment_id, 'amount' => $a->amount])->values(),
         ];
     }

@@ -197,7 +197,8 @@
       "feeDiscount": "Discount (an amount, optional)",
       "remaining": "Remaining fees",
       "firstPayment": "First payment (optional)",
-      "firstPaymentMethod": "Payment method"
+      "firstPaymentMethod": "Payment method",
+      "firstPaymentPayer": "Paid by (optional)"
     },
     "male": "Male",
     "female": "Female",
@@ -230,7 +231,8 @@
     "discountHint": "The yearly fee of the grade is applied by itself. An amount to take off it (e.g. a sibling discount).",
     "firstPaymentHint": "The amount received now, taken from the yearly fee first, then transport. It gets a receipt (print it from the student's account).",
     "feesHeading": "Fees",
-    "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student."
+    "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student.",
+    "firstPaymentPayerHint": "Who paid. The receipt is written in this name; if empty, the parent's name is used."
   },
   "staff": {
     "title": "Staff",
@@ -873,7 +875,12 @@
       "everyMonths": "Months between installments",
       "discountAll": "Discount for each student (optional)",
       "status": "Status",
-      "transportAmount": "Transport fee (total for the year)"
+      "transportAmount": "Transport fee (total for the year)",
+      "payerName": "Paid by (the receipt is written in this name)",
+      "chargeType": "Type",
+      "chargeAmount": "Amount to add",
+      "transportInPlan": "Transport fee (optional, inside the same installments)",
+      "firstPayment": "First payment amount"
     },
     "receiptFields": {
       "receiptNo": "Receipt no.",
@@ -883,7 +890,8 @@
       "amount": "Amount",
       "method": "Method",
       "reference": "Reference",
-      "receivedBy": "Received by"
+      "receivedBy": "Received by",
+      "payer": "Received from"
     },
     "addStructure": "New yearly fee",
     "editStructure": "Edit the fee",
@@ -916,6 +924,16 @@
     "changeDiscount": "Change the discount",
     "changeDiscountFor": "Discount: {{name}}",
     "transportHelp": "The fee for the bus, which changes if the student moves to another area. What was paid is kept and the unpaid installments are re-split. 0 removes it.",
-    "discountHelp": "A sum taken off this fee, allowed only while it has no payments. The installments are re-split."
+    "discountHelp": "A sum taken off this fee, allowed only while it has no payments. The installments are re-split.",
+    "items": "What the fee is made of",
+    "paidBy": "paid by {{name}}",
+    "addCharge": "Add fees",
+    "spreadHelp": "This student already has a schedule. The amount you add is spread over the {{count}} installments still open: it does not get a schedule of its own.",
+    "kinds": {
+      "other": "Other (books, activities...)",
+      "transport": "Transport"
+    },
+    "transport": "Transport",
+    "firstPaymentTitle": "First payment (optional)"
   }
 }

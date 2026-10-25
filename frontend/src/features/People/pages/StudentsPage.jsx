@@ -37,6 +37,7 @@ const fields = [
   { name: 'transport_fee', label: 'people.fields.transportFee', hint: 'people.transportHint', type: 'number', getValue: (row) => row.transport_fee ?? '', visibleWhen: (f) => Boolean(f.classroom_id) },
   { name: 'fee_discount', label: 'people.fields.feeDiscount', hint: 'people.discountHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
   { name: 'first_payment', label: 'people.fields.firstPayment', hint: 'people.firstPaymentHint', type: 'number', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id },
+  { name: 'first_payment_payer', label: 'people.fields.firstPaymentPayer', hint: 'people.firstPaymentPayerHint', getValue: () => '', visibleWhen: (f) => f.is_new_student && f.classroom_id && f.first_payment },
   {
     name: 'first_payment_method', label: 'people.fields.firstPaymentMethod', type: 'select', getValue: () => 'cash', visibleWhen: (f) => f.is_new_student && f.classroom_id && f.first_payment,
     options: ['cash', 'bank_transfer', 'card', 'cheque', 'online'].map((m) => ({ value: m, label: `finance.methods.${m}` })),
@@ -102,7 +103,7 @@ export default function StudentsPage() {
         fields={fields}
         empty={{
           student_number: '', name_ar: '', name_en: '', birth_date: '', gender: '',
-          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '', first_payment: '', first_payment_method: 'cash',
+          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '', first_payment: '', first_payment_method: 'cash', first_payment_payer: '',
         }}
         rowActions={rowActions}
         onSaved={(response, isNew) => isNew && setAccount(response?.data?.account ? { ...response.data.account, fees: response.data.created_fees ?? [], payments: response.data.created_payments ?? [] } : null)}
@@ -117,7 +118,7 @@ export default function StudentsPage() {
           <div className="mt-4 space-y-1 border-t pt-3">
             <p className="text-sm font-medium">{t('people.accountCreated.fees')}</p>
             <ul className="text-sm text-slate-700">
-              {account.fees.map((f) => <li key={f.description}>{f.description}: <span dir="ltr">{f.net}</span> ({t('people.accountCreated.installments', { count: f.installments })})</li>)}
+              {account.fees.map((f) => <li key={f.description}>{f.description}: <span dir="ltr">{f.net}</span> ({t('people.accountCreated.installments', { count: f.installments })})<ul className="ms-4 list-disc text-xs text-slate-500">{f.items?.map((i) => <li key={i.description}>{i.description}: <span dir="ltr">{i.amount}</span></li>)}</ul></li>)}
             </ul>
           </div>
         )}

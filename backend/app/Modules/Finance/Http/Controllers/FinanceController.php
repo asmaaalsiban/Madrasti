@@ -131,21 +131,53 @@ class FinanceController extends Controller
         return response()->json(['data' => ['students' => $count]]);
     }
 
-    /** A fee for one student (a bus, a discount case...): an even split, or the installments written by hand. */
+    /**
+     * Adds fees to a student. If the student already has a schedule, the amount is spread over the installments still open (never a
+     * schedule of its own); otherwise the fee is created with its plan: a total, an optional transport fee and discount (all in the
+     * same installments) and an optional first payment taken at once.
+     */
     public function storeFee(Request $request, Student $student): JsonResponse
     {
-        $this->manage($request);
+        $user = $this->manage($request);
+        $year = $this->year();
         $data = $request->validate([
-            'description' => ['required', 'string', 'max:255'], 'total_amount' => ['required', 'numeric', 'gt:0'], 'discount' => ['sometimes', 'numeric', 'min:0'],
-            'installments' => ['required_without:installments_count', 'array', 'min:1', 'max:24'], 'installments.*.due_date' => ['required', 'date_format:Y-m-d'], 'installments.*.amount' => ['required', 'numeric', 'gt:0'],
-            'installments_count' => ['required_without:installments', 'integer', 'between:1,24'], 'first_due' => ['required_with:installments_count', 'date_format:Y-m-d'], 'every_months' => ['sometimes', 'integer', 'between:1,12'],
+            'description' => ['required', 'string', 'max:255'], 'total_amount' => ['required', 'numeric', 'gt:0'], 'kind' => ['sometimes', Rule::in(['transport', 'other'])],
+            'discount' => ['sometimes', 'numeric', 'min:0'], 'transport_fee' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'installments' => ['sometimes', 'array', 'min:1', 'max:24'], 'installments.*.due_date' => ['required_with:installments', 'date_format:Y-m-d'], 'installments.*.amount' => ['required_with:installments', 'numeric', 'gt:0'],
+            'installments_count' => ['sometimes', 'integer', 'between:1,24'], 'first_due' => ['sometimes', 'date_format:Y-m-d'], 'every_months' => ['sometimes', 'integer', 'between:1,12'],
+            'first_payment' => ['sometimes', 'nullable', 'numeric', 'min:0'], 'first_payment_method' => ['sometimes', Rule::in(Payment::METHODS)], 'payer_name' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
+
+        $main = $this->billing->mainFee($student, $year);
+        if ($main !== null) {
+            $this->billing->addCharge($main, $data['kind'] ?? 'other', $data['description'], $data['total_amount']);
+
+            return response()->json(['data' => ['id' => $main->id, 'spread' => true]], 201);
+        }
+
         $discount = (float) ($data['discount'] ?? 0);
-        $schedule = $data['installments'] ?? $this->billing->evenSchedule(Money::cents($data['total_amount']) - Money::cents($discount), $data['installments_count'], $data['first_due'], $data['every_months'] ?? 1);
+        $transport = (float) ($data['transport_fee'] ?? 0);
+        $total = Money::cents($data['total_amount']) + Money::cents($transport);
+        $net = $total - Money::cents($discount);
+        if (! isset($data['installments']) && (! isset($data['installments_count']) || ! isset($data['first_due']))) {
+            throw ValidationException::withMessages(['installments' => [__('finance.schedule_mismatch')]]);
+        }
+        $schedule = $data['installments'] ?? $this->billing->evenSchedule($net, $data['installments_count'], $data['first_due'], $data['every_months'] ?? 1);
+        $items = array_values(array_filter([
+            ['kind' => ($data['kind'] ?? 'other') === 'transport' ? 'transport' : 'other', 'description' => $data['description'], 'amount' => $data['total_amount']],
+            $transport > 0 ? ['kind' => 'transport', 'description' => __('finance.transport'), 'amount' => $transport] : null,
+            $discount > 0 ? ['kind' => 'discount', 'description' => __('finance.discount_line'), 'amount' => -1 * $discount] : null,
+        ]));
 
-        $fee = $this->billing->createFee($student, $this->year(), $data['description'], $data['total_amount'], $discount, $schedule);
+        return DB::transaction(function () use ($student, $year, $data, $total, $discount, $schedule, $items, $user): JsonResponse {
+            $fee = $this->billing->createFee($student, $year, $data['description'], Money::amount($total), $discount, $schedule, null, ($data['kind'] ?? 'other') === 'transport' ? 'transport' : 'other', $items);
+            $payments = [];
+            if ((float) ($data['first_payment'] ?? 0) > 0) {
+                $payments = $this->billing->payFirst([$fee], (float) $data['first_payment'], $data['first_payment_method'] ?? 'cash', $user, $data['payer_name'] ?? null);
+            }
 
-        return response()->json(['data' => ['id' => $fee->id]], 201);
+            return response()->json(['data' => ['id' => $fee->id, 'spread' => false, 'payments' => array_map(fn (Payment $p) => $this->reader->payment($p->load('receiver')), $payments)]], 201);
+        });
     }
 
     /** Sets the student's transport fee from their account page (0 = no transport); same rules as the student form. */
@@ -190,10 +222,10 @@ class FinanceController extends Controller
         $data = $request->validate([
             'student_fee_id' => ['required', 'integer', 'exists:student_fees,id'], 'amount' => ['required', 'numeric', 'gt:0'],
             'method' => ['required', Rule::in(Payment::METHODS)], 'paid_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
-            'reference' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:255'], 'installment_id' => ['nullable', 'integer'],
+            'reference' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:255'], 'installment_id' => ['nullable', 'integer'], 'payer_name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $payment = $this->billing->recordPayment(StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['method'], $data['paid_on'] ?? now()->toDateString(), $user, $data['reference'] ?? null, $data['note'] ?? null, $data['installment_id'] ?? null);
+        $payment = $this->billing->recordPayment(StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['method'], $data['paid_on'] ?? now()->toDateString(), $user, $data['reference'] ?? null, $data['note'] ?? null, $data['installment_id'] ?? null, $data['payer_name'] ?? null);
 
         return response()->json(['data' => $this->reader->payment($payment->load('receiver'))], 201);
     }

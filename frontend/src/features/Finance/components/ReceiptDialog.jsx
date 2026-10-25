@@ -8,7 +8,7 @@ export default function ReceiptDialog({ payment, fee, student, currency, onClose
   const { t, i18n } = useTranslation()
   const { data: school } = useSchool()
   const name = student[`name_${i18n.language}`] || student.name_ar
-  const rows = [['receiptNo', <span key="no" dir="ltr">{payment.receipt}</span>], ['date', <span key="date" dir="ltr">{payment.paid_on}</span>], ['student', name], ['for', fee.description],
+  const rows = [['receiptNo', <span key="no" dir="ltr">{payment.receipt}</span>], ['date', <span key="date" dir="ltr">{payment.paid_on}</span>], ['payer', payment.payer_name ?? '—'], ['student', name], ['for', fee.description],
     ['amount', <Money key="amount" value={payment.amount} currency={currency} />], ['method', t(`finance.methods.${payment.method}`)], ['reference', payment.reference ?? '—'], ['receivedBy', payment.received_by ?? '—']]
 
   return (

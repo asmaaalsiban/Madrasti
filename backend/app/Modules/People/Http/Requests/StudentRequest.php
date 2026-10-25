@@ -33,6 +33,7 @@ class StudentRequest extends FormRequest
             'fee_discount' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
             // Only used when the student is created: money taken at registration.
             'first_payment' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+            'first_payment_payer' => ['nullable', 'string', 'max:255'],
             'first_payment_method' => ['nullable', Rule::in(Payment::METHODS)],
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_email' => ['nullable', 'email', 'max:255', $this->guardianEmailRule()],
