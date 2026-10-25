@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
@@ -54,10 +54,20 @@ import FeeStructuresPage from '../features/Finance/pages/FeeStructuresPage'
 import AccountsPage from '../features/Finance/pages/AccountsPage'
 import StudentAccountPage from '../features/Finance/pages/StudentAccountPage'
 import ChildFeesPage from '../features/Finance/pages/ChildFeesPage'
+import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
+import { useAuth } from '../features/Auth/AuthProvider'
 import { RequireAuth, RequireRole } from './guards'
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
+
+// A notification link /chat?c=5 goes to the chat page of whoever opens it.
+function ChatRedirect() {
+  const { user, loading } = useAuth()
+  const { search } = useLocation()
+  if (loading) return null
+  return <Navigate to={user ? `/${user.role}/chat${search}` : '/login'} replace />
+}
 
 // Pages of the non-admin roles (anything not listed shows the placeholder home).
 const HOME_ROUTES = {
@@ -106,6 +116,7 @@ export const routes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/chat', element: <ChatRedirect /> },
   {
     element: <RequireAuth />,
     children: [
@@ -115,7 +126,7 @@ export const routes = [
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
           path: `/${role}`,
           element: <RequireRole role={role} />,
-          children: [...(HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }]), { path: 'announcements', element: <AnnouncementsPage /> }],
+          children: [...(HOME_ROUTES[role] ?? [{ index: true, element: <RoleHome /> }]), { path: 'announcements', element: <AnnouncementsPage /> }, { path: 'chat', element: <ChatPage /> }],
         })),
       },
       {
@@ -144,6 +155,7 @@ export const routes = [
               { path: '/admin/finance/structures', element: <FeeStructuresPage /> },
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
+              { path: '/admin/chat', element: <ChatPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },

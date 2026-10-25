@@ -13,5 +13,7 @@ return [
     'homework_answer' => 'أرسل :student إجابة الواجب: :title',
     'installment' => 'قسط بقيمة :amount يستحق :due',
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
+    'chat_message' => 'أرسل لك :sender رسالة',
+    'chat_group' => 'كتب :sender في :group',
     'unknown' => 'إشعار جديد',
 ];

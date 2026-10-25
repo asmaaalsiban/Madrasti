@@ -9,9 +9,9 @@ import PushToggle from './PushToggle'
 export function notificationText(t, language, n) {
   const p = n.params ?? {}
   const pick = (key) => p[`${key}_${language}`] ?? p[`${key}_ar`]
-  const kind = n.kind === 'installment' && p.overdue ? 'installment_overdue' : n.kind
+  const kind = n.kind === 'installment' && p.overdue ? 'installment_overdue' : n.kind === 'chat_message' && p.group ? 'chat_group' : n.kind
   const text = t(`notifications.kinds.${kind}${kind === 'plan_reviewed' ? `.${p.decision}` : ''}`, {
-    subject: pick('subject'), title: p.title, teacher: p.teacher, student: pick('student'), note: p.note, amount: p.amount, due: p.due, defaultValue: t('notifications.kinds.unknown'),
+    subject: pick('subject'), title: p.title, teacher: p.teacher, student: pick('student'), note: p.note, sender: p.sender, group: p.group, amount: p.amount, due: p.due, defaultValue: t('notifications.kinds.unknown'),
   })
   const child = pick('child')
   return child ? `${text} (${child})` : text

@@ -36,6 +36,28 @@ class Notifier
     }
 
     /**
+     * A chat message: rings the bell (and the phone) of each recipient only if they have no unread notification for that
+     * conversation already, so a busy chat is one notification, not fifty.
+     *
+     * @param  iterable<int>  $userIds
+     * @param  array<string, mixed>  $params
+     */
+    public function toUsersOnce(iterable $userIds, string $kind, int $conversationId, array $params, string $link): void
+    {
+        $fresh = collect($userIds)->unique()->reject(fn ($id) => DB::table('notifications')->where('notifiable_id', $id)->whereNull('read_at')
+            ->where('data', 'like', '%"kind":"'.$kind.'"%')->where(fn ($q) => $q->where('data', 'like', '%"conversation":'.$conversationId.',%')->orWhere('data', 'like', '%"conversation":'.$conversationId.'}%'))->exists());
+        $this->toUsers($fresh, $kind, ['conversation' => $conversationId] + $params, $link);
+    }
+
+    /** Marks the chat notifications of a conversation as read (the person opened it). */
+    public function readChat(int $userId, int $conversationId): void
+    {
+        DB::table('notifications')->where('notifiable_id', $userId)->whereNull('read_at')->where('data', 'like', '%"kind":"chat_message"%')
+            ->where(fn ($q) => $q->where('data', 'like', '%"conversation":'.$conversationId.',%')->orWhere('data', 'like', '%"conversation":'.$conversationId.'}%'))
+            ->update(['read_at' => now()]);
+    }
+
+    /**
      * Everyone who follows a section: its students (page /student/{path}) and each student's parents (page /parent/children/{id}/{path},
      * with the child's name in the parameters so a parent with several children knows which one it is about).
      *

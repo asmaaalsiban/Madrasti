@@ -92,6 +92,7 @@
       "availability": "Teacher availability",
       "behavior": "Behaviour",
       "announcements": "Announcements",
+      "chat": "Chat",
       "finance": "Finance"
     },
     "actions": {
@@ -740,6 +741,8 @@
       },
       "homework_answer": "{{student}} sent an answer to: {{title}}",
       "unknown": "New notification",
+      "chat_message": "{{sender}} sent you a message",
+      "chat_group": "{{sender}} wrote in {{group}}",
       "installment": "Installment of {{amount}} due {{due}}",
       "installment_overdue": "Overdue installment of {{amount}} (due {{due}})"
     },
@@ -750,6 +753,33 @@
       "denied": "Notifications are blocked in your browser settings for this site. Allow them there to turn this on.",
       "addToHome": "On iPhone: open the share menu and choose \"Add to Home Screen\", then open the app from there to turn on notifications."
     }
+  },
+  "chat": {
+    "title": "Chat",
+    "conversations": "Conversations",
+    "none": "No conversations yet. Start one with \"New chat\".",
+    "pick": "Choose a conversation.",
+    "newChat": "New chat",
+    "newGroup": "New group",
+    "search": "Search by name",
+    "noContacts": "No one to chat with.",
+    "back": "Back",
+    "you": "You",
+    "photo": "Photo",
+    "addPhoto": "Add a photo",
+    "message": "Write a message",
+    "send": "Send",
+    "sent": "Sent",
+    "read": "Read",
+    "readBy": "Read by {{count}} of {{total}}",
+    "members": "{{count}} members",
+    "unread": "{{count}} unread",
+    "staffOnly": "Only the teachers can write in this group.",
+    "groupTitle": "Group name (optional)",
+    "includeParents": "Include the parents",
+    "teachersOnly": "Only the teachers can write",
+    "groupHelp": "The group holds the students and teachers of the section and follows it when students join or leave.",
+    "createGroup": "Create the group"
   },
   "finance": {
     "title": "Finance",
