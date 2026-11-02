@@ -664,7 +664,9 @@
     "remarks": "ملاحظات المعلمين",
     "notes": "الملاحظات",
     "monthRow": "{{month}} ({{weeks}} أسابيع)",
-    "termRow": "{{name}} ({{months}} أشهر)"
+    "termRow": "{{name}} ({{months}} أشهر)",
+    "addCriterion": "إضافة معيار دائم",
+    "saveCriterion": "حفظ المعيار"
   },
   "dailySummary": {
     "title": "الملخص اليومي",

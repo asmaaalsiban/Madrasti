@@ -664,7 +664,9 @@
     "remarks": "Teachers' remarks",
     "notes": "Notes",
     "monthRow": "{{month}} ({{weeks}} weeks)",
-    "termRow": "{{name}} ({{months}} months)"
+    "termRow": "{{name}} ({{months}} months)",
+    "addCriterion": "Add a permanent criterion",
+    "saveCriterion": "Save criterion"
   },
   "dailySummary": {
     "title": "Daily summary",

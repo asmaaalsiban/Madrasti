@@ -15,6 +15,8 @@ export default function EvaluateDialog({ student, date, onClose }) {
   const [quick, setQuick] = useState({ type: 'positive', note: '' })
   const [error, setError] = useState('')
   const [quickSaved, setQuickSaved] = useState(false)
+  const [newCriterion, setNewCriterion] = useState({ name_ar: '', name_en: '' })
+  const [adding, setAdding] = useState(false)
   const name = (c) => c[`name_${i18n.language}`] || c.name_ar
 
   const criteria = useQuery({ queryKey: ['behavior', 'criteria'], queryFn: async () => (await api.get('/behavior/criteria')).data.data })
@@ -28,6 +30,11 @@ export default function EvaluateDialog({ student, date, onClose }) {
   const addQuick = useMutation({
     mutationFn: () => api.post('/behavior/notes', { student_id: student.id, type: quick.type, note: quick.note, noted_on: date, visible_to_parent: visible }),
     onSuccess: () => { setQuick({ ...quick, note: '' }); setQuickSaved(true); setError('') },
+    onError: fail,
+  })
+  const addCriterion = useMutation({
+    mutationFn: () => api.post('/behavior/criteria', newCriterion),
+    onSuccess: () => { setNewCriterion({ name_ar: '', name_en: '' }); setAdding(false); setError(''); client.invalidateQueries({ queryKey: ['behavior', 'criteria'] }) },
     onError: fail,
   })
   const pick = (id, value) => setScores((prev) => { const next = { ...prev }; if (next[id] === value) delete next[id]; else next[id] = value; return next })
@@ -52,6 +59,14 @@ export default function EvaluateDialog({ student, date, onClose }) {
             </li>
           ))}
         </ul>
+        {adding ? (
+          <div className="flex flex-wrap items-end gap-2 rounded border bg-slate-50 p-2">
+            <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newCriterion.name_ar} onChange={(e) => setNewCriterion({ ...newCriterion, name_ar: e.target.value })} /></label>
+            <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCriterion.name_en} onChange={(e) => setNewCriterion({ ...newCriterion, name_en: e.target.value })} /></label>
+            <button type="button" className="rounded bg-brand px-3 py-2 text-white disabled:opacity-50" disabled={!newCriterion.name_ar || !newCriterion.name_en || addCriterion.isPending} onClick={() => addCriterion.mutate()}>{t('behavior.saveCriterion')}</button>
+            <button type="button" className="rounded border px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</button>
+          </div>
+        ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAdding(true)}>{t('behavior.addCriterion')}</button>}
         <p className="text-xs text-slate-500">{[1, 2, 3, 4, 5].map((v) => `${v} = ${t(`behavior.levels.${v}`)}`).join(' · ')}</p>
         <label className="block text-sm">{t('behavior.note')}<textarea rows={3} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />{t('behavior.visibleToParent')}</label>

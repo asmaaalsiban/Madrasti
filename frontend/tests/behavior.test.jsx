@@ -42,6 +42,18 @@ describe('BehaviorPage', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/behavior/evaluations', expect.objectContaining({ student_id: 9, scores: { 1: 5 }, note: 'Calm week', visible_to_parent: true, evaluated_on: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) })))
   })
 
+  it('adds a permanent criterion from the evaluation screen', async () => {
+    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
+    wrap(<BehaviorPage base="/teacher" />)
+    await screen.findByText('Salma')
+    fireEvent.click(screen.getByRole('button', { name: 'Evaluate' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Add a permanent criterion' }))
+    fireEvent.change(screen.getByLabelText('Name (Arabic)'), { target: { value: 'القراءة' } })
+    fireEvent.change(screen.getByLabelText('Name (English)'), { target: { value: 'Reading' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save criterion' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/behavior/criteria', { name_ar: 'القراءة', name_en: 'Reading' }))
+  })
+
   it('adds a quick negative note with the date', async () => {
     api.post.mockResolvedValue({ data: { data: {} } })
     wrap(<BehaviorPage base="/teacher" />)
