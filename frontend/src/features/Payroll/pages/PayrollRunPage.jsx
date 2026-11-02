@@ -13,10 +13,10 @@ const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {
 function ItemDialog({ slip, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ kind: 'bonus', label: '', amount: '' })
+  const [form, setForm] = useState({ kind: 'bonus', label: '', amount: '', category: '' })
   const [error, setError] = useState('')
   const save = useMutation({
-    mutationFn: () => api.post(`/payroll/payslips/${slip.id}/items`, form),
+    mutationFn: () => api.post(`/payroll/payslips/${slip.id}/items`, { ...form, category: form.category || null }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -29,6 +29,9 @@ function ItemDialog({ slip, onClose }) {
           <select className="mt-1 w-full rounded border p-2" value={form.kind} onChange={set('kind')}>
             {['bonus', 'allowance', 'deduction'].map((k) => <option key={k} value={k}>{t(`payroll.kinds.${k}`)}</option>)}
           </select>
+        </label>
+        <label className="block text-sm">{t('payroll.category')}
+          <select className="mt-1 w-full rounded border p-2" value={form.category} onChange={set('category')}><option value="">—</option>{['private_lessons', 'summer_club', 'club', 'other'].map((c) => <option key={c} value={c}>{t(`payroll.categories.${c}`)}</option>)}</select>
         </label>
         <label className="block text-sm">{t('payroll.label')}<input required className="mt-1 w-full rounded border p-2" placeholder={t('payroll.reasonHint')} value={form.label} onChange={set('label')} /></label>
         <label className="block text-sm">{t('payroll.amount')}<input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></label>
@@ -56,6 +59,41 @@ function PaymentCell({ slip, editable }) {
       </select>
       <input aria-label={`${t('payroll.payDetails')} ${slip.user.name}`} dir="ltr" className="rounded border p-1 text-xs" placeholder={t('payroll.payDetailsHint')} value={details} onChange={(e) => setDetails(e.target.value)} onBlur={() => slip.payment_method && details !== (slip.payment_details ?? '') && save.mutate({ payment_method: slip.payment_method, payment_details: details || null })} />
     </span>
+  )
+}
+
+// Gives one of the school's own rules to everyone on the payroll, or to one person.
+function ApplyRuleDialog({ run, slip, onClose }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [id, setId] = useState('')
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+  const { data } = useQuery({ queryKey: ['payroll', 'templates'], queryFn: async () => (await api.get('/payroll/templates')).data })
+  const save = useMutation({
+    mutationFn: () => api.post(`/payroll/runs/${run.id}/apply-template`, { template_id: Number(id), ...(slip ? { payslip_ids: [slip.id] } : {}) }),
+    onSuccess: (res) => { client.invalidateQueries({ queryKey: ['payroll'] }); setError(''); setResult(res.data) },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  const rules = (data?.data ?? []).filter((r) => r.is_active)
+  return (
+    <Modal open title={slip ? t('payroll.applyRuleFor', { name: slip.user.name }) : t('payroll.applyRuleAll')} onClose={onClose}>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
+        {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        {result && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{t('payroll.ruleApplied', { applied: result.applied, skipped: result.skipped })}</p>}
+        <label className="block text-sm">{t('payroll.chooseRule')}
+          <select required className="mt-1 w-full rounded border p-2" value={id} onChange={(e) => { setId(e.target.value); setResult(null) }}>
+            <option value="">—</option>
+            {rules.map((r) => <option key={r.id} value={r.id}>{r.name} ({t(`payroll.kinds.${r.kind}`)} {r.type === 'percent' ? `${Number(r.value)}%` : r.value})</option>)}
+          </select>
+        </label>
+        {rules.length === 0 && <p className="text-sm text-slate-500">{t('payroll.noTemplates')}</p>}
+        <div className="flex justify-end gap-2">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</button>
+          <button type="submit" disabled={save.isPending || !id} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.apply')}</button>
+        </div>
+      </form>
+    </Modal>
   )
 }
 
@@ -143,6 +181,7 @@ export default function PayrollRunPage({ base }) {
       <div className="flex flex-wrap gap-2">
         {manage && draft && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'submit' })}>{t('payroll.submit')}</button>}
         {manage && draft && <button type="button" className="rounded border px-4 py-1.5" onClick={() => api.post('/payroll/runs', { month: run.month }).then(refresh)}>{t('payroll.addNewcomers')}</button>}
+        {manage && draft && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'rule' })}>{t('payroll.applyRuleAll')}</button>}
         {manage && draft && <button type="button" className="rounded border border-red-300 px-4 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('payroll.deleteRun')}</button>}
         {approve && run.status === 'submitted' && <button type="button" className="rounded bg-green-700 px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'approve' })}>{t('payroll.approve')}</button>}
         {approve && run.status === 'submitted' && <button type="button" className="rounded border px-4 py-1.5" onClick={() => setBack(true)}>{t('payroll.sendBack')}</button>}
@@ -182,6 +221,7 @@ export default function PayrollRunPage({ base }) {
                 <td className="p-2">
                   <span className="flex flex-wrap justify-end gap-2">
                     {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'item', slip: s })}>{t('payroll.addBonusOrDeduction')}</button>}
+                    {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'rule', slip: s })}>{t('payroll.rule')}</button>}
                     {manage && draft && <button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => removeSlip.mutate(s.id)}>{t('payroll.removeFromRun')}</button>}
                     <Link className="rounded border px-2 py-1 text-brand" to={`${base}/payroll/payslips/${s.id}`}>{t('payroll.payslip')}</Link>
                   </span>
@@ -193,6 +233,7 @@ export default function PayrollRunPage({ base }) {
         </table>
       </div>
       {dialog?.type === 'item' && <ItemDialog slip={dialog.slip} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'rule' && <ApplyRuleDialog run={run} slip={dialog.slip} onClose={() => setDialog(null)} />}
       {dialog?.type === 'pay' && <PayDialog run={run} onClose={() => setDialog(null)} />}
     </section>
   )

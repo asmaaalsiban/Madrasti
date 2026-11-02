@@ -362,3 +362,9 @@ Upload the **school's own file** as it is — no template needed.
 - **Commitment score** (0-100) per month from what the system already records: punctuality (on-time days), daily summaries (one per scheduled lesson) and weekly lesson plans (submitted or approved, one per class and subject each week). A measure that does not apply (e.g. no lessons) is skipped.
 - **Rules** (`/admin/payroll/rules`, principal edits, accountant reads): per measure, a bonus at or above a score and a deduction below another, each a percent of the salary or a fixed amount. Off until switched on. When the payroll is prepared the lines are added automatically (the accountant can still remove one); a deduction never takes the net below zero. Each person sees their score and what it earns on "My payslips".
 - After pulling: `php artisan tenants:migrate`.
+
+## My salary page and the school's own bonus / deduction rules
+
+- **Own rules** (`/admin/payroll/templates`, `/teacher/payroll/templates`; the principal and the accountant both write them): a name, bonus / allowance / deduction, a fixed amount or a percent of the salary, and an optional category (private lessons, summer club, club, other). In a draft payroll the accountant gives a rule to everyone ("Give a rule to everyone") or to one person ("Rule"); percent rules are worked out from each person's base salary, and a deduction that would take someone's net below zero is skipped for them. Manual lines can carry a category too.
+- **My salary** (`/teacher/payslips`, `/admin/payslips`): the last paid month with how it was calculated (base, bonuses, deductions grouped by category), the current contract, the commitment score, a chart of the net salary by month, and the previous months (tap one to see its breakdown).
+- After pulling: `php artisan tenants:migrate`.

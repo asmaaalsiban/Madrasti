@@ -27,7 +27,7 @@ export default function PayrollPage({ base }) {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('payroll.title')}</h1>
-        <span className="flex flex-wrap gap-2"><Link to={`${base}/payroll/rules`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.rulesTitle')}</Link><Link to={`${base}/payroll/contracts`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.contractsTitle')}</Link></span>
+        <span className="flex flex-wrap gap-2"><Link to={`${base}/payroll/templates`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.templatesTitle')}</Link><Link to={`${base}/payroll/rules`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.rulesTitle')}</Link><Link to={`${base}/payroll/contracts`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.contractsTitle')}</Link></span>
       </div>
       <p className="text-sm text-slate-600">{t('payroll.help')}</p>
       {user?.staff_type === 'accountant' && (

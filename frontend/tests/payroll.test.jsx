@@ -7,6 +7,7 @@ import { api } from '../src/api/client'
 import ContractsPage from '../src/features/Payroll/pages/ContractsPage'
 import PayrollRunPage from '../src/features/Payroll/pages/PayrollRunPage'
 import MyPayslipsPage from '../src/features/Payroll/pages/MyPayslipsPage'
+import TemplatesPage from '../src/features/Payroll/pages/TemplatesPage'
 import { notificationText } from '../src/features/Notifications/NotificationBell'
 
 vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
@@ -91,7 +92,7 @@ describe('PayrollRunPage', () => {
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Absence' } })
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '20' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/payslips/3/items', { kind: 'deduction', label: 'Absence', amount: '20' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/payslips/3/items', { kind: 'deduction', label: 'Absence', amount: '20', category: null }))
   })
 
   it('changes how one person is paid this month', async () => {
@@ -110,13 +111,22 @@ describe('PayrollRunPage', () => {
 })
 
 describe('MyPayslipsPage and notifications', () => {
-  it('lists paid payslips', async () => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/commitment' ? { scores: {}, lines: [] } : url === '/payroll/my-contract' ? { base_salary: '900.00', payment_method: 'cheque', starts_on: '2026-09-01', ends_on: null, items: [{ kind: 'allowance', label: 'Transport', amount: '30.00' }] } : [{ id: 4, month: '2026-10', net: '950.00', paid_on: '2026-10-30' }] } }))
+  const paid = [
+    { id: 4, month: '2026-10', net: '950.00', base_salary: '900.00', additions: '80.00', deductions: '30.00', paid_on: '2026-10-30', items: [{ kind: 'bonus', label: 'Maths tutoring', amount: '80.00', category: 'private_lessons' }, { kind: 'deduction', label: 'Late', amount: '30.00', category: null }] },
+    { id: 3, month: '2026-09', net: '900.00', base_salary: '900.00', additions: '0.00', deductions: '0.00', paid_on: '2026-09-30', items: [] },
+  ]
+  it('shows the last paid month with its breakdown, the chart and the earlier months', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/commitment' ? { scores: {}, lines: [] } : url === '/payroll/my-contract' ? { base_salary: '900.00', payment_method: 'cheque', starts_on: '2026-09-01', ends_on: null, items: [] } : paid } }))
     wrap(<MyPayslipsPage base="/teacher" />)
-    expect(await screen.findByText('2026-10')).toBeInTheDocument()
-    expect(await screen.findByLabelText('My salary')).toHaveTextContent('900.00 JOD')
+    const latest = await screen.findByLabelText('Last paid month')
+    expect(latest).toHaveTextContent('950.00 JOD')
+    expect(latest).toHaveTextContent('Private lessons')
+    expect(latest).toHaveTextContent('Maths tutoring')
+    expect(latest).toHaveTextContent('−30.00')
     expect(screen.getByLabelText('My salary')).toHaveTextContent('Cheque')
-    expect(screen.getByRole('link', { name: 'Payslip' })).toHaveAttribute('href', '/teacher/payslips/4')
+    expect(screen.getByRole('img', { name: 'Net salary by month' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /2026-09/ }))
+    expect(screen.getAllByRole('link', { name: 'Payslip' }).at(-1)).toHaveAttribute('href', '/teacher/payslips/3')
   })
 
   it('writes the payroll notifications', () => {
@@ -124,5 +134,35 @@ describe('MyPayslipsPage and notifications', () => {
     expect(text('payroll_submitted', { month: '2026-11' })).toContain('2026-11')
     expect(text('payslip_paid', { month: '2026-11' })).toContain('2026-11')
     expect(text('contract_expiring', { name: 'Sara', date: '2026-12-01' })).toContain('Sara')
+  })
+})
+
+describe('TemplatesPage and giving a rule', () => {
+  const rule = { id: 1, name: 'Summer club', kind: 'bonus', type: 'amount', value: '50.00', category: 'summer_club', is_active: true }
+
+  it('adds a new rule', async () => {
+    api.get.mockResolvedValue({ data: { currency: 'JOD', data: [rule] } })
+    api.post.mockResolvedValue({ data: {} })
+    wrap(<TemplatesPage base="/admin" />)
+    expect((await screen.findAllByText('Summer club')).length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'New rule' }))
+    fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'Late penalty' } })
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'deduction' } })
+    fireEvent.change(screen.getByLabelText('Value'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/templates', { name: 'Late penalty', kind: 'deduction', type: 'amount', value: '5', category: null }))
+  })
+
+  it('gives a rule to everyone from a draft payroll', async () => {
+    const run = { id: 9, month: '2026-11', status: 'draft', return_note: null, approved_by: null, totals: { base: '1', additions: '0', deductions: '0', net: '1' }, payslips: [{ id: 3, user: { id: 1, name: 'Sara Ali' }, base_salary: '1.00', additions: '0.00', deductions: '0.00', net: '1.00', paid_on: null, items: [] }] }
+    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/payroll/templates' ? { currency: 'JOD', data: [rule] } : { currency: 'JOD', data: run } }))
+    api.post.mockResolvedValue({ data: { applied: 1, skipped: 0 } })
+    wrap(<PayrollRunPage base="/teacher" />, '/payroll/9', '/payroll/:id')
+    fireEvent.click(await screen.findByRole('button', { name: 'Give a rule to everyone' }))
+    await screen.findByRole('option', { name: /Summer club/ })
+    fireEvent.change(screen.getByLabelText('Rule'), { target: { value: '1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/runs/9/apply-template', { template_id: 1 }))
+    expect(await screen.findByText('Given to 1 person(s); 0 skipped (a deduction would take the net below zero).')).toBeInTheDocument()
   })
 })
