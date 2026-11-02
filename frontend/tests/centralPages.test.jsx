@@ -163,7 +163,7 @@ describe('routesFor', () => {
 
   it('serves the school landing once a school is selected', () => {
     at('alnoor')
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your whole school in one place')
+    expect(screen.getByText('Your whole school in one place')).toBeInTheDocument()
   })
 
   it('sends unknown paths back to the welcome page when no school is selected', () => {

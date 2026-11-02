@@ -87,7 +87,10 @@
       "reports": "Reports",
       "finance": "Tuition & payments"
     },
-    "footer": "© {{year}} {{name}}. All rights reserved."
+    "footer": "© {{year}} {{name}}. All rights reserved.",
+    "welcome": "Welcome to",
+    "ctaTitle": "Ready to join {{name}}?",
+    "ctaText": "Sign in to follow grades, attendance, timetables and messages in one place."
   },
   "admin": {
     "menu": "Menu",

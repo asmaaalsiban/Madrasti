@@ -113,6 +113,10 @@ div.rounded, li.rounded, p.rounded, ul.rounded, fieldset.rounded, article.rounde
 /* Dialogs and the notification list sit above the page: flat edge, rounded. */
 [role="dialog"], .modal-card { border-radius: 26px; }
 
+/* Gentle motion for the landing page (switched off for people who ask for less motion). */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(24px); } }
+
 @media print {
   body { background: #ffffff; }
   body * { visibility: hidden; }
