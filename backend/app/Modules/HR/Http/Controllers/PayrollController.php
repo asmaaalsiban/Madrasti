@@ -206,7 +206,7 @@ class PayrollController extends Controller
             'id' => $p->id, 'user' => ['id' => $p->user->id, 'name' => $p->user->name, 'staff_type' => $p->user->staffProfile?->staff_type->value],
             'base_salary' => $p->base_salary, 'additions' => $p->additions, 'deductions' => $p->deductions, 'net' => $p->net,
             'paid_on' => $p->paid_on?->format('Y-m-d'), 'payment_method' => $p->payment_method, 'payment_details' => $p->payment_details, 'reference' => $p->reference,
-            'items' => $p->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'from_contract' => $i->from_contract])->values(),
+            'items' => $p->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'from_contract' => $i->from_contract, 'auto_code' => $i->auto_code, 'detail' => $i->detail])->values(),
         ];
     }
 

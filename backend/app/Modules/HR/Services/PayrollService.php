@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 /** Contracts (with renewal and the annual raise) and the monthly payroll. Money is added in cents. */
 class PayrollService
 {
-    public function __construct(private readonly Notifier $notifier) {}
+    public function __construct(private readonly CommitmentService $commitment, private readonly Notifier $notifier) {}
 
     // ---- contracts -------------------------------------------------------------------------------------------------
 
@@ -147,11 +147,29 @@ class PayrollService
                 foreach ($contract->items as $item) {
                     $slip->items()->create(['kind' => $item->kind, 'label' => $item->label, 'amount' => $item->amount, 'from_contract' => true, 'created_by' => $by->id]);
                 }
+                $this->addCommitmentLines($slip, $staff, $start, $by);
                 $this->recalculate($slip);
             }
         });
 
         return $run->refresh();
+    }
+
+    /** The bonuses and deductions the commitment rules give this person for the month. A deduction never takes the net below zero. */
+    private function addCommitmentLines(Payslip $slip, User $staff, Carbon $month, User $by): void
+    {
+        $room = Money::cents($slip->base_salary) + $slip->items()->whereIn('kind', ['bonus', 'allowance'])->get()->sum(fn ($i) => Money::cents($i->amount)) - $slip->items()->where('kind', 'deduction')->get()->sum(fn ($i) => Money::cents($i->amount));
+        foreach ($this->commitment->lines($staff, $month, $slip->base_salary) as $line) {
+            $cents = Money::cents($line['amount']);
+            if ($line['kind'] === 'deduction') {
+                $cents = min($cents, max(0, $room));
+                $room -= $cents;
+            }
+            if ($cents <= 0) {
+                continue;
+            }
+            $slip->items()->create(['kind' => $line['kind'], 'label' => __('payroll.auto.'.$line['code'].'_'.$line['kind'], ['score' => $line['score']]), 'amount' => Money::amount($cents), 'from_contract' => false, 'auto_code' => $line['code'], 'detail' => (string) $line['score'], 'created_by' => $by->id]);
+        }
     }
 
     /** Adds up a payslip: net = base + bonuses and allowances - deductions. */

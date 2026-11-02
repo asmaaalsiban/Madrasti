@@ -104,6 +104,12 @@ class User extends Authenticatable
      *
      * @return HasOne<StaffProfile, $this>
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Modules\HR\Models\StaffContract, $this> */
+    public function staffContracts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Modules\HR\Models\StaffContract::class);
+    }
+
     public function staffProfile(): HasOne
     {
         return $this->hasOne(StaffProfile::class);

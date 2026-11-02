@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
+import CheckInCard from '../../StaffAttendance/CheckInCard'
 
 // The teacher's start page: the tools that exist so far.
 export default function TeacherHome() {
@@ -25,12 +26,13 @@ export default function TeacherHome() {
   ]
   // An accountant is not a teacher: their home is the school's money.
   const cards = user?.staff_type === 'accountant'
-    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/renewals', 'renewals.title', 'renewals.hint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
+    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/renewals', 'renewals.title', 'renewals.hint'], ['/teacher/staff-attendance', 'staffAttendance.title', 'staffAttendance.hint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
     : teaching
   const all = [...cards, ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint']]
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('dashboard.welcome', { name: user?.name })}</h1>
+      <CheckInCard />
       {pending.data > 0 && (
         <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
       )}

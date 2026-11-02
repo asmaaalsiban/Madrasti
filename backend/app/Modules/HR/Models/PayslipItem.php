@@ -17,7 +17,7 @@ class PayslipItem extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['payslip_id', 'kind', 'label', 'amount', 'from_contract', 'created_by'];
+    protected $fillable = ['payslip_id', 'kind', 'label', 'amount', 'from_contract', 'auto_code', 'detail', 'created_by'];
 
     /**
      * @return array<string, string>

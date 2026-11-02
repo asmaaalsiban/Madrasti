@@ -355,3 +355,10 @@ Upload the **school's own file** as it is — no template needed.
 - **Renew all waiting** places everyone automatically and reports who could not be placed (no section or full). **Decline** records a reason and gives no seat; it can be reopened.
 - Parents (and the student) get a notification when the student is renewed. Raise the fees for the new year by setting the new year's fee structures.
 - After pulling: `php artisan tenants:migrate`.
+
+## Staff attendance and commitment rules (automatic bonus / deduction)
+
+- **Working day**: each staff member presses "I arrived" / "I'm leaving" on their home page (`/teacher`, `/admin/staff-attendance`). Arriving after the start of the day (School day setting) plus the grace minutes is "late". The principal can fix any day (absence, leave, forgotten check-in); a working day with no record counts as an absence, but days before the school started recording are never held against anyone.
+- **Commitment score** (0-100) per month from what the system already records: punctuality (on-time days), daily summaries (one per scheduled lesson) and weekly lesson plans (submitted or approved, one per class and subject each week). A measure that does not apply (e.g. no lessons) is skipped.
+- **Rules** (`/admin/payroll/rules`, principal edits, accountant reads): per measure, a bonus at or above a score and a deduction below another, each a percent of the salary or a fixed amount. Off until switched on. When the payroll is prepared the lines are added automatically (the accountant can still remove one); a deduction never takes the net below zero. Each person sees their score and what it earns on "My payslips".
+- After pulling: `php artisan tenants:migrate`.
