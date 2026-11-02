@@ -28,4 +28,6 @@ return [
     'col_role' => 'Who',
     'role_parent' => 'Parent',
     'role_student' => 'Student',
+    'staff_invalid' => 'Choose staff members with an active account.',
+    'role_staff' => 'Staff',
 ];

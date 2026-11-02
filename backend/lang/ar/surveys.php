@@ -28,4 +28,6 @@ return [
     'col_role' => 'الصفة',
     'role_parent' => 'ولي أمر',
     'role_student' => 'طالب',
+    'staff_invalid' => 'اختر موظفين لديهم حسابات فعّالة.',
+    'role_staff' => 'موظف',
 ];

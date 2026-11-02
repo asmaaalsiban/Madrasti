@@ -1,11 +1,14 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 
 // The teacher's start page: the tools that exist so far.
 export default function TeacherHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000 })
   const teaching = [
     ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
     ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
@@ -26,6 +29,9 @@ export default function TeacherHome() {
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('dashboard.welcome', { name: user?.name })}</h1>
+      {pending.data > 0 && (
+        <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         {cards.map(([to, title, hint]) => (
           <Link key={to} to={to} className="block rounded-lg border bg-white p-4 shadow-sm hover:border-brand">

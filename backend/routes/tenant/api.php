@@ -83,13 +83,14 @@ Route::middleware(['school-user', 'throttle:email-code'])->prefix('auth')->group
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('surveys')->group(function (): void {
     Route::get('/', [SurveyController::class, 'index']);
     Route::post('/', [SurveyController::class, 'store']);
+    Route::get('staff', [SurveyController::class, 'staff']);
     Route::get('{survey}', [SurveyController::class, 'show']);
     Route::get('{survey}/export', [SurveyController::class, 'export']);
     Route::post('{survey}/close', [SurveyController::class, 'close']);
     Route::post('{survey}/remind', [SurveyController::class, 'remind']);
     Route::delete('{survey}', [SurveyController::class, 'destroy']);
 });
-Route::middleware(['school-user', 'role:parent,student'])->prefix('my-surveys')->group(function (): void {
+Route::middleware(['school-user', 'role:parent,student,teacher,admin'])->prefix('my-surveys')->group(function (): void {
     Route::get('/', [MySurveyController::class, 'index']);
     Route::get('pending', [MySurveyController::class, 'pending']);
     Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);

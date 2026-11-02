@@ -45,7 +45,7 @@ class SurveyService
                     'options' => in_array($q['type'], ['single_choice', 'multiple_choice'], true) ? array_values(array_map('trim', $q['options'])) : null,
                 ]);
             }
-            foreach ($this->recipientRows($survey) as $row) {
+            foreach ($this->recipientRows($survey, $data['staff_ids'] ?? []) as $row) {
                 SurveyRecipient::create($row + ['survey_id' => $survey->id]);
             }
 
@@ -60,10 +60,16 @@ class SurveyService
     /**
      * The parents of the audience: an approval is per child (one row for each parent and child), a poll or survey per parent.
      *
+     * @param  list<int>  $staffIds
      * @return list<array{user_id: int, student_id: ?int}>
      */
-    private function recipientRows(Survey $survey): array
+    private function recipientRows(Survey $survey, array $staffIds = []): array
     {
+        // A staff survey goes to the members of staff the admin picked, whatever the students or parents are.
+        if ($survey->respondents === 'staff') {
+            return array_map(fn ($id) => ['user_id' => (int) $id, 'student_id' => null], array_values(array_unique($staffIds)));
+        }
+
         $year = AcademicYear::where('is_current', true)->first();
         $classroomIds = match ($survey->audience) {
             'classrooms' => $survey->classrooms()->pluck('classrooms.id'),
@@ -96,10 +102,15 @@ class SurveyService
     private function notify(Survey $survey, string $kind, ?\Illuminate\Support\Collection $userIds = null): void
     {
         $ids = $userIds ?? $survey->recipients()->pluck('user_id')->unique();
-        $students = User::whereIn('id', $ids)->where('role', Role::Student)->pluck('id');
         $params = ['title' => $survey->title, 'type' => $survey->type];
-        $this->notifier->toUsers($ids->diff($students), $kind, $params, '/parent/surveys');
-        $this->notifier->toUsers($students, $kind, $params, '/student/surveys');
+        // Everyone gets the link to their own page: students, teachers and admin-side staff each have theirs; parents the default.
+        $links = ['student' => '/student/surveys', 'teacher' => '/teacher/my-surveys', 'admin' => '/admin/my-surveys'];
+        $roles = User::whereIn('id', $ids)->pluck('role', 'id')->map(fn ($role) => $role->value);
+        foreach ($links as $role => $link) {
+            $this->notifier->toUsers($roles->filter(fn ($r) => $r === $role)->keys(), $kind, $params, $link);
+        }
+        // Everyone else is a parent.
+        $this->notifier->toUsers($roles->reject(fn ($r) => isset($links[$r]))->keys(), $kind, $params, '/parent/surveys');
     }
 
     /** Tells the parents who have not answered yet (at most once every 6 hours). Returns how many were told. */

@@ -61,7 +61,7 @@ export default function SurveyResponsesPage({ base }) {
             {rows.map((r) => (
               <tr key={r.id} className="border-t">
                 <td className="p-2 font-medium">{r.name}</td>
-                <td className="p-2">{t(`surveys.role.${r.role}`)}</td>
+                <td className="p-2">{t(`surveys.role.${r.role}`)}{r.position ? ` · ${t(`staff.types.${r.position}`)}` : ''}</td>
                 {withChild && <td className="p-2">{nameOf(r.student)}</td>}
                 {withChild && <td className="p-2">{r.classroom ?? '—'}</td>}
                 <td dir="ltr" className="p-2 text-start">{r.phone ?? '—'}</td>

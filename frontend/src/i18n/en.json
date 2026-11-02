@@ -1223,13 +1223,23 @@
     "who": {
       "parents": "Parents",
       "students": "Students",
-      "both": "Parents and students"
+      "both": "Parents and students",
+      "staff": "Staff"
     },
     "approvalParentsOnly": "An approval is always answered by the parents.",
     "answeredBy": "Answered by",
     "role": {
       "parent": "Parent",
-      "student": "Student"
-    }
+      "student": "Student",
+      "staff": "Staff"
+    },
+    "pickStaff": "Choose the staff",
+    "searchStaff": "Search by name",
+    "allPositions": "All positions",
+    "selectShown": "Select all shown ({{count}})",
+    "staffChosen": "{{count}} chosen",
+    "noStaff": "No staff match.",
+    "staffCount": "{{count}} staff members",
+    "forMe": "Surveys for me"
   }
 }

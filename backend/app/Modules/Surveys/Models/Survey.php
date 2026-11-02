@@ -17,7 +17,7 @@ class Survey extends Model
 {
     public const TYPES = ['poll', 'survey', 'approval'];
 
-    public const RESPONDENTS = ['parents', 'students', 'both'];
+    public const RESPONDENTS = ['parents', 'students', 'both', 'staff'];
 
     /**
      * @var list<string>

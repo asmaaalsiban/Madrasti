@@ -253,7 +253,7 @@ class SurveyTest extends AcademicTestCase
         $this->assertNull(Survey::find($empty));
     }
 
-    public function test_a_parent_cannot_answer_for_someone_else_and_only_parents_have_the_list(): void
+    public function test_nobody_can_answer_for_someone_else_and_only_staff_can_write(): void
     {
         $this->actAsAdmin();
         $this->postJson('/api/surveys', $this->pollBody());
@@ -262,7 +262,8 @@ class SurveyTest extends AcademicTestCase
         Sanctum::actingAs($this->mum);
         $this->postJson("/api/my-surveys/{$recipient->id}/respond", ['answers' => []])->assertNotFound();
         Sanctum::actingAs($this->teacher);
-        $this->getJson('/api/my-surveys')->assertForbidden();
+        $this->getJson('/api/my-surveys')->assertOk()->assertJsonCount(0, 'data'); // staff may be asked too, but nothing was addressed to this teacher
+        $this->postJson("/api/my-surveys/{$recipient->id}/respond", ['answers' => []])->assertNotFound();
         Sanctum::actingAs($this->dad);
         $this->getJson('/api/surveys')->assertForbidden();
         $this->postJson('/api/surveys', $this->pollBody())->assertForbidden();
@@ -516,5 +517,106 @@ class SurveyTest extends AcademicTestCase
         $r = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'students', 'audience' => 'classrooms', 'classroom_ids' => [$this->a->id]]))->assertCreated();
         $this->assertSame(2, $r->json('data.recipient_count')); // Ali and Sami are in 5-A
         $this->postJson('/api/surveys', $this->approvalBody(['respondents' => 'students']))->assertUnprocessable();
+    }
+
+    private function staffBody(array $ids, array $extra = []): array
+    {
+        return ['type' => 'poll', 'title' => 'Staff meeting day', 'respondents' => 'staff', 'staff_ids' => $ids, 'questions' => [['type' => 'single_choice', 'text' => 'Which day?', 'options' => ['Sunday', 'Monday']]], ...$extra];
+    }
+
+    public function test_the_admin_lists_the_staff_to_choose_from_and_nobody_else_can(): void
+    {
+        $principal = User::factory()->staff(StaffType::Principal)->create(['name' => 'Principal']);
+        $this->actAsAdmin();
+
+        $list = collect($this->getJson('/api/surveys/staff')->assertOk()->json('data'));
+        $this->assertEqualsCanonicalizing([$this->teacher->id, $principal->id], $list->pluck('id')->all()); // staff only: no parents, students or the bare admin
+        $this->assertSame('principal', $list->firstWhere('id', $principal->id)['staff_type']);
+
+        Sanctum::actingAs($this->teacher);
+        $this->getJson('/api/surveys/staff')->assertForbidden();
+        Sanctum::actingAs($this->dad);
+        $this->getJson('/api/surveys/staff')->assertForbidden();
+    }
+
+    public function test_a_staff_survey_goes_only_to_the_chosen_staff_and_each_gets_the_link_to_their_page(): void
+    {
+        $principal = User::factory()->staff(StaffType::Principal)->create();
+        $other = User::factory()->staff(StaffType::Teacher)->create();
+        $this->actAsAdmin();
+
+        $r = $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id, $principal->id]))->assertCreated();
+
+        $this->assertSame([2, 'staff'], [$r->json('data.recipient_count'), $r->json('data.respondents')]);
+        $this->assertSame(0, SurveyRecipient::where('survey_id', $r->json('data.id'))->whereIn('user_id', [$this->dad->id, $other->id])->count());
+        $link = fn (User $u) => json_decode((string) DB::table('notifications')->where('notifiable_id', $u->id)->value('data'), true)['link'];
+        $this->assertSame('/teacher/my-surveys', $link($this->teacher));
+        $this->assertSame('/admin/my-surveys', $link($principal));
+        $this->assertNull(DB::table('notifications')->where('notifiable_id', $other->id)->value('data')); // not chosen: not told
+    }
+
+    public function test_a_chosen_teacher_answers_and_the_admin_sees_the_staff_member_with_their_position(): void
+    {
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id]))->json('data.id');
+
+        Sanctum::actingAs($this->teacher);
+        $row = $this->mine()[0];
+        $this->assertSame('Staff meeting day', $row['title']);
+        $this->assertNull($row['student']);
+        $this->assertSame(1, $this->getJson('/api/my-surveys/pending')->json('data.count'));
+        $this->postJson("/api/my-surveys/{$row['id']}/respond", ['answers' => [$row['questions'][0]['id'] => 'Monday']])->assertOk();
+
+        $this->actAsAdmin();
+        $data = $this->getJson("/api/surveys/$id")->assertOk()->json('data');
+        $this->assertEquals(['Sunday' => 0, 'Monday' => 1], collect($data['questions'][0]['counts'])->pluck('count', 'option')->all());
+        $me = $data['recipients'][0];
+        $this->assertSame([$this->teacher->name, 'staff', 'teacher', 'answered'], [$me['name'], $me['role'], $me['position'], $me['state']]);
+    }
+
+    public function test_only_the_admin_sends_to_staff_and_only_real_active_staff_can_be_chosen(): void
+    {
+        $inactive = User::factory()->staff(StaffType::Teacher)->create(['is_active' => false]);
+        Sanctum::actingAs($this->teacher);
+        $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id]))->assertForbidden();
+
+        $this->actAsAdmin();
+        $this->postJson('/api/surveys', $this->staffBody([]))->assertUnprocessable()->assertJsonValidationErrors('staff_ids');
+        $this->postJson('/api/surveys', $this->staffBody([$this->dad->id]))->assertUnprocessable()->assertJsonValidationErrors('staff_ids'); // a parent is not staff
+        $this->postJson('/api/surveys', $this->staffBody([$inactive->id]))->assertUnprocessable();
+        $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id, $this->teacher->id]))->assertUnprocessable(); // no duplicates
+        $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id], ['type' => 'approval', 'questions' => []]))->assertUnprocessable()->assertJsonValidationErrors('respondents'); // approvals stay the parents'
+    }
+
+    public function test_the_staff_responses_download_with_their_role_and_a_reminder_reaches_the_ones_who_did_not_answer(): void
+    {
+        $second = User::factory()->staff(StaffType::Teacher)->create(['name' => 'Omar']);
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id, $second->id]))->json('data.id');
+        Sanctum::actingAs($this->teacher);
+        $row = $this->mine()[0];
+        $this->postJson("/api/my-surveys/{$row['id']}/respond", ['answers' => [$row['questions'][0]['id'] => 'Sunday']])->assertOk();
+
+        $this->actAsAdmin();
+        DB::table('notifications')->delete();
+        $this->postJson("/api/surveys/$id/remind")->assertOk()->assertJsonPath('data.reminded', 1);
+        $this->assertSame(1, DB::table('notifications')->where('notifiable_id', $second->id)->count());
+        $this->assertSame(0, DB::table('notifications')->where('notifiable_id', $this->teacher->id)->count());
+
+        $sheet = $this->sheet($this->get("/api/surveys/$id/export", ['Accept-Language' => 'en']));
+        $this->assertCount(3, $sheet);
+        $this->assertContains('Staff', array_column($sheet, 1));
+    }
+
+    public function test_parents_and_students_never_get_a_staff_survey(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $this->postJson('/api/surveys', $this->staffBody([$this->teacher->id]))->assertCreated();
+
+        Sanctum::actingAs($this->dad);
+        $this->assertCount(0, $this->mine());
+        Sanctum::actingAs($accounts['ali']);
+        $this->assertCount(0, $this->mine());
     }
 }

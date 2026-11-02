@@ -38,6 +38,17 @@ class SurveyController extends Controller
         return response()->json(['data' => $rows->map(fn (Survey $s) => $this->summary($s))->values()]);
     }
 
+    /** The staff the admin can send a survey to (active accounts with a staff profile). */
+    public function staff(Request $request): JsonResponse
+    {
+        abort_unless($this->user($request)->hasRole(Role::Admin), 403);
+        $rows = User::whereIn('role', [Role::Admin, Role::Teacher])->where('is_active', true)->whereHas('staffProfile')->with('staffProfile.subject:id,name_ar,name_en')->orderBy('name')->get();
+
+        return response()->json(['data' => $rows->map(fn (User $u) => [
+            'id' => $u->id, 'name' => $u->name, 'staff_type' => $u->staffProfile->staff_type->value, 'subject' => $u->staffProfile->subject?->only(['name_ar', 'name_en']),
+        ])->values()]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $user = $this->user($request);
@@ -47,7 +58,9 @@ class SurveyController extends Controller
             'description' => ['nullable', 'string', 'max:3000'],
             'closes_at' => ['nullable', 'date', 'after:now'],
             'respondents' => ['sometimes', Rule::in(Survey::RESPONDENTS)],
-            'audience' => ['required', Rule::in(['all', 'grades', 'classrooms'])],
+            'audience' => ['required_unless:respondents,staff', 'nullable', Rule::in(['all', 'grades', 'classrooms'])],
+            'staff_ids' => ['required_if:respondents,staff', 'nullable', 'array', 'min:1', 'max:500'],
+            'staff_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'grade_from_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
             'grade_to_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
             'classroom_ids' => ['required_if:audience,classrooms', 'nullable', 'array', 'min:1', 'max:200'],
@@ -63,6 +76,15 @@ class SurveyController extends Controller
         // A permission is the parents' to give: students never answer an approval.
         if ($data['type'] === 'approval' && ($data['respondents'] ?? 'parents') !== 'parents') {
             throw ValidationException::withMessages(['respondents' => [__('surveys.approval_parents_only')]]);
+        }
+
+        // A staff survey: only the admin sends one, to staff accounts (admin or teacher role) they picked.
+        if (($data['respondents'] ?? null) === 'staff') {
+            abort_unless($user->hasRole(Role::Admin), 403);
+            if (User::whereIn('id', $data['staff_ids'])->whereIn('role', [Role::Admin, Role::Teacher])->where('is_active', true)->count() !== count($data['staff_ids'])) {
+                throw ValidationException::withMessages(['staff_ids' => [__('surveys.staff_invalid')]]);
+            }
+            $data['audience'] = 'staff';
         }
 
         $questions = $data['questions'] ?? [];
@@ -139,13 +161,14 @@ class SurveyController extends Controller
     private function rows(Survey $survey, $responses, $recipients)
     {
         $year = AcademicYear::where('is_current', true)->first();
+        $positions = \App\Modules\People\Models\StaffProfile::whereIn('user_id', $recipients->pluck('user_id'))->pluck('staff_type', 'user_id');
         $sections = Enrollment::where('academic_year_id', $year?->id)->whereIn('student_id', $recipients->pluck('student_id')->filter())->with('classroom:id,name')->get()->pluck('classroom.name', 'student_id');
 
-        return $recipients->map(function ($r) use ($responses, $sections): array {
+        return $recipients->map(function ($r) use ($responses, $sections, $positions): array {
             $response = $responses->get($r->user_id.'-'.($r->student_id ?? 0));
 
             return [
-                'id' => $r->id, 'name' => $r->parent->name, 'role' => $r->parent->role->value, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']), 'classroom' => $r->student_id ? ($sections[$r->student_id] ?? null) : null,
+                'id' => $r->id, 'name' => $r->parent->name, 'role' => in_array($r->parent->role, [Role::Admin, Role::Teacher], true) ? 'staff' : $r->parent->role->value, 'position' => ($positions[$r->user_id] ?? null)?->value, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']), 'classroom' => $r->student_id ? ($sections[$r->student_id] ?? null) : null,
                 'state' => $response === null ? 'pending' : ($response->decision ?? 'answered'), 'answered_at' => $response?->submitted_at?->toIso8601String(),
                 'answers' => $response ? $response->answers->mapWithKeys(fn ($a) => [$a->survey_question_id => $a->value])->all() : [],
             ];
