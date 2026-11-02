@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Auth\Http\Requests\ChangePasswordRequest;
 use App\Modules\Auth\Http\Requests\LoginRequest;
 use App\Modules\Auth\Http\Resources\UserResource;
+use App\Modules\Auth\Services\EmailVerification;
 use App\Modules\Auth\Services\PasswordReset;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
@@ -72,6 +73,35 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => __('auth.reset_done')]);
+    }
+
+    /** A parent who signs in with a phone number asks to put an email on the account: a code is sent to it. */
+    public function requestEmail(Request $request, EmailVerification $verification): JsonResponse
+    {
+        abort_unless($verification->eligible($request->user()), 403);
+        $data = $request->validate(['email' => ['required', 'email', 'max:255']]);
+        $verification->request($request->user(), $data['email'], app()->getLocale());
+
+        return response()->json(['sent' => true, 'message' => __('auth.email_requested')]);
+    }
+
+    /** Confirms the code. After a merge the person continues as the account that already had the email (a new token is returned). */
+    public function confirmEmail(Request $request, EmailVerification $verification): JsonResponse
+    {
+        $data = $request->validate(['email' => ['required', 'email', 'max:255'], 'code' => ['required', 'string', 'digits:6']]);
+        $before = $request->user();
+        $user = $verification->confirm($before, $data['email'], $data['code']);
+        if ($user === null) {
+            throw ValidationException::withMessages(['code' => [__('auth.reset_invalid')]]);
+        }
+
+        $merged = $user->id !== $before->id;
+
+        return response()->json([
+            'merged' => $merged,
+            'token' => $merged ? $user->createToken('web')->plainTextToken : null,
+            'user' => new UserResource($this->withChildren($user)),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse

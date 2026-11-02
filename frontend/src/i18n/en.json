@@ -35,6 +35,21 @@
       "resend": "Send a new code",
       "backToLogin": "Back to sign in",
       "phoneOnly": "If you registered with a phone number only, no code can be sent: ask the school to reset your password."
+    },
+    "addEmail": {
+      "title": "Add your email",
+      "help": "Add your own email so you can recover your password and receive messages. We send a code to it to make sure it is yours. If you already have another account with this email, your children from both accounts will be together.",
+      "email": "Your email",
+      "sendCode": "Send the code",
+      "later": "Later",
+      "sent": "A code was sent to {{email}}.",
+      "confirm": "Confirm",
+      "change": "Use another email",
+      "saved": "Your email {{email}} was saved.",
+      "merged": "Done. Your two accounts are now one, with all your children. You can sign in with your email or phone number.",
+      "continue": "Continue",
+      "reminder": "You have not added an email yet. Add it to recover your password if you forget it.",
+      "button": "Add my email"
     }
   },
   "roles": {

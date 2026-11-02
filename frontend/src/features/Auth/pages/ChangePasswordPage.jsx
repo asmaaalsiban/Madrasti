@@ -7,6 +7,7 @@ import { homeFor } from '../../../app/guards'
 import BackArrow from '../../../components/shared/BackArrow'
 import FormField from '../../../components/shared/FormField'
 import CentralShell from '../../Central/CentralShell'
+import AddEmailForm from '../components/AddEmailForm'
 import { useAuth } from '../AuthProvider'
 
 const EMPTY = { current_password: '', password: '', password_confirmation: '' }
@@ -21,6 +22,7 @@ export default function ChangePasswordPage() {
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [askEmail, setAskEmail] = useState(false)
   const forced = Boolean(user?.must_change_password)
 
   const set = (name) => (e) => setForm({ ...form, [name]: e.target.value })
@@ -33,6 +35,11 @@ export default function ChangePasswordPage() {
     try {
       const { data } = await api.post('/auth/change-password', form)
       updateUser(data.data)
+      // A parent who signs in with a phone number is offered to add their own email (they can skip it).
+      if (data.data.role === 'parent' && !data.data.email) {
+        setAskEmail(true)
+        return
+      }
       navigate(homeFor(user.role), { replace: true })
     } catch (err) {
       const fieldErrors = err.response?.data?.errors
@@ -48,6 +55,17 @@ export default function ChangePasswordPage() {
       <PasswordInput value={form[name]} onChange={set(name)} required />
     </FormField>
   )
+
+  if (askEmail) {
+    return (
+      <CentralShell>
+        <div className="space-y-4 rounded-lg bg-white p-6 shadow">
+          <h1 className="text-xl font-bold">{t('auth.addEmail.title')}</h1>
+          <AddEmailForm onDone={() => navigate('/parent', { replace: true })} onSkip={() => navigate('/parent', { replace: true })} />
+        </div>
+      </CentralShell>
+    )
+  }
 
   return (
     <CentralShell>

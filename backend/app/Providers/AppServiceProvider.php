@@ -116,6 +116,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Changing a password asks for the current one: 5 tries a minute per user.
+        RateLimiter::for('email-code', fn (Request $request): Limit => Limit::perMinute(10)->by('ec|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
         RateLimiter::for('change-password', fn (Request $request): Limit => Limit::perMinute(5)->by('cp|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
 
         // Public school registration (each call creates a database): 5 per hour per IP, plus a global daily cap.

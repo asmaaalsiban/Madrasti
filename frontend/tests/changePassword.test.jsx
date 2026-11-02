@@ -145,3 +145,19 @@ describe('LoginPage', () => {
     expect(await screen.findByText('student home')).toBeInTheDocument()
   })
 })
+
+describe('a parent who signs in with a phone number', () => {
+  it('is offered to add an email after choosing a password, and can skip it', async () => {
+    auth.user = { id: 7, role: 'parent', name: 'Abu Ali', email: null, must_change_password: true }
+    api.post.mockResolvedValue({ data: { data: { ...auth.user, must_change_password: false } } })
+    renderAt('/change-password', [...guarded, { path: '/parent', element: <p>parent home</p> }, { element: <RequireAuth />, children: [] }])
+    fireEvent.change(screen.getByLabelText('Current password'), { target: { value: '123456789' } })
+    fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'Chosen12345' } })
+    fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'Chosen12345' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Change password' }))
+
+    expect(await screen.findByText('Add your email')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Later' }))
+    expect(await screen.findByText('parent home')).toBeInTheDocument()
+  })
+})
