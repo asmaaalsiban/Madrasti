@@ -11,6 +11,7 @@ return [
         'reject' => 'رُفضت خطة درسك: :title — :note',
     ],
     'homework_answer' => 'أرسل :student إجابة الواجب: :title',
+    'student_renewed' => 'تم تجديد تسجيل :student للعام :title',
     'installment' => 'قسط بقيمة :amount يستحق :due',
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'chat_message' => 'أرسل لك :sender رسالة',

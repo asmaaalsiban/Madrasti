@@ -347,3 +347,11 @@ Upload the **school's own file** as it is — no template needed.
 - **Flexible payment method**: each contract has a default way of paying (bank transfer, cheque, cash) plus details (IBAN, payee). A payslip starts with it and the accountant can change it per person and per month until it is paid; "Record payment" pays everyone their own way.
 - **My salary**: every staff member sees their current salary, allowances and payment method above their payslips (`/teacher/payslips`).
 - After pulling: `php artisan tenants:migrate`.
+
+## Student renewal (re-registration)
+
+- Add the next academic year first (Academic years). Then open **Student renewal** (`/admin/renewals`, or the accountant's home): "Open renewal" lists every enrolled student with their **next grade** (the next `sort_order`); students in the last grade are marked "Last grade".
+- **Renew** places the student in a section of the next grade in the new year (that is the automatic move to the new grade; last year's enrollment stays as history) and gives them the new year's fees (`auto_apply` fee structures, with optional discount and transport). Pick a section yourself (with how full it is) or leave it automatic: the emptiest section with free seats that suits the student's gender. "Repeat the same grade" keeps them in their grade.
+- **Renew all waiting** places everyone automatically and reports who could not be placed (no section or full). **Decline** records a reason and gives no seat; it can be reopened.
+- Parents (and the student) get a notification when the student is renewed. Raise the fees for the new year by setting the new year's fee structures.
+- After pulling: `php artisan tenants:migrate`.
