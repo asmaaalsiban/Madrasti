@@ -24,17 +24,17 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-2 bg-brand px-4 py-3 text-white print:hidden">
-        <span className="font-bold">{school?.name ?? t('common.appName')}</span>
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-fog bg-snow px-4 py-3 text-ink print:hidden">
+        <span className="text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm">{label}: <strong>{user.name}</strong>{detail ? ` · ${detail}` : ''}</span>
           <NotificationBell />
           <LanguageSwitcher />
           <Link to={`/${user.role}/chat`} className="rounded border px-3 py-1 text-sm">
-            {t('chat.title')}{unreadChat > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('chat.unread', { count: unreadChat })}>{unreadChat}</span>}
+            {t('chat.title')}{unreadChat > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('chat.unread', { count: unreadChat })}>{unreadChat}</span>}
           </Link>
           <Link to={`/${user.role}/announcements`} className="rounded border px-3 py-1 text-sm">
-            {t('announcements.title')}{unread > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('announcements.unread', { count: unread })}>{unread}</span>}
+            {t('announcements.title')}{unread > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('announcements.unread', { count: unread })}>{unread}</span>}
           </Link>
           <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />

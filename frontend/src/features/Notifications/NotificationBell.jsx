@@ -55,7 +55,7 @@ export default function NotificationBell() {
     <div className="relative" ref={box}>
       <button type="button" className="relative rounded border px-3 py-1 text-sm" aria-expanded={open} aria-label={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
         <span aria-hidden="true">🔔</span>
-        {unread > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
+        {unread > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
       </button>
       {open && (
         <div role="dialog" aria-label={t('notifications.title')} className="absolute end-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg">
