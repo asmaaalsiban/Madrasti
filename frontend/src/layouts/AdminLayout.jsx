@@ -52,9 +52,9 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen md:flex">
-      <aside className="bg-brand text-white md:min-h-screen md:w-60 print:hidden">
+      <aside className="bg-deep-harbor text-white md:min-h-screen md:w-60 print:hidden">
         <div className="flex items-center justify-between p-4">
-          <span className="font-bold">{school?.name ?? t('common.appName')}</span>
+          <span className="text-lg font-extrabold">{school?.name ?? t('common.appName')}</span>
           <button
             type="button"
             className="rounded border px-3 py-1 text-sm md:hidden"
@@ -73,17 +73,17 @@ export default function AdminLayout() {
               to={to}
               end={end}
               onClick={() => setOpen(false)}
-              className={({ isActive }) => `block rounded px-3 py-2 ${isActive ? 'bg-white/20' : 'hover:bg-white/10'}`}
+              className={({ isActive }) => `block rounded-full px-4 py-2 ${isActive ? 'bg-sky-tint font-bold text-deep-harbor' : 'hover:bg-white/10'}`}
             >
               {t(`admin.nav.${key}`)}
-              {key === 'chat' && unreadChat > 0 && <span className="ms-2 rounded-full bg-white px-2 text-xs font-bold text-brand">{unreadChat}</span>}
-              {key === 'announcements' && unread > 0 && <span className="ms-2 rounded-full bg-white px-2 text-xs font-bold text-brand">{unread}</span>}
+              {key === 'chat' && unreadChat > 0 && <span className="ms-2 rounded-full bg-brand px-2 text-xs font-bold text-white">{unreadChat}</span>}
+              {key === 'announcements' && unread > 0 && <span className="ms-2 rounded-full bg-brand px-2 text-xs font-bold text-white">{unread}</span>}
             </NavLink>
           ))}
         </nav>
       </aside>
       <div className="flex-1">
-        <header className="flex items-center justify-end gap-2 border-b bg-white px-4 py-3 print:hidden">
+        <header className="flex flex-wrap items-center justify-end gap-2 border-b border-fog bg-snow px-4 py-3 print:hidden">
           <LanguageSwitcher />
           <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />

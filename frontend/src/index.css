@@ -1,28 +1,121 @@
 @import "tailwindcss";
 
+/*
+ * Madrasati look: the "Relief" style (cream paper, one sky-blue accent, deep-navy blocks, pill buttons with a flat solid
+ * "pop" shadow). The accent --color-brand is the only colour that changes per school (set at runtime from the school's
+ * branding); everything tinted (pop shadow, soft washes) is derived from it.
+ */
 @theme {
-  /* Overridden at runtime from the school's branding (primary_color) */
-  --color-brand: #2563eb;
+  --color-brand: #2e96ff;
+  --color-warm-cream: #f9f7f0;
+  --color-snow: #ffffff;
+  --color-ink: #333333;
+  --color-charcoal: #212121;
+  --color-fog: #d0d5dd;
+  --color-slate-border: #40444e;
+  --color-deep-harbor: #13426f;
+  --color-deep-wave: #0254a5;
+  --color-sky-tint: #bde1f9;
+  --color-sky-wash: #cde7fb;
+
+  /* The grey scale the screens already use, mapped onto the palette (no new hues). */
+  --color-slate-50: #eef6fc;
+  --color-slate-100: #e4eff9;
+  --color-slate-200: #d0d5dd;
+  --color-slate-500: #616c8a;
+  --color-slate-600: #616c8a;
+  --color-slate-700: #40444e;
+  --color-slate-800: #212121;
+  --color-slate-900: #212121;
+
+  /* Nunito stands in for Gilroy (Latin); Cairo gives the Arabic the same rounded, friendly feel. */
+  --font-sans: "Nunito", "Cairo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+:root {
+  --pop: color-mix(in srgb, var(--color-brand) 38%, white);
+  --shadow-pop: 0 5px 0 0 var(--pop);
+  --shadow-pop-big: 0 7px 0 0 var(--pop);
+  --shadow-flat: 0 3px 0 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Dates and times are written right-to-left in Arabic (the browser draws them left-to-right otherwise). */
-[dir="rtl"] input[type="date"],
-[dir="rtl"] input[type="month"],
-[dir="rtl"] input[type="time"],
-[dir="rtl"] input[type="datetime-local"] {
-  direction: rtl;
-  text-align: right;
+@layer base {
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--color-warm-cream);
+    color: var(--color-ink);
+    line-height: 1.6;
+  }
+
+  /* Tight tracking suits Latin type; Arabic letters must stay joined, so it is only applied in English. */
+  html[lang="en"] body { letter-spacing: -0.018em; }
+
+  h1, h2, h3 { color: var(--color-deep-harbor); }
+  h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 800; }
+  h2 { font-weight: 700; }
+
+  *, ::after, ::before { border-color: var(--color-fog); }
+  a { color: inherit; }
 }
 
-/* Printing a receipt: only the receipt is shown. */
+/* ---- Buttons and links used as buttons: pills ------------------------------------------------------------------ */
+/* (a big radius is clamped to a pill on a small button and stays a soft card on a large one) */
+button.rounded, a.rounded, button.rounded-lg, a.rounded-lg, button.rounded-full, a.rounded-full, label.rounded.cursor-pointer,
+summary.rounded { border-radius: 28px; }
+
+button.rounded, a.rounded, button.rounded-full, a.rounded-full { font-weight: 600; }
+
+/* The primary action: sky blue with a flat solid shadow under it, as if lifted off the page. */
+button.bg-brand, a.bg-brand {
+  font-weight: 700;
+  box-shadow: var(--shadow-pop);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+button.bg-brand:active:not(:disabled), a.bg-brand:active { transform: translateY(3px); box-shadow: 0 2px 0 0 var(--pop); }
+button.bg-brand:disabled, button.bg-brand[disabled] { box-shadow: none; }
+
+/* A bigger call to action (login, landing). */
+.cta { border-radius: 40px; padding: 0.8rem 1.75rem; font-size: 1rem; font-weight: 700; box-shadow: var(--shadow-pop-big); }
+
+/* ---- Fields --------------------------------------------------------------------------------------------------- */
+input.rounded, select.rounded, textarea.rounded, input.rounded-lg, select.rounded-lg, textarea.rounded-lg {
+  border-radius: 14px;
+  background-color: var(--color-snow);
+  border-color: var(--color-fog);
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* ---- Cards and surfaces ---------------------------------------------------------------------------------------- */
+.rounded-lg { border-radius: 22px; }
+.rounded-xl, .rounded-2xl { border-radius: 26px; }
+div.rounded, li.rounded, p.rounded, ul.rounded, fieldset.rounded, article.rounded, figure.rounded, section.rounded { border-radius: 16px; }
+
+/* No soft blurred shadows anywhere: a barely-there flat offset instead. */
+.shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: var(--shadow-flat); }
+
+/* Deep-navy block on the cream canvas (home tiles, role cards). */
+.feature-card {
+  display: block;
+  border-radius: 22px;
+  background: var(--color-deep-harbor);
+  color: #ffffff;
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.12s ease;
+}
+.feature-card:hover { transform: translateY(-2px); }
+.feature-card h3, .feature-card .title { color: #ffffff; font-weight: 700; font-size: 1.1rem; }
+.feature-card .hint { color: rgba(255, 255, 255, 0.78); font-size: 0.875rem; }
+
+/* Dialogs and the notification list sit above the page: flat edge, rounded. */
+[role="dialog"], .modal-card { border-radius: 26px; }
+
 @media print {
+  body { background: #ffffff; }
   body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; inset: 0; border: 0; }

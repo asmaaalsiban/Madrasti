@@ -35,8 +35,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow">
+    <div className="flex min-h-screen items-center justify-center bg-sky-wash p-4">
+      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl bg-snow p-7 shadow">
         <div className="flex items-center justify-between gap-2">
           <ChangeSchoolCodeButton />
           <LanguageSwitcher />
@@ -66,7 +66,7 @@ export default function LoginPage() {
         </label>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <Link to="/forgot-password" className="block text-sm text-brand">{t('auth.forgot.link')}</Link>
-        <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">
+        <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">
           {t('auth.submit')}
         </button>
       </form>

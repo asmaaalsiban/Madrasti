@@ -38,9 +38,9 @@ export default function TeacherHome() {
       )}
       <div className="grid gap-3 sm:grid-cols-2">
         {all.map(([to, title, hint]) => (
-          <Link key={to} to={to} className="block rounded-lg border bg-white p-4 shadow-sm hover:border-brand">
-            <span className="block font-bold">{t(title)}</span>
-            <span className="block text-sm text-slate-600">{t(hint)}</span>
+          <Link key={to} to={to} className="feature-card">
+            <span className="title block">{t(title)}</span>
+            <span className="hint block">{t(hint)}</span>
           </Link>
         ))}
       </div>

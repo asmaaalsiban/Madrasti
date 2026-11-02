@@ -385,3 +385,11 @@ Upload the **school's own file** as it is — no template needed.
 
 - **Audit log** (`/admin/audit-log`, school management only, read only): every create / update / delete of sensitive data (grades, fees and payments, attendance, payroll, contracts, students, accounts...) with who, when, and the changed fields (old → new). Filter by action, kind of record, person, dates and record number; page through; **Export to Excel** (up to 10,000 rows). Password hashes are never shown.
 - No migration needed.
+
+## Look and feel (the "Relief" design)
+
+- Cream paper canvas (`#f9f7f0`), one sky-blue accent, deep-navy blocks (home tiles, role cards, admin sidebar), pill buttons, and a flat solid "pop" shadow under primary buttons (never a blurred shadow). Tokens live in `frontend/src/index.css` (`@theme`).
+- **Per-school branding**: the accent `--color-brand` is still set at runtime from the school's `primary_color`; the pop shadow and soft washes are derived from it with `color-mix`, so every school keeps its own colour on the same system.
+- **Fonts**: Nunito stands in for Gilroy (Latin) and Cairo for Arabic (loaded from Google Fonts in `index.html`). The tight letter-spacing of the style is applied in English only, because it would break the joined Arabic letters.
+- Use `.feature-card` for navy tiles and `.cta` for a large call to action; existing `rounded` buttons/inputs/cards are restyled globally (pills, 14px fields, 22px cards).
+- Status colours (green paid / amber late / red absent) are kept on purpose: they carry meaning in a school system.
