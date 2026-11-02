@@ -99,7 +99,6 @@ div.rounded, li.rounded, p.rounded, ul.rounded, fieldset.rounded, article.rounde
 
 /* Deep-navy block on the cream canvas (home tiles, role cards). */
 .feature-card {
-  display: block;
   border-radius: 22px;
   background: var(--color-deep-harbor);
   color: #ffffff;

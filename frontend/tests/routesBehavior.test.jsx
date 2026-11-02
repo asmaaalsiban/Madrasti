@@ -78,14 +78,16 @@ describe('the signed-in name in the header', () => {
 describe('who is signed in, shown in the header', () => {
   beforeEach(() => i18n.changeLanguage('en'))
 
+  // The header shows the name with the role (and section / subject) under it.
   const header = async (user, text) => {
     auth.user = user
     at('/' + user.role)
     expect(await screen.findByText((_, node) => node?.tagName === 'SPAN' && node.textContent === text)).toBeInTheDocument()
+    expect(screen.getAllByText(user.name).length).toBeGreaterThan(0)
   }
 
-  it('shows the student their section', () => header({ role: 'student', name: 'Ahmad Khaled', classroom: '5-A', student_id: 1 }, 'Student: Ahmad Khaled · 5-A'))
-  it('shows a teacher their subject', () => header({ role: 'teacher', name: 'Sara', staff_type: 'teacher', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Teacher: Sara · Math'))
-  it('shows a head of department which department', () => header({ role: 'teacher', name: 'Omar', staff_type: 'head_of_department', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Head of department Math: Omar'))
-  it('shows a parent only the name', () => header({ role: 'parent', name: 'Mohammad', children: [] }, 'Parent: Mohammad'))
+  it('shows the student their section', () => header({ role: 'student', name: 'Ahmad Khaled', classroom: '5-A', student_id: 1 }, 'Student · 5-A'))
+  it('shows a teacher their subject', () => header({ role: 'teacher', name: 'Sara', staff_type: 'teacher', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Teacher · Math'))
+  it('shows a head of department which department', () => header({ role: 'teacher', name: 'Omar', staff_type: 'head_of_department', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Head of department Math'))
+  it('shows a parent only the name', () => header({ role: 'parent', name: 'Mohammad', children: [] }, 'Parent'))
 })

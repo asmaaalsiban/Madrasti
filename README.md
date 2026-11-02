@@ -393,3 +393,10 @@ Upload the **school's own file** as it is — no template needed.
 - **Fonts**: Nunito stands in for Gilroy (Latin) and Cairo for Arabic (loaded from Google Fonts in `index.html`). The tight letter-spacing of the style is applied in English only, because it would break the joined Arabic letters.
 - Use `.feature-card` for navy tiles and `.cta` for a large call to action; existing `rounded` buttons/inputs/cards are restyled globally (pills, 14px fields, 22px cards).
 - Status colours (green paid / amber late / red absent) are kept on purpose: they carry meaning in a school system.
+
+### Layout and icons
+
+- Icons are [lucide-react](https://lucide.dev) (`import { Wallet } from 'lucide-react'`), always with `aria-hidden` next to a text label.
+- **Header** (all roles): school name on one side; round icon buttons for chat, announcements and notifications (with unread badges), and one **account menu** (avatar, name and role, language, change password, switch school, log out) instead of a row of text buttons (`UserMenu`, `IconButton`).
+- **Admin sidebar**: grouped (People, Learning & follow-up, Schedules, Money & staff, Communication, School setup, System), each item with an icon, sticky and scrollable on desktop.
+- **Teacher home**: arrive/leave card, then tiles in groups (Teaching, Follow-up, Department, Me); an accountant sees School money. Each tile has an icon, a title and a hint.
