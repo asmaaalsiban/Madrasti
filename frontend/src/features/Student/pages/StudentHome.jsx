@@ -16,6 +16,7 @@ export default function StudentHome() {
           <Link to="/student/lesson-plans" className="rounded border px-3 py-1.5 text-sm text-brand">{t('lessonPlans.title')}</Link>
           <Link to="/student/summaries" className="rounded border px-3 py-1.5 text-sm text-brand">{t('dailySummary.title')}</Link>
           <Link to="/student/behavior" className="rounded border px-3 py-1.5 text-sm text-brand">{t('behavior.title')}</Link>
+          <Link to="/student/motivation" className="rounded border px-3 py-1.5 text-sm text-brand">{t('motivation.title')}</Link>
           <Link to="/student/timetable" className="rounded border px-3 py-1.5 text-sm text-brand">{t('timetable.myTimetable')}</Link>
         </div>
       </div>

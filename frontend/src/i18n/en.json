@@ -93,7 +93,8 @@
       "behavior": "Behaviour",
       "announcements": "Announcements",
       "chat": "Chat",
-      "finance": "Finance"
+      "finance": "Finance",
+      "motivation": "Points & badges"
     },
     "actions": {
       "add": "Add",
@@ -759,7 +760,9 @@
       "chat_message": "{{sender}} sent you a message",
       "chat_group": "{{sender}} wrote in {{group}}",
       "installment": "Installment of {{amount}} due {{due}}",
-      "installment_overdue": "Overdue installment of {{amount}} (due {{due}})"
+      "installment_overdue": "Overdue installment of {{amount}} (due {{due}})",
+      "badge_earned": "{{student}} earned the badge {{icon}} {{badge}}",
+      "star_of_week": "{{student}} is the star of the week!"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -935,5 +938,38 @@
     },
     "transport": "Transport",
     "firstPaymentTitle": "First payment (optional)"
+  },
+  "motivation": {
+    "title": "Points & badges",
+    "hint": "Give points, badges and crown the star of the week.",
+    "settings": "Points & badges settings",
+    "childTitle": "Points & badges: {{name}}",
+    "selectAll": "Select all",
+    "selected": "{{count}} selected",
+    "points": "Points",
+    "note": "Reason",
+    "give": "Give",
+    "badge": "Badge",
+    "giveBadge": "Give badge",
+    "star": "Star of the week",
+    "starThisWeek": "Star of the week!",
+    "leading": "Leading",
+    "crown": "Make star",
+    "details": "Details",
+    "weekPoints": "This week",
+    "totalPoints": "Total points",
+    "badges": "Badges",
+    "noBadges": "No badges yet.",
+    "history": "Latest points",
+    "noAwards": "No points yet.",
+    "undo": "Undo",
+    "nextBadge": "{{count}} more points to earn {{icon}} {{badge}}",
+    "categories": "What points are given for",
+    "categoriesHelp": "Ready-made reasons teachers tap to give points. Use a negative number to take points away.",
+    "badgesHelp": "A badge with \"points needed\" is earned automatically at that total; without it, teachers give it by hand.",
+    "icon": "Icon (emoji)",
+    "pointsRequired": "Points needed",
+    "atPoints": "at {{count}} points",
+    "byHand": "given by hand"
   }
 }

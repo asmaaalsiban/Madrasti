@@ -40,6 +40,9 @@ import StaffPage from '../features/People/pages/StaffPage'
 import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
+import MotivationPage from '../features/Motivation/pages/MotivationPage'
+import MotivationSettingsPage from '../features/Motivation/pages/MotivationSettingsPage'
+import StudentMotivationPage, { MyMotivationPage } from '../features/Motivation/pages/StudentMotivationPage'
 import HomeworkPage from '../features/Homework/pages/HomeworkPage'
 import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
 import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
@@ -77,6 +80,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
+    { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
     { path: 'children/:id/fees', element: <ChildFeesPage /> },
     { path: 'children/:id/summaries', element: <ChildSummariesPage /> },
     { path: 'children/:id/lesson-plans', element: <ChildPlansPage /> },
@@ -87,6 +91,7 @@ const HOME_ROUTES = {
     { path: 'grades', element: <StudentHome /> },
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
+    { path: 'motivation', element: <MyMotivationPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
   ],
@@ -98,6 +103,8 @@ const HOME_ROUTES = {
     { path: 'timetable', element: <TeacherTimetablePage /> },
     { path: 'behavior', element: <BehaviorPage base="/teacher" /> },
     { path: 'behavior/students/:id', element: <StudentBehaviorPage staff /> },
+    { path: 'motivation', element: <MotivationPage base="/teacher" /> },
+    { path: 'motivation/students/:id', element: <StudentMotivationPage staff /> },
     { path: 'homework', element: <HomeworkPage /> },
     { path: 'daily-summary', element: <DailySummaryPage /> },
     { path: 'lesson-plans', element: <LessonPlansPage /> },
@@ -159,6 +166,9 @@ export const routes = [
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
+              { path: '/admin/motivation', element: <MotivationPage base="/admin" /> },
+              { path: '/admin/motivation/students/:id', element: <StudentMotivationPage staff /> },
+              { path: '/admin/motivation-settings', element: <MotivationSettingsPage /> },
               { path: '/admin/grades', element: <AssessmentsPage /> },
               { path: '/admin/grades/results', element: <ResultsPage /> },
               { path: '/admin/grades/:id', element: <ScoreSheetPage /> },

@@ -258,3 +258,11 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - The add-fees dialog sets installments, transport, discount and the first payment together.
 - Paying an installment accepts a `payer_name`; the receipt is written in that name.
 - Requires `php artisan tenants:migrate`.
+
+## Motivation (points, badges, star of the week)
+- Teachers (and the admin) open **Points & badges**, pick a section, tick students and tap a category (e.g. *Helping +2*, *Late −1*), or enter a free amount with a reason. Awards can be undone by whoever gave them.
+- **Badges** are earned automatically when a student's total reaches the badge's `points_required`, or handed over by a teacher. The student and parents get a notification.
+- **Star of the week**: the section's leaders for the current week are suggested; the teacher crowns one (`PUT /api/motivation/star`), the family is notified.
+- Admin manages the categories and badges at `/admin/motivation-settings`.
+- Students (`/student/motivation`) and parents (`/parent/children/:id/motivation`) see points, badges, the next badge to aim for and the latest awards.
+- Requires `php artisan tenants:migrate`.

@@ -35,6 +35,9 @@ use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
+use App\Modules\Motivation\Http\Controllers\BadgeController;
+use App\Modules\Motivation\Http\Controllers\MotivationController;
+use App\Modules\Motivation\Http\Controllers\PointCategoryController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
@@ -233,6 +236,26 @@ Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->g
     Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
 });
 Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
+
+// Motivation: points, badges, star of the week.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('motivation')->group(function (): void {
+    Route::get('classroom', [MotivationController::class, 'classroom']);
+    Route::post('awards', [MotivationController::class, 'award']);
+    Route::put('star', [MotivationController::class, 'crown']);
+    Route::delete('awards/{award}', [MotivationController::class, 'undo']);
+    Route::post('students/{student}/badges', [MotivationController::class, 'giveBadge']);
+    Route::get('categories', [PointCategoryController::class, 'index']);
+    Route::get('badges', [BadgeController::class, 'index']);
+});
+Route::middleware(['school-user', 'role:admin'])->prefix('motivation')->group(function (): void {
+    Route::post('categories', [PointCategoryController::class, 'store']);
+    Route::put('categories/{category}', [PointCategoryController::class, 'update']);
+    Route::delete('categories/{category}', [PointCategoryController::class, 'destroy']);
+    Route::post('badges', [BadgeController::class, 'store']);
+    Route::put('badges/{badge}', [BadgeController::class, 'update']);
+    Route::delete('badges/{badge}', [BadgeController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('students/{student}/motivation', [MotivationController::class, 'student']);
 // Homework: teachers send it and see who answered; the student answers; the student and their parents read it.
 Route::middleware(['school-user', 'role:teacher'])->group(function (): void {
     Route::get('homework', [HomeworkController::class, 'index']);

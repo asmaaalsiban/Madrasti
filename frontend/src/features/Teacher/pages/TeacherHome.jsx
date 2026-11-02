@@ -12,6 +12,7 @@ export default function TeacherHome() {
     ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint'],
     ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint'],
     ['/teacher/behavior', 'behavior.title', 'behavior.hint'],
+    ['/teacher/motivation', 'motivation.title', 'motivation.hint'],
     ['/teacher/homework', 'homework.title', 'homework.hint'],
     ['/teacher/grades', 'grading.title', 'grading.hint'],
     ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
