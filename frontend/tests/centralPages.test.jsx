@@ -27,8 +27,8 @@ beforeEach(async () => {
 describe('WelcomePage', () => {
   it('links to register and find-school in both languages', async () => {
     renderPage(<WelcomePage />)
-    expect(screen.getByRole('link', { name: 'Create account' })).toHaveAttribute('href', '/register')
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/find-school')
+    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toHaveAttribute('href', '/register')
+    expect(screen.getAllByRole('link', { name: 'Sign in' })[0]).toHaveAttribute('href', '/find-school')
     await i18n.changeLanguage('ar')
     renderPage(<WelcomePage />)
     expect(screen.getAllByRole('link', { name: 'إنشاء حساب' }).length).toBeGreaterThan(0)
@@ -158,7 +158,7 @@ describe('routesFor', () => {
 
   it('serves the welcome page when no school is selected', () => {
     at(null)
-    expect(screen.getByRole('link', { name: 'Create account' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toBeInTheDocument()
   })
 
   it('serves the school landing once a school is selected', () => {
@@ -168,6 +168,6 @@ describe('routesFor', () => {
 
   it('sends unknown paths back to the welcome page when no school is selected', () => {
     at(null, '/nope')
-    expect(screen.getByRole('link', { name: 'Create account' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toBeInTheDocument()
   })
 })

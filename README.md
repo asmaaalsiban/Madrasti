@@ -404,3 +404,5 @@ Upload the **school's own file** as it is — no template needed.
 ### Landing page
 
 The school's public page (`/`) shows a welcome hero: the school's **logo** (or a graduation-cap badge / first letter when it has none) and **name** as the big title, soft clouds, stars and floating feature chips, a small school-building illustration (inline SVG in the palette), role cards, a features band and a closing call to action. The name, logo and colour come from the school's branding; motion is switched off for people who prefer reduced motion.
+
+The same welcome page (`LandingView`) is the very first page for everyone: with a school chosen it shows that school's logo and name and a login button; before a school is chosen (a fresh visitor) it shows the platform ("مدرستي") with **Create account** and **Sign in** (find my school). Signed-in users are sent straight to their home.
