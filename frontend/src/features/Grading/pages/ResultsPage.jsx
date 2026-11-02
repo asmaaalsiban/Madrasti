@@ -14,7 +14,7 @@ export default function ResultsPage() {
   const params = { classroom_id: Number(search.get('classroom')), subject_id: Number(search.get('subject')), term_id: Number(search.get('term')) }
 
   const options = useQuery({ queryKey: ['grading', 'options'], queryFn: async () => (await api.get('/grading/options')).data.data })
-  const results = useQuery({ queryKey: ['grading', 'results', params], queryFn: async () => (await api.get('/grading/results', { params })).data.data })
+  const results = useQuery({ queryKey: ['grading', 'results', params], queryFn: async () => (await api.get('/grading/results', { params })).data.data, enabled: Object.values(params).every((id) => id > 0) })
 
   const assignment = options.data?.assignments.find((a) => a.classroom.id === params.classroom_id && a.subject.id === params.subject_id)
   const title = assignment ? `${assignment.classroom.name} · ${assignment.subject[`name_${i18n.language}`]}` : ''

@@ -1,1 +1,4 @@
 *.sqlite*
+
+# Tenant databases of a local SQLite setup (madrasati_<school code>)
+madrasati_*
