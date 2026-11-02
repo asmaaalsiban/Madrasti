@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Services;
 
 use App\Models\User;
+use App\Shared\Support\CurrentDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Folds one account into another (the same person registered twice): everything that pointed at the old account now
@@ -18,10 +18,10 @@ class UserMerger
     public function merge(User $from, User $into): void
     {
         DB::transaction(function () use ($from, $into): void {
-            foreach (Schema::getTables() as $table) {
-                foreach (Schema::getForeignKeys($table['name']) as $key) {
+            foreach (CurrentDatabase::tables() as $table) {
+                foreach (CurrentDatabase::schema()->getForeignKeys($table) as $key) {
                     if ($key['foreign_table'] === 'users' && count($key['columns']) === 1) {
-                        $this->move($table['name'], $key['columns'][0], $from->id, $into->id);
+                        $this->move($table, $key['columns'][0], $from->id, $into->id);
                     }
                 }
             }
@@ -53,7 +53,7 @@ class UserMerger
                 ->get()->each(fn ($row) => DB::table($table)->where($column, $into)->where('student_id', $row->student_id)->update(['is_primary' => true]));
         }
 
-        foreach (Schema::getIndexes($table) as $index) {
+        foreach (CurrentDatabase::schema()->getIndexes($table) as $index) {
             if (! ($index['unique'] || $index['primary']) || ! in_array($column, $index['columns'], true)) {
                 continue;
             }

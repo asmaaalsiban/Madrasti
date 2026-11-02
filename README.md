@@ -311,3 +311,5 @@ Upload the **school's own file** as it is — no template needed.
 - Commands: `php artisan backup:run [--school=code]` (now), `backup:status` (newest per school, fails if one is missing or older than 36 hours: use it as a health check), `backup:list <school>`, `backup:prune`.
 - **Restore a school**: `php artisan backup:restore <school> [path] [--force]` (default: its newest nightly backup). It first makes a `before-restore` safety backup of the current state, then replaces the school's data and files; if anything fails nothing is changed. A backup only fits the same set of migrations: restore it with the application version that made it, then update.
 - Practice a restore on a copy before you need one.
+
+> Backups and account merges list the tables of the **current** database only (`App\Shared\Support\CurrentDatabase`). Laravel's `Schema::getTables()` with no argument lists every database on a MySQL/PostgreSQL server, which mixed the central and the schools' tables.
