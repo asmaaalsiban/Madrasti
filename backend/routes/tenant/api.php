@@ -82,6 +82,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('surveys')->gro
     Route::get('/', [SurveyController::class, 'index']);
     Route::post('/', [SurveyController::class, 'store']);
     Route::get('{survey}', [SurveyController::class, 'show']);
+    Route::get('{survey}/export', [SurveyController::class, 'export']);
     Route::post('{survey}/close', [SurveyController::class, 'close']);
     Route::post('{survey}/remind', [SurveyController::class, 'remind']);
     Route::delete('{survey}', [SurveyController::class, 'destroy']);

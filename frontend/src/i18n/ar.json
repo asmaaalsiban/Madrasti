@@ -1144,6 +1144,36 @@
     "submit": "إرسال إجابتي",
     "thanks": "شكراً، تم إرسال إجابتك.",
     "change": "تغيير إجابتي",
-    "fieldTitle": "العنوان"
+    "fieldTitle": "العنوان",
+    "audiences": {
+      "all": "كل أولياء الأمور",
+      "grades": "من صف … إلى صف …",
+      "classrooms": "اختيار شعب"
+    },
+    "fromGrade": "من الصف",
+    "toGrade": "إلى الصف",
+    "allMySections": "الكل",
+    "pickedCount": "تم اختيار {{count}} شعبة",
+    "sentTo": "أُرسل إلى",
+    "gradeRange": "من {{from}} إلى {{to}}",
+    "openTable": "فتح جدول الردود",
+    "responsesTable": "جدول الردود",
+    "backToResults": "رجوع إلى النتائج",
+    "filter": {
+      "all": "الكل",
+      "approved": "موافقون",
+      "declined": "رافضون",
+      "pending": "بانتظار الرد",
+      "answered": "أجابوا"
+    },
+    "cols": {
+      "parent": "ولي الأمر",
+      "student": "الطالب",
+      "classroom": "الشعبة",
+      "phone": "الهاتف",
+      "state": "الرد",
+      "answeredAt": "وقت الرد"
+    },
+    "noRows": "لا يوجد أحد مطابق."
   }
 }
