@@ -113,7 +113,8 @@
       "chat": "Chat",
       "finance": "Finance",
       "motivation": "Points & badges",
-      "import": "Import"
+      "import": "Import",
+      "surveys": "Surveys"
     },
     "actions": {
       "add": "Add",
@@ -786,7 +787,13 @@
       "installment_overdue": "Overdue installment of {{amount}} (due {{due}})",
       "badge_earned": "{{student}} earned the badge {{icon}} {{badge}}",
       "star_of_week": "{{student}} is the star of the week!",
-      "online_payment": "Online payment of {{amount}} received"
+      "online_payment": "Online payment of {{amount}} received",
+      "survey_new": {
+        "poll": "New poll from the school: {{title}}",
+        "survey": "New survey from the school: {{title}}",
+        "approval": "Your approval is needed: {{title}}"
+      },
+      "survey_reminder": "Reminder: please answer {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1071,5 +1078,72 @@
     "autoNumbers": "No student number column: numbers are generated (after the highest one you already have).",
     "autoEmails": "No email column: login emails are generated from the names.",
     "defaultPosition": "Position of everyone in this file (it has no position column)"
+  },
+  "surveys": {
+    "title": "Surveys and approvals",
+    "hint": "Polls, surveys and parent approvals.",
+    "help": "Send a poll, a survey or an approval (for example a trip permission) to parents and follow who answered.",
+    "new": "New",
+    "none": "Nothing sent yet.",
+    "type": "Type",
+    "types": {
+      "poll": "Poll",
+      "survey": "Survey",
+      "approval": "Approval"
+    },
+    "typeHelp": {
+      "poll": "One question; the parents pick an answer and you see the counts.",
+      "survey": "Several questions of different kinds.",
+      "approval": "Each parent approves or declines for each child (e.g. a trip). You can add questions such as an emergency phone."
+    },
+    "description": "Details",
+    "audience": "Send to",
+    "allParents": "All parents",
+    "oneClassroom": "One section",
+    "closesAt": "Closes at (optional)",
+    "questions": "Questions",
+    "optional": "(optional)",
+    "addQuestion": "Add a question",
+    "questionType": "Question type",
+    "questionText": "Question",
+    "options": "Choices",
+    "optionsHelp": "One choice per line",
+    "required": "Required",
+    "qtypes": {
+      "single_choice": "One choice",
+      "multiple_choice": "Several choices",
+      "yes_no": "Yes / No",
+      "text": "Written answer"
+    },
+    "send": "Send to parents",
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "answered": "{{done}} of {{total}} answered",
+    "state": {
+      "pending": "Waiting",
+      "answered": "Answered",
+      "approved": "Approved",
+      "declined": "Declined"
+    },
+    "remind": "Remind {{count}} who have not answered",
+    "reminded": "Reminder sent to {{count}} parents.",
+    "close": "Close it",
+    "confirmDelete": "Delete this survey?",
+    "parents": "Parents",
+    "noAnswers": "No answers yet.",
+    "yes": "Yes",
+    "no": "No",
+    "mine": "Surveys and approvals",
+    "noneForMe": "Nothing from the school for you right now.",
+    "waiting": "You have {{count}} waiting for your answer",
+    "until": "until {{date}}",
+    "approve": "Approve",
+    "decline": "Decline",
+    "submit": "Send my answer",
+    "thanks": "Thank you, your answer was sent.",
+    "change": "Change my answer",
+    "fieldTitle": "Title"
   }
 }

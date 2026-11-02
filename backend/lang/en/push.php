@@ -15,5 +15,11 @@ return [
     'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'chat_message' => ':sender sent you a message',
     'chat_group' => ':sender wrote in :group',
+    'survey_new' => [
+        'poll' => 'New poll from the school: :title',
+        'survey' => 'New survey from the school: :title',
+        'approval' => 'Your approval is needed: :title',
+    ],
+    'survey_reminder' => 'Reminder: please answer :title',
     'unknown' => 'New notification',
 ];
