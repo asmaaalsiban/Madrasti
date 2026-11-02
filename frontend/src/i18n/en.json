@@ -1198,7 +1198,7 @@
       "declined": "Declined"
     },
     "remind": "Remind {{count}} who have not answered",
-    "reminded": "Reminder sent to {{count}} parents.",
+    "reminded": "Reminder sent to {{count}} people who have not answered yet (those who answered were skipped).",
     "close": "Close it",
     "confirmDelete": "Delete this survey?",
     "parents": "Parents",

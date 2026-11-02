@@ -619,4 +619,37 @@ class SurveyTest extends AcademicTestCase
         Sanctum::actingAs($accounts['ali']);
         $this->assertCount(0, $this->mine());
     }
+
+    public function test_someone_who_answered_everything_is_not_reminded_again_and_their_waiting_notices_are_cleared(): void
+    {
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->approvalBody(['title' => 'All parents trip', 'audience' => 'all', 'classroom_ids' => null]))->json('data.id');
+        $unread = fn (User $u, string $kind) => DB::table('notifications')->where('notifiable_id', $u->id)->whereNull('read_at')->where('data', 'like', "%\"kind\":\"$kind\"%")->count();
+        $respond = function (User $parent, string $decision = 'approved') {
+            Sanctum::actingAs($parent);
+            $r = $this->mine()->firstWhere('state', 'pending'); // the open ones come first
+            $this->postJson("/api/my-surveys/{$r['id']}/respond", ['decision' => $decision, 'answers' => [$r['questions'][0]['id'] => '0599']])->assertOk();
+        };
+
+        // Dad answers for one child only: he is still waiting for the other, so he is reminded once, not twice.
+        $respond($this->dad);
+        $this->actAsAdmin();
+        $this->postJson("/api/surveys/$id/remind")->assertOk()->assertJsonPath('data.reminded', 3); // dad (one child left), mum, the other
+        $this->assertSame(1, $unread($this->dad, 'survey_reminder'));
+        $this->assertSame(1, $unread($this->dad, 'survey_new'));
+
+        // Dad answers the second child too: his invitation and his reminder are cleared from the bell.
+        $respond($this->dad, 'declined');
+        $this->assertSame(0, $unread($this->dad, 'survey_reminder'));
+        $this->assertSame(0, $unread($this->dad, 'survey_new'));
+        $this->assertSame(1, $unread($this->mum, 'survey_reminder')); // mum has not answered: hers stay
+
+        // The next reminder (later) goes only to those who have not answered.
+        \Illuminate\Support\Carbon::setTestNow(now()->addHours(7));
+        $this->actAsAdmin();
+        DB::table('notifications')->delete();
+        $this->postJson("/api/surveys/$id/remind")->assertOk()->assertJsonPath('data.reminded', 2);
+        $this->assertSame(0, DB::table('notifications')->where('notifiable_id', $this->dad->id)->count());
+        \Illuminate\Support\Carbon::setTestNow();
+    }
 }

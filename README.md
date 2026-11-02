@@ -412,3 +412,7 @@ The same welcome page (`LandingView`) is the very first page for everyone: with 
 - **Parent**: a navy welcome band with one tab per child (avatar + name), then the chosen child at a glance (class, student number, days absent / late with the dates on demand) and every section as an icon tile (report card, grades, timetable, homework, summaries, lesson plans, behaviour, points, fees), and the child's sign-in email at the bottom.
 - **Student**: a welcome band with the class, the same icon tiles (timetable, homework, summaries, lesson plans, report card, behaviour, points, surveys with a count), then "My grades" as subject cards with a percentage bar.
 - Shared: `SectionTiles` (icon tiles).
+
+### Survey reminders only reach people who still owe an answer
+
+"Remind" goes only to people who have not answered everything the survey asks of them (a parent with two children and an approval each is reminded only while one is still open). When someone finishes, their invitation and any reminder still unread in their bell are marked read, so nobody is nagged about something already done.
