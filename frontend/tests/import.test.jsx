@@ -51,6 +51,18 @@ describe('ImportPage', () => {
     expect(screen.getByText('layla.1@school.edu')).toBeInTheDocument()
   })
 
+  it('has a big button to choose the file and shows which file was chosen', async () => {
+    renderPage()
+    const button = screen.getByRole('button', { name: /Choose an Excel file/ })
+    const input = screen.getByLabelText('File')
+    const click = vi.spyOn(input, 'click').mockImplementation(() => {})
+    fireEvent.click(button)
+    expect(click).toHaveBeenCalled()
+    pick()
+    expect(await screen.findByText(/Selected file: school.xlsx/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Choose another file/ })).toBeInTheDocument()
+  })
+
   it('lets the admin correct a wrong guess, and a field keeps one column only', async () => {
     api.post.mockResolvedValueOnce(analysis())
     renderPage()

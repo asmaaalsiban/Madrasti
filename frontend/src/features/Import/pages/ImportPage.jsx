@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
@@ -13,6 +13,7 @@ const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {
 export default function ImportPage() {
   const { t } = useTranslation()
   const client = useQueryClient()
+  const fileInput = useRef(null)
   const [kind, setKind] = useState('students')
   const [file, setFile] = useState(null)
   const [analysis, setAnalysis] = useState(null) // headers, sample, suggested, fields
@@ -73,7 +74,12 @@ export default function ImportPage() {
         <div className="space-y-3 rounded-lg border bg-white p-4">
           <p className="font-medium">{t('import.chooseFile')}</p>
           <p className="text-xs text-slate-500">{t(`import.note.${kind}`)}</p>
-          <input type="file" aria-label={t('import.file')} accept=".xlsx,.csv" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError('') }} />
+          <input ref={fileInput} type="file" className="sr-only" tabIndex={-1} aria-label={t('import.file')} accept=".xlsx,.csv" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError('') }} />
+          <button type="button" className="flex w-full items-center justify-center gap-3 rounded-lg border-2 border-dashed border-brand bg-blue-50 px-4 py-6 text-lg font-bold text-brand hover:bg-blue-100" onClick={() => fileInput.current?.click()}>
+            <span aria-hidden="true" className="text-2xl">📁</span>
+            {file ? t('import.changeFile') : t('import.pickFile')}
+          </button>
+          {file && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">✔ {t('import.chosen', { name: file.name })}</p>}
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" disabled={!file || read.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => read.mutate()}>{t('import.read')}</button>
             <ExportButton path={`/import/${kind}/template`} fallbackName={`${kind}.xlsx`} label={t('import.downloadTemplate')} />

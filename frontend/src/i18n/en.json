@@ -1051,6 +1051,9 @@
     "needName": "Choose which column holds the name.",
     "autoNumbers": "No student number column: numbers are generated (after the highest one you already have).",
     "autoEmails": "No email column: login emails are generated from the names.",
-    "defaultPosition": "Position of everyone in this file (it has no position column)"
+    "defaultPosition": "Position of everyone in this file (it has no position column)",
+    "pickFile": "Choose an Excel file",
+    "changeFile": "Choose another file",
+    "chosen": "Selected file: {{name}}. Now press \"Read the file\"."
   }
 }
