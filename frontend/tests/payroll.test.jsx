@@ -94,6 +94,14 @@ describe('PayrollRunPage', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/payslips/3/items', { kind: 'deduction', label: 'Absence', amount: '20' }))
   })
 
+  it('changes how one person is paid this month', async () => {
+    api.get.mockResolvedValue(run('approved'))
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<PayrollRunPage base="/teacher" />, '/payroll/9', '/payroll/:id')
+    fireEvent.change(await screen.findByLabelText('Payment method Sara Ali'), { target: { value: 'cheque' } })
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/payroll/payslips/3/payment', { payment_method: 'cheque', payment_details: null }))
+  })
+
   it('offers the payment only once approved', async () => {
     api.get.mockResolvedValue(run('approved'))
     wrap(<PayrollRunPage base="/teacher" />, '/payroll/9', '/payroll/:id')
@@ -103,9 +111,11 @@ describe('PayrollRunPage', () => {
 
 describe('MyPayslipsPage and notifications', () => {
   it('lists paid payslips', async () => {
-    api.get.mockResolvedValue({ data: { currency: 'JOD', data: [{ id: 4, month: '2026-10', net: '950.00', paid_on: '2026-10-30' }] } })
+    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/my-contract' ? { base_salary: '900.00', payment_method: 'cheque', starts_on: '2026-09-01', ends_on: null, items: [{ kind: 'allowance', label: 'Transport', amount: '30.00' }] } : [{ id: 4, month: '2026-10', net: '950.00', paid_on: '2026-10-30' }] } }))
     wrap(<MyPayslipsPage base="/teacher" />)
     expect(await screen.findByText('2026-10')).toBeInTheDocument()
+    expect(await screen.findByLabelText('My salary')).toHaveTextContent('900.00 JOD')
+    expect(screen.getByLabelText('My salary')).toHaveTextContent('Cheque')
     expect(screen.getByRole('link', { name: 'Payslip' })).toHaveAttribute('href', '/teacher/payslips/4')
   })
 

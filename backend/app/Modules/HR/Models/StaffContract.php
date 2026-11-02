@@ -18,7 +18,7 @@ class StaffContract extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['user_id', 'starts_on', 'ends_on', 'base_salary', 'status', 'renewed_from_id', 'raise_amount', 'raise_percent', 'notes', 'reminded_at', 'created_by'];
+    protected $fillable = ['user_id', 'starts_on', 'ends_on', 'base_salary', 'payment_method', 'payment_details', 'status', 'renewed_from_id', 'raise_amount', 'raise_percent', 'notes', 'reminded_at', 'created_by'];
 
     /**
      * @return array<string, string>

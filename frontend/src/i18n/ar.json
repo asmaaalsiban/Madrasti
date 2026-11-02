@@ -1311,7 +1311,8 @@
       "net": "الصافي",
       "base": "الراتب الأساسي",
       "additions": "الإضافات",
-      "deductions": "الخصومات"
+      "deductions": "الخصومات",
+      "pay": "الدفع"
     },
     "state": {
       "ok": "ساري",
@@ -1401,6 +1402,11 @@
     "lastDay": "آخر يوم",
     "history": "السجل",
     "historyOf": "عقود {{name}}",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "payMethod": "طريقة الدفع",
+    "payDetails": "التفاصيل",
+    "payDetailsHint": "IBAN، اسم المستفيد من الشيك...",
+    "methodForRest": "{{count}} قسيمة بدون طريقة دفع: ادفعها عن طريق",
+    "mySalary": "راتبي"
   }
 }

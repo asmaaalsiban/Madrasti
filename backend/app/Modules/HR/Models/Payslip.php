@@ -18,7 +18,7 @@ class Payslip extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['payroll_run_id', 'user_id', 'staff_contract_id', 'base_salary', 'additions', 'deductions', 'net', 'paid_on', 'payment_method', 'reference'];
+    protected $fillable = ['payroll_run_id', 'user_id', 'staff_contract_id', 'base_salary', 'additions', 'deductions', 'net', 'paid_on', 'payment_method', 'payment_details', 'reference'];
 
     /**
      * @return array<string, string>

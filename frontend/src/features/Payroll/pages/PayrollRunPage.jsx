@@ -40,13 +40,33 @@ function ItemDialog({ slip, onClose }) {
   )
 }
 
+// How one payslip is paid this month: the contract's default, changeable for this person and this month.
+function PaymentCell({ slip, editable }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [details, setDetails] = useState(slip.payment_details ?? '')
+  const save = useMutation({ mutationFn: (body) => api.put(`/payroll/payslips/${slip.id}/payment`, body), onSuccess: () => client.invalidateQueries({ queryKey: ['payroll'] }) })
+  if (!editable) return <span>{slip.payment_method ? t(`finance.methods.${slip.payment_method}`) : '—'}{slip.payment_details ? <span className="block text-xs text-slate-500" dir="ltr">{slip.payment_details}</span> : null}</span>
+  return (
+    <span className="flex flex-col gap-1">
+      <select aria-label={`${t('payroll.payMethod')} ${slip.user.name}`} className="rounded border p-1" value={slip.payment_method ?? ''} onChange={(e) => e.target.value && save.mutate({ payment_method: e.target.value, payment_details: details || null })}>
+        <option value="">—</option>
+        {['bank_transfer', 'cheque', 'cash'].map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
+      </select>
+      <input aria-label={`${t('payroll.payDetails')} ${slip.user.name}`} dir="ltr" className="rounded border p-1 text-xs" placeholder={t('payroll.payDetailsHint')} value={details} onChange={(e) => setDetails(e.target.value)} onBlur={() => slip.payment_method && details !== (slip.payment_details ?? '') && save.mutate({ payment_method: slip.payment_method, payment_details: details || null })} />
+    </span>
+  )
+}
+
 function PayDialog({ run, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState(() => ({ method: 'bank_transfer', paid_on: new Date().toISOString().slice(0, 10), reference: '' }))
+  const [form, setForm] = useState(() => ({ method: '', paid_on: new Date().toISOString().slice(0, 10), reference: '' }))
   const [error, setError] = useState('')
+  const unpaid = run.payslips.filter((s) => !s.paid_on)
+  const missing = unpaid.filter((s) => !s.payment_method).length
   const save = useMutation({
-    mutationFn: () => api.post(`/payroll/runs/${run.id}/pay`, { ...form, reference: form.reference || null }),
+    mutationFn: () => api.post(`/payroll/runs/${run.id}/pay`, { ...form, method: form.method || null, reference: form.reference || null }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -55,11 +75,17 @@ function PayDialog({ run, onClose }) {
     <Modal open title={t('payroll.payAll')} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-        <label className="block text-sm">{t('payroll.method')}
-          <select className="mt-1 w-full rounded border p-2" value={form.method} onChange={set('method')}>
-            {['cash', 'bank_transfer', 'cheque'].map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
-          </select>
-        </label>
+        <ul className="rounded border bg-slate-50 p-2 text-sm">
+          {['bank_transfer', 'cheque', 'cash'].map((m) => { const n = unpaid.filter((s) => s.payment_method === m).length; return n > 0 && <li key={m}>{t(`finance.methods.${m}`)}: {n}</li> })}
+        </ul>
+        {missing > 0 && (
+          <label className="block text-sm">{t('payroll.methodForRest', { count: missing })}
+            <select required className="mt-1 w-full rounded border p-2" value={form.method} onChange={set('method')}>
+              <option value="">—</option>
+              {['bank_transfer', 'cheque', 'cash'].map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
+            </select>
+          </label>
+        )}
         <label className="block text-sm">{t('payroll.paidOn')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
         <label className="block text-sm">{t('payroll.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
         <div className="flex justify-end gap-2">
@@ -132,7 +158,7 @@ export default function PayrollRunPage({ base }) {
 
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['name', 'base', 'additions', 'deductions', 'net'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['name', 'base', 'additions', 'deductions', 'net', 'pay'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th /></tr></thead>
           <tbody>
             {run.payslips.map((s) => (
               <tr key={s.id} className="border-t align-top">
@@ -151,6 +177,7 @@ export default function PayrollRunPage({ base }) {
                 <td className="p-2"><Money value={s.additions} currency={currency} /></td>
                 <td className="p-2"><Money value={s.deductions} currency={currency} /></td>
                 <td className="p-2 font-bold"><Money value={s.net} currency={currency} /></td>
+                <td className="p-2"><PaymentCell slip={s} editable={manage && !s.paid_on && run.status !== 'paid'} /></td>
                 <td className="p-2">
                   <span className="flex flex-wrap justify-end gap-2">
                     {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'item', slip: s })}>{t('payroll.addBonusOrDeduction')}</button>}
@@ -160,7 +187,7 @@ export default function PayrollRunPage({ base }) {
                 </td>
               </tr>
             ))}
-            {run.payslips.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-slate-500">{t('payroll.noPayslips')}</td></tr>}
+            {run.payslips.length === 0 && <tr><td colSpan={7} className="p-4 text-center text-slate-500">{t('payroll.noPayslips')}</td></tr>}
           </tbody>
         </table>
       </div>

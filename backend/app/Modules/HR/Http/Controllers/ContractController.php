@@ -63,7 +63,7 @@ class ContractController extends Controller
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'starts_on' => ['required', 'date_format:Y-m-d'], 'ends_on' => ['nullable', 'date_format:Y-m-d', 'after:starts_on'],
             'base_salary' => ['required', 'numeric', 'gt:0', 'max:1000000'], 'notes' => ['nullable', 'string', 'max:2000'],
-        ] + $this->itemRules());
+        ] + $this->paymentRules() + $this->itemRules());
         $staff = User::findOrFail($data['user_id']);
         $this->assertStaff($staff);
 
@@ -82,7 +82,7 @@ class ContractController extends Controller
         $data = $request->validate([
             'starts_on' => ['sometimes', 'date_format:Y-m-d'], 'ends_on' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
             'base_salary' => ['sometimes', 'numeric', 'gt:0', 'max:1000000'], 'notes' => ['sometimes', 'nullable', 'string', 'max:2000'],
-        ] + $this->itemRules());
+        ] + $this->paymentRules() + $this->itemRules());
         $starts = $data['starts_on'] ?? $contract->starts_on->format('Y-m-d');
         $ends = array_key_exists('ends_on', $data) ? $data['ends_on'] : $contract->ends_on?->format('Y-m-d');
         if ($ends !== null && $ends <= $starts) {
@@ -106,7 +106,7 @@ class ContractController extends Controller
             'raise_type' => ['required', Rule::in(['none', 'percent', 'amount', 'salary'])],
             'raise_value' => ['required_unless:raise_type,none', 'nullable', 'numeric', 'min:0', 'max:1000000'],
             'carry_items' => ['sometimes', 'boolean'], 'notes' => ['nullable', 'string', 'max:2000'],
-        ]);
+        ] + $this->paymentRules());
 
         $new = $this->payroll->renew($contract, $data, $by);
 
@@ -139,6 +139,12 @@ class ContractController extends Controller
     }
 
     /** @return array<string, mixed> */
+    private function paymentRules(): array
+    {
+        return ['payment_method' => ['sometimes', 'nullable', Rule::in(PayrollController::METHODS)], 'payment_details' => ['sometimes', 'nullable', 'string', 'max:255']];
+    }
+
+    /** @return array<string, mixed> */
     private function present(StaffContract $c): array
     {
         $left = $c->ends_on ? (int) now()->startOfDay()->diffInDays($c->ends_on->startOfDay(), false) : null;
@@ -146,7 +152,7 @@ class ContractController extends Controller
         return [
             'id' => $c->id, 'user_id' => $c->user_id, 'starts_on' => $c->starts_on->format('Y-m-d'), 'ends_on' => $c->ends_on?->format('Y-m-d'), 'base_salary' => $c->base_salary,
             'status' => $c->status, 'days_left' => $c->status === 'active' ? $left : null, 'renewed_from_id' => $c->renewed_from_id,
-            'raise_amount' => $c->raise_amount, 'raise_percent' => $c->raise_percent, 'notes' => $c->notes,
+            'raise_amount' => $c->raise_amount, 'raise_percent' => $c->raise_percent, 'notes' => $c->notes, 'payment_method' => $c->payment_method, 'payment_details' => $c->payment_details,
             'items' => $c->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount])->values(),
         ];
     }

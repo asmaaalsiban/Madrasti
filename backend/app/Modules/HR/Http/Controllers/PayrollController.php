@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\Payslip;
+use App\Modules\HR\Models\StaffContract;
 use App\Modules\HR\Models\PayslipItem;
 use App\Modules\HR\Models\PayrollRun;
 use App\Modules\HR\Services\PayrollAccess;
@@ -25,6 +26,8 @@ use Illuminate\Validation\ValidationException;
  */
 class PayrollController extends Controller
 {
+    public const METHODS = ['cash', 'bank_transfer', 'cheque'];
+
     public function __construct(private readonly PayrollService $payroll) {}
 
     public function runs(Request $request): JsonResponse
@@ -83,11 +86,11 @@ class PayrollController extends Controller
     {
         $this->manage($request);
         $data = $request->validate([
-            'payslip_id' => ['nullable', 'integer'], 'method' => ['required', Rule::in(['cash', 'bank_transfer', 'cheque'])],
+            'payslip_id' => ['nullable', 'integer'], 'method' => ['nullable', Rule::in(self::METHODS)],
             'paid_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'reference' => ['nullable', 'string', 'max:255'],
         ]);
         $only = isset($data['payslip_id']) ? $run->payslips()->findOrFail($data['payslip_id']) : null;
-        $paid = $this->payroll->pay($run, $only, $data['method'], $data['paid_on'] ?? now()->toDateString(), $data['reference'] ?? null);
+        $paid = $this->payroll->pay($run, $only, $data['method'] ?? null, $data['paid_on'] ?? now()->toDateString(), $data['reference'] ?? null);
 
         return response()->json(['data' => $this->detail($run->refresh()), 'paid' => $paid]);
     }
@@ -111,6 +114,16 @@ class PayrollController extends Controller
         $this->payroll->addItem($payslip, $data['kind'], $data['label'], $data['amount'], $by);
 
         return response()->json(['data' => $this->presentSlip($payslip->refresh()->load(['items', 'user.staffProfile']))], 201);
+    }
+
+    /** How one payslip is paid (bank transfer, cheque, cash) and the details: IBAN, cheque number... */
+    public function setPayment(Request $request, Payslip $payslip): JsonResponse
+    {
+        $this->manage($request);
+        $data = $request->validate(['payment_method' => ['required', Rule::in(self::METHODS)], 'payment_details' => ['nullable', 'string', 'max:255'], 'reference' => ['nullable', 'string', 'max:255']]);
+        $this->payroll->setPayment($payslip->load('run'), $data['payment_method'], $data['payment_details'] ?? null, $data['reference'] ?? null);
+
+        return response()->json(['data' => $this->presentSlip($payslip->refresh()->load(['items', 'user.staffProfile']))]);
     }
 
     public function removeItem(Request $request, PayslipItem $item): JsonResponse
@@ -138,6 +151,20 @@ class PayrollController extends Controller
         abort_unless(PayrollAccess::views($user) || ($payslip->user_id === $user->id && $payslip->paid_on !== null), 403);
 
         return response()->json(['data' => $this->presentSlip($payslip) + ['month' => $payslip->run->month->format('Y-m'), 'run_status' => $payslip->run->status], 'currency' => $this->currency(), 'school' => (string) (tenant('name') ?? config('app.name'))]);
+    }
+
+    /** "My salary": the signed-in person's own current contract, its monthly items and how they are paid. */
+    public function myContract(Request $request): JsonResponse
+    {
+        $user = $this->user($request);
+        $c = StaffContract::with('items')->where('user_id', $user->id)->orderByRaw("status = 'active' desc")->orderByDesc('starts_on')->orderByDesc('id')->first();
+        $data = $c === null ? null : [
+            'status' => $c->status, 'starts_on' => $c->starts_on->format('Y-m-d'), 'ends_on' => $c->ends_on?->format('Y-m-d'), 'base_salary' => $c->base_salary,
+            'payment_method' => $c->payment_method, 'payment_details' => $c->payment_details,
+            'items' => $c->items->map(fn ($i) => ['kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount])->values(),
+        ];
+
+        return response()->json(['data' => $data, 'currency' => $this->currency()]);
     }
 
     /** The signed-in person's own paid payslips. */
@@ -178,7 +205,7 @@ class PayrollController extends Controller
         return [
             'id' => $p->id, 'user' => ['id' => $p->user->id, 'name' => $p->user->name, 'staff_type' => $p->user->staffProfile?->staff_type->value],
             'base_salary' => $p->base_salary, 'additions' => $p->additions, 'deductions' => $p->deductions, 'net' => $p->net,
-            'paid_on' => $p->paid_on?->format('Y-m-d'), 'payment_method' => $p->payment_method, 'reference' => $p->reference,
+            'paid_on' => $p->paid_on?->format('Y-m-d'), 'payment_method' => $p->payment_method, 'payment_details' => $p->payment_details, 'reference' => $p->reference,
             'items' => $p->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'from_contract' => $i->from_contract])->values(),
         ];
     }
