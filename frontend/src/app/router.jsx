@@ -73,6 +73,9 @@ import StaffAttendancePage from '../features/StaffAttendance/StaffAttendancePage
 import RulesPage from '../features/Payroll/pages/RulesPage'
 import TemplatesPage from '../features/Payroll/pages/TemplatesPage'
 import AuditLogPage from '../features/Audit/AuditLogPage'
+import ExamsAdminPage from '../features/Exams/ExamsAdminPage'
+import MyExamsPage from '../features/Exams/MyExamsPage'
+import ChildExamsPage from '../features/Exams/ChildExamsPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -95,6 +98,7 @@ const HOME_ROUTES = {
     { index: true, element: <ParentHome /> },
     { path: 'children/:id/grades', element: <ChildGradesPage /> },
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
+    { path: 'children/:id/exams', element: <ChildExamsPage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
@@ -112,6 +116,7 @@ const HOME_ROUTES = {
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'motivation', element: <MyMotivationPage /> },
     { path: 'report-card', element: <MyReportCardPage /> },
+    { path: 'exams', element: <MyExamsPage /> },
     { path: 'surveys', element: <MySurveysPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
@@ -140,6 +145,7 @@ const HOME_ROUTES = {
     { path: 'finance/accounts', element: <AccountsPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'renewals', element: <RenewalsPage /> },
+    { path: 'exams', element: <MyExamsPage /> },
     { path: 'staff-attendance', element: <StaffAttendancePage /> },
     { path: 'payroll/rules', element: <RulesPage base="/teacher" /> },
     { path: 'payroll/templates', element: <TemplatesPage base="/teacher" /> },
@@ -199,6 +205,7 @@ export const routes = [
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
+              { path: '/admin/exams', element: <ExamsAdminPage /> },
               { path: '/admin/audit-log', element: <AuditLogPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },
               { path: '/admin/payroll/rules', element: <RulesPage base="/admin" /> },

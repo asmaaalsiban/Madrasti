@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, BookOpenCheck, CalendarClock, FileBadge, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
+import { Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
 import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -15,6 +15,7 @@ export default function StudentHome() {
   const tiles = [
     { to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
     { to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },
+    { to: '/student/exams', label: t('exams.myTitle'), icon: FileCheck2 },
     { to: '/student/summaries', label: t('dailySummary.title'), icon: FileText },
     { to: '/student/lesson-plans', label: t('lessonPlans.title'), icon: NotebookPen },
     { to: '/student/report-card', label: t('reportCard.title'), icon: FileBadge },
