@@ -41,6 +41,7 @@ import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import ImportPage from '../features/Import/pages/ImportPage'
+import SignaturesPage from '../features/Reports/pages/SignaturesPage'
 import ReportCardPage, { MyReportCardPage } from '../features/Reports/pages/ReportCardPage'
 import MySurveysPage from '../features/Surveys/pages/MySurveysPage'
 import SurveyResponsesPage from '../features/Surveys/pages/SurveyResponsesPage'
@@ -115,6 +116,7 @@ const HOME_ROUTES = {
     { path: 'behavior/students/:id', element: <StudentBehaviorPage staff /> },
     { path: 'motivation', element: <MotivationPage base="/teacher" /> },
     { path: 'surveys', element: <SurveysPage base="/teacher" /> },
+    { path: 'signature', element: <SignaturesPage /> },
     { path: 'my-surveys', element: <MySurveysPage /> },
     { path: 'surveys/:id', element: <SurveyResultsPage base="/teacher" /> },
     { path: 'surveys/:id/responses', element: <SurveyResponsesPage base="/teacher" /> },
@@ -182,6 +184,7 @@ export const routes = [
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
               { path: '/admin/report-card/:id', element: <ReportCardPage /> },
               { path: '/admin/surveys', element: <SurveysPage base="/admin" /> },
+              { path: '/admin/signatures', element: <SignaturesPage admin /> },
               { path: '/admin/my-surveys', element: <MySurveysPage /> },
               { path: '/admin/surveys/:id', element: <SurveyResultsPage base="/admin" /> },
               { path: '/admin/surveys/:id/responses', element: <SurveyResponsesPage base="/admin" /> },

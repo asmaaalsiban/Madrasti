@@ -10,6 +10,7 @@ use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Attendance\Models\StudentAttendance;
 use App\Modules\Grading\Services\StudentTranscript;
+use App\Modules\Reports\Models\Signature;
 use App\Modules\TeacherTools\Models\BehaviorEvaluation;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +29,7 @@ class ReportCardController extends Controller
         $user = auth()->user();
 
         $year = AcademicYear::where('is_current', true)->first();
-        $enrollment = $year ? $student->enrollments()->where('academic_year_id', $year->id)->with('classroom.gradeLevel')->first() : null;
+        $enrollment = $year ? $student->enrollments()->where('academic_year_id', $year->id)->with(['classroom.gradeLevel', 'classroom.homeroomTeacher:id,name'])->first() : null;
         $terms = $year && $enrollment ? $transcript->terms($student, $year, $enrollment) : [];
         $pass = (float) config('grading.pass_percent');
 
@@ -57,7 +58,16 @@ class ReportCardController extends Controller
         $evaluations = BehaviorEvaluation::with('scores')->where('student_id', $student->id)
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('visible_to_parent', true))->get();
 
+        // Electronic signatures for the bottom of the card: the section's homeroom teacher (if they uploaded one) and the school's.
+        $teacher = $enrollment?->classroom?->homeroomTeacher;
+        $homeroom = $teacher ? Signature::where('scope', 'user')->where('user_id', $teacher->id)->where('is_active', true)->first() : null;
+
         return response()->json(['data' => [
+            'signatures' => [
+                'homeroom' => $teacher ? ['name' => $teacher->name, 'image' => $homeroom?->dataUri()] : null,
+                'school' => Signature::where('scope', 'school')->where('is_active', true)->orderBy('sort_order')->orderBy('id')->get()
+                    ->map(fn (Signature $sig) => ['id' => $sig->id, 'title' => $sig->title, 'name' => $sig->signer_name, 'image' => $sig->dataUri()])->values(),
+            ],
             'student' => $student->only(['id', 'student_number', 'name_ar', 'name_en', 'birth_date']) + [
                 'classroom' => $enrollment?->classroom?->name,
                 'grade' => $enrollment?->classroom?->gradeLevel?->only(['name_ar', 'name_en']),

@@ -18,6 +18,13 @@ export default function ReportCard({ studentId }) {
   const name = (x) => x?.[`name_${i18n.language}`] || x?.name_ar || ''
   const level = (score) => (score === null ? '—' : t(`behavior.levels.${Math.min(5, Math.max(1, Math.round(score)))}`))
   const noGrades = data.subjects.length === 0
+  // The signatures at the bottom: the homeroom teacher, then the school's (principal...), then a line for the parent.
+  const signers = [
+    ...(data.signatures?.homeroom ? [{ key: 'homeroom', title: t('reportCard.sign.homeroom'), name: data.signatures.homeroom.name, image: data.signatures.homeroom.image }] : [{ key: 'homeroom', title: t('reportCard.sign.homeroom') }]),
+    ...(data.signatures?.school ?? []).map((s) => ({ key: `s${s.id}`, title: s.title, name: s.name, image: s.image })),
+    ...((data.signatures?.school ?? []).length === 0 ? [{ key: 'principal', title: t('reportCard.sign.principal') }] : []),
+    { key: 'parent', title: t('reportCard.sign.parent') },
+  ]
 
   return (
     <div className="space-y-3">
@@ -93,9 +100,12 @@ export default function ReportCard({ studentId }) {
 
         <p className="text-xs text-slate-500">{t('reportCard.passMark', { percent: data.pass_percent })}</p>
 
-        <div className="grid grid-cols-3 gap-6 pt-10 text-center text-sm">
-          {['homeroom', 'principal', 'parent'].map((who) => (
-            <div key={who}><div className="border-t border-slate-700 pt-1">{t(`reportCard.sign.${who}`)}</div></div>
+        <div className="flex flex-wrap items-end justify-around gap-6 pt-6 text-center text-sm">
+          {signers.map((s) => (
+            <div key={s.key} className="min-w-32 flex-1">
+              <div className="flex h-16 items-end justify-center pb-1">{s.image && <img src={s.image} alt="" className="max-h-16 max-w-full object-contain" />}</div>
+              <div className="border-t border-slate-700 pt-1"><div className="font-medium">{s.title}</div>{s.name && <div className="text-xs text-slate-600">{s.name}</div>}</div>
+            </div>
           ))}
         </div>
       </article>
