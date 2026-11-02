@@ -15,5 +15,11 @@ return [
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'chat_message' => 'أرسل لك :sender رسالة',
     'chat_group' => 'كتب :sender في :group',
+    'survey_new' => [
+        'poll' => 'تصويت جديد من المدرسة: :title',
+        'survey' => 'استطلاع جديد من المدرسة: :title',
+        'approval' => 'مطلوب موافقتك: :title',
+    ],
+    'survey_reminder' => 'تذكير: الرجاء الإجابة على :title',
     'unknown' => 'إشعار جديد',
 ];

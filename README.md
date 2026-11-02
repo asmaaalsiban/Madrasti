@@ -313,3 +313,9 @@ Upload the **school's own file** as it is — no template needed.
 - Practice a restore on a copy before you need one.
 
 > Backups and account merges list the tables of the **current** database only (`App\Shared\Support\CurrentDatabase`). Laravel's `Schema::getTables()` with no argument lists every database on a MySQL/PostgreSQL server, which mixed the central and the schools' tables.
+
+## Surveys, polls and parent approvals
+- **Admin** (all parents or one section) and **teachers** (only their sections) send a **poll** (one question: choices or yes/no), a **survey** (several questions: one choice, several choices, yes/no, written) or an **approval** (e.g. permission for a trip: each parent approves or declines **for each child**; extra questions such as an emergency phone are optional). Parents are notified (bell + phone); an optional closing time, or close it by hand.
+- **Parents** see what is waiting on their home page and under *Surveys and approvals*; they can change their answer until it closes. Declining an approval needs no other answers.
+- The creator sees the counts per choice, the written answers, and **who has not answered** (those first, with their phone); *Remind* notifies only those (at most every 6 hours). A survey that already has answers cannot be deleted, only closed.
+- A teacher sees only the surveys they sent; the admin sees all. Requires `php artisan tenants:migrate`.

@@ -67,7 +67,11 @@ class PushNotifier
         } elseif ($kind === 'chat_message' && filled($p['group'] ?? null)) {
             $kind = 'chat_group';
         }
-        $key = 'push.'.$kind.($kind === 'plan_reviewed' ? '.'.($p['decision'] ?? 'approve') : '');
+        $key = 'push.'.$kind.match ($kind) {
+            'plan_reviewed' => '.'.($p['decision'] ?? 'approve'),
+            'survey_new' => '.'.($p['type'] ?? 'survey'),
+            default => '',
+        };
         $text = __($key, ['subject' => $pick('subject'), 'title' => $p['title'] ?? '', 'teacher' => $p['teacher'] ?? '', 'student' => $pick('student'), 'note' => $p['note'] ?? '', 'sender' => $p['sender'] ?? '', 'group' => $p['group'] ?? '', 'amount' => $p['amount'] ?? '', 'due' => $p['due'] ?? ''], $locale);
         if ($text === $key) {
             $text = __('push.unknown', [], $locale);
