@@ -29,6 +29,7 @@ export default function ParentHome() {
                 <Link to={`/parent/children/${c.id}/fees`} className="rounded border px-3 py-1 text-sm text-brand">{t('finance.feesLink')}</Link>
                 <Link to={`/parent/children/${c.id}/summaries`} className="rounded border px-3 py-1 text-sm text-brand">{t('dailySummary.title')}</Link>
                 <Link to={`/parent/children/${c.id}/behavior`} className="rounded border px-3 py-1 text-sm text-brand">{t('behavior.title')}</Link>
+                <Link to={`/parent/children/${c.id}/motivation`} className="rounded border px-3 py-1 text-sm text-brand">{t('motivation.title')}</Link>
                 <Link to={`/parent/children/${c.id}/homework`} className="rounded border px-3 py-1 text-sm text-brand">{t('homework.title')}</Link>
               </div>
               <ChildAttendance studentId={c.id} />

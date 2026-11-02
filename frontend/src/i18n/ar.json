@@ -93,7 +93,8 @@
       "behavior": "السلوك",
       "announcements": "الإعلانات",
       "chat": "المحادثات",
-      "finance": "الماليات"
+      "finance": "الماليات",
+      "motivation": "النقاط والشارات"
     },
     "actions": {
       "add": "إضافة",
@@ -759,7 +760,9 @@
       "chat_message": "أرسل لك {{sender}} رسالة",
       "chat_group": "كتب {{sender}} في {{group}}",
       "installment": "قسط بقيمة {{amount}} يستحق {{due}}",
-      "installment_overdue": "قسط متأخر بقيمة {{amount}} (استحقاقه {{due}})"
+      "installment_overdue": "قسط متأخر بقيمة {{amount}} (استحقاقه {{due}})",
+      "badge_earned": "{{student}} حصل على الشارة {{icon}} {{badge}}",
+      "star_of_week": "{{student}} هو نجم الأسبوع!"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -935,5 +938,38 @@
     },
     "transport": "مواصلات",
     "firstPaymentTitle": "الدفعة الأولى (اختياري)"
+  },
+  "motivation": {
+    "title": "النقاط والشارات",
+    "hint": "امنح نقاطًا وشارات واختر نجم الأسبوع.",
+    "settings": "إعدادات النقاط والشارات",
+    "childTitle": "النقاط والشارات: {{name}}",
+    "selectAll": "تحديد الكل",
+    "selected": "تم تحديد {{count}}",
+    "points": "النقاط",
+    "note": "السبب",
+    "give": "منح",
+    "badge": "الشارة",
+    "giveBadge": "منح الشارة",
+    "star": "نجم الأسبوع",
+    "starThisWeek": "نجم الأسبوع!",
+    "leading": "المتصدر",
+    "crown": "اجعله نجم الأسبوع",
+    "details": "التفاصيل",
+    "weekPoints": "هذا الأسبوع",
+    "totalPoints": "مجموع النقاط",
+    "badges": "الشارات",
+    "noBadges": "لا توجد شارات بعد.",
+    "history": "آخر النقاط",
+    "noAwards": "لا توجد نقاط بعد.",
+    "undo": "تراجع",
+    "nextBadge": "باقي {{count}} نقطة لتحصل على {{icon}} {{badge}}",
+    "categories": "أسباب منح النقاط",
+    "categoriesHelp": "أسباب جاهزة يضغط عليها المعلم لمنح النقاط. استخدم رقمًا سالبًا لخصم النقاط.",
+    "badgesHelp": "الشارة التي لها \"نقاط مطلوبة\" تُمنح تلقائيًا عند هذا المجموع، وغير ذلك يمنحها المعلم يدويًا.",
+    "icon": "الرمز (إيموجي)",
+    "pointsRequired": "النقاط المطلوبة",
+    "atPoints": "عند {{count}} نقطة",
+    "byHand": "تُمنح يدويًا"
   }
 }

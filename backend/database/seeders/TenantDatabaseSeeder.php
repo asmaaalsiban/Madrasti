@@ -29,9 +29,9 @@ class TenantDatabaseSeeder extends Seeder
         DB::table('badges')->insert(array_map(
             fn (array $row) => $row + ['created_at' => $now, 'updated_at' => $now],
             [
-                ['name_ar' => 'نجم الأسبوع', 'name_en' => 'Star of the week', 'description' => null, 'icon' => 'star'],
-                ['name_ar' => 'متفوق', 'name_en' => 'High achiever', 'description' => null, 'icon' => 'trophy'],
-                ['name_ar' => 'منضبط', 'name_en' => 'Disciplined', 'description' => null, 'icon' => 'shield'],
+                ['name_ar' => 'نجم الأسبوع', 'name_en' => 'Star of the week', 'description' => null, 'icon' => '🌟', 'points_required' => null],
+                ['name_ar' => 'متفوق', 'name_en' => 'High achiever', 'description' => null, 'icon' => '🏆', 'points_required' => 100],
+                ['name_ar' => 'منضبط', 'name_en' => 'Disciplined', 'description' => null, 'icon' => '🛡️', 'points_required' => null],
             ],
         ));
     }

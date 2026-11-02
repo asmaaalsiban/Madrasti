@@ -106,6 +106,7 @@ class AutoFeesTest extends AcademicTestCase
 
     public function test_the_admins_student_list_shows_what_each_student_owes_and_what_remains(): void
     {
+        $this->travelTo('2026-10-15'); // the first installment is paid, the one due 2026-10-01 is overdue
         $id = $this->enrol($this->first)->json('data.id');
         $paidFee = StudentFee::first();
         $paidFee->installments->first()->update(['paid_amount' => 175]);
