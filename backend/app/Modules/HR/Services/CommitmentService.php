@@ -20,7 +20,7 @@ class CommitmentService
     public function __construct(private readonly StaffAttendanceService $attendance, private readonly CommitmentRules $rules) {}
 
     /**
-     * @return array<string, array{score: int|null, done: int, expected: int}>
+     * @return array<string, array{score: int|null, done: int, expected: int, absent?: int}>
      */
     public function scores(User $user, Carbon $month): array
     {
@@ -45,7 +45,8 @@ class CommitmentService
         $rules = $this->rules->all();
         $base = Money::cents($baseSalary);
         $lines = [];
-        foreach ($this->scores($user, $month) as $code => $s) {
+        $scores = $this->scores($user, $month);
+        foreach ($scores as $code => $s) {
             $rule = $rules[$code];
             if (! $rule['enabled'] || $s['score'] === null) {
                 continue;
@@ -53,12 +54,31 @@ class CommitmentService
             $cents = static fn (string $type, float $value): int => $type === 'percent' ? (int) round($base * $value / 100) : Money::cents($value);
             if ($s['score'] >= $rule['bonus_min'] && $rule['bonus_value'] > 0) {
                 $lines[] = ['code' => $code, 'kind' => 'bonus', 'amount' => Money::amount($cents($rule['bonus_type'], (float) $rule['bonus_value'])), 'score' => $s['score']];
-            } elseif ($s['score'] < $rule['deduction_below'] && $rule['deduction_value'] > 0) {
-                $lines[] = ['code' => $code, 'kind' => 'deduction', 'amount' => Money::amount($cents($rule['deduction_type'], (float) $rule['deduction_value'])), 'score' => $s['score']];
+            } elseif (($tier = $this->tierFor($rule['deduction_tiers'], $s['score'])) !== null) {
+                $lines[] = ['code' => $code, 'kind' => 'deduction', 'amount' => Money::amount($cents($tier['type'], (float) $tier['value'])), 'score' => $s['score']];
             }
         }
 
+        // Each day of absence costs a fixed amount, or a percent of one day of the salary (salary / working days of the month).
+        $absence = $rules['absence'];
+        $days = $scores['punctuality']['absent'] ?? 0;
+        if ($absence['enabled'] && $absence['value'] > 0 && $days > 0) {
+            $perDay = $absence['type'] === 'percent' ? (int) round($base / max(1, $this->workdays($month->copy()->startOfMonth(), $month->copy()->endOfMonth())->count()) * (float) $absence['value'] / 100) : Money::cents($absence['value']);
+            $lines[] = ['code' => 'absence', 'kind' => 'deduction', 'amount' => Money::amount($perDay * $days), 'score' => $days];
+        }
+
         return array_values(array_filter($lines, fn ($l) => Money::cents($l['amount']) > 0));
+    }
+
+    /**
+     * The deduction tier a score falls in: of all the tiers whose "below" it is under, the strictest one (lowest "below") applies; they do not add up.
+     *
+     * @param  list<array{below: int, type: string, value: float}>  $tiers
+     * @return array{below: int, type: string, value: float}|null
+     */
+    private function tierFor(array $tiers, int $score): ?array
+    {
+        return collect($tiers)->filter(fn ($t) => $score < $t['below'])->sortBy('below')->first();
     }
 
     /** @return Collection<int, Carbon> */
@@ -81,11 +101,12 @@ class CommitmentService
         $started = DB::table('staff_attendances')->min('date');
         $days = $started === null ? collect() : $days->filter(fn (Carbon $d) => $d->toDateString() >= substr((string) $started, 0, 10))->values();
         if ($days->isEmpty()) {
-            return ['score' => null, 'done' => 0, 'expected' => 0];
+            return ['score' => null, 'done' => 0, 'expected' => 0, 'absent' => 0];
         }
         $rows = DB::table('staff_attendances')->where('user_id', $user->id)->whereBetween('date', [$days->first()->toDateString(), $days->last()->toDateString()])->get()->keyBy(fn ($r) => substr((string) $r->date, 0, 10));
         $expected = 0;
         $done = 0;
+        $absent = 0;
         foreach ($days as $day) {
             $status = $rows[$day->toDateString()]->status ?? 'absent';
             if ($status === 'leave') {
@@ -93,9 +114,10 @@ class CommitmentService
             }
             $expected++;
             $done += $status === 'present' ? 1 : 0;
+            $absent += $status === 'absent' ? 1 : 0;
         }
 
-        return $this->result($done, $expected);
+        return $this->result($done, $expected) + ['absent' => $absent];
     }
 
     /** A published summary for each scheduled lesson (class + subject) on each working day so far. */

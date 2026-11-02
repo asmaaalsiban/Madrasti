@@ -1441,6 +1441,9 @@
       "weekly_plan": {
         "bonus": "Weekly plans bonus ({{score}}%)",
         "deduction": "Missing weekly plans ({{score}}%)"
+      },
+      "absence": {
+        "deduction": "Absence deduction ({{score}} day(s))"
       }
     },
     "templatesTitle": "Bonus and deduction rules",
@@ -1469,7 +1472,13 @@
     "latestMonth": "Last paid month",
     "netOf": "Net salary · {{month}}",
     "howCalculated": "How it was calculated",
-    "previousMonths": "Previous months"
+    "previousMonths": "Previous months",
+    "tiersHelp": "Add steps: the lower the score, the bigger the deduction. Only the strictest step the score falls under applies; they do not add up.",
+    "addTier": "+ Add a step",
+    "absenceTitle": "Absence",
+    "absenceHelp": "A day with no check-in counts as an absence. Approved leave is never deducted.",
+    "perAbsentDay": "Each day of absence costs",
+    "ofDayPay": "of one day's pay (salary ÷ working days of the month)"
   },
   "renewals": {
     "title": "Student renewal",
