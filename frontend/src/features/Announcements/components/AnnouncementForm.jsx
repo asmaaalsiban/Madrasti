@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const ROLES = ['teacher', 'student', 'parent', 'admin']
 
@@ -61,7 +62,7 @@ export default function AnnouncementForm({ announcement, options, onClose }) {
         <label className="block text-sm">{t('announcements.fields.title')}<input required className="mt-1 w-full rounded border p-2" value={form.title} onChange={set('title')} /></label>
         <label className="block text-sm">{t('announcements.fields.body')}<textarea required rows={5} className="mt-1 w-full rounded border p-2" value={form.body} onChange={set('body')} /></label>
         <div className="flex flex-wrap items-center gap-4">
-          <label className="text-sm">{t('announcements.expiresAt')}<input type="date" className="mt-1 block rounded border p-2" value={form.expires_at} onChange={set('expires_at')} /></label>
+          <label className="text-sm">{t('announcements.expiresAt')}<DateInput className="mt-1 block rounded border p-2" value={form.expires_at} onChange={set('expires_at')} /></label>
           {options.can_publish_all && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_pinned} onChange={(e) => setForm({ ...form, is_pinned: e.target.checked })} />{t('announcements.pin')}</label>}
         </div>
         <div className="flex justify-end gap-2">

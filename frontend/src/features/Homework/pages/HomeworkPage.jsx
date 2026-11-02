@@ -8,6 +8,7 @@ import Modal from '../../../components/shared/Modal'
 import { HomeworkPhotos } from '../components/HomeworkImage'
 import ImagePicker from '../components/ImagePicker'
 import SubmissionsDialog from '../components/SubmissionsDialog'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const EMPTY = { pair: '', title: '', description: '', due_on: '', files: [], saved: [], dropped: [] }
 
@@ -87,7 +88,7 @@ export default function HomeworkPage() {
             </FormField>
             <FormField label={t('homework.fields.title')}><input required className="w-full rounded border p-2" value={form.title} onChange={set('title')} /></FormField>
             <FormField label={t('homework.fields.description')}><textarea rows={4} className="w-full rounded border p-2" value={form.description} onChange={set('description')} /></FormField>
-            <FormField label={t('homework.fields.dueOn')}><input required type="date" className="w-full rounded border p-2" value={form.due_on} onChange={set('due_on')} /></FormField>
+            <FormField label={t('homework.fields.dueOn')}><DateInput required className="w-full rounded border p-2" value={form.due_on} onChange={set('due_on')} /></FormField>
             <div className="space-y-1">
               <span className="block text-sm">{t('homework.fields.image')}</span>
               <ImagePicker

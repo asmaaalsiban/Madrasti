@@ -75,7 +75,12 @@ function RulesForm({ base, initial }) {
                     {canEdit && <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => set(code, { deduction_tiers: r.deduction_tiers.filter((_, j) => j !== i) })}>✕</button>}
                   </div>
                 ))}
-                {canEdit && <button type="button" className="text-brand underline" onClick={() => set(code, { deduction_tiers: [...r.deduction_tiers, { below: 60, type: 'amount', value: '' }] })}>{t('payroll.addTier')}</button>}
+                {canEdit && (
+                  <div className="flex flex-wrap gap-3">
+                    <button type="button" className="rounded border border-red-300 bg-white px-3 py-1 text-red-800" onClick={() => set(code, { deduction_tiers: [...r.deduction_tiers, { below: 60, type: 'amount', value: '' }] })}>{t('payroll.addTier')}</button>
+                    {r.deduction_tiers.length === 0 && <button type="button" className="rounded border bg-white px-3 py-1 text-brand" onClick={() => set(code, { deduction_tiers: [{ below: 80, type: 'amount', value: 10 }, { below: 60, type: 'amount', value: 25 }, { below: 50, type: 'percent', value: 20 }] })}>{t('payroll.suggestedTiers')}</button>}
+                  </div>
+                )}
               </div>
             </div>
           </fieldset>

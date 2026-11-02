@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import StatusDates from '../components/StatusDates'
 import { useStudentName } from '../components/useStudentName'
+import { DateInput } from '../../../components/shared/DateInput'
 
 // Per student: how many days absent / late in the period; the number opens the dates behind it.
 export default function AttendanceReportPage() {
@@ -53,11 +54,11 @@ export default function AttendanceReportPage() {
         </label>
         <label className="text-sm">
           {t('attendance.from')}
-          <input type="date" dir="ltr" className="mt-1 block rounded border p-2" value={filters.from} onChange={set('from')} />
+          <DateInput className="mt-1 block rounded border p-2" value={filters.from} onChange={set('from')} />
         </label>
         <label className="text-sm">
           {t('attendance.to')}
-          <input type="date" dir="ltr" className="mt-1 block rounded border p-2" value={filters.to} onChange={set('to')} />
+          <DateInput className="mt-1 block rounded border p-2" value={filters.to} onChange={set('to')} />
         </label>
       </div>
       {meta && <p className="text-sm text-slate-500" dir="ltr">{meta.from} → {meta.to}</p>}

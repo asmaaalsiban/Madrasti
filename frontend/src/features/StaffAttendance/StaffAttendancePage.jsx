@@ -5,6 +5,7 @@ import { api } from '../../api/client'
 import Modal from '../../components/shared/Modal'
 import { useAuth } from '../Auth/AuthProvider'
 import CheckInCard from './CheckInCard'
+import { DateInput } from '../../components/shared/DateInput'
 
 const STATUS_STYLE = { present: 'bg-green-100 text-green-800', late: 'bg-amber-100 text-amber-800', absent: 'bg-red-100 text-red-700', leave: 'bg-blue-100 text-blue-800' }
 
@@ -29,8 +30,8 @@ function EditDialog({ row, date, onClose }) {
         </label>
         {timed && (
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm">{t('staffAttendance.cols.in')}<input type="time" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.check_in} onChange={set('check_in')} /></label>
-            <label className="block text-sm">{t('staffAttendance.cols.out')}<input type="time" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.check_out} onChange={set('check_out')} /></label>
+            <label className="block text-sm">{t('staffAttendance.cols.in')}<input type="time" className="mt-1 w-full rounded border p-2" value={form.check_in} onChange={set('check_in')} /></label>
+            <label className="block text-sm">{t('staffAttendance.cols.out')}<input type="time" className="mt-1 w-full rounded border p-2" value={form.check_out} onChange={set('check_out')} /></label>
           </div>
         )}
         <label className="block text-sm">{t('staffAttendance.note')}<input className="mt-1 w-full rounded border p-2" value={form.note} onChange={set('note')} /></label>
@@ -55,7 +56,7 @@ export default function StaffAttendancePage() {
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('staffAttendance.title')}</h1>
       <CheckInCard />
-      <label className="block text-sm">{t('staffAttendance.date')}<input type="date" className="ms-2 rounded border p-1.5" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} /></label>
+      <label className="block text-sm">{t('staffAttendance.date')}<DateInput className="ms-2 rounded border p-1.5" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} /></label>
       {isLoading || !data ? <p className="text-slate-500">{t('common.loading')}</p> : (
         <>
           {!data.workday && <p className="rounded border bg-white p-3 text-sm text-slate-600">{t('staffAttendance.dayOff')}</p>}

@@ -6,6 +6,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import ApplyFeeDialog from '../components/ApplyFeeDialog'
 import Money from '../components/Money'
+import { DateInput } from '../../../components/shared/DateInput'
 
 // The yearly fee of each grade. The accountant adds them and gives them to the students of the grade; the admin only reads.
 export default function FeeStructuresPage() {
@@ -70,7 +71,7 @@ export default function FeeStructuresPage() {
             <label className="block text-sm">{t('finance.fields.name')}<input required className="mt-1 w-full rounded border p-2" value={form.name} onChange={set('name')} /></label>
             <label className="block text-sm">{t('finance.fields.amount')}<input required type="number" min="0.01" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></label>
             <label className="block text-sm">{t('finance.fields.installments')}<input required type="number" min="1" max="24" className="mt-1 w-full rounded border p-2" value={form.installments_count} onChange={set('installments_count')} /></label>
-            <label className="block text-sm">{t('finance.fields.firstDue')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.first_due} onChange={set('first_due')} /></label>
+            <label className="block text-sm">{t('finance.fields.firstDue')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.first_due} onChange={set('first_due')} /></label>
             <label className="block text-sm">{t('finance.fields.everyMonths')}<input required type="number" min="1" max="12" className="mt-1 w-full rounded border p-2" value={form.every_months} onChange={set('every_months')} /></label>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.auto_apply} onChange={(e) => setForm({ ...form, auto_apply: e.target.checked })} />{t('finance.autoApply')}</label>
             <p className="text-xs text-slate-500">{t('finance.autoApplyHelp')}</p>

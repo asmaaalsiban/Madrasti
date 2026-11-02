@@ -373,3 +373,10 @@ Upload the **school's own file** as it is — no template needed.
 
 - Each commitment measure can have **steps**: e.g. below 80% lose 10, below 60% lose 25, below 50% lose 20% of the salary. Only the strictest step the score falls under applies (they do not add up). Old single-threshold rules keep working as one step.
 - **Absence**: a working day with no check-in (after recording started) costs a fixed amount, or a percent of one day's pay (salary / working days of the month); approved leave costs nothing.
+
+### Assigning rules to staff (summer club, private lessons) and Arabic dates
+
+- On the rules screen press **Assign staff** next to a rule, tick the teachers and choose the first (and optionally the last) month. The rule is added to their payslip automatically in every payroll prepared for those months (inactive rules and deductions that would push the net below zero are skipped). Open-ended = every month until removed. For a one-off in one month use **Rule** inside the draft payroll.
+- The commitment rules screen has a **Use suggested steps** button when a measure has no deduction steps yet.
+- Dates: the browser draws native date fields left-to-right, so in Arabic the app shows **day / month / year** as three fields from right to left (`DateInput` / `MonthInput`); in English the native field is kept.
+- After pulling: `php artisan tenants:migrate`.

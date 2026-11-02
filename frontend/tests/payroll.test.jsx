@@ -165,4 +165,17 @@ describe('TemplatesPage and giving a rule', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/runs/9/apply-template', { template_id: 1 }))
     expect(await screen.findByText('Given to 1 person(s); 0 skipped (a deduction would take the net below zero).')).toBeInTheDocument()
   })
+
+  it('assigns staff to a rule for a range of months', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/payroll/staff' ? { currency: 'JOD', data: [{ id: 1, name: 'Sara Ali' }, { id: 2, name: 'Omar Nasser' }] } : url.includes('/assignments') ? { data: [{ id: 8, user: { id: 2, name: 'Omar Nasser' }, starts_on: '2026-07', ends_on: null }] } : { currency: 'JOD', data: [rule] } }))
+    api.post.mockResolvedValue({ data: {} })
+    wrap(<TemplatesPage base="/admin" />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Assign staff' }))
+    expect(await screen.findByText('2026-07 → ∞')).toBeInTheDocument() // already assigned
+    fireEvent.click(await screen.findByLabelText('Sara Ali'))
+    fireEvent.change(screen.getByLabelText('From month'), { target: { value: '2026-07' } })
+    fireEvent.change(screen.getByLabelText('To month (optional)'), { target: { value: '2026-08' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Assign (1)' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/templates/1/assignments', { user_ids: [1], starts_on: '2026-07', ends_on: '2026-08' }))
+  })
 })

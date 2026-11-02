@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const METHODS = ['cash', 'bank_transfer', 'card', 'cheque', 'online']
 const today = () => new Date().toISOString().slice(0, 10)
@@ -33,7 +34,7 @@ export default function PaymentDialog({ fee, currency, payerDefault = '', onClos
         <label className="block text-sm">{t('finance.fields.method')}
           <select className="mt-1 w-full rounded border p-2" value={form.method} onChange={set('method')}>{METHODS.map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}</select>
         </label>
-        <label className="block text-sm">{t('finance.fields.paidOn')}<input required type="date" max={today()} className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
+        <label className="block text-sm">{t('finance.fields.paidOn')}<DateInput required max={today()} className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
         <label className="block text-sm">{t('finance.fields.installment')}
           <select className="mt-1 w-full rounded border p-2" value={form.installment_id} onChange={set('installment_id')}>
             <option value="">{t('finance.oldestFirst')}</option>

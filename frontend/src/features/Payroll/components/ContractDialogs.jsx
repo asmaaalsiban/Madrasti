@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import Money from '../../Finance/components/Money'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const cents = (v) => Math.round(Number(v || 0) * 100)
@@ -67,8 +68,8 @@ export function NewContractDialog({ staff, onClose }) {
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-sm">{t('payroll.startsOn')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.starts_on} onChange={set('starts_on')} /></label>
-          <label className="block text-sm">{t('payroll.endsOn')}<input type="date" className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={set('ends_on')} /></label>
+          <label className="block text-sm">{t('payroll.startsOn')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.starts_on} onChange={set('starts_on')} /></label>
+          <label className="block text-sm">{t('payroll.endsOn')}<DateInput className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={set('ends_on')} /></label>
         </div>
         <label className="block text-sm">{t('payroll.baseSalary')}<input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.base_salary} onChange={set('base_salary')} /></label>
         <PaymentFields method={form.payment_method} details={form.payment_details} onChange={(p) => setForm({ ...form, ...p })} />
@@ -103,7 +104,7 @@ export function RenewDialog({ staff, currency, onClose }) {
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <p className="text-sm text-slate-600">{t('payroll.currentContract', { from: c.starts_on, to: c.ends_on ?? '—' })} · <Money value={c.base_salary} currency={currency} /></p>
-        <label className="block text-sm">{t('payroll.newEndsOn')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={set('ends_on')} /></label>
+        <label className="block text-sm">{t('payroll.newEndsOn')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={set('ends_on')} /></label>
         <fieldset className="space-y-2 rounded border p-3">
           <legend className="px-1 text-sm font-medium">{t('payroll.annualRaise')}</legend>
           <label className="block text-sm">{t('payroll.raiseType')}
@@ -140,7 +141,7 @@ export function EndDialog({ staff, onClose }) {
     <Modal open title={t('payroll.endFor', { name: staff.name })} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-        <label className="block text-sm">{t('payroll.lastDay')}<input required type="date" className="mt-1 w-full rounded border p-2" value={on} onChange={(e) => setOn(e.target.value)} /></label>
+        <label className="block text-sm">{t('payroll.lastDay')}<DateInput required className="mt-1 w-full rounded border p-2" value={on} onChange={(e) => setOn(e.target.value)} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
           <button type="submit" disabled={save.isPending} className="rounded bg-red-700 px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.endContract')}</button>
