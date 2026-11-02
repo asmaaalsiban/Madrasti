@@ -124,7 +124,11 @@ describe('MyPayslipsPage and notifications', () => {
     expect(latest).toHaveTextContent('Maths tutoring')
     expect(latest).toHaveTextContent('−30.00')
     expect(screen.getByLabelText('My salary')).toHaveTextContent('Cheque')
-    expect(screen.getByRole('img', { name: 'Net salary by month' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Salary breakdown' })).toBeInTheDocument()
+    const chart = screen.getByLabelText('Salary breakdown', { selector: 'figure' })
+    expect(chart).toHaveTextContent('950.00') // the net of the last month sits in the middle
+    fireEvent.click(screen.getByRole('tab', { name: '2026-09' })) // another month
+    expect(chart).toHaveTextContent('900.00')
     fireEvent.click(screen.getByRole('button', { name: /2026-09/ }))
     expect(screen.getAllByRole('link', { name: 'Payslip' }).at(-1)).toHaveAttribute('href', '/teacher/payslips/3')
   })

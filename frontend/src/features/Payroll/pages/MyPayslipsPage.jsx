@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Breakdown from '../components/Breakdown'
 import CommitmentCard from '../components/CommitmentCard'
-import SalaryChart from '../components/SalaryChart'
+import SalaryDonut from '../components/SalaryDonut'
 import Money from '../../Finance/components/Money'
 
 // "My salary": the current contract, the last paid month with how it was calculated, a chart of the months, and the history.
@@ -47,7 +47,7 @@ export default function MyPayslipsPage({ base }) {
       )}
 
       <CommitmentCard currency={data.currency} />
-      <SalaryChart rows={data.data} currency={data.currency} />
+      <SalaryDonut rows={data.data} currency={data.currency} />
 
       {older.length > 0 && <h2 className="font-bold">{t('payroll.previousMonths')}</h2>}
       <ul className="space-y-2">

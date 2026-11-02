@@ -1468,7 +1468,7 @@
     "apply": "Apply",
     "rule": "Rule",
     "ruleApplied": "Given to {{applied}} person(s); {{skipped}} skipped (a deduction would take the net below zero).",
-    "chartTitle": "Net salary by month",
+    "chartTitle": "Salary breakdown",
     "latestMonth": "Last paid month",
     "netOf": "Net salary · {{month}}",
     "howCalculated": "How it was calculated",
@@ -1488,7 +1488,8 @@
     "toMonthHint": "Leave \"To month\" empty to keep giving it every month until you remove it.",
     "assignAction": "Assign ({{count}})",
     "assignedNow": "Already assigned",
-    "noAssigned": "Nobody yet."
+    "noAssigned": "Nobody yet.",
+    "pickMonth": "Pick a month"
   },
   "renewals": {
     "title": "Student renewal",
