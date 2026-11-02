@@ -181,10 +181,29 @@ class MotivationTest extends AcademicTestCase
         $this->getJson("/api/students/{$this->omar->id}/motivation")->assertForbidden();
     }
 
+    public function test_the_teacher_sees_every_badge_each_student_has_and_which_are_theirs(): void
+    {
+        Sanctum::actingAs($this->teacher);
+        $creative = Badge::where('name_en', 'Creative')->first();
+        $other = User::factory()->staff(StaffType::Teacher)->create();
+        $this->postJson("/api/motivation/students/{$this->ali->id}/badges", ['badge_id' => $creative->id])->assertCreated();
+        $this->give([$this->ali], null, ['points' => 15, 'note' => 'Project'])->assertCreated();
+        $this->give([$this->ali], null, ['points' => 15, 'note' => 'Presentation'])->assertCreated(); // earns Rising star automatically
+
+        $rows = collect($this->getJson('/api/motivation/classroom?classroom_id='.$this->a->id)->json('data.students'));
+        $ali = $rows->firstWhere('id', $this->ali->id)['badges'];
+        $this->assertEqualsCanonicalizing(['Creative', 'Rising star'], collect($ali)->pluck('name_en')->all());
+        $this->assertSame([true], collect($ali)->where('name_en', 'Creative')->pluck('mine')->all());
+        $this->assertSame([false], collect($ali)->where('name_en', 'Rising star')->pluck('mine')->all());
+        $this->assertSame([], $rows->firstWhere('id', $this->omar->id)['badges']);
+    }
+
     public function test_the_admin_manages_reasons_and_badges_and_teachers_cannot(): void
     {
         Sanctum::actingAs($this->teacher);
-        $this->postJson('/api/motivation/categories', ['name_ar' => 'x', 'name_en' => 'x', 'points' => 1])->assertForbidden();
+        $mine = $this->postJson('/api/motivation/categories', ['name_ar' => 'قراءة', 'name_en' => 'Reading aloud', 'points' => 2])->assertCreated()->json('data.id');
+        $this->putJson("/api/motivation/categories/$mine", ['name_ar' => 'x', 'name_en' => 'x', 'points' => 1])->assertForbidden();
+        $this->deleteJson("/api/motivation/categories/$mine")->assertForbidden();
         $id = $this->postJson('/api/motivation/badges', ['name_ar' => 'قارئ', 'name_en' => 'Reader', 'icon' => '📚', 'points_required' => 5])->assertCreated()->assertJsonPath('data.points_required', null)->json('data.id');
         $this->putJson("/api/motivation/badges/$id", ['name_ar' => 'x', 'name_en' => 'x', 'icon' => '⭐'])->assertForbidden();
         $this->deleteJson("/api/motivation/badges/$id")->assertForbidden();

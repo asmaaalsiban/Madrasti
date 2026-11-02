@@ -974,6 +974,9 @@
     "atPoints": "عند {{count}} نقطة",
     "byHand": "تُمنح يدويًا",
     "addOwnBadge": "أضف شارة من عندي",
-    "saveBadge": "حفظ الشارة"
+    "saveBadge": "حفظ الشارة",
+    "addOwnCategory": "أضف سببًا من عندي",
+    "saveCategory": "حفظ السبب",
+    "givenByMe": "منحتها أنا"
   }
 }

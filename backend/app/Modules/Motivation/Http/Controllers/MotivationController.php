@@ -36,13 +36,16 @@ class MotivationController extends Controller
         $year = AcademicYear::where('is_current', true)->first();
         $students = Student::whereIn('id', Enrollment::where('classroom_id', $data['classroom_id'])->where('academic_year_id', $year?->id)->select('student_id'))->orderBy('name_ar')->get();
         $totals = $this->motivation->totals($students->pluck('id'));
+        $earned = DB::table('student_badges')->join('badges', 'badges.id', '=', 'student_badges.badge_id')->whereIn('student_id', $students->pluck('id'))
+            ->orderBy('awarded_at')->get(['student_id', 'badges.id', 'name_ar', 'name_en', 'icon', 'awarded_by'])->groupBy('student_id');
         $star = $this->motivation->star((int) $data['classroom_id']);
         $leaders = $this->motivation->leaders((int) $data['classroom_id']);
 
         return response()->json(['data' => [
             'students' => $students->map(fn (Student $s) => [
                 'id' => $s->id, 'name_ar' => $s->name_ar, 'name_en' => $s->name_en,
-                'total' => $totals[$s->id]['total'], 'week' => $totals[$s->id]['week'], 'is_star' => $star === $s->id, 'is_leader' => $leaders->contains($s->id),
+                'total' => $totals[$s->id]['total'], 'week' => $totals[$s->id]['week'], 'badges' => ($earned[$s->id] ?? collect())->map(fn ($b) => ['id' => $b->id, 'name_ar' => $b->name_ar, 'name_en' => $b->name_en, 'icon' => $b->icon, 'mine' => (int) $b->awarded_by === $request->user()->id])->values(),
+                'is_star' => $star === $s->id, 'is_leader' => $leaders->contains($s->id),
             ])->values(),
             'categories' => PointCategory::where('is_active', true)->orderByDesc('points')->get(),
             'badges' => Badge::where('is_active', true)->orderBy('id')->get(),

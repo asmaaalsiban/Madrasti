@@ -12,6 +12,8 @@ export default function MotivationPage({ base }) {
   const [picked, setPicked] = useState([])
   const [custom, setCustom] = useState({ points: '', note: '' })
   const [badgeId, setBadgeId] = useState('')
+  const [newCategory, setNewCategory] = useState({ name_ar: '', name_en: '', points: '' })
+  const [addingCategory, setAddingCategory] = useState(false)
   const [newBadge, setNewBadge] = useState({ name_ar: '', name_en: '', icon: '' })
   const [error, setError] = useState('')
   const name = (x) => x[`name_${i18n.language}`] || x.name_ar
@@ -40,6 +42,11 @@ export default function MotivationPage({ base }) {
   const createBadge = useMutation({
     mutationFn: async () => (await api.post('/motivation/badges', newBadge)).data.data,
     onSuccess: (badge) => { setError(''); setNewBadge({ name_ar: '', name_en: '', icon: '' }); setBadgeId(String(badge.id)); refresh() },
+    onError: fail,
+  })
+  const createCategory = useMutation({
+    mutationFn: () => api.post('/motivation/categories', { ...newCategory, points: Number(newCategory.points) }),
+    onSuccess: () => { setError(''); setNewCategory({ name_ar: '', name_en: '', points: '' }); setAddingCategory(false); refresh() },
     onError: fail,
   })
   const crown = useMutation({
@@ -80,6 +87,15 @@ export default function MotivationPage({ base }) {
               </button>
             ))}
           </div>
+          {addingCategory ? (
+            <div className="flex flex-wrap items-end gap-2 rounded border bg-slate-50 p-2">
+              <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newCategory.name_ar} onChange={(e) => setNewCategory({ ...newCategory, name_ar: e.target.value })} /></label>
+              <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCategory.name_en} onChange={(e) => setNewCategory({ ...newCategory, name_en: e.target.value })} /></label>
+              <label className="text-sm">{t('motivation.points')}<input type="number" min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={newCategory.points} onChange={(e) => setNewCategory({ ...newCategory, points: e.target.value })} /></label>
+              <button type="button" disabled={!newCategory.name_ar || !newCategory.name_en || !newCategory.points || createCategory.isPending} onClick={() => createCategory.mutate()} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-40">{t('motivation.saveCategory')}</button>
+              <button type="button" className="rounded border px-3 py-2" onClick={() => setAddingCategory(false)}>{t('admin.actions.cancel')}</button>
+            </div>
+          ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAddingCategory(true)}>{t('motivation.addOwnCategory')}</button>}
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); award.mutate({ points: Number(custom.points), note: custom.note }) }}>
             <label className="text-sm">{t('motivation.points')}<input type="number" required min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={custom.points} onChange={(e) => setCustom({ ...custom, points: e.target.value })} /></label>
             <label className="text-sm">{t('motivation.note')}<input required className="mt-1 block rounded border p-2" value={custom.note} onChange={(e) => setCustom({ ...custom, note: e.target.value })} /></label>
@@ -114,6 +130,7 @@ export default function MotivationPage({ base }) {
               <input type="checkbox" aria-label={name(s)} checked={picked.includes(s.id)} onChange={() => toggle(s.id)} />
               <span>{name(s)}</span>
               {s.is_star && <span title={t('motivation.star')} className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">⭐ {t('motivation.star')}</span>}
+              {s.badges.map((b) => <span key={b.id} title={`${name(b)}${b.mine ? ` (${t('motivation.givenByMe')})` : ''}`} className={`rounded-full border px-2 py-0.5 text-xs ${b.mine ? 'border-brand' : ''}`}>{b.icon} {name(b)}</span>)}
               {!s.is_star && s.is_leader && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-800">🔥 {t('motivation.leading')}</span>}
             </label>
             <span className="flex flex-wrap items-center gap-2 text-sm">

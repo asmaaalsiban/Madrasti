@@ -974,6 +974,9 @@
     "atPoints": "at {{count}} points",
     "byHand": "given by hand",
     "addOwnBadge": "Add my own badge",
-    "saveBadge": "Save badge"
+    "saveBadge": "Save badge",
+    "addOwnCategory": "Add my own reason",
+    "saveCategory": "Save reason",
+    "givenByMe": "given by me"
   }
 }
