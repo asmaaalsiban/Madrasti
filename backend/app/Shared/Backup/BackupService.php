@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Backup;
 
-use Illuminate\Support\Facades\Config;
+use App\Shared\Support\CurrentDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use ZipArchive;
@@ -223,15 +222,15 @@ class BackupService
     /** @return list<string> */
     private function tables(): array
     {
-        return array_values(array_map(fn ($t) => $t['name'], array_filter(Schema::getTables(), fn ($t) => ! str_starts_with($t['name'], 'sqlite_'))));
+        return CurrentDatabase::tables();
     }
 
     /** @return \Generator<int, array<string, mixed>> */
     private function rows(string $table): \Generator
     {
         $query = DB::table($table);
-        $columns = array_column(Schema::getColumns($table), 'name');
-        foreach (Schema::getIndexes($table) as $index) {
+        $columns = array_column(CurrentDatabase::schema()->getColumns($table), 'name');
+        foreach (CurrentDatabase::schema()->getIndexes($table) as $index) {
             if ($index['primary']) {
                 foreach ($index['columns'] as $column) {
                     $query->orderBy($column);
@@ -249,7 +248,7 @@ class BackupService
     /** The migrations this database has run: a backup only fits a database with exactly these. @return list<string> */
     private function migrations(): array
     {
-        return Schema::hasTable('migrations') ? DB::table('migrations')->orderBy('id')->pluck('migration')->all() : [];
+        return CurrentDatabase::schema()->hasTable('migrations') ? DB::table('migrations')->orderBy('id')->pluck('migration')->all() : [];
     }
 
     private function withoutForeignKeys(callable $work): void
