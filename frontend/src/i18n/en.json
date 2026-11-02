@@ -96,7 +96,8 @@
       "announcements": "Announcements",
       "chat": "Chat",
       "finance": "Finance",
-      "motivation": "Points & badges"
+      "motivation": "Points & badges",
+      "import": "Import"
     },
     "actions": {
       "add": "Add",
@@ -1006,5 +1007,35 @@
     "addOwnCategory": "Add my own reason",
     "saveCategory": "Save reason",
     "givenByMe": "given by me"
+  },
+  "import": {
+    "title": "Import from Excel",
+    "help": "Add many students or staff at once from an Excel or CSV file. First the file is only checked; nothing is added until you confirm.",
+    "kinds": {
+      "students": "Students",
+      "staff": "Staff"
+    },
+    "step1": "Download the template and fill it in (one row per person).",
+    "downloadTemplate": "Download the template",
+    "note": {
+      "students": "Required: student number and Arabic name. Section must match an existing section name. A parent email creates (or reuses) the parent account, so siblings share one parent. The yearly fee of the grade is applied automatically.",
+      "staff": "Required: name, email and position (for example teacher, head_of_department, accountant, registrar). Subject must match an existing subject."
+    },
+    "step2": "Choose the file and check it.",
+    "file": "File",
+    "check": "Check the file",
+    "line": "Row {{line}}:",
+    "problems": "Rows with problems (they will be skipped)",
+    "skipped": "Rows that were skipped",
+    "checked": "{{total}} rows read: {{valid}} are ready, {{problems}} have problems.",
+    "run": "Import {{count}} rows",
+    "done": "Done: {{created}} added, {{skipped}} skipped.",
+    "passwordNote": "New accounts start with the school's default password and must change it at the first sign-in. Save this list now to hand out the emails.",
+    "cols": {
+      "student_number": "Student number",
+      "name": "Name",
+      "email": "Sign-in email",
+      "staff_type": "Position"
+    }
   }
 }

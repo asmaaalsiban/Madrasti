@@ -6,7 +6,7 @@ import { api } from '../../api/client'
 const fileName = (headers, fallback) => /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(headers?.['content-disposition'] ?? '')?.[1] ?? fallback
 
 // "Export to Excel": downloads what the page is showing, with the same filters. `params` must not include the page number.
-export default function ExportButton({ path, params = {}, fallbackName = 'export.xlsx' }) {
+export default function ExportButton({ path, params = {}, fallbackName = 'export.xlsx', label = null }) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -33,7 +33,7 @@ export default function ExportButton({ path, params = {}, fallbackName = 'export
 
   return (
     <span className="inline-flex items-center gap-2">
-      <button type="button" disabled={busy} className="rounded border px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={download}>{t('common.exportExcel')}</button>
+      <button type="button" disabled={busy} className="rounded border px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={download}>{label ?? t('common.exportExcel')}</button>
       {failed && <span role="alert" className="text-sm text-red-700">{t('common.exportFailed')}</span>}
     </span>
   )

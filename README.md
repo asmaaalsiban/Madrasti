@@ -280,3 +280,11 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - Endpoints (same permissions as the screens they export): `GET /api/attendance/report/export`, `GET /api/finance/accounts/export`, `GET /api/grading/results/export`.
 - Built on `openspout/openspout` v4 (it runs on PHP 8.2; v5 needs 8.3) through `App\Shared\Export\XlsxExport`; a new export is a controller method that passes headers and rows to it.
 - Excel import is the next step.
+
+## Excel import (students and staff)
+- Admin: **Import** in the side menu. Pick Students or Staff, download the template, fill it (one row per person), upload it. Step 1 only **checks** the file (every row, with the same rules as the forms) and lists the problems by row; step 2 imports the valid rows and skips the rest, so a file can be fixed and uploaded again (rows already added are reported as duplicates, never added twice).
+- Columns can be named by key, English or Arabic label. `.xlsx` and `.csv`, up to 1000 rows / 2 MB per file.
+- Students: required student number and Arabic name; section by name (current year); parent email creates or reuses the parent account (siblings share one). Accounts, the grade's yearly fee and the default password work exactly as when adding a student by hand.
+- Staff: required name, email and position (`teacher`, `head_of_department`, `accountant`, ...); subject by name.
+- Endpoints: `GET /api/import/{students|staff}/template`, `POST /api/import/{students|staff}` (`file`, `confirm`).
+- A new kind of import = one `Importer` class (`columns()`, `check()`, `create()`).
