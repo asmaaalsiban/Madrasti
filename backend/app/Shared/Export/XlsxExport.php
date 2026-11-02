@@ -25,9 +25,9 @@ class XlsxExport
         $writer->openToFile($path);
         $sheet = $writer->getCurrentSheet();
         $sheet->setName(mb_substr(preg_replace('/[\\\\\/?*\[\]:]/', ' ', $sheetName) ?: 'Sheet1', 0, 31));
-        $sheet->setSheetView((new SheetView())->withRightToLeft(app()->getLocale() === 'ar'));
+        $sheet->setSheetView((new SheetView())->setRightToLeft(app()->getLocale() === 'ar'));
 
-        $bold = (new Style())->withFontBold(true);
+        $bold = (new Style())->setFontBold();
         $writer->addRow(new Row(array_map(fn (string $h) => Cell::fromValue($h, $bold), $headers)));
         foreach ($rows as $row) {
             $writer->addRow(Row::fromValues($row));

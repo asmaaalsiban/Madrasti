@@ -278,5 +278,5 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 ## Excel export
 - **Export to Excel** buttons on the attendance report, the student fee accounts and a subject's results. The file has every row (not just the page shown), uses the page's filters, and the headers follow the interface language (the sheet reads right-to-left in Arabic).
 - Endpoints (same permissions as the screens they export): `GET /api/attendance/report/export`, `GET /api/finance/accounts/export`, `GET /api/grading/results/export`.
-- Built on `openspout/openspout` through `App\Shared\Export\XlsxExport`; a new export is a controller method that passes headers and rows to it.
+- Built on `openspout/openspout` v4 (it runs on PHP 8.2; v5 needs 8.3) through `App\Shared\Export\XlsxExport`; a new export is a controller method that passes headers and rows to it.
 - Excel import is the next step.
