@@ -115,7 +115,8 @@
       "motivation": "Points & badges",
       "import": "Import",
       "surveys": "Surveys",
-      "signatures": "Signatures"
+      "signatures": "Signatures",
+      "payroll": "Payroll"
     },
     "actions": {
       "add": "Add",
@@ -808,7 +809,12 @@
         "survey": "New survey from the school: {{title}}",
         "approval": "Your approval is needed: {{title}}"
       },
-      "survey_reminder": "Reminder: please answer {{title}}"
+      "survey_reminder": "Reminder: please answer {{title}}",
+      "payroll_submitted": "Payroll {{month}} is waiting for your approval",
+      "payroll_approved": "Payroll {{month}} was approved",
+      "payroll_returned": "Payroll {{month}} was sent back: {{note}}",
+      "payslip_paid": "Your salary for {{month}} was paid",
+      "contract_expiring": "{{name}}'s contract ends on {{date}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1274,5 +1280,127 @@
     "show": "Print it on the report cards",
     "preview": "Signature {{name}}",
     "noImage": "No picture"
+  },
+  "payroll": {
+    "title": "Payroll",
+    "hint": "Monthly salaries, bonuses and deductions.",
+    "help": "The accountant prepares each month, adds bonuses and deductions and submits it; the principal approves; then the accountant records the payment.",
+    "contractsTitle": "Staff contracts",
+    "contractsHint": "Contracts, annual raises and renewals.",
+    "contractsHelp": "Renew a contract with the annual raise, or end it. Salaries are copied into each month's payroll from the active contract.",
+    "mineTitle": "My payslips",
+    "mineHint": "Your paid salary slips.",
+    "noMine": "No paid payslips yet.",
+    "month": "Month",
+    "prepare": "Prepare payroll",
+    "open": "Open",
+    "noRuns": "No payrolls yet.",
+    "noRows": "No staff found.",
+    "noPayslips": "No payslips in this payroll.",
+    "filterAll": "All",
+    "filterSoon": "Ending soon",
+    "filterNone": "No contract",
+    "cols": {
+      "name": "Name",
+      "position": "Position",
+      "salary": "Salary",
+      "period": "Contract period",
+      "state": "Status",
+      "month": "Month",
+      "people": "People",
+      "net": "Net",
+      "base": "Base salary",
+      "additions": "Additions",
+      "deductions": "Deductions"
+    },
+    "state": {
+      "ok": "Active",
+      "soon": "Ends in {{days}} days",
+      "expired": "Expired",
+      "none": "No contract"
+    },
+    "status": {
+      "active": "Active",
+      "renewed": "Renewed",
+      "ended": "Ended"
+    },
+    "runStatus": {
+      "draft": "Draft",
+      "submitted": "Waiting for approval",
+      "approved": "Approved",
+      "paid": "Paid"
+    },
+    "runTitle": "Payroll {{month}}",
+    "returned": "Sent back by the principal",
+    "approvedBy": "Approved by {{name}}",
+    "totals": {
+      "base": "Base salaries",
+      "additions": "Additions",
+      "deductions": "Deductions",
+      "net": "Net total"
+    },
+    "submit": "Submit for approval",
+    "approve": "Approve",
+    "sendBack": "Send back",
+    "returnNote": "Note for the accountant",
+    "payAll": "Record payment",
+    "confirmPay": "Confirm payment",
+    "method": "Payment method",
+    "paidOn": "Paid on",
+    "reference": "Reference",
+    "deleteRun": "Delete draft",
+    "addNewcomers": "Add new staff",
+    "paid": "Paid",
+    "addBonusOrDeduction": "Bonus / deduction",
+    "removeFromRun": "Remove",
+    "addFor": "Add for {{name}}",
+    "reasonHint": "Reason",
+    "payslip": "Payslip",
+    "print": "Print",
+    "payslipOf": "Payslip for {{month}}",
+    "paidLine": "Paid on {{date}} by {{method}}",
+    "notPaidYet": "Not paid yet",
+    "kind": "Type",
+    "kinds": {
+      "bonus": "Bonus",
+      "allowance": "Allowance",
+      "deduction": "Deduction"
+    },
+    "label": "Description",
+    "labelHint": "e.g. Transport allowance",
+    "amount": "Amount",
+    "monthlyItems": "Monthly allowances and deductions",
+    "addItem": "+ Add line",
+    "newContract": "New contract",
+    "newContractFor": "New contract: {{name}}",
+    "startsOn": "Starts on",
+    "endsOn": "Ends on",
+    "baseSalary": "Base salary",
+    "notes": "Notes",
+    "renew": "Renew",
+    "renewFor": "Renew contract: {{name}}",
+    "currentContract": "Current: {{from}} → {{to}}",
+    "newEndsOn": "New contract ends on",
+    "annualRaise": "Annual raise",
+    "raiseType": "Raise type",
+    "raise": {
+      "percent": "Percent",
+      "amount": "Fixed amount",
+      "salary": "New salary",
+      "none": "No raise"
+    },
+    "raiseValue": {
+      "percent": "Percent (%)",
+      "amount": "Amount added",
+      "salary": "New salary"
+    },
+    "newSalary": "New salary",
+    "carryItems": "Keep the monthly allowances and deductions",
+    "endContract": "End contract",
+    "endFor": "End contract: {{name}}",
+    "lastDay": "Last day",
+    "history": "History",
+    "historyOf": "Contracts of {{name}}",
+    "close": "Close"
   }
 }

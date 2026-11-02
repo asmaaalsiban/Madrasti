@@ -338,3 +338,10 @@ Upload the **school's own file** as it is — no template needed.
 - The server removes the paper: it finds the paper colour from the edges of the picture, makes it transparent (shadows and a yellowish photo included), keeps the colour of the ink, and crops to the signature. The **"Remove the paper"** slider cleans more or less (the uploaded photo is kept, so it is redone without uploading again); the preview is shown on a checkerboard so the transparency is visible.
 - The report card prints the homeroom teacher's signature, then the school's, then a blank line for the parent; they print with the card (**Print** / save as PDF). A person with no signature keeps a plain line with their name.
 - Signatures are stored privately per school and sent inside the report card as data (no public URL). Needs the PHP **gd** extension (on XAMPP: `extension=gd` in `php.ini`, enabled by default). Requires `php artisan tenants:migrate`.
+
+## Payroll and staff contracts
+
+- **Contracts** (`/teacher/payroll/contracts`, `/admin/payroll/contracts`): one active contract per person with a base salary, monthly allowances/deductions and an end date. **Renew** creates the next contract the day after the old one ends, with the annual raise (percent, fixed amount, or a new salary); the old one becomes `renewed` and the history keeps every raise.
+- **Monthly payroll** (`/teacher/payroll`, `/admin/payroll`): the accountant opens a month (a payslip per staff member with a contract, recurring items copied), adds one-off bonuses and manual deductions (amount + reason), then submits. The principal (admin role) approves or sends it back with a note. The accountant then records the payment; each person sees their own paid payslips (`/teacher/payslips`) and can print them.
+- **Reminders**: `php artisan contracts:remind` (daily at 08:10 for every school) notifies the accountant and the principal about contracts ending within 30 days (once per week per contract).
+- After pulling: `php artisan tenants:migrate`.

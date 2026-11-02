@@ -28,6 +28,8 @@ use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
+use App\Modules\HR\Http\Controllers\ContractController;
+use App\Modules\HR\Http\Controllers\PayrollController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\Reports\Http\Controllers\ReportCardController;
 use App\Modules\Reports\Http\Controllers\SignatureController;
@@ -95,6 +97,30 @@ Route::middleware(['school-user', 'role:parent,student,teacher,admin'])->prefix(
     Route::get('/', [MySurveyController::class, 'index']);
     Route::get('pending', [MySurveyController::class, 'pending']);
     Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);
+});
+
+// Staff contracts and payroll: the accountant manages, the principal (admin role) approves, everyone reads their own payslips.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->group(function (): void {
+    Route::get('staff', [ContractController::class, 'staff']);
+    Route::get('contracts/expiring', [ContractController::class, 'expiring']);
+    Route::get('staff/{user}/contracts', [ContractController::class, 'history']);
+    Route::post('contracts', [ContractController::class, 'store']);
+    Route::put('contracts/{contract}', [ContractController::class, 'update']);
+    Route::post('contracts/{contract}/renew', [ContractController::class, 'renew']);
+    Route::post('contracts/{contract}/end', [ContractController::class, 'end']);
+    Route::get('runs', [PayrollController::class, 'runs']);
+    Route::post('runs', [PayrollController::class, 'prepare']);
+    Route::get('runs/{run}', [PayrollController::class, 'show']);
+    Route::delete('runs/{run}', [PayrollController::class, 'destroy']);
+    Route::post('runs/{run}/submit', [PayrollController::class, 'submit']);
+    Route::post('runs/{run}/approve', [PayrollController::class, 'approve']);
+    Route::post('runs/{run}/send-back', [PayrollController::class, 'sendBack']);
+    Route::post('runs/{run}/pay', [PayrollController::class, 'pay']);
+    Route::post('payslips/{payslip}/items', [PayrollController::class, 'addItem']);
+    Route::delete('payslip-items/{item}', [PayrollController::class, 'removeItem']);
+    Route::delete('payslips/{payslip}', [PayrollController::class, 'removePayslip']);
+    Route::get('payslips/mine', [PayrollController::class, 'mine']);
+    Route::get('payslips/{payslip}', [PayrollController::class, 'payslip']);
 });
 
 // School structure: admin only.

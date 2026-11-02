@@ -64,6 +64,11 @@ import FeeStructuresPage from '../features/Finance/pages/FeeStructuresPage'
 import AccountsPage from '../features/Finance/pages/AccountsPage'
 import StudentAccountPage from '../features/Finance/pages/StudentAccountPage'
 import ChildFeesPage from '../features/Finance/pages/ChildFeesPage'
+import PayrollPage from '../features/Payroll/pages/PayrollPage'
+import PayrollRunPage from '../features/Payroll/pages/PayrollRunPage'
+import PayslipPage from '../features/Payroll/pages/PayslipPage'
+import MyPayslipsPage from '../features/Payroll/pages/MyPayslipsPage'
+import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
 import { useAuth } from '../features/Auth/AuthProvider'
@@ -129,6 +134,12 @@ const HOME_ROUTES = {
     { path: 'finance/structures', element: <FeeStructuresPage /> },
     { path: 'finance/accounts', element: <AccountsPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
+    { path: 'payroll', element: <PayrollPage base="/teacher" /> },
+    { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
+    { path: 'payroll/payslips/:id', element: <PayslipPage /> },
+    { path: 'payroll/:id', element: <PayrollRunPage base="/teacher" /> },
+    { path: 'payslips', element: <MyPayslipsPage base="/teacher" /> },
+    { path: 'payslips/:id', element: <PayslipPage /> },
     { path: 'grades', element: <AssessmentsPage /> },
     { path: 'grades/results', element: <ResultsPage /> },
     { path: 'grades/:id', element: <ScoreSheetPage /> },
@@ -178,6 +189,12 @@ export const routes = [
               { path: '/admin/finance/structures', element: <FeeStructuresPage /> },
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
+              { path: '/admin/payroll', element: <PayrollPage base="/admin" /> },
+              { path: '/admin/payroll/contracts', element: <ContractsRoute base="/admin" /> },
+              { path: '/admin/payroll/payslips/:id', element: <PayslipPage /> },
+              { path: '/admin/payroll/:id', element: <PayrollRunPage base="/admin" /> },
+              { path: '/admin/payslips', element: <MyPayslipsPage base="/admin" /> },
+              { path: '/admin/payslips/:id', element: <PayslipPage /> },
               { path: '/admin/chat', element: <ChatPage /> },
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },

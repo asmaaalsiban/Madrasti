@@ -72,7 +72,7 @@ class PushNotifier
             'survey_new' => '.'.($p['type'] ?? 'survey'),
             default => '',
         };
-        $text = __($key, ['subject' => $pick('subject'), 'title' => $p['title'] ?? '', 'teacher' => $p['teacher'] ?? '', 'student' => $pick('student'), 'note' => $p['note'] ?? '', 'sender' => $p['sender'] ?? '', 'group' => $p['group'] ?? '', 'amount' => $p['amount'] ?? '', 'due' => $p['due'] ?? ''], $locale);
+        $text = __($key, ['subject' => $pick('subject'), 'title' => $p['title'] ?? '', 'teacher' => $p['teacher'] ?? '', 'student' => $pick('student'), 'note' => $p['note'] ?? '', 'sender' => $p['sender'] ?? '', 'group' => $p['group'] ?? '', 'amount' => $p['amount'] ?? '', 'due' => $p['due'] ?? '', 'month' => $p['month'] ?? '', 'name' => $p['name'] ?? '', 'date' => $p['date'] ?? ''], $locale);
         if ($text === $key) {
             $text = __('push.unknown', [], $locale);
         }
