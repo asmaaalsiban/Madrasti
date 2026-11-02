@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -48,7 +49,7 @@ export default function DailySummaryPage() {
             </select>
           </label>
           <label className="text-sm">{t('behavior.date')}
-            <input type="date" max={today()} className="mt-1 block rounded border p-2" value={date} onChange={(e) => { setDate(e.target.value || today()); setText(null); setSaved(false) }} />
+            <DateInput max={today()} className="mt-1 block rounded border p-2" value={date} onChange={(e) => { setDate(e.target.value || today()); setText(null); setSaved(false) }} />
           </label>
         </div>
         <label className="block text-sm">{t('dailySummary.summary')}

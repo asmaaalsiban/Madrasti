@@ -9,6 +9,7 @@ use App\Modules\Communication\Services\Notifier;
 use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\Payslip;
 use App\Modules\HR\Models\PayslipItem;
+use App\Modules\HR\Models\PayrollRuleAssignment;
 use App\Modules\HR\Models\PayrollRun;
 use App\Modules\HR\Models\PayrollTemplate;
 use App\Modules\HR\Models\StaffContract;
@@ -149,11 +150,33 @@ class PayrollService
                     $slip->items()->create(['kind' => $item->kind, 'label' => $item->label, 'amount' => $item->amount, 'from_contract' => true, 'created_by' => $by->id]);
                 }
                 $this->addCommitmentLines($slip, $staff, $start, $by);
+                $this->addAssignedRules($slip, $staff, $start, $by);
                 $this->recalculate($slip);
             }
         });
 
         return $run->refresh();
+    }
+
+    /** The school's own rules this person was assigned for this month (a summer club, private lessons...). A deduction that would take the net below zero is skipped. */
+    private function addAssignedRules(Payslip $slip, User $staff, Carbon $month, User $by): void
+    {
+        $assignments = PayrollRuleAssignment::with('template')->where('user_id', $staff->id)->whereDate('starts_on', '<=', $month->toDateString())
+            ->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', $month->toDateString()))->get();
+        foreach ($assignments as $assignment) {
+            $template = $assignment->template;
+            if (! $template->is_active) {
+                continue;
+            }
+            $slip->refresh();
+            $cents = $template->type === 'percent' ? (int) round(Money::cents($slip->base_salary) * (float) $template->value / 100) : Money::cents($template->value);
+            $net = Money::cents($slip->net) + ($template->kind === 'deduction' ? -$cents : $cents);
+            if ($cents <= 0 || $net < 0) {
+                continue;
+            }
+            $slip->items()->create(['kind' => $template->kind, 'label' => $template->name, 'amount' => Money::amount($cents), 'category' => $template->category, 'created_by' => $by->id]);
+            $this->recalculate($slip->refresh());
+        }
     }
 
     /** The bonuses and deductions the commitment rules give this person for the month. A deduction never takes the net below zero. */

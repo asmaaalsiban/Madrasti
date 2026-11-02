@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import PlanCard from '../components/PlanCard'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const EMPTY = { pair: '', date: today(), title: '', objectives: '', content: '', shared: true, fromStatus: null }
@@ -53,7 +54,7 @@ export default function LessonPlansPage() {
               {(options.data ?? []).map((a) => <option key={`${a.classroom.id}-${a.subject.id}`} value={`${a.classroom.id}-${a.subject.id}`}>{`${a.classroom.name} · ${subject(a.subject)}`}</option>)}
             </select>
           </label>
-          <label className="text-sm">{t('lessonPlans.weekOf')}<input type="date" className="mt-1 block rounded border p-2" value={form.date} onChange={set('date')} /></label>
+          <label className="text-sm">{t('lessonPlans.weekOf')}<DateInput className="mt-1 block rounded border p-2" value={form.date} onChange={set('date')} /></label>
         </div>
         <label className="block text-sm">{t('lessonPlans.planTitle')}<input required className="mt-1 w-full rounded border p-2" value={form.title} onChange={set('title')} /></label>
         <label className="block text-sm">{t('lessonPlans.objectives')}<textarea rows={3} className="mt-1 w-full rounded border p-2" value={form.objectives} onChange={set('objectives')} /></label>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import EvaluateDialog from '../components/EvaluateDialog'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -34,7 +35,7 @@ export default function BehaviorPage({ base }) {
             {(classrooms.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </label>
-        <label className="text-sm">{t('behavior.date')}<input type="date" max={today()} className="mt-1 block rounded border p-2" value={date} onChange={(e) => setDate(e.target.value || today())} /></label>
+        <label className="text-sm">{t('behavior.date')}<DateInput max={today()} className="mt-1 block rounded border p-2" value={date} onChange={(e) => setDate(e.target.value || today())} /></label>
       </div>
       {week.data && <p className="text-sm text-slate-600">{t('behavior.weekOf', { date: week.data.week_starts_on })}</p>}
       {classrooms.isSuccess && classrooms.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('behavior.noClassrooms')}</p>}

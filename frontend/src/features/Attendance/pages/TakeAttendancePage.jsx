@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { today } from '../../../lib/dates'
 import { useStudentName } from '../components/useStudentName'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const STATUSES = ['present', 'late', 'absent']
 const ACTIVE = { present: 'bg-green-600 text-white', late: 'bg-yellow-400 text-black', absent: 'bg-red-600 text-white' }
@@ -71,7 +72,7 @@ export default function TakeAttendancePage() {
         </label>
         <label className="text-sm">
           {t('attendance.date')}
-          <input type="date" dir="ltr" className="mt-1 block rounded border p-2" value={date} max={today()} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setDate(e.target.value) }} />
+          <DateInput className="mt-1 block rounded border p-2" value={date} max={today()} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setDate(e.target.value) }} />
         </label>
       </div>
 

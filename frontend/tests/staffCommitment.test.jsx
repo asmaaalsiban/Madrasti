@@ -80,6 +80,13 @@ describe('RulesPage', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/payroll/rules', expect.objectContaining({ punctuality: expect.objectContaining({ enabled: true, bonus_value: '20' }) })))
   })
 
+  it('offers suggested steps when none exist', async () => {
+    api.get.mockResolvedValue({ data: { data: rules } })
+    wrap(<RulesPage base="/admin" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: /Use suggested steps/ }))[0])
+    expect(screen.getByLabelText('Punctuality (arriving on time) Score below 3')).toHaveValue(50)
+  })
+
   it('adds a deduction step', async () => {
     api.get.mockResolvedValue({ data: { data: rules } })
     api.put.mockResolvedValue({ data: {} })

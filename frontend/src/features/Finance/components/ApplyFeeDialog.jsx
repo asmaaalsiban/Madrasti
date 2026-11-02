@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { DateInput } from '../../../components/shared/DateInput'
 
 // Gives a structure's fee to every student of its grade, split into equal installments.
 export default function ApplyFeeDialog({ structure, onClose }) {
@@ -31,7 +32,7 @@ export default function ApplyFeeDialog({ structure, onClose }) {
           {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
           <p className="text-sm text-slate-600">{t('finance.applyHelp')}</p>
           <label className="block text-sm">{t('finance.fields.installments')}<input required type="number" min="1" max="24" className="mt-1 w-full rounded border p-2" value={form.installments} onChange={set('installments')} /></label>
-          <label className="block text-sm">{t('finance.fields.firstDue')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.first_due} onChange={set('first_due')} /></label>
+          <label className="block text-sm">{t('finance.fields.firstDue')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.first_due} onChange={set('first_due')} /></label>
           <label className="block text-sm">{t('finance.fields.everyMonths')}<input required type="number" min="1" max="12" className="mt-1 w-full rounded border p-2" value={form.every_months} onChange={set('every_months')} /></label>
           <label className="block text-sm">{t('finance.fields.discountAll')}<input type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.discount} onChange={set('discount')} /></label>
           <div className="flex justify-end gap-2">

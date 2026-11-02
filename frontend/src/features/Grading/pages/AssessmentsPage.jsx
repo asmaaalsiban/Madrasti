@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const TYPES = ['quiz', 'exam', 'assignment', 'project', 'participation']
 const inputClass = 'w-full rounded border p-2'
@@ -180,7 +181,7 @@ export default function AssessmentsPage() {
             <input className={inputClass} type="number" min="0" max="100" step="any" dir="ltr" value={form.weight} onChange={set('weight')} />
           </FormField>
           <FormField label={t('grading.date')} error={errors.held_on?.[0]}>
-            <input className={inputClass} type="date" dir="ltr" value={form.held_on} onChange={set('held_on')} />
+            <DateInput className={inputClass} value={form.held_on} onChange={set('held_on')} />
           </FormField>
           <FormFieldErrors errors={errors} names={['term_id', 'subject_id', 'classroom_id']} />
           <div className="flex justify-end gap-2 pt-2">

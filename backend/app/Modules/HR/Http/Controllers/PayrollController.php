@@ -9,11 +9,13 @@ use App\Models\User;
 use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\Payslip;
 use App\Modules\HR\Models\StaffContract;
+use App\Modules\HR\Models\PayrollRuleAssignment;
 use App\Modules\HR\Models\PayrollTemplate;
 use App\Modules\HR\Models\PayslipItem;
 use App\Modules\HR\Models\PayrollRun;
 use App\Modules\HR\Services\PayrollAccess;
 use App\Modules\HR\Services\PayrollService;
+use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -160,6 +162,41 @@ class PayrollController extends Controller
         return response()->noContent();
     }
 
+    /** Who has this rule every month, and for which months. */
+    public function assignments(Request $request, PayrollTemplate $template): JsonResponse
+    {
+        $this->view($request);
+
+        return response()->json(['data' => $this->presentAssignments($template)]);
+    }
+
+    /** Gives a rule to several people for a range of months: they get it in every payroll prepared for those months. */
+    public function assign(Request $request, PayrollTemplate $template): JsonResponse
+    {
+        $by = $this->view($request);
+        $data = $request->validate(['user_ids' => ['required', 'array', 'min:1'], 'user_ids.*' => ['integer', 'exists:users,id'], 'starts_on' => ['required', 'date_format:Y-m'], 'ends_on' => ['nullable', 'date_format:Y-m', 'after_or_equal:starts_on']]);
+        foreach (User::whereIn('id', $data['user_ids'])->whereIn('role', [Role::Admin, Role::Teacher])->whereHas('staffProfile')->get() as $staff) {
+            PayrollRuleAssignment::create(['payroll_template_id' => $template->id, 'user_id' => $staff->id, 'starts_on' => $data['starts_on'].'-01', 'ends_on' => isset($data['ends_on']) ? $data['ends_on'].'-01' : null, 'created_by' => $by->id]);
+        }
+
+        return response()->json(['data' => $this->presentAssignments($template)], 201);
+    }
+
+    public function unassign(Request $request, PayrollRuleAssignment $assignment): Response
+    {
+        $this->view($request);
+        $assignment->delete();
+
+        return response()->noContent();
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function presentAssignments(PayrollTemplate $template): array
+    {
+        return PayrollRuleAssignment::with('user:id,name')->where('payroll_template_id', $template->id)->orderBy('starts_on')->get()
+            ->map(fn ($a) => ['id' => $a->id, 'user' => ['id' => $a->user->id, 'name' => $a->user->name], 'starts_on' => $a->starts_on->format('Y-m'), 'ends_on' => $a->ends_on?->format('Y-m')])->values()->all();
+    }
+
     /** Gives a rule to chosen payslips, or to everyone, of a draft payroll. */
     public function applyTemplate(Request $request, PayrollRun $run): JsonResponse
     {
@@ -182,7 +219,7 @@ class PayrollController extends Controller
     /** @return array<string, mixed> */
     private function presentTemplate(PayrollTemplate $t): array
     {
-        return ['id' => $t->id, 'name' => $t->name, 'kind' => $t->kind, 'type' => $t->type, 'value' => $t->value, 'category' => $t->category, 'is_active' => $t->is_active];
+        return ['id' => $t->id, 'name' => $t->name, 'kind' => $t->kind, 'type' => $t->type, 'value' => $t->value, 'category' => $t->category, 'is_active' => $t->is_active, 'assignments_count' => PayrollRuleAssignment::where('payroll_template_id', $t->id)->count()];
     }
 
     public function removeItem(Request $request, PayslipItem $item): JsonResponse

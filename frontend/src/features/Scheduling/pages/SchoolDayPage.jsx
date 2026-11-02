@@ -93,7 +93,7 @@ export default function SchoolDayPage() {
             <input className={inputClass} type="number" min="1" max="12" dir="ltr" value={form.periods_per_day} onChange={set('periods_per_day')} />
           </FormField>
           <FormField label={t('schoolDay.startsAt')} error={errors.starts_at?.[0]}>
-            <input className={inputClass} type="time" dir="ltr" value={form.starts_at} onChange={set('starts_at')} />
+            <input className={inputClass} type="time" value={form.starts_at} onChange={set('starts_at')} />
           </FormField>
           <FormField label={t('schoolDay.periodMinutes')} error={errors.period_minutes?.[0]}>
             <input className={inputClass} type="number" min="20" max="120" dir="ltr" value={form.period_minutes} onChange={set('period_minutes')} />

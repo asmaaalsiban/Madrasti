@@ -1447,7 +1447,7 @@
       }
     },
     "templatesTitle": "Bonus and deduction rules",
-    "templatesHelp": "Write your own rules (e.g. exam supervision bonus, summer club, private lessons, a fixed penalty). Then give them to staff from a payroll.",
+    "templatesHelp": "1) Write a rule (e.g. summer club, private lessons, exam supervision, a penalty). 2) Press \"Assign staff\", tick the teachers and choose the months: it is added to their payslip automatically.",
     "newRule": "New rule",
     "editRule": "Edit rule",
     "ruleName": "Name",
@@ -1478,7 +1478,17 @@
     "absenceTitle": "Absence",
     "absenceHelp": "A day with no check-in counts as an absence. Approved leave is never deducted.",
     "perAbsentDay": "Each day of absence costs",
-    "ofDayPay": "of one day's pay (salary ÷ working days of the month)"
+    "ofDayPay": "of one day's pay (salary ÷ working days of the month)",
+    "suggestedTiers": "Use suggested steps (80%→10, 60%→25, 50%→20%)",
+    "assignStaff": "Assign staff",
+    "assignTitle": "Who gets: {{name}}",
+    "assignHelp": "Tick the people who get this rule and choose the months. It is added to their payslip automatically in every payroll for those months. (A one-off for a single month: use \"Rule\" inside the payroll instead.)",
+    "fromMonth": "From month",
+    "toMonth": "To month (optional)",
+    "toMonthHint": "Leave \"To month\" empty to keep giving it every month until you remove it.",
+    "assignAction": "Assign ({{count}})",
+    "assignedNow": "Already assigned",
+    "noAssigned": "Nobody yet."
   },
   "renewals": {
     "title": "Student renewal",
@@ -1545,5 +1555,10 @@
       "in": "Arrived",
       "out": "Left"
     }
+  },
+  "dateInput": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
   }
 }

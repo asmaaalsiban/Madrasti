@@ -108,4 +108,51 @@ class PayrollTemplatesTest extends AcademicTestCase
         $this->assertSame('300.00', $mine['base_salary']);
         $this->assertSame('private_lessons', $mine['items'][0]['category']);
     }
+
+    public function test_a_rule_assigned_to_a_person_for_some_months_lands_on_their_payslip_in_those_months_only(): void
+    {
+        $club = $this->template(['name' => 'Summer club', 'value' => 60]);
+        $r = $this->postJson("/api/payroll/templates/$club/assignments", ['user_ids' => [$this->sara->id], 'starts_on' => '2026-11', 'ends_on' => '2026-12'])->assertCreated()->json('data');
+        $this->assertSame('Sara', $r[0]['user']['name']);
+        $this->assertSame('2026-11', $r[0]['starts_on']);
+        $this->getJson('/api/payroll/templates')->assertJsonPath('data.0.assignments_count', 1);
+
+        $nov = $this->postJson('/api/payroll/runs', ['month' => '2026-11'])->json('data.id');
+        $slips = collect($this->getJson("/api/payroll/runs/$nov")->json('data.payslips'))->keyBy(fn ($s) => $s['user']['name']);
+        $this->assertSame('360.00', $slips['Sara']['net']); // 300 + 60
+        $this->assertSame('summer_club', $slips['Sara']['items'][0]['category']);
+        $this->assertSame('100.00', $slips['Omar']['net']); // not assigned
+
+        $this->postJson('/api/payroll/runs', ['month' => '2027-01'])->assertCreated();
+        $jan = PayrollRun::where('month', '2027-01-01')->first();
+        $this->assertSame('300.00', $jan->payslips()->where('user_id', $this->sara->id)->value('net')); // the range ended in December
+    }
+
+    public function test_an_assignment_can_be_open_ended_removed_and_only_staff_are_assigned(): void
+    {
+        $id = $this->template(['name' => 'Tutoring', 'category' => 'private_lessons']);
+        $student = User::factory()->create(['role' => \App\Shared\Enums\Role::Student]);
+        $res = $this->postJson("/api/payroll/templates/$id/assignments", ['user_ids' => [$this->omar->id, $student->id], 'starts_on' => '2026-10'])->assertCreated()->json('data');
+        $this->assertCount(1, $res); // the student is not staff
+        $this->assertNull($res[0]['ends_on']);
+        $this->postJson("/api/payroll/templates/$id/assignments", ['user_ids' => [$this->omar->id], 'starts_on' => '2026-11', 'ends_on' => '2026-10'])->assertUnprocessable();
+
+        $this->deleteJson('/api/payroll/assignments/'.$res[0]['id'])->assertNoContent();
+        $this->getJson("/api/payroll/templates/$id/assignments")->assertOk()->assertJsonCount(0, 'data');
+        Sanctum::actingAs($this->sara);
+        $this->postJson("/api/payroll/templates/$id/assignments", ['user_ids' => [$this->sara->id], 'starts_on' => '2026-11'])->assertForbidden();
+    }
+
+    public function test_an_inactive_rule_or_a_deduction_that_would_go_below_zero_is_not_assigned_to_the_payslip(): void
+    {
+        $off = $this->template(['name' => 'Old club', 'is_active' => false]);
+        $big = $this->template(['name' => 'Fine', 'kind' => 'deduction', 'value' => 500, 'category' => null]);
+        foreach ([$off, $big] as $id) {
+            $this->postJson("/api/payroll/templates/$id/assignments", ['user_ids' => [$this->omar->id], 'starts_on' => '2026-11'])->assertCreated();
+        }
+        $run = $this->postJson('/api/payroll/runs', ['month' => '2026-11'])->json('data.id');
+        $omar = collect($this->getJson("/api/payroll/runs/$run")->json('data.payslips'))->firstWhere('user.name', 'Omar');
+        $this->assertSame('100.00', $omar['net']);
+        $this->assertCount(0, $omar['items']);
+    }
 }

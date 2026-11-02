@@ -7,6 +7,7 @@ import Modal from '../../../components/shared/Modal'
 import Money from '../../Finance/components/Money'
 import { useAuth } from '../../Auth/AuthProvider'
 import { itemLabel } from '../itemLabel'
+import { DateInput } from '../../../components/shared/DateInput'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -125,7 +126,7 @@ function PayDialog({ run, onClose }) {
             </select>
           </label>
         )}
-        <label className="block text-sm">{t('payroll.paidOn')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
+        <label className="block text-sm">{t('payroll.paidOn')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
         <label className="block text-sm">{t('payroll.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>

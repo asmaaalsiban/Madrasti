@@ -8,6 +8,7 @@ import Modal from '../../../components/shared/Modal'
 import PaymentDialog from '../components/PaymentDialog'
 import ReceiptDialog from '../components/ReceiptDialog'
 import Statement from '../components/Statement'
+import { DateInput } from '../../../components/shared/DateInput'
 
 // One student's money: the statement; the accountant adds a fee, records and prints payments, cancels a wrong one.
 export default function StudentAccountPage() {
@@ -110,7 +111,7 @@ export default function StudentAccountPage() {
                 <label className="block text-sm">{t('finance.fields.transportInPlan')}<input type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={adding.transport} onChange={set('transport')} /></label>
                 <label className="block text-sm">{t('finance.fields.discount')}<input type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={adding.discount} onChange={set('discount')} /></label>
                 <label className="block text-sm">{t('finance.fields.installments')}<input required type="number" min="1" max="24" className="mt-1 w-full rounded border p-2" value={adding.count} onChange={set('count')} /></label>
-                <label className="block text-sm">{t('finance.fields.firstDue')}<input required type="date" className="mt-1 w-full rounded border p-2" value={adding.first_due} onChange={set('first_due')} /></label>
+                <label className="block text-sm">{t('finance.fields.firstDue')}<DateInput required className="mt-1 w-full rounded border p-2" value={adding.first_due} onChange={set('first_due')} /></label>
                 <label className="block text-sm">{t('finance.fields.everyMonths')}<input required type="number" min="1" max="12" className="mt-1 w-full rounded border p-2" value={adding.every} onChange={set('every')} /></label>
                 <div className="space-y-2 rounded border p-3">
                   <p className="text-sm font-medium">{t('finance.firstPaymentTitle')}</p>

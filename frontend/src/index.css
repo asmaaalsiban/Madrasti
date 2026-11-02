@@ -12,6 +12,15 @@ body {
   color: #0f172a;
 }
 
+/* Dates and times are written right-to-left in Arabic (the browser draws them left-to-right otherwise). */
+[dir="rtl"] input[type="date"],
+[dir="rtl"] input[type="month"],
+[dir="rtl"] input[type="time"],
+[dir="rtl"] input[type="datetime-local"] {
+  direction: rtl;
+  text-align: right;
+}
+
 /* Printing a receipt: only the receipt is shown. */
 @media print {
   body * { visibility: hidden; }
