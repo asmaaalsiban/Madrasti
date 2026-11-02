@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
+import { Bell } from 'lucide-react'
 import PushToggle from './PushToggle'
 
 // The sentence of a notification, written in the reader's language from its kind and parameters.
@@ -53,9 +54,9 @@ export default function NotificationBell() {
 
   return (
     <div className="relative" ref={box}>
-      <button type="button" className="relative rounded border px-3 py-1 text-sm" aria-expanded={open} aria-label={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
-        <span aria-hidden="true">🔔</span>
-        {unread > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
+      <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border bg-snow text-deep-harbor" aria-expanded={open} aria-label={t('notifications.title')} title={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
+        <Bell aria-hidden size={20} />
+        {unread > 0 && <span className="absolute -end-1 -top-1 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold leading-5 text-white" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
       </button>
       {open && (
         <div role="dialog" aria-label={t('notifications.title')} className="absolute end-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg">

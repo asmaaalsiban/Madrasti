@@ -6,7 +6,8 @@
     "loading": "Loading...",
     "back": "Back",
     "exportExcel": "Export to Excel",
-    "exportFailed": "The file could not be downloaded."
+    "exportFailed": "The file could not be downloaded.",
+    "account": "Account"
   },
   "auth": {
     "title": "Sign in",
@@ -134,6 +135,15 @@
       "next": "Next",
       "actions": "Actions",
       "error": "Something went wrong, please try again."
+    },
+    "groups": {
+      "people": "People",
+      "learning": "Learning",
+      "schedule": "Schedules",
+      "money": "Money & staff",
+      "communication": "Communication",
+      "school": "School setup",
+      "system": "System"
     }
   },
   "academic": {
@@ -1667,5 +1677,12 @@
       "staff_type": "Staff type",
       "is_current": "Current year"
     }
+  },
+  "teacherHome": {
+    "teaching": "Teaching",
+    "followUp": "Follow-up",
+    "department": "My department",
+    "money": "School money",
+    "mine": "Me"
   }
 }

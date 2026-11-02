@@ -1,49 +1,87 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileText, Fingerprint, GraduationCap, ListChecks, Landmark, NotebookPen, PenLine, RefreshCw, Smile, Users, Vote, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 
-// The teacher's start page: the tools that exist so far.
-export default function TeacherHome() {
-  const { t } = useTranslation()
-  const { user } = useAuth()
-  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000 })
-  const teaching = [
-    ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint'],
-    ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint'],
-    ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint'],
-    ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint'],
-    ['/teacher/behavior', 'behavior.title', 'behavior.hint'],
-    ['/teacher/motivation', 'motivation.title', 'motivation.hint'],
-    ['/teacher/surveys', 'surveys.title', 'surveys.hint'],
-    ['/teacher/signature', 'signatures.mineTitle', 'signatures.mineHint'],
-    ['/teacher/homework', 'homework.title', 'homework.hint'],
-    ['/teacher/grades', 'grading.title', 'grading.hint'],
-    ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint'],
-    ...(user?.staff_type === 'head_of_department' ? [['/teacher/lesson-plans/review', 'lessonPlans.reviewTitle', 'lessonPlans.reviewHint'], ['/teacher/department', 'department.cardTitle', 'department.cardHint']] : []),
-  ]
-  // An accountant is not a teacher: their home is the school's money.
-  const cards = user?.staff_type === 'accountant'
-    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/renewals', 'renewals.title', 'renewals.hint'], ['/teacher/staff-attendance', 'staffAttendance.title', 'staffAttendance.hint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
-    : teaching
-  const all = [...cards, ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint']]
+// [path, title key, hint key, icon]
+const TEACHING = [
+  ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint', CalendarClock],
+  ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint', CircleCheck],
+  ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint', NotebookPen],
+  ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint', FileText],
+  ['/teacher/homework', 'homework.title', 'homework.hint', BookOpenCheck],
+  ['/teacher/grades', 'grading.title', 'grading.hint', ClipboardList],
+]
+const FOLLOW_UP = [
+  ['/teacher/behavior', 'behavior.title', 'behavior.hint', Smile],
+  ['/teacher/motivation', 'motivation.title', 'motivation.hint', Award],
+  ['/teacher/surveys', 'surveys.title', 'surveys.hint', Vote],
+  ['/teacher/signature', 'signatures.mineTitle', 'signatures.mineHint', PenLine],
+  ['/teacher/attendance/report', 'attendance.reportTitle', 'attendance.reportHint', FileBarChart],
+]
+const HEAD = [
+  ['/teacher/lesson-plans/review', 'lessonPlans.reviewTitle', 'lessonPlans.reviewHint', ListChecks],
+  ['/teacher/department', 'department.cardTitle', 'department.cardHint', Users],
+]
+const MONEY = [
+  ['/teacher/finance', 'finance.title', 'finance.hint', Wallet],
+  ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint', Landmark],
+  ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint', ClipboardList],
+  ['/teacher/renewals', 'renewals.title', 'renewals.hint', RefreshCw],
+  ['/teacher/payroll', 'payroll.title', 'payroll.hint', Banknote],
+  ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint', GraduationCap],
+]
+const MINE = [
+  ['/teacher/staff-attendance', 'staffAttendance.title', 'staffAttendance.hint', Fingerprint],
+  ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint', Banknote],
+]
+
+function Section({ title, tiles, t }) {
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('dashboard.welcome', { name: user?.name })}</h1>
-      <CheckInCard />
-      {pending.data > 0 && (
-        <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
-      )}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {all.map(([to, title, hint]) => (
-          <Link key={to} to={to} className="feature-card">
-            <span className="title block">{t(title)}</span>
-            <span className="hint block">{t(hint)}</span>
+    <section className="space-y-3">
+      {title && <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">{title}</h2>}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tiles.map(([to, name, hint, Icon]) => (
+          <Link key={to} to={to} className="feature-card flex items-start gap-4">
+            <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15"><Icon size={22} /></span>
+            <span className="min-w-0">
+              <span className="title block">{t(name)}</span>
+              <span className="hint block">{t(hint)}</span>
+            </span>
           </Link>
         ))}
       </div>
     </section>
+  )
+}
+
+// The teacher's start page: the day first (arrive, today's lessons), then the tools in groups. An accountant's home is the school's money.
+export default function TeacherHome() {
+  const { t } = useTranslation()
+  const { user } = useAuth()
+  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000 })
+  const accountant = user?.staff_type === 'accountant'
+  const head = user?.staff_type === 'head_of_department'
+  return (
+    <div className="space-y-6">
+      <h1>{t('dashboard.welcome', { name: user?.name })}</h1>
+      <CheckInCard />
+      {pending.data > 0 && (
+        <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
+      )}
+      {accountant ? (
+        <Section title={t('teacherHome.money')} tiles={MONEY} t={t} />
+      ) : (
+        <>
+          <Section title={t('teacherHome.teaching')} tiles={TEACHING} t={t} />
+          <Section title={t('teacherHome.followUp')} tiles={FOLLOW_UP} t={t} />
+          {head && <Section title={t('teacherHome.department')} tiles={HEAD} t={t} />}
+        </>
+      )}
+      <Section title={t('teacherHome.mine')} tiles={MINE} t={t} />
+    </div>
   )
 }

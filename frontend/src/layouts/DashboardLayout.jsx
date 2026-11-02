@@ -1,8 +1,9 @@
 import { Link, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
-import LanguageSwitcher from '../components/shared/LanguageSwitcher'
-import SwitchSchoolButton from '../components/shared/SwitchSchoolButton'
+import IconButton from '../components/shared/IconButton'
+import UserMenu from '../components/shared/UserMenu'
+import { Megaphone, MessageCircle } from 'lucide-react'
 import useUnreadChat from '../features/Chat/hooks/useUnreadChat'
 import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
@@ -12,7 +13,7 @@ import { useSchool } from '../tenant/useSchool'
 // Mobile-first shell shared by all four roles.
 export default function DashboardLayout() {
   const { t, i18n } = useTranslation()
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const { data: school } = useSchool()
   const unread = useUnreadAnnouncements()
   const unreadChat = useUnreadChat()
@@ -24,23 +25,16 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-fog bg-snow px-4 py-3 text-ink print:hidden">
-        <span className="text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm">{label}: <strong>{user.name}</strong>{detail ? ` · ${detail}` : ''}</span>
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-fog bg-snow px-4 py-2.5 print:hidden">
+        <Link to={`/${user.role}`} className="flex min-w-0 items-center gap-2">
+          {school?.logo && <img src={school.logo} alt="" className="h-9 w-9 rounded-xl object-cover" />}
+          <span className="truncate text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <IconButton to={`/${user.role}/chat`} icon={MessageCircle} label={t('chat.title')} count={unreadChat} />
+          <IconButton to={`/${user.role}/announcements`} icon={Megaphone} label={t('announcements.title')} count={unread} />
           <NotificationBell />
-          <LanguageSwitcher />
-          <Link to={`/${user.role}/chat`} className="rounded border px-3 py-1 text-sm">
-            {t('chat.title')}{unreadChat > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('chat.unread', { count: unreadChat })}>{unreadChat}</span>}
-          </Link>
-          <Link to={`/${user.role}/announcements`} className="rounded border px-3 py-1 text-sm">
-            {t('announcements.title')}{unread > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs font-bold text-white" aria-label={t('announcements.unread', { count: unread })}>{unread}</span>}
-          </Link>
-          <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
-          <SwitchSchoolButton />
-          <button type="button" className="rounded border px-3 py-1 text-sm" onClick={logout}>
-            {t('common.logout')}
-          </button>
+          <UserMenu detail={[label, detail].filter(Boolean).join(' · ')} />
         </div>
       </header>
       <main className="mx-auto max-w-5xl p-4">
