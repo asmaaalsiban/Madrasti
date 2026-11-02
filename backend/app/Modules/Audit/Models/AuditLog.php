@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Audit\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
@@ -25,6 +27,11 @@ class AuditLog extends Model
     protected function casts(): array
     {
         return ['old_values' => 'array', 'new_values' => 'array', 'created_at' => 'datetime'];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function auditable(): MorphTo

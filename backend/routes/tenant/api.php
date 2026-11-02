@@ -29,6 +29,7 @@ use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\Academic\Http\Controllers\RenewalController;
+use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\HR\Http\Controllers\ContractController;
 use App\Modules\HR\Http\Controllers\StaffAttendanceController;
 use App\Modules\HR\Http\Controllers\PayrollController;
@@ -108,6 +109,13 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('staff-attendan
     Route::post('check-out', [StaffAttendanceController::class, 'checkOut']);
     Route::get('day', [StaffAttendanceController::class, 'day']);
     Route::put('{user}', [StaffAttendanceController::class, 'set']);
+});
+
+// Audit log: who created, changed or deleted what (school management only).
+Route::middleware(['school-user', 'role:admin'])->prefix('audit-logs')->group(function (): void {
+    Route::get('/', [AuditLogController::class, 'index']);
+    Route::get('filters', [AuditLogController::class, 'filters']);
+    Route::get('export', [AuditLogController::class, 'export']);
 });
 
 // Yearly re-registration of students: school management and the accountant.
