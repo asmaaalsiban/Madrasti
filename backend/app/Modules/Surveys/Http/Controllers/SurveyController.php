@@ -6,17 +6,21 @@ namespace App\Modules\Surveys\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Communication\Services\AnnouncementAudience;
 use App\Modules\Surveys\Models\Survey;
 use App\Modules\Surveys\Models\SurveyQuestion;
 use App\Modules\Surveys\Services\SurveyService;
 use App\Shared\Enums\Role;
+use App\Shared\Export\XlsxExport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Polls, surveys and parent approvals, made by the admin (for all parents or a section) or a teacher (for the sections
@@ -29,7 +33,7 @@ class SurveyController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $this->user($request);
-        $rows = Survey::with('author:id,name')->withCount(['recipients', 'responses'])->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('created_by', $user->id))->latest()->get();
+        $rows = Survey::with(['author:id,name', 'classrooms:id,name', 'gradeFrom', 'gradeTo'])->withCount(['recipients', 'responses'])->when(! $user->hasRole(Role::Admin), fn ($q) => $q->where('created_by', $user->id))->latest()->get();
 
         return response()->json(['data' => $rows->map(fn (Survey $s) => $this->summary($s))->values()]);
     }
@@ -42,8 +46,11 @@ class SurveyController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:3000'],
             'closes_at' => ['nullable', 'date', 'after:now'],
-            'audience' => ['required', Rule::in(['all', 'classroom'])],
-            'classroom_id' => ['required_if:audience,classroom', 'nullable', 'integer', 'exists:classrooms,id'],
+            'audience' => ['required', Rule::in(['all', 'grades', 'classrooms'])],
+            'grade_from_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
+            'grade_to_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
+            'classroom_ids' => ['required_if:audience,classrooms', 'nullable', 'array', 'min:1', 'max:200'],
+            'classroom_ids.*' => ['integer', 'distinct', 'exists:classrooms,id'],
             'questions' => ['array', 'max:30'],
             'questions.*.type' => ['required', Rule::in(SurveyQuestion::TYPES)],
             'questions.*.text' => ['required', 'string', 'max:255'],
@@ -66,10 +73,12 @@ class SurveyController extends Controller
         }
         // A teacher may only write to the sections they teach (or are homeroom of).
         if (! $user->hasRole(Role::Admin)) {
-            abort_unless($data['audience'] === 'classroom' && $this->audience->classroomIds($user)->contains((int) $data['classroom_id']), 403);
+            $mine = $this->audience->classroomIds($user);
+            abort_unless($data['audience'] === 'classrooms' && collect($data['classroom_ids'])->every(fn ($id) => $mine->contains((int) $id)), 403);
         }
 
         $survey = $this->surveys->create($user, $data, $questions);
+        $survey->load(['classrooms:id,name', 'gradeFrom', 'gradeTo']);
 
         return response()->json(['data' => $this->summary($survey->loadCount(['recipients', 'responses']))], 201);
     }
@@ -78,23 +87,74 @@ class SurveyController extends Controller
     public function show(Request $request, Survey $survey): JsonResponse
     {
         $this->owns($request, $survey);
-        $survey->load(['questions', 'author:id,name'])->loadCount(['recipients', 'responses']);
+        $survey->load(['questions', 'author:id,name', 'classrooms:id,name', 'gradeFrom', 'gradeTo'])->loadCount(['recipients', 'responses']);
         $responses = $survey->responses()->with('answers')->get()->keyBy(fn ($r) => $r->user_id.'-'.($r->student_id ?? 0));
         $recipients = $survey->recipients()->with(['parent:id,name,phone', 'student:id,name_ar,name_en'])->get();
+        $rows = $this->rows($survey, $responses, $recipients);
 
         return response()->json(['data' => $this->summary($survey) + [
             'questions' => $survey->questions->map(fn (SurveyQuestion $q) => $this->question($q, $responses, $recipients)),
-            'recipients' => $recipients->map(function ($r) use ($responses) {
-                $response = $responses->get($r->user_id.'-'.($r->student_id ?? 0));
-
-                return [
-                    'id' => $r->id, 'parent' => $r->parent->name, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']),
-                    'state' => $response === null ? 'pending' : ($response->decision ?? 'answered'), 'answered_at' => $response?->submitted_at?->toIso8601String(),
-                ];
-            })->sortBy(fn ($r) => $r['state'] === 'pending' ? 0 : 1)->values(),
+            'recipients' => $rows,
             'approved' => $responses->where('decision', 'approved')->count(),
             'declined' => $responses->where('decision', 'declined')->count(),
         ]]);
+    }
+
+    /** The responses table as an Excel file (optionally only one state: approved, declined, answered or pending). */
+    public function export(Request $request, Survey $survey, XlsxExport $xlsx): BinaryFileResponse
+    {
+        $this->owns($request, $survey);
+        $state = $request->validate(['state' => ['nullable', Rule::in(['approved', 'declined', 'answered', 'pending'])]])['state'] ?? null;
+        $survey->load('questions');
+        $responses = $survey->responses()->with('answers')->get()->keyBy(fn ($r) => $r->user_id.'-'.($r->student_id ?? 0));
+        $recipients = $survey->recipients()->with(['parent:id,name,phone', 'student:id,name_ar,name_en'])->get();
+        $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
+
+        $rows = $this->rows($survey, $responses, $recipients)->when($state, fn ($c) => $c->where('state', $state))->map(function (array $r) use ($survey, $lang): array {
+            return [
+                $r['parent'], $r['phone'], $r['student']["name_$lang"] ?? $r['student']['name_ar'] ?? '', $r['classroom'], __("surveys.state_$r[state]"), $r['answered_at'] ? substr(str_replace('T', ' ', $r['answered_at']), 0, 16) : '',
+                ...$survey->questions->map(fn ($q) => $this->plain($r['answers'][$q->id] ?? null))->all(),
+            ];
+        })->values();
+
+        return $xlsx->download(__('surveys.file').'_'.$survey->id, __('surveys.sheet'), [
+            __('surveys.col_parent'), __('surveys.col_phone'), __('surveys.col_student'), __('surveys.col_classroom'), __('surveys.col_state'), __('surveys.col_answered_at'),
+            ...$survey->questions->pluck('text')->all(),
+        ], $rows);
+    }
+
+    /**
+     * Everyone who must answer, with their state, the child's section and the answers they gave; those still waiting first.
+     *
+     * @param  \Illuminate\Support\Collection<string, \App\Modules\Surveys\Models\SurveyResponse>  $responses
+     * @param  \Illuminate\Support\Collection<int, \App\Modules\Surveys\Models\SurveyRecipient>  $recipients
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    private function rows(Survey $survey, $responses, $recipients)
+    {
+        $year = AcademicYear::where('is_current', true)->first();
+        $sections = Enrollment::where('academic_year_id', $year?->id)->whereIn('student_id', $recipients->pluck('student_id')->filter())->with('classroom:id,name')->get()->pluck('classroom.name', 'student_id');
+
+        return $recipients->map(function ($r) use ($responses, $sections): array {
+            $response = $responses->get($r->user_id.'-'.($r->student_id ?? 0));
+
+            return [
+                'id' => $r->id, 'parent' => $r->parent->name, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']), 'classroom' => $r->student_id ? ($sections[$r->student_id] ?? null) : null,
+                'state' => $response === null ? 'pending' : ($response->decision ?? 'answered'), 'answered_at' => $response?->submitted_at?->toIso8601String(),
+                'answers' => $response ? $response->answers->mapWithKeys(fn ($a) => [$a->survey_question_id => $a->value])->all() : [],
+            ];
+        })->sortBy(fn ($r) => [$r['state'] === 'pending' ? 0 : 1, $r['classroom'], $r['parent']])->values();
+    }
+
+    /** An answer as text for a spreadsheet cell. */
+    private function plain(mixed $value): string
+    {
+        return match (true) {
+            $value === null => '',
+            is_bool($value) => __($value ? 'surveys.yes' : 'surveys.no'),
+            is_array($value) => implode(', ', $value),
+            default => (string) $value,
+        };
     }
 
     public function close(Request $request, Survey $survey): JsonResponse
@@ -144,7 +204,12 @@ class SurveyController extends Controller
         $status = $s->closed_at !== null || ($s->closes_at !== null && $s->closes_at->isPast()) ? 'closed' : 'open';
 
         return [
-            'id' => $s->id, 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'audience' => $s->audience, 'classroom_id' => $s->classroom_id,
+            'id' => $s->id, 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'audience' => $s->audience,
+            'audience_detail' => match ($s->audience) {
+                'grades' => ['from' => $s->gradeFrom?->only(['name_ar', 'name_en']), 'to' => $s->gradeTo?->only(['name_ar', 'name_en'])],
+                'classrooms' => $s->classrooms->pluck('name')->sort()->values(),
+                default => null,
+            },
             'status' => $status, 'closes_at' => $s->closes_at?->toIso8601String(), 'created_at' => $s->created_at?->toIso8601String(), 'author' => $s->author?->name,
             'recipient_count' => (int) ($s->recipients_count ?? 0), 'response_count' => (int) ($s->responses_count ?? 0),
         ];

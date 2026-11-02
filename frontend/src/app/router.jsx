@@ -42,6 +42,7 @@ import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPag
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import ImportPage from '../features/Import/pages/ImportPage'
 import MySurveysPage from '../features/Surveys/pages/MySurveysPage'
+import SurveyResponsesPage from '../features/Surveys/pages/SurveyResponsesPage'
 import SurveyResultsPage from '../features/Surveys/pages/SurveyResultsPage'
 import SurveysPage from '../features/Surveys/pages/SurveysPage'
 import MotivationPage from '../features/Motivation/pages/MotivationPage'
@@ -111,6 +112,7 @@ const HOME_ROUTES = {
     { path: 'motivation', element: <MotivationPage base="/teacher" /> },
     { path: 'surveys', element: <SurveysPage base="/teacher" /> },
     { path: 'surveys/:id', element: <SurveyResultsPage base="/teacher" /> },
+    { path: 'surveys/:id/responses', element: <SurveyResponsesPage base="/teacher" /> },
     { path: 'motivation/students/:id', element: <StudentMotivationPage staff /> },
     { path: 'homework', element: <HomeworkPage /> },
     { path: 'daily-summary', element: <DailySummaryPage /> },
@@ -175,6 +177,7 @@ export const routes = [
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
               { path: '/admin/surveys', element: <SurveysPage base="/admin" /> },
               { path: '/admin/surveys/:id', element: <SurveyResultsPage base="/admin" /> },
+              { path: '/admin/surveys/:id/responses', element: <SurveyResponsesPage base="/admin" /> },
               { path: '/admin/import', element: <ImportPage /> },
               { path: '/admin/motivation', element: <MotivationPage base="/admin" /> },
               { path: '/admin/motivation/students/:id', element: <StudentMotivationPage staff /> },

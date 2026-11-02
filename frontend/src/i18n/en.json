@@ -1144,6 +1144,36 @@
     "submit": "Send my answer",
     "thanks": "Thank you, your answer was sent.",
     "change": "Change my answer",
-    "fieldTitle": "Title"
+    "fieldTitle": "Title",
+    "audiences": {
+      "all": "All parents",
+      "grades": "From grade … to grade …",
+      "classrooms": "Choose sections"
+    },
+    "fromGrade": "From grade",
+    "toGrade": "To grade",
+    "allMySections": "All",
+    "pickedCount": "{{count}} sections chosen",
+    "sentTo": "Sent to",
+    "gradeRange": "{{from}} to {{to}}",
+    "openTable": "Open the table of answers",
+    "responsesTable": "Table of answers",
+    "backToResults": "Back to the results",
+    "filter": {
+      "all": "All",
+      "approved": "Approved",
+      "declined": "Declined",
+      "pending": "Waiting",
+      "answered": "Answered"
+    },
+    "cols": {
+      "parent": "Parent",
+      "student": "Student",
+      "classroom": "Section",
+      "phone": "Phone",
+      "state": "Answer",
+      "answeredAt": "Answered at"
+    },
+    "noRows": "No one matches."
   }
 }

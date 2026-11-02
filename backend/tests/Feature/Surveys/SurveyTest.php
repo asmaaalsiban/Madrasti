@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Enrollment;
+use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
@@ -14,6 +15,7 @@ use App\Modules\Surveys\Models\SurveyRecipient;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
 use Illuminate\Support\Facades\DB;
+use OpenSpout\Reader\XLSX\Reader;
 use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Academic\AcademicTestCase;
 
@@ -25,7 +27,13 @@ class SurveyTest extends AcademicTestCase
 
     private Classroom $b;
 
-    private User $dad;      // two children in 5-A and 5-B
+    private GradeLevel $g4;
+
+    private GradeLevel $g5;
+
+    private GradeLevel $g6;
+
+    private User $dad;      // two children in 5-A and 6-B
 
     private User $mum;      // one child in 5-A
 
@@ -40,8 +48,11 @@ class SurveyTest extends AcademicTestCase
         $year = AcademicYear::factory()->create(['is_current' => true]);
         $math = Subject::factory()->create();
         $this->teacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $math->id])->create();
-        $this->a = Classroom::factory()->create(['name' => '5-A', 'academic_year_id' => $year->id]);
-        $this->b = Classroom::factory()->create(['name' => '5-B', 'academic_year_id' => $year->id]);
+        $this->g4 = GradeLevel::factory()->create(['name_en' => 'Grade 4', 'sort_order' => 4]);
+        $this->g5 = GradeLevel::factory()->create(['name_en' => 'Grade 5', 'sort_order' => 5]);
+        $this->g6 = GradeLevel::factory()->create(['name_en' => 'Grade 6', 'sort_order' => 6]);
+        $this->a = Classroom::factory()->create(['name' => '5-A', 'academic_year_id' => $year->id, 'grade_level_id' => $this->g5->id]);
+        $this->b = Classroom::factory()->create(['name' => '6-B', 'academic_year_id' => $year->id, 'grade_level_id' => $this->g6->id]);
         TeachingAssignment::create(['classroom_id' => $this->a->id, 'subject_id' => $math->id, 'teacher_id' => $this->teacher->id, 'weekly_periods' => 4]);
         $this->dad = User::factory()->role(Role::Guardian)->create(['name' => 'Abu Ali']);
         $this->mum = User::factory()->role(Role::Guardian)->create(['name' => 'Um Sami']);
@@ -61,7 +72,7 @@ class SurveyTest extends AcademicTestCase
 
     private function approvalBody(array $extra = []): array
     {
-        return ['type' => 'approval', 'title' => 'Zoo trip', 'description' => 'Friday, 8am', 'audience' => 'classroom', 'classroom_id' => $this->a->id, 'questions' => [['type' => 'text', 'text' => 'Emergency phone', 'is_required' => true]], ...$extra];
+        return ['type' => 'approval', 'title' => 'Zoo trip', 'description' => 'Friday, 8am', 'audience' => 'classrooms', 'classroom_ids' => [$this->a->id], 'questions' => [['type' => 'text', 'text' => 'Emergency phone', 'is_required' => true]], ...$extra];
     }
 
     private function mine()
@@ -91,7 +102,7 @@ class SurveyTest extends AcademicTestCase
         // A parent with two children in the section gets one approval for each.
         Sanctum::actingAs(User::factory()->staff(StaffType::Teacher)->create());
         $this->actAsAdmin();
-        $this->postJson('/api/surveys', $this->approvalBody(['title' => 'All parents trip', 'audience' => 'all', 'classroom_id' => null]))->assertCreated()->assertJsonPath('data.recipient_count', 4);
+        $this->postJson('/api/surveys', $this->approvalBody(['title' => 'All parents trip', 'audience' => 'all', 'classroom_ids' => null]))->assertCreated()->assertJsonPath('data.recipient_count', 4);
     }
 
     public function test_the_questions_are_checked(): void
@@ -100,7 +111,7 @@ class SurveyTest extends AcademicTestCase
         $this->postJson('/api/surveys', $this->pollBody(['questions' => []]))->assertUnprocessable()->assertJsonValidationErrors('questions');
         $this->postJson('/api/surveys', $this->pollBody(['questions' => [['type' => 'text', 'text' => 'Why?']]]))->assertUnprocessable();
         $this->postJson('/api/surveys', $this->pollBody(['questions' => [['type' => 'single_choice', 'text' => 'One choice', 'options' => ['Only']]]]))->assertUnprocessable();
-        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classroom']))->assertUnprocessable()->assertJsonValidationErrors('classroom_id');
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms']))->assertUnprocessable()->assertJsonValidationErrors('classroom_ids');
         $this->postJson('/api/surveys', $this->pollBody(['closes_at' => now()->subDay()->toDateTimeString()]))->assertUnprocessable();
         $this->postJson('/api/surveys', ['type' => 'approval', 'title' => 'Plain permission', 'audience' => 'all'])->assertCreated(); // an approval needs no questions
     }
@@ -109,7 +120,7 @@ class SurveyTest extends AcademicTestCase
     {
         Sanctum::actingAs($this->teacher);
         $this->postJson('/api/surveys', $this->pollBody())->assertForbidden(); // all parents: admin only
-        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classroom', 'classroom_id' => $this->b->id]))->assertForbidden(); // not their section
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => [$this->b->id]]))->assertForbidden(); // not their section
         $mine = $this->postJson('/api/surveys', $this->approvalBody())->assertCreated()->json('data.id');
 
         $this->actAsAdmin();
@@ -255,5 +266,127 @@ class SurveyTest extends AcademicTestCase
         Sanctum::actingAs($this->dad);
         $this->getJson('/api/surveys')->assertForbidden();
         $this->postJson('/api/surveys', $this->pollBody())->assertForbidden();
+    }
+
+    public function test_a_survey_can_go_to_a_range_of_grades_in_either_order(): void
+    {
+        $this->actAsAdmin();
+        // Grade 5 only: Ali (dad) and Sami (mum), not the Grade 6 children.
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades', 'grade_from_id' => $this->g5->id, 'grade_to_id' => $this->g5->id]))->assertCreated()->assertJsonPath('data.recipient_count', 2);
+        // Grade 4 to 6 covers everyone; given backwards it is the same.
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades', 'grade_from_id' => $this->g4->id, 'grade_to_id' => $this->g6->id]))->assertCreated()->assertJsonPath('data.recipient_count', 3);
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades', 'grade_from_id' => $this->g6->id, 'grade_to_id' => $this->g4->id]))->assertCreated()->assertJsonPath('data.recipient_count', 3);
+        // Grade 6 only: Dana (dad) and Khaled (the other parent).
+        $six = $this->postJson('/api/surveys', $this->approvalBody(['audience' => 'grades', 'grade_from_id' => $this->g6->id, 'grade_to_id' => $this->g6->id, 'classroom_ids' => null]))->assertCreated();
+        $this->assertSame(2, $six->json('data.recipient_count'));
+        $this->assertSame('Grade 6', $six->json('data.audience_detail.to.name_en'));
+    }
+
+    public function test_a_survey_can_go_to_several_chosen_sections(): void
+    {
+        $this->actAsAdmin();
+        $r = $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => [$this->a->id, $this->b->id]]))->assertCreated();
+
+        $this->assertSame(3, $r->json('data.recipient_count'));
+        $this->assertEquals(['5-A', '6-B'], $r->json('data.audience_detail'));
+    }
+
+    public function test_the_grade_range_and_the_section_list_are_checked(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades']))->assertUnprocessable()->assertJsonValidationErrors(['grade_from_id', 'grade_to_id']);
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades', 'grade_from_id' => 99999, 'grade_to_id' => $this->g5->id]))->assertUnprocessable();
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => []]))->assertUnprocessable();
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => [$this->a->id, $this->a->id]]))->assertUnprocessable();
+    }
+
+    public function test_a_teacher_may_pick_several_of_their_own_sections_but_not_grades_or_others(): void
+    {
+        $math = Subject::first();
+        $second = Classroom::factory()->create(['name' => '5-C', 'academic_year_id' => $this->a->academic_year_id, 'grade_level_id' => $this->g5->id]);
+        TeachingAssignment::create(['classroom_id' => $second->id, 'subject_id' => $math->id, 'teacher_id' => $this->teacher->id, 'weekly_periods' => 2]);
+        Sanctum::actingAs($this->teacher);
+
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => [$this->a->id, $second->id]]))->assertCreated();
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'classrooms', 'classroom_ids' => [$this->a->id, $this->b->id]]))->assertForbidden(); // one of them is not theirs
+        $this->postJson('/api/surveys', $this->pollBody(['audience' => 'grades', 'grade_from_id' => $this->g5->id, 'grade_to_id' => $this->g5->id]))->assertForbidden();
+    }
+
+    public function test_the_results_table_has_the_section_phone_decision_and_the_extra_answers(): void
+    {
+        $this->dad->update(['phone' => '0790000001']);
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->approvalBody(['audience' => 'all', 'classroom_ids' => null]))->json('data.id');
+        Sanctum::actingAs($this->dad);
+        $rows = $this->mine();
+        $ali = $rows->first(fn ($r) => $r['student']['name_en'] === 'ali');
+        $this->postJson("/api/my-surveys/{$ali['id']}/respond", ['decision' => 'approved', 'answers' => [$ali['questions'][0]['id'] => '0791111111']])->assertOk();
+        $dana = $rows->first(fn ($r) => $r['student']['name_en'] === 'dana');
+        $this->postJson("/api/my-surveys/{$dana['id']}/respond", ['decision' => 'declined'])->assertOk();
+
+        $this->actAsAdmin();
+        $table = collect($this->getJson("/api/surveys/$id")->json('data.recipients'));
+        $this->assertSame(4, $table->count());
+        $row = $table->first(fn ($r) => $r['student']['name_en'] === 'ali');
+        $this->assertSame(['Abu Ali', '0790000001', '5-A', 'approved'], [$row['parent'], $row['phone'], $row['classroom'], $row['state']]);
+        $this->assertSame('0791111111', array_values($row['answers'])[0]);
+        $this->assertSame('declined', $table->first(fn ($r) => $r['student']['name_en'] === 'dana')['state']);
+        $this->assertSame(['pending', 'pending'], $table->take(2)->pluck('state')->all()); // those still waiting come first
+    }
+
+    /** @return list<list<mixed>> the rows of the downloaded workbook */
+    private function sheet($response): array
+    {
+        $response->assertOk();
+        $reader = new Reader();
+        $reader->open($response->baseResponse->getFile()->getPathname());
+        $rows = [];
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $rows[] = $row->toArray();
+            }
+        }
+        $reader->close();
+
+        return $rows;
+    }
+
+    public function test_the_responses_download_as_excel_and_can_be_limited_to_one_state(): void
+    {
+        $this->dad->update(['phone' => '0790000001']);
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->approvalBody(['audience' => 'all', 'classroom_ids' => null]))->json('data.id');
+        Sanctum::actingAs($this->dad);
+        $ali = $this->mine()->first(fn ($r) => $r['student']['name_en'] === 'ali');
+        $this->postJson("/api/my-surveys/{$ali['id']}/respond", ['decision' => 'approved', 'answers' => [$ali['questions'][0]['id'] => '0791111111']])->assertOk();
+
+        $this->actAsAdmin();
+        $all = $this->sheet($this->get("/api/surveys/$id/export", ['Accept-Language' => 'en']));
+        $this->assertSame(['Parent', 'Phone', 'Student', 'Section', 'Answer', 'Answered at', 'Emergency phone'], $all[0]);
+        $this->assertCount(5, $all); // header + 4 children
+
+        $approved = $this->sheet($this->get("/api/surveys/$id/export?state=approved", ['Accept-Language' => 'en']));
+        $this->assertCount(2, $approved);
+        $this->assertSame(['Abu Ali', '0790000001', 'ali', '5-A', 'Approved'], array_slice($approved[1], 0, 5));
+        $this->assertSame('0791111111', $approved[1][6]);
+
+        $arabic = $this->sheet($this->get("/api/surveys/$id/export?state=approved", ['Accept-Language' => 'ar']));
+        $this->assertSame('ولي الأمر', $arabic[0][0]);
+
+        $this->get("/api/surveys/$id/export?state=nonsense")->assertStatus(422);
+    }
+
+    public function test_only_the_creator_or_the_admin_can_download_the_responses(): void
+    {
+        Sanctum::actingAs($this->teacher);
+        $mine = $this->postJson('/api/surveys', $this->approvalBody())->json('data.id');
+        $this->get("/api/surveys/$mine/export")->assertOk();
+
+        $this->actAsAdmin();
+        $theirs = $this->postJson('/api/surveys', $this->pollBody())->json('data.id');
+        Sanctum::actingAs($this->teacher);
+        $this->get("/api/surveys/$theirs/export")->assertForbidden();
+        Sanctum::actingAs($this->dad);
+        $this->get("/api/surveys/$mine/export")->assertForbidden();
     }
 }

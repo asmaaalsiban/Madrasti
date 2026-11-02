@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
@@ -25,6 +25,8 @@ export default function SurveyResultsPage({ base }) {
   if (isLoading) return <p className="text-slate-500">{t('common.loading')}</p>
   if (isError || !data) return <p role="alert" className="text-red-700">{t('admin.actions.error')}</p>
   const nameOf = (s) => (s ? s[`name_${i18n.language}`] || s.name_ar : '')
+  const grade = (g) => (g ? g[`name_${i18n.language}`] || g.name_ar : '')
+  const audienceText = data.audience === 'grades' ? t('surveys.gradeRange', { from: grade(data.audience_detail.from), to: grade(data.audience_detail.to) }) : data.audience === 'classrooms' ? (data.audience_detail ?? []).join(' · ') : t('surveys.allParents')
   const open = data.status === 'open'
   const pending = data.recipients.filter((r) => r.state === 'pending').length
 
@@ -33,10 +35,12 @@ export default function SurveyResultsPage({ base }) {
       <div className="space-y-1">
         <h1 className="text-xl font-bold">{data.title}</h1>
         <p className="text-sm text-slate-600">{t(`surveys.types.${data.type}`)} · {t(`surveys.status.${data.status}`)} · {t('surveys.answered', { done: data.response_count, total: data.recipient_count })}</p>
+        <p className="text-sm text-slate-600">{t('surveys.sentTo')}: {audienceText}</p>
         {data.description && <p className="rounded bg-white p-3 text-sm">{data.description}</p>}
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <Link to={`${base}/surveys/${id}/responses`} className="rounded bg-brand px-3 py-1.5 text-sm text-white">{t('surveys.openTable')}</Link>
         {open && pending > 0 && <button type="button" disabled={remind.isPending} className="rounded border px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={() => remind.mutate()}>{t('surveys.remind', { count: pending })}</button>}
         {open && <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => close.mutate()}>{t('surveys.close')}</button>}
         <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-700" onClick={() => setConfirmDelete(true)}>{t('admin.actions.delete')}</button>

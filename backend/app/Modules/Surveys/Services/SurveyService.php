@@ -6,6 +6,8 @@ namespace App\Modules\Surveys\Services;
 
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Communication\Services\Notifier;
@@ -30,8 +32,12 @@ class SurveyService
         $survey = DB::transaction(function () use ($author, $data, $questions): Survey {
             $survey = Survey::create([
                 'created_by' => $author->id, 'type' => $data['type'], 'title' => $data['title'], 'description' => $data['description'] ?? null,
-                'closes_at' => $data['closes_at'] ?? null, 'audience' => $data['audience'], 'classroom_id' => $data['audience'] === 'classroom' ? $data['classroom_id'] : null,
+                'closes_at' => $data['closes_at'] ?? null, 'audience' => $data['audience'],
+                'grade_from_id' => $data['audience'] === 'grades' ? $data['grade_from_id'] : null, 'grade_to_id' => $data['audience'] === 'grades' ? $data['grade_to_id'] : null,
             ]);
+            if ($data['audience'] === 'classrooms') {
+                $survey->classrooms()->sync($data['classroom_ids']);
+            }
             foreach (array_values($questions) as $i => $q) {
                 $survey->questions()->create([
                     'type' => $q['type'], 'text' => $q['text'], 'is_required' => $q['is_required'] ?? true, 'sort_order' => $i,
@@ -58,7 +64,15 @@ class SurveyService
     private function recipientRows(Survey $survey): array
     {
         $year = AcademicYear::where('is_current', true)->first();
-        $studentIds = Enrollment::where('academic_year_id', $year?->id)->when($survey->audience === 'classroom', fn ($q) => $q->where('classroom_id', $survey->classroom_id))->pluck('student_id');
+        $classroomIds = match ($survey->audience) {
+            'classrooms' => $survey->classrooms()->pluck('classrooms.id'),
+            // From the lower grade to the higher one, whichever order they were chosen in.
+            'grades' => Classroom::where('academic_year_id', $year?->id)->whereIn('grade_level_id', GradeLevel::whereBetween('sort_order', [
+                min($survey->gradeFrom->sort_order, $survey->gradeTo->sort_order), max($survey->gradeFrom->sort_order, $survey->gradeTo->sort_order),
+            ])->select('id'))->pluck('id'),
+            default => null, // everyone
+        };
+        $studentIds = Enrollment::where('academic_year_id', $year?->id)->when($classroomIds !== null, fn ($q) => $q->whereIn('classroom_id', $classroomIds))->pluck('student_id');
 
         $rows = [];
         foreach (Student::with('guardians:users.id')->whereIn('id', $studentIds)->get() as $student) {
