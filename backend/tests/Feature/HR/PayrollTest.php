@@ -56,6 +56,53 @@ class PayrollTest extends AcademicTestCase
 
     // ---- contracts -------------------------------------------------------------------------------------------------
 
+    public function test_each_person_is_paid_the_way_their_payslip_says(): void
+    {
+        $this->contract($this->sara, ['payment_method' => 'bank_transfer', 'payment_details' => 'JO94CBJO0010000000000131000302'])->assertCreated();
+        $this->contract($this->omar, ['payment_method' => 'cheque'])->assertCreated();
+        $runId = $this->postJson('/api/payroll/runs', ['month' => '2026-10'])->assertCreated()->json('data.id');
+        $slips = collect($this->getJson("/api/payroll/runs/$runId")->json('data.payslips'))->keyBy(fn ($s) => $s['user']['name']);
+        $this->assertSame('bank_transfer', $slips['Sara']['payment_method']);
+        $this->assertSame('cheque', $slips['Omar']['payment_method']);
+        // The accountant can change one person for this month only.
+        $this->putJson('/api/payroll/payslips/'.$slips['Omar']['id'].'/payment', ['payment_method' => 'cash'])->assertOk()->assertJsonPath('data.payment_method', 'cash');
+        $this->postJson("/api/payroll/runs/$runId/submit")->assertOk();
+        Sanctum::actingAs($this->principal);
+        $this->postJson("/api/payroll/runs/$runId/approve")->assertOk();
+        Sanctum::actingAs($this->accountant);
+        $this->postJson("/api/payroll/runs/$runId/pay", [])->assertOk();
+        $paid = Payslip::where('payroll_run_id', $runId)->get()->keyBy('user_id');
+        $this->assertSame('bank_transfer', $paid[$this->sara->id]->payment_method);
+        $this->assertSame('cash', $paid[$this->omar->id]->payment_method);
+        // A paid payslip can no longer change.
+        $this->putJson('/api/payroll/payslips/'.$paid[$this->omar->id]->id.'/payment', ['payment_method' => 'cheque'])->assertUnprocessable();
+        // The contract's default carries into the renewal.
+        $first = StaffContract::where('user_id', $this->sara->id)->value('id');
+        $new = $this->postJson("/api/payroll/contracts/$first/renew", ['raise_type' => 'none', 'ends_on' => '2028-08-31'])->assertCreated()->json('data');
+        $this->assertSame('bank_transfer', $new['payment_method']);
+    }
+
+    public function test_a_payslip_without_a_method_needs_one_at_payment(): void
+    {
+        $this->contract($this->sara)->assertCreated();
+        $runId = $this->postJson('/api/payroll/runs', ['month' => '2026-10'])->assertCreated()->json('data.id');
+        $this->postJson("/api/payroll/runs/$runId/submit")->assertOk();
+        Sanctum::actingAs($this->principal);
+        $this->postJson("/api/payroll/runs/$runId/approve")->assertOk();
+        Sanctum::actingAs($this->accountant);
+        $this->postJson("/api/payroll/runs/$runId/pay", [])->assertUnprocessable();
+        $this->postJson("/api/payroll/runs/$runId/pay", ['method' => 'cash'])->assertOk();
+    }
+
+    public function test_staff_see_their_own_salary(): void
+    {
+        $this->contract($this->sara, ['payment_method' => 'cheque'])->assertCreated();
+        Sanctum::actingAs($this->sara);
+        $this->getJson('/api/payroll/my-contract')->assertOk()->assertJsonPath('data.base_salary', '900.00')->assertJsonPath('data.payment_method', 'cheque');
+        Sanctum::actingAs($this->omar);
+        $this->getJson('/api/payroll/my-contract')->assertOk()->assertJsonPath('data', null);
+    }
+
     public function test_the_accountant_writes_a_contract_with_monthly_allowances_and_deductions(): void
     {
         $r = $this->contract($this->sara, ['items' => [['kind' => 'allowance', 'label' => 'Transport', 'amount' => 50], ['kind' => 'deduction', 'label' => 'Insurance', 'amount' => 20.5]]])->assertCreated();

@@ -39,6 +39,7 @@ class PayrollService
         return DB::transaction(function () use ($staff, $data, $items, $by): StaffContract {
             $contract = StaffContract::create([
                 'user_id' => $staff->id, 'starts_on' => $data['starts_on'], 'ends_on' => $data['ends_on'] ?? null, 'base_salary' => $data['base_salary'],
+                'payment_method' => $data['payment_method'] ?? null, 'payment_details' => $data['payment_details'] ?? null,
                 'notes' => $data['notes'] ?? null, 'status' => 'active', 'created_by' => $by->id,
             ]);
             $this->writeItems($contract, $items);
@@ -81,6 +82,8 @@ class PayrollService
             $new = StaffContract::create([
                 'user_id' => $old->user_id, 'starts_on' => $starts->toDateString(), 'ends_on' => $ends?->toDateString(), 'base_salary' => Money::amount($newCents),
                 'status' => 'active', 'renewed_from_id' => $old->id, 'raise_amount' => Money::amount($raise), 'raise_percent' => $oldCents > 0 ? round($raise / $oldCents * 100, 2) : null,
+                'payment_method' => array_key_exists('payment_method', $data) ? $data['payment_method'] : $old->payment_method,
+                'payment_details' => array_key_exists('payment_details', $data) ? $data['payment_details'] : $old->payment_details,
                 'notes' => $data['notes'] ?? null, 'created_by' => $by->id,
             ]);
             // The monthly allowances and deductions carry over unless the accountant says otherwise.
@@ -140,7 +143,7 @@ class PayrollService
                 if ($contract === null) {
                     continue;
                 }
-                $slip = $run->payslips()->create(['user_id' => $staff->id, 'staff_contract_id' => $contract->id, 'base_salary' => $contract->base_salary, 'net' => $contract->base_salary]);
+                $slip = $run->payslips()->create(['user_id' => $staff->id, 'staff_contract_id' => $contract->id, 'base_salary' => $contract->base_salary, 'net' => $contract->base_salary, 'payment_method' => $contract->payment_method, 'payment_details' => $contract->payment_details]);
                 foreach ($contract->items as $item) {
                     $slip->items()->create(['kind' => $item->kind, 'label' => $item->label, 'amount' => $item->amount, 'from_contract' => true, 'created_by' => $by->id]);
                 }
@@ -232,13 +235,17 @@ class PayrollService
      *
      * @return int how many were paid
      */
-    public function pay(PayrollRun $run, ?Payslip $only, string $method, string $paidOn, ?string $reference): int
+    public function pay(PayrollRun $run, ?Payslip $only, ?string $method, string $paidOn, ?string $reference): int
     {
         $this->assertStatus($run, 'approved', 'paid');
         $slips = $run->payslips()->whereNull('paid_on')->when($only, fn ($q) => $q->whereKey($only->id))->with('user')->get();
+        // Everyone is paid the way their own payslip says; the method given here is only for payslips that have none.
+        if ($slips->contains(fn (Payslip $s) => ! $s->payment_method && ! $method)) {
+            throw ValidationException::withMessages(['method' => [__('payroll.no_method')]]);
+        }
         DB::transaction(function () use ($slips, $method, $paidOn, $reference, $run): void {
             foreach ($slips as $slip) {
-                $slip->update(['paid_on' => $paidOn, 'payment_method' => $method, 'reference' => $reference]);
+                $slip->update(['paid_on' => $paidOn, 'payment_method' => $slip->payment_method ?: $method, 'reference' => $slip->reference ?: $reference]);
             }
             if (! $run->payslips()->whereNull('paid_on')->exists()) {
                 $run->update(['status' => 'paid']);
@@ -249,6 +256,16 @@ class PayrollService
         }
 
         return $slips->count();
+    }
+
+    /** How one payslip is paid this month (the contract's default can be overridden per person and per month). */
+    public function setPayment(Payslip $payslip, string $method, ?string $details, ?string $reference): void
+    {
+        $this->assertStatus($payslip->run, 'draft', 'submitted', 'approved');
+        if ($payslip->paid_on !== null) {
+            throw ValidationException::withMessages(['payslip' => [__('payroll.already_paid')]]);
+        }
+        $payslip->update(['payment_method' => $method, 'payment_details' => $details, 'reference' => $reference]);
     }
 
     public function payslipLink(User $user): string

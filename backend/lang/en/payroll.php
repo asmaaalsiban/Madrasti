@@ -9,6 +9,8 @@ return [
     'not_staff' => 'Choose an active member of staff.',
     'locked' => 'This month\'s payroll was already submitted.',
     'empty' => 'There is nobody on this payroll: add a contract first.',
+    'no_method' => 'Choose how each person is paid (bank transfer, cheque or cash) before recording the payment.',
+    'already_paid' => 'This payslip is already paid.',
     'wrong_state' => 'This payroll is :state: this cannot be done now.',
     'bad_amount' => 'The amount must be more than zero.',
     'deduction_too_big' => 'This deduction is more than what is left of the pay (:net).',

@@ -1311,7 +1311,8 @@
       "net": "Net",
       "base": "Base salary",
       "additions": "Additions",
-      "deductions": "Deductions"
+      "deductions": "Deductions",
+      "pay": "Payment"
     },
     "state": {
       "ok": "Active",
@@ -1401,6 +1402,11 @@
     "lastDay": "Last day",
     "history": "History",
     "historyOf": "Contracts of {{name}}",
-    "close": "Close"
+    "close": "Close",
+    "payMethod": "Payment method",
+    "payDetails": "Details",
+    "payDetailsHint": "IBAN, cheque payee...",
+    "methodForRest": "{{count}} payslip(s) have no method: pay them by",
+    "mySalary": "My salary"
   }
 }

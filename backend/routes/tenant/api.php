@@ -116,9 +116,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
     Route::post('runs/{run}/approve', [PayrollController::class, 'approve']);
     Route::post('runs/{run}/send-back', [PayrollController::class, 'sendBack']);
     Route::post('runs/{run}/pay', [PayrollController::class, 'pay']);
+    Route::put('payslips/{payslip}/payment', [PayrollController::class, 'setPayment']);
     Route::post('payslips/{payslip}/items', [PayrollController::class, 'addItem']);
     Route::delete('payslip-items/{item}', [PayrollController::class, 'removeItem']);
     Route::delete('payslips/{payslip}', [PayrollController::class, 'removePayslip']);
+    Route::get('my-contract', [PayrollController::class, 'myContract']);
     Route::get('payslips/mine', [PayrollController::class, 'mine']);
     Route::get('payslips/{payslip}', [PayrollController::class, 'payslip']);
 });

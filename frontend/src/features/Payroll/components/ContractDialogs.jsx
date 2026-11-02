@@ -33,16 +33,32 @@ function ItemsEditor({ items, onChange }) {
 }
 
 
+// How the person is paid: bank transfer, cheque or cash, with the details (IBAN, payee...).
+export function PaymentFields({ method, details, onChange }) {
+  const { t } = useTranslation()
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <label className="block text-sm">{t('payroll.payMethod')}
+        <select className="mt-1 w-full rounded border p-2" value={method} onChange={(e) => onChange({ payment_method: e.target.value, payment_details: details })}>
+          <option value="">—</option>
+          {['bank_transfer', 'cheque', 'cash'].map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
+        </select>
+      </label>
+      <label className="block text-sm">{t('payroll.payDetails')}<input className="mt-1 w-full rounded border p-2" dir="ltr" placeholder={t('payroll.payDetailsHint')} value={details} onChange={(e) => onChange({ payment_method: method, payment_details: e.target.value })} /></label>
+    </div>
+  )
+}
+
 // A new contract for a member of staff.
 export function NewContractDialog({ staff, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ starts_on: '', ends_on: '', base_salary: '', notes: '' })
+  const [form, setForm] = useState({ starts_on: '', ends_on: '', base_salary: '', notes: '', payment_method: '', payment_details: '' })
   const [items, setItems] = useState([])
   const [error, setError] = useState('')
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
   const save = useMutation({
-    mutationFn: () => api.post('/payroll/contracts', { user_id: staff.id, ...form, ends_on: form.ends_on || null, notes: form.notes || null, items }),
+    mutationFn: () => api.post('/payroll/contracts', { user_id: staff.id, ...form, ends_on: form.ends_on || null, notes: form.notes || null, payment_method: form.payment_method || null, payment_details: form.payment_details || null, items }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -55,6 +71,7 @@ export function NewContractDialog({ staff, onClose }) {
           <label className="block text-sm">{t('payroll.endsOn')}<input type="date" className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={set('ends_on')} /></label>
         </div>
         <label className="block text-sm">{t('payroll.baseSalary')}<input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.base_salary} onChange={set('base_salary')} /></label>
+        <PaymentFields method={form.payment_method} details={form.payment_details} onChange={(p) => setForm({ ...form, ...p })} />
         <ItemsEditor items={items} onChange={setItems} />
         <label className="block text-sm">{t('payroll.notes')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
@@ -71,13 +88,13 @@ export function RenewDialog({ staff, currency, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const c = staff.contract
-  const [form, setForm] = useState({ ends_on: '', raise_type: 'percent', raise_value: '', carry_items: true, notes: '' })
+  const [form, setForm] = useState({ ends_on: '', raise_type: 'percent', raise_value: '', carry_items: true, notes: '', payment_method: c.payment_method ?? '', payment_details: c.payment_details ?? '' })
   const [error, setError] = useState('')
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
   const old = cents(c.base_salary)
   const preview = form.raise_type === 'none' ? old : form.raise_type === 'percent' ? Math.round(old * (1 + Number(form.raise_value || 0) / 100)) : form.raise_type === 'amount' ? old + cents(form.raise_value) : cents(form.raise_value)
   const save = useMutation({
-    mutationFn: () => api.post(`/payroll/contracts/${c.id}/renew`, { raise_type: form.raise_type, ...(form.raise_type === 'none' ? {} : { raise_value: form.raise_value }), ends_on: form.ends_on || null, carry_items: form.carry_items, notes: form.notes || null }),
+    mutationFn: () => api.post(`/payroll/contracts/${c.id}/renew`, { raise_type: form.raise_type, ...(form.raise_type === 'none' ? {} : { raise_value: form.raise_value }), ends_on: form.ends_on || null, carry_items: form.carry_items, notes: form.notes || null, payment_method: form.payment_method || null, payment_details: form.payment_details || null }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -97,6 +114,7 @@ export function RenewDialog({ staff, currency, onClose }) {
           {form.raise_type !== 'none' && <label className="block text-sm">{t(`payroll.raiseValue.${form.raise_type}`)}<input required type="number" step="0.01" min="0" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.raise_value} onChange={set('raise_value')} /></label>}
           <p className="rounded bg-slate-50 p-2 text-sm">{t('payroll.newSalary')}: <b><Money value={fmt(preview)} currency={currency} /></b>{preview !== old && <span className="ms-2 text-green-700" dir="ltr">{preview > old ? '+' : ''}{fmt(preview - old)}</span>}</p>
         </fieldset>
+        <PaymentFields method={form.payment_method} details={form.payment_details} onChange={(p) => setForm({ ...form, ...p })} />
         {c.items.length > 0 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.carry_items} onChange={set('carry_items')} />{t('payroll.carryItems')}</label>}
         <label className="block text-sm">{t('payroll.notes')}<input className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
