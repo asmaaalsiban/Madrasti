@@ -71,6 +71,7 @@ import MyPayslipsPage from '../features/Payroll/pages/MyPayslipsPage'
 import RenewalsPage from '../features/Renewals/pages/RenewalsPage'
 import StaffAttendancePage from '../features/StaffAttendance/StaffAttendancePage'
 import RulesPage from '../features/Payroll/pages/RulesPage'
+import TemplatesPage from '../features/Payroll/pages/TemplatesPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -140,6 +141,7 @@ const HOME_ROUTES = {
     { path: 'renewals', element: <RenewalsPage /> },
     { path: 'staff-attendance', element: <StaffAttendancePage /> },
     { path: 'payroll/rules', element: <RulesPage base="/teacher" /> },
+    { path: 'payroll/templates', element: <TemplatesPage base="/teacher" /> },
     { path: 'payroll', element: <PayrollPage base="/teacher" /> },
     { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
     { path: 'payroll/payslips/:id', element: <PayslipPage /> },
@@ -198,6 +200,7 @@ export const routes = [
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },
               { path: '/admin/payroll/rules', element: <RulesPage base="/admin" /> },
+              { path: '/admin/payroll/templates', element: <TemplatesPage base="/admin" /> },
               { path: '/admin/payroll', element: <PayrollPage base="/admin" /> },
               { path: '/admin/payroll/contracts', element: <ContractsRoute base="/admin" /> },
               { path: '/admin/payroll/payslips/:id', element: <PayslipPage /> },

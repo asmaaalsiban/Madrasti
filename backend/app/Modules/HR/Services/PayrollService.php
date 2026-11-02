@@ -10,6 +10,7 @@ use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\Payslip;
 use App\Modules\HR\Models\PayslipItem;
 use App\Modules\HR\Models\PayrollRun;
+use App\Modules\HR\Models\PayrollTemplate;
 use App\Modules\HR\Models\StaffContract;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
@@ -181,7 +182,7 @@ class PayrollService
         $slip->update(['additions' => Money::amount($additions), 'deductions' => Money::amount($deductions), 'net' => Money::amount(Money::cents($slip->base_salary) + $additions - $deductions)]);
     }
 
-    public function addItem(Payslip $slip, string $kind, string $label, float|int|string $amount, User $by): PayslipItem
+    public function addItem(Payslip $slip, string $kind, string $label, float|int|string $amount, User $by, ?string $category = null): PayslipItem
     {
         $this->assertDraft($slip->run);
         $cents = Money::cents($amount);
@@ -194,12 +195,37 @@ class PayrollService
             throw ValidationException::withMessages(['amount' => [__('payroll.deduction_too_big', ['net' => $slip->net])]]);
         }
 
-        return DB::transaction(function () use ($slip, $kind, $label, $cents, $by): PayslipItem {
-            $item = $slip->items()->create(['kind' => $kind, 'label' => trim($label), 'amount' => Money::amount($cents), 'created_by' => $by->id]);
+        return DB::transaction(function () use ($slip, $kind, $label, $cents, $by, $category): PayslipItem {
+            $item = $slip->items()->create(['kind' => $kind, 'label' => trim($label), 'amount' => Money::amount($cents), 'category' => $category, 'created_by' => $by->id]);
             $this->recalculate($slip->refresh());
 
             return $item;
         });
+    }
+
+    /**
+     * Gives the school's own rule to some payslips of a draft payroll (or to all of them): a percent rule is worked out from each
+     * person's base salary. A deduction that would take someone's net below zero is skipped for that person.
+     *
+     * @param  list<int>|null  $payslipIds  null = everyone on the payroll
+     * @return array{applied: int, skipped: int}
+     */
+    public function applyTemplate(PayrollRun $run, PayrollTemplate $template, ?array $payslipIds, User $by): array
+    {
+        $this->assertDraft($run);
+        $applied = 0;
+        $skipped = 0;
+        foreach ($run->payslips()->when($payslipIds !== null, fn ($q) => $q->whereIn('id', $payslipIds))->get() as $slip) {
+            $cents = $template->type === 'percent' ? (int) round(Money::cents($slip->base_salary) * (float) $template->value / 100) : Money::cents($template->value);
+            try {
+                $this->addItem($slip->setRelation('run', $run), $template->kind, $template->name, Money::amount($cents), $by, $template->category);
+                $applied++;
+            } catch (ValidationException) {
+                $skipped++;
+            }
+        }
+
+        return ['applied' => $applied, 'skipped' => $skipped];
     }
 
     public function removeItem(PayslipItem $item): void

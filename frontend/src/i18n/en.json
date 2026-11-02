@@ -1442,7 +1442,34 @@
         "bonus": "Weekly plans bonus ({{score}}%)",
         "deduction": "Missing weekly plans ({{score}}%)"
       }
-    }
+    },
+    "templatesTitle": "Bonus and deduction rules",
+    "templatesHelp": "Write your own rules (e.g. exam supervision bonus, summer club, private lessons, a fixed penalty). Then give them to staff from a payroll.",
+    "newRule": "New rule",
+    "editRule": "Edit rule",
+    "ruleName": "Name",
+    "ruleNameHint": "e.g. Summer club",
+    "value": "Value",
+    "category": "Category",
+    "categories": {
+      "private_lessons": "Private lessons",
+      "summer_club": "Summer club",
+      "club": "Club",
+      "other": "Other"
+    },
+    "noTemplates": "No rules yet. Add one first.",
+    "deleteRuleConfirm": "Delete this rule? Payslips that already used it are not changed.",
+    "applyRuleAll": "Give a rule to everyone",
+    "applyRuleFor": "Give a rule to {{name}}",
+    "chooseRule": "Rule",
+    "apply": "Apply",
+    "rule": "Rule",
+    "ruleApplied": "Given to {{applied}} person(s); {{skipped}} skipped (a deduction would take the net below zero).",
+    "chartTitle": "Net salary by month",
+    "latestMonth": "Last paid month",
+    "netOf": "Net salary · {{month}}",
+    "howCalculated": "How it was calculated",
+    "previousMonths": "Previous months"
   },
   "renewals": {
     "title": "Student renewal",

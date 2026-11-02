@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\Payslip;
 use App\Modules\HR\Models\StaffContract;
+use App\Modules\HR\Models\PayrollTemplate;
 use App\Modules\HR\Models\PayslipItem;
 use App\Modules\HR\Models\PayrollRun;
 use App\Modules\HR\Services\PayrollAccess;
@@ -110,8 +111,8 @@ class PayrollController extends Controller
     public function addItem(Request $request, Payslip $payslip): JsonResponse
     {
         $by = $this->manage($request);
-        $data = $request->validate(['kind' => ['required', Rule::in(PayslipItem::KINDS)], 'label' => ['required', 'string', 'max:120'], 'amount' => ['required', 'numeric', 'gt:0', 'max:1000000']]);
-        $this->payroll->addItem($payslip, $data['kind'], $data['label'], $data['amount'], $by);
+        $data = $request->validate(['kind' => ['required', Rule::in(PayslipItem::KINDS)], 'label' => ['required', 'string', 'max:120'], 'amount' => ['required', 'numeric', 'gt:0', 'max:1000000'], 'category' => ['nullable', Rule::in(PayrollTemplate::CATEGORIES)]]);
+        $this->payroll->addItem($payslip, $data['kind'], $data['label'], $data['amount'], $by, $data['category'] ?? null);
 
         return response()->json(['data' => $this->presentSlip($payslip->refresh()->load(['items', 'user.staffProfile']))], 201);
     }
@@ -124,6 +125,64 @@ class PayrollController extends Controller
         $this->payroll->setPayment($payslip->load('run'), $data['payment_method'], $data['payment_details'] ?? null, $data['reference'] ?? null);
 
         return response()->json(['data' => $this->presentSlip($payslip->refresh()->load(['items', 'user.staffProfile']))]);
+    }
+
+    // ---- the school's own bonus and deduction rules ----------------------------------------------------------------
+
+    public function templates(Request $request): JsonResponse
+    {
+        $this->view($request);
+
+        return response()->json(['data' => PayrollTemplate::orderBy('name')->get()->map(fn ($t) => $this->presentTemplate($t))->values(), 'currency' => $this->currency()]);
+    }
+
+    public function storeTemplate(Request $request): JsonResponse
+    {
+        $by = $this->view($request);
+        $template = PayrollTemplate::create($this->templateData($request) + ['created_by' => $by->id]);
+
+        return response()->json(['data' => $this->presentTemplate($template)], 201);
+    }
+
+    public function updateTemplate(Request $request, PayrollTemplate $template): JsonResponse
+    {
+        $this->view($request);
+        $template->update($this->templateData($request));
+
+        return response()->json(['data' => $this->presentTemplate($template->refresh())]);
+    }
+
+    public function destroyTemplate(Request $request, PayrollTemplate $template): Response
+    {
+        $this->view($request);
+        $template->delete();
+
+        return response()->noContent();
+    }
+
+    /** Gives a rule to chosen payslips, or to everyone, of a draft payroll. */
+    public function applyTemplate(Request $request, PayrollRun $run): JsonResponse
+    {
+        $by = $this->manage($request);
+        $data = $request->validate(['template_id' => ['required', 'integer', 'exists:payroll_templates,id'], 'payslip_ids' => ['nullable', 'array'], 'payslip_ids.*' => ['integer']]);
+        $result = $this->payroll->applyTemplate($run, PayrollTemplate::findOrFail($data['template_id']), isset($data['payslip_ids']) ? array_map('intval', $data['payslip_ids']) : null, $by);
+
+        return response()->json($result + ['data' => $this->detail($run->refresh())]);
+    }
+
+    /** @return array<string, mixed> */
+    private function templateData(Request $request): array
+    {
+        return $request->validate([
+            'name' => ['required', 'string', 'max:120'], 'kind' => ['required', Rule::in(PayslipItem::KINDS)], 'type' => ['required', Rule::in(['amount', 'percent'])],
+            'value' => ['required', 'numeric', 'gt:0', 'max:1000000'], 'category' => ['nullable', Rule::in(PayrollTemplate::CATEGORIES)], 'is_active' => ['sometimes', 'boolean'],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function presentTemplate(PayrollTemplate $t): array
+    {
+        return ['id' => $t->id, 'name' => $t->name, 'kind' => $t->kind, 'type' => $t->type, 'value' => $t->value, 'category' => $t->category, 'is_active' => $t->is_active];
     }
 
     public function removeItem(Request $request, PayslipItem $item): JsonResponse
@@ -173,7 +232,12 @@ class PayrollController extends Controller
         $user = $this->user($request);
         $rows = Payslip::with('run')->where('user_id', $user->id)->whereNotNull('paid_on')->get()->sortByDesc(fn ($p) => $p->run->month)->values();
 
-        return response()->json(['data' => $rows->map(fn (Payslip $p) => ['id' => $p->id, 'month' => $p->run->month->format('Y-m'), 'net' => $p->net, 'paid_on' => $p->paid_on->format('Y-m-d')])->values(), 'currency' => $this->currency()]);
+        $rows->load('items');
+
+        return response()->json(['data' => $rows->map(fn (Payslip $p) => [
+            'id' => $p->id, 'month' => $p->run->month->format('Y-m'), 'net' => $p->net, 'base_salary' => $p->base_salary, 'additions' => $p->additions, 'deductions' => $p->deductions, 'paid_on' => $p->paid_on->format('Y-m-d'), 'payment_method' => $p->payment_method,
+            'items' => $p->items->map(fn ($i) => ['kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'auto_code' => $i->auto_code, 'detail' => $i->detail, 'category' => $i->category])->values(),
+        ])->values(), 'currency' => $this->currency()]);
     }
 
     /** @return array<string, mixed> */
@@ -206,7 +270,7 @@ class PayrollController extends Controller
             'id' => $p->id, 'user' => ['id' => $p->user->id, 'name' => $p->user->name, 'staff_type' => $p->user->staffProfile?->staff_type->value],
             'base_salary' => $p->base_salary, 'additions' => $p->additions, 'deductions' => $p->deductions, 'net' => $p->net,
             'paid_on' => $p->paid_on?->format('Y-m-d'), 'payment_method' => $p->payment_method, 'payment_details' => $p->payment_details, 'reference' => $p->reference,
-            'items' => $p->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'from_contract' => $i->from_contract, 'auto_code' => $i->auto_code, 'detail' => $i->detail])->values(),
+            'items' => $p->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'label' => $i->label, 'amount' => $i->amount, 'from_contract' => $i->from_contract, 'auto_code' => $i->auto_code, 'detail' => $i->detail, 'category' => $i->category])->values(),
         ];
     }
 
