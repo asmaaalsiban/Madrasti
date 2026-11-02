@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
@@ -26,7 +26,7 @@ describe('ImportPage', () => {
     api.post
       .mockResolvedValueOnce(analysis())
       .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: null, problem_count: 1, problems: [{ line: 3, errors: ['There is no section named "9-Z" this year.'] }] } } })
-      .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: [{ student_number: '1', name: 'ليلى', email: 'layla.1@school.edu' }], problem_count: 1, problems: [{ line: 3, errors: ['No section'] }] } } })
+      .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: [{ student_number: '1', name: 'ليلى', email: 'layla.1@school.edu', parent_login: '0790000001' }], problem_count: 1, problems: [{ line: 3, errors: ['No section'] }] } } })
     renderPage()
     expect(screen.getByRole('button', { name: 'Read the file' })).toBeDisabled()
     pick()
@@ -49,6 +49,7 @@ describe('ImportPage', () => {
     expect(await screen.findByText('Done: 1 added, 1 skipped.')).toBeInTheDocument()
     expect(api.post.mock.calls[2][1].get('confirm')).toBe('1')
     expect(screen.getByText('layla.1@school.edu')).toBeInTheDocument()
+    expect(screen.getByText('0790000001')).toBeInTheDocument() // a parent with no email signs in with the phone
   })
 
   it('lets the admin correct a wrong guess, and a field keeps one column only', async () => {

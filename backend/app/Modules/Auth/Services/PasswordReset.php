@@ -64,7 +64,7 @@ class PasswordReset
 
     private function find(string $login): ?User
     {
-        return User::where(fn ($q) => $q->where('email', $login)->orWhere('phone', $login))->first();
+        return User::findByLogin($login);
     }
 
     /** The e-mail the code is sent to: a student's primary parent (any parent with an e-mail if there is no primary), else the account itself. */

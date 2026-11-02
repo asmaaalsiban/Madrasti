@@ -12,6 +12,7 @@ use App\Modules\Finance\Models\Money;
 use App\Modules\Finance\Services\FeeBilling;
 use App\Modules\People\Services\StudentEmail;
 use App\Shared\Enums\Role;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -139,27 +140,38 @@ class SaveStudent
      */
     private function linkGuardian(Student $student, ?string $email, ?string $name, ?string $phone = null, bool $replacePrimary = false): void
     {
-        if ($email === null || $email === '') {
+        $email = $email === '' ? null : $email;
+        $phone = PhoneNumber::normalize($phone);
+        if ($email === null && $phone === null) {
             return;
         }
 
-        $existing = User::where('email', $email)->first();
+        // The parent is found by email; a parent registered with a phone number only is found by that number.
+        $existing = $email !== null ? User::where('email', $email)->first() : User::findByLogin($phone);
+        // A parent who was registered with a phone number only now gets an email: same parent, same account.
+        if ($existing === null && $email !== null && $phone !== null) {
+            $byPhone = User::findByLogin($phone);
+            if ($byPhone !== null && $byPhone->role === Role::Guardian && blank($byPhone->email)) {
+                $byPhone->update(['email' => $email]);
+                $existing = $byPhone;
+            }
+        }
         if ($existing !== null && $existing->role !== Role::Guardian) {
             // e.g. the student's own generated email: rolls the whole save back.
-            throw ValidationException::withMessages(['guardian_email' => __('people.guardian_email_conflict')]);
+            throw ValidationException::withMessages([$email !== null ? 'guardian_email' : 'guardian_phone' => $email !== null ? __('people.guardian_email_conflict') : __('people.guardian_phone_conflict')]);
         }
 
         $guardian = $existing ?? User::create([
             'name' => $name ?: __('people.guardian_of', ['name' => $student->name_ar]),
-            'email' => $email,
-            'phone' => $phone ?: null,
+            'email' => $email, // may be empty: the parent then signs in with the phone number
+            'phone' => $phone,
             'role' => Role::Guardian,
             'is_active' => true,
             ...$this->defaultCredentials(),
         ]);
 
-        // A phone given for an existing parent replaces the old one.
-        if ($phone && $guardian->phone !== $phone) {
+        // A phone given with the email of an existing parent replaces the old one (a parent found by phone keeps the number as registered).
+        if ($email !== null && $phone && $guardian->phone !== $phone) {
             $guardian->update(['phone' => $phone]);
         }
 

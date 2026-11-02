@@ -33,7 +33,8 @@
       "code": "Code (6 digits)",
       "setPassword": "Set the new password",
       "resend": "Send a new code",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "phoneOnly": "If you registered with a phone number only, no code can be sent: ask the school to reset your password."
     }
   },
   "roles": {
@@ -236,7 +237,8 @@
     "firstPaymentHint": "The amount received now, taken from the yearly fee first, then transport. It gets a receipt (print it from the student's account).",
     "feesHeading": "Fees",
     "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student.",
-    "firstPaymentPayerHint": "Who paid. The receipt is written in this name; if empty, the parent's name is used."
+    "firstPaymentPayerHint": "Who paid. The receipt is written in this name; if empty, the parent's name is used.",
+    "guardianHint": "Optional. A parent with no email signs in with the phone number below (the default password at first)."
   },
   "staff": {
     "title": "Staff",
@@ -1035,7 +1037,8 @@
       "student_number": "Student number",
       "name": "Name",
       "email": "Sign-in email",
-      "staff_type": "Position"
+      "staff_type": "Position",
+      "parent_login": "Parent sign-in"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",

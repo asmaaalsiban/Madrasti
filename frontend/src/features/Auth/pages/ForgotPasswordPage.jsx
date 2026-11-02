@@ -60,6 +60,7 @@ export default function ForgotPasswordPage() {
         {step === 'login' && (
           <form onSubmit={requestCode} className="space-y-4">
             <p className="text-sm text-slate-600">{t('auth.forgot.help')}</p>
+            <p className="text-xs text-slate-500">{t('auth.forgot.phoneOnly')}</p>
             <label className="block text-sm">{t('auth.login')}<input required className="mt-1 w-full rounded border p-2" value={form.login} onChange={set('login')} /></label>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">{t('auth.forgot.sendCode')}</button>

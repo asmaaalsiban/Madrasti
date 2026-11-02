@@ -91,7 +91,9 @@ class StudentImporter extends Importer
     {
         $student = $this->save->create($data);
 
-        return ['student_number' => $student->student_number, 'name' => $student->name_ar, 'email' => $student->generated_account['email']];
+        $parent = $student->guardians->sortByDesc(fn ($g) => $g->pivot->is_primary)->first();
+
+        return ['student_number' => $student->student_number, 'name' => $student->name_ar, 'email' => $student->generated_account['email'], 'parent_login' => $parent?->email ?: $parent?->phone];
     }
 
     /** The next free student number after the highest numeric one (so a school's own numbers are never touched). */

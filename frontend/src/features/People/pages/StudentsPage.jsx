@@ -43,7 +43,7 @@ const fields = [
     options: ['cash', 'bank_transfer', 'card', 'cheque', 'online'].map((m) => ({ value: m, label: `finance.methods.${m}` })),
   },
   { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
-  { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', getValue: (row) => row.guardians?.[0]?.email },
+  { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', hint: 'people.guardianHint', getValue: (row) => row.guardians?.[0]?.email },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
   { name: 'guardian_phone', label: 'people.fields.guardianPhone', getValue: (row) => row.guardians?.[0]?.phone },
 ]
@@ -53,7 +53,7 @@ const baseColumns = [
   { key: 'name_ar', label: 'academic.fields.nameAr' },
   { key: 'email', label: 'people.fields.studentEmail' },
   { key: 'classroom', label: 'people.fields.classroom', render: (r) => r.classroom?.name },
-  { key: 'guardians', label: 'people.fields.guardians', render: (r) => r.guardians?.map((g) => g.email).join(', ') },
+  { key: 'guardians', label: 'people.fields.guardians', render: (r) => r.guardians?.map((g) => g.email || g.phone).join(', ') },
 ]
 
 const rowActions = [

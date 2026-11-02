@@ -24,9 +24,7 @@ class AuthController extends Controller
     {
         $login = $request->validated('login');
 
-        $user = User::query()
-            ->where(fn ($query) => $query->where('email', $login)->orWhere('phone', $login))
-            ->first();
+        $user = User::findByLogin($login);
 
         // One generic message for unknown user and wrong password (no user enumeration).
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
