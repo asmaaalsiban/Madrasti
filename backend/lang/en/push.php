@@ -21,5 +21,10 @@ return [
         'approval' => 'Your approval is needed: :title',
     ],
     'survey_reminder' => 'Reminder: please answer :title',
+    'payroll_submitted' => 'The payroll of :month is waiting for your approval',
+    'payroll_approved' => 'The payroll of :month was approved',
+    'payroll_returned' => 'The payroll of :month was sent back: :note',
+    'payslip_paid' => 'Your salary for :month was paid',
+    'contract_expiring' => ':name\'s contract ends on :date',
     'unknown' => 'New notification',
 ];

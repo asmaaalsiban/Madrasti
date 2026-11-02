@@ -1,0 +1,171 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { api } from '../../../api/client'
+import Modal from '../../../components/shared/Modal'
+import Money from '../../Finance/components/Money'
+import { useAuth } from '../../Auth/AuthProvider'
+
+const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
+
+function ItemDialog({ slip, onClose }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [form, setForm] = useState({ kind: 'bonus', label: '', amount: '' })
+  const [error, setError] = useState('')
+  const save = useMutation({
+    mutationFn: () => api.post(`/payroll/payslips/${slip.id}/items`, form),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+  return (
+    <Modal open title={t('payroll.addFor', { name: slip.user.name })} onClose={onClose}>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
+        {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        <label className="block text-sm">{t('payroll.kind')}
+          <select className="mt-1 w-full rounded border p-2" value={form.kind} onChange={set('kind')}>
+            {['bonus', 'allowance', 'deduction'].map((k) => <option key={k} value={k}>{t(`payroll.kinds.${k}`)}</option>)}
+          </select>
+        </label>
+        <label className="block text-sm">{t('payroll.label')}<input required className="mt-1 w-full rounded border p-2" placeholder={t('payroll.reasonHint')} value={form.label} onChange={set('label')} /></label>
+        <label className="block text-sm">{t('payroll.amount')}<input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></label>
+        <div className="flex justify-end gap-2">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+function PayDialog({ run, onClose }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [form, setForm] = useState(() => ({ method: 'bank_transfer', paid_on: new Date().toISOString().slice(0, 10), reference: '' }))
+  const [error, setError] = useState('')
+  const save = useMutation({
+    mutationFn: () => api.post(`/payroll/runs/${run.id}/pay`, { ...form, reference: form.reference || null }),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ['payroll'] }); onClose() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+  return (
+    <Modal open title={t('payroll.payAll')} onClose={onClose}>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
+        {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        <label className="block text-sm">{t('payroll.method')}
+          <select className="mt-1 w-full rounded border p-2" value={form.method} onChange={set('method')}>
+            {['cash', 'bank_transfer', 'cheque'].map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}
+          </select>
+        </label>
+        <label className="block text-sm">{t('payroll.paidOn')}<input required type="date" className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
+        <label className="block text-sm">{t('payroll.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
+        <div className="flex justify-end gap-2">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.confirmPay')}</button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+// One month's payroll: every payslip with its bonuses and deductions, and the steps that move it forward.
+export default function PayrollRunPage({ base }) {
+  const { t } = useTranslation()
+  const { id } = useParams()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const client = useQueryClient()
+  const [dialog, setDialog] = useState(null)
+  const [note, setNote] = useState('')
+  const [back, setBack] = useState(false)
+  const [error, setError] = useState('')
+  const manage = user?.staff_type === 'accountant'
+  const approve = user?.role === 'admin'
+  const { data, isLoading } = useQuery({ queryKey: ['payroll', 'run', id], queryFn: async () => (await api.get(`/payroll/runs/${id}`)).data })
+  const refresh = () => client.invalidateQueries({ queryKey: ['payroll'] })
+  const act = useMutation({
+    mutationFn: ({ path, body }) => api.post(`/payroll/runs/${id}/${path}`, body),
+    onSuccess: () => { setBack(false); setError(''); refresh() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  const drop = useMutation({ mutationFn: () => api.delete(`/payroll/runs/${id}`), onSuccess: () => { refresh(); navigate(`${base}/payroll`) }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
+  const removeItem = useMutation({ mutationFn: (itemId) => api.delete(`/payroll/payslip-items/${itemId}`), onSuccess: refresh, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
+  const removeSlip = useMutation({ mutationFn: (slipId) => api.delete(`/payroll/payslips/${slipId}`), onSuccess: refresh, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
+  if (isLoading || !data) return <p className="text-slate-500">{t('common.loading')}</p>
+  const run = data.data
+  const currency = data.currency
+  const draft = run.status === 'draft'
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('payroll.runTitle', { month: run.month })} <span className="ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-sm font-normal">{t(`payroll.runStatus.${run.status}`)}</span></h1>
+        <Link to={`${base}/payroll`} className="text-sm text-brand underline">{t('payroll.title')}</Link>
+      </div>
+      {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+      {draft && run.return_note && <p className="rounded border border-amber-300 bg-amber-50 p-2 text-sm">{t('payroll.returned')}: {run.return_note}</p>}
+
+      <div className="grid gap-2 sm:grid-cols-4">
+        {['base', 'additions', 'deductions', 'net'].map((k) => (
+          <div key={k} className="rounded-lg border bg-white p-3"><p className="text-xs text-slate-500">{t(`payroll.totals.${k}`)}</p><p className="font-bold"><Money value={run.totals[k]} currency={currency} /></p></div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {manage && draft && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'submit' })}>{t('payroll.submit')}</button>}
+        {manage && draft && <button type="button" className="rounded border px-4 py-1.5" onClick={() => api.post('/payroll/runs', { month: run.month }).then(refresh)}>{t('payroll.addNewcomers')}</button>}
+        {manage && draft && <button type="button" className="rounded border border-red-300 px-4 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('payroll.deleteRun')}</button>}
+        {approve && run.status === 'submitted' && <button type="button" className="rounded bg-green-700 px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'approve' })}>{t('payroll.approve')}</button>}
+        {approve && run.status === 'submitted' && <button type="button" className="rounded border px-4 py-1.5" onClick={() => setBack(true)}>{t('payroll.sendBack')}</button>}
+        {manage && run.status === 'approved' && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({ type: 'pay' })}>{t('payroll.payAll')}</button>}
+      </div>
+      {run.approved_by && <p className="text-sm text-slate-600">{t('payroll.approvedBy', { name: run.approved_by })}</p>}
+
+      {back && (
+        <form className="space-y-2 rounded-lg border bg-white p-3" onSubmit={(e) => { e.preventDefault(); act.mutate({ path: 'send-back', body: { note: note || null } }) }}>
+          <label className="block text-sm">{t('payroll.returnNote')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
+          <div className="flex gap-2"><button type="submit" className="rounded bg-brand px-3 py-1.5 text-white">{t('payroll.sendBack')}</button><button type="button" className="rounded border px-3 py-1.5" onClick={() => setBack(false)}>{t('admin.actions.cancel')}</button></div>
+        </form>
+      )}
+
+      <div className="overflow-x-auto rounded-lg border bg-white">
+        <table className="w-full text-start text-sm">
+          <thead className="bg-slate-50"><tr>{['name', 'base', 'additions', 'deductions', 'net'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th /></tr></thead>
+          <tbody>
+            {run.payslips.map((s) => (
+              <tr key={s.id} className="border-t align-top">
+                <td className="p-2 font-medium">{s.user.name}{s.paid_on && <span className="ms-2 rounded-full bg-green-100 px-2 text-xs text-green-800">{t('payroll.paid')}</span>}
+                  {s.items.length > 0 && (
+                    <ul className="mt-1 space-y-0.5 text-xs font-normal text-slate-600">
+                      {s.items.map((i) => (
+                        <li key={i.id}>{t(`payroll.kinds.${i.kind}`)}: {i.label} <span dir="ltr">{i.kind === 'deduction' ? '−' : '+'}{i.amount}</span>
+                          {manage && draft && !i.from_contract && <button type="button" aria-label={t('admin.actions.delete')} className="ms-2 text-red-700" onClick={() => removeItem.mutate(i.id)}>✕</button>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </td>
+                <td className="p-2"><Money value={s.base_salary} currency={currency} /></td>
+                <td className="p-2"><Money value={s.additions} currency={currency} /></td>
+                <td className="p-2"><Money value={s.deductions} currency={currency} /></td>
+                <td className="p-2 font-bold"><Money value={s.net} currency={currency} /></td>
+                <td className="p-2">
+                  <span className="flex flex-wrap justify-end gap-2">
+                    {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'item', slip: s })}>{t('payroll.addBonusOrDeduction')}</button>}
+                    {manage && draft && <button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => removeSlip.mutate(s.id)}>{t('payroll.removeFromRun')}</button>}
+                    <Link className="rounded border px-2 py-1 text-brand" to={`${base}/payroll/payslips/${s.id}`}>{t('payroll.payslip')}</Link>
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {run.payslips.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-slate-500">{t('payroll.noPayslips')}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      {dialog?.type === 'item' && <ItemDialog slip={dialog.slip} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'pay' && <PayDialog run={run} onClose={() => setDialog(null)} />}
+    </section>
+  )
+}

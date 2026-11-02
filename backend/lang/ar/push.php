@@ -21,5 +21,10 @@ return [
         'approval' => 'مطلوب موافقتك: :title',
     ],
     'survey_reminder' => 'تذكير: الرجاء الإجابة على :title',
+    'payroll_submitted' => 'كشف رواتب :month بانتظار اعتمادك',
+    'payroll_approved' => 'تم اعتماد كشف رواتب :month',
+    'payroll_returned' => 'أُعيد كشف رواتب :month: :note',
+    'payslip_paid' => 'تم دفع راتبك عن :month',
+    'contract_expiring' => 'ينتهي عقد :name بتاريخ :date',
     'unknown' => 'إشعار جديد',
 ];

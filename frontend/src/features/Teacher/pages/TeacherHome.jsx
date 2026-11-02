@@ -25,8 +25,9 @@ export default function TeacherHome() {
   ]
   // An accountant is not a teacher: their home is the school's money.
   const cards = user?.staff_type === 'accountant'
-    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint']]
+    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
     : teaching
+  const all = [...cards, ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint']]
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('dashboard.welcome', { name: user?.name })}</h1>
@@ -34,7 +35,7 @@ export default function TeacherHome() {
         <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
-        {cards.map(([to, title, hint]) => (
+        {all.map(([to, title, hint]) => (
           <Link key={to} to={to} className="block rounded-lg border bg-white p-4 shadow-sm hover:border-brand">
             <span className="block font-bold">{t(title)}</span>
             <span className="block text-sm text-slate-600">{t(hint)}</span>

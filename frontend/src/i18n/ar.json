@@ -115,7 +115,8 @@
       "motivation": "النقاط والشارات",
       "import": "استيراد",
       "surveys": "الاستطلاعات",
-      "signatures": "التوقيعات"
+      "signatures": "التوقيعات",
+      "payroll": "الرواتب"
     },
     "actions": {
       "add": "إضافة",
@@ -808,7 +809,12 @@
         "survey": "استطلاع جديد من المدرسة: {{title}}",
         "approval": "مطلوب موافقتك: {{title}}"
       },
-      "survey_reminder": "تذكير: الرجاء الإجابة على {{title}}"
+      "survey_reminder": "تذكير: الرجاء الإجابة على {{title}}",
+      "payroll_submitted": "كشف رواتب {{month}} بانتظار اعتمادك",
+      "payroll_approved": "اعتُمد كشف رواتب {{month}}",
+      "payroll_returned": "أُعيد كشف رواتب {{month}}: {{note}}",
+      "payslip_paid": "تم دفع راتبك عن {{month}}",
+      "contract_expiring": "ينتهي عقد {{name}} بتاريخ {{date}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -1274,5 +1280,127 @@
     "show": "اطبعه على الشهادات",
     "preview": "توقيع {{name}}",
     "noImage": "لا توجد صورة"
+  },
+  "payroll": {
+    "title": "الرواتب",
+    "hint": "رواتب شهرية ومكافآت وخصومات.",
+    "help": "المحاسب يجهّز كشف كل شهر ويضيف المكافآت والخصومات ويرسله، والمدير يعتمده، ثم يسجّل المحاسب الدفع.",
+    "contractsTitle": "عقود الموظفين",
+    "contractsHint": "العقود والزيادة السنوية والتجديد.",
+    "contractsHelp": "جدّد العقد مع الزيادة السنوية أو أنهِه. يُنسخ الراتب إلى كشف كل شهر من العقد الساري.",
+    "mineTitle": "قسائم راتبي",
+    "mineHint": "قسائم الراتب المدفوعة.",
+    "noMine": "لا توجد قسائم مدفوعة بعد.",
+    "month": "الشهر",
+    "prepare": "تجهيز الكشف",
+    "open": "فتح",
+    "noRuns": "لا توجد كشوف رواتب بعد.",
+    "noRows": "لا يوجد موظفون.",
+    "noPayslips": "لا توجد قسائم في هذا الكشف.",
+    "filterAll": "الكل",
+    "filterSoon": "قاربت على الانتهاء",
+    "filterNone": "بدون عقد",
+    "cols": {
+      "name": "الاسم",
+      "position": "الوظيفة",
+      "salary": "الراتب",
+      "period": "مدة العقد",
+      "state": "الحالة",
+      "month": "الشهر",
+      "people": "العدد",
+      "net": "الصافي",
+      "base": "الراتب الأساسي",
+      "additions": "الإضافات",
+      "deductions": "الخصومات"
+    },
+    "state": {
+      "ok": "ساري",
+      "soon": "ينتهي بعد {{days}} يوم",
+      "expired": "منتهي",
+      "none": "بدون عقد"
+    },
+    "status": {
+      "active": "ساري",
+      "renewed": "مُجدَّد",
+      "ended": "منتهي"
+    },
+    "runStatus": {
+      "draft": "مسودة",
+      "submitted": "بانتظار الاعتماد",
+      "approved": "معتمد",
+      "paid": "مدفوع"
+    },
+    "runTitle": "كشف رواتب {{month}}",
+    "returned": "أعادها المدير",
+    "approvedBy": "اعتمده {{name}}",
+    "totals": {
+      "base": "الرواتب الأساسية",
+      "additions": "الإضافات",
+      "deductions": "الخصومات",
+      "net": "إجمالي الصافي"
+    },
+    "submit": "إرسال للاعتماد",
+    "approve": "اعتماد",
+    "sendBack": "إعادة للمحاسب",
+    "returnNote": "ملاحظة للمحاسب",
+    "payAll": "تسجيل الدفع",
+    "confirmPay": "تأكيد الدفع",
+    "method": "طريقة الدفع",
+    "paidOn": "تاريخ الدفع",
+    "reference": "المرجع",
+    "deleteRun": "حذف المسودة",
+    "addNewcomers": "إضافة الموظفين الجدد",
+    "paid": "مدفوع",
+    "addBonusOrDeduction": "مكافأة / خصم",
+    "removeFromRun": "إزالة",
+    "addFor": "إضافة لـ {{name}}",
+    "reasonHint": "السبب",
+    "payslip": "قسيمة الراتب",
+    "print": "طباعة",
+    "payslipOf": "قسيمة راتب {{month}}",
+    "paidLine": "دُفع بتاريخ {{date}} عن طريق {{method}}",
+    "notPaidYet": "لم يُدفع بعد",
+    "kind": "النوع",
+    "kinds": {
+      "bonus": "مكافأة",
+      "allowance": "بدل",
+      "deduction": "خصم"
+    },
+    "label": "الوصف",
+    "labelHint": "مثال: بدل مواصلات",
+    "amount": "المبلغ",
+    "monthlyItems": "البدلات والخصومات الشهرية",
+    "addItem": "+ إضافة بند",
+    "newContract": "عقد جديد",
+    "newContractFor": "عقد جديد: {{name}}",
+    "startsOn": "يبدأ في",
+    "endsOn": "ينتهي في",
+    "baseSalary": "الراتب الأساسي",
+    "notes": "ملاحظات",
+    "renew": "تجديد",
+    "renewFor": "تجديد عقد: {{name}}",
+    "currentContract": "الحالي: {{from}} ← {{to}}",
+    "newEndsOn": "ينتهي العقد الجديد في",
+    "annualRaise": "الزيادة السنوية",
+    "raiseType": "نوع الزيادة",
+    "raise": {
+      "percent": "نسبة مئوية",
+      "amount": "مبلغ ثابت",
+      "salary": "راتب جديد",
+      "none": "بدون زيادة"
+    },
+    "raiseValue": {
+      "percent": "النسبة (%)",
+      "amount": "المبلغ المضاف",
+      "salary": "الراتب الجديد"
+    },
+    "newSalary": "الراتب الجديد",
+    "carryItems": "إبقاء البدلات والخصومات الشهرية",
+    "endContract": "إنهاء العقد",
+    "endFor": "إنهاء عقد: {{name}}",
+    "lastDay": "آخر يوم",
+    "history": "السجل",
+    "historyOf": "عقود {{name}}",
+    "close": "إغلاق"
   }
 }
