@@ -416,3 +416,11 @@ The same welcome page (`LandingView`) is the very first page for everyone: with 
 ### Survey reminders only reach people who still owe an answer
 
 "Remind" goes only to people who have not answered everything the survey asks of them (a parent with two children and an approval each is reminded only while one is still open). When someone finishes, their invitation and any reminder still unread in their bell are marked read, so nobody is nagged about something already done.
+
+## Exam timetable
+
+- **Principal** (`/admin/exams`, under Schedules): choose the term, the dates, the first exam time, the exam length, exam times per day, how many exams a grade may have per day, teachers per room, which grades (none = all) and days off. **Preview** shows how many exams over how many days and any warnings; **Publish** replaces the exams of those grades. Needs each grade's curriculum (subjects) and sections.
+- **Rules**: every section of a grade sits the same subject at the same time; a grade never has more than the allowed exams a day; only the school's working days are used; each room gets teachers who are not watching another room at that time and do not teach that subject to that section (teachers who know the section come first, then whoever has the fewest duties). If there are too few days the generator refuses and says how many are needed; too few free teachers is a warning.
+- **By hand**: edit an exam's date, time and watchers; clashes (same section, or a teacher already in another room) are refused; delete an exam.
+- **Everyone else**: students see their section's exams (`/student/exams`), parents each child's (`/parent/children/:id/exams`), teachers the rooms they watch and the exams of the classes they teach (`/teacher/exams`). Publishing notifies students, parents and the watching teachers.
+- No migration (the tables already existed).

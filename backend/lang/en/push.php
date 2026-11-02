@@ -12,6 +12,8 @@ return [
     ],
     'homework_answer' => ':student sent an answer to: :title',
     'student_renewed' => ':student is registered for :title',
+    'exam_schedule' => ':title exam schedule is published',
+    'exam_duty' => ':title: you have exam duty',
     'installment' => 'Installment of :amount due :due',
     'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'chat_message' => ':sender sent you a message',

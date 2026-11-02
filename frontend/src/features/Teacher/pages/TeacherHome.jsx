@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileText, Fingerprint, GraduationCap, ListChecks, Landmark, NotebookPen, PenLine, RefreshCw, Smile, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, Landmark, NotebookPen, PenLine, RefreshCw, Smile, Users, Vote, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
@@ -10,6 +10,7 @@ import CheckInCard from '../../StaffAttendance/CheckInCard'
 const TEACHING = [
   ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint', CalendarClock],
   ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint', CircleCheck],
+  ['/teacher/exams', 'exams.myTitle', 'exams.tile', FileCheck2],
   ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint', NotebookPen],
   ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint', FileText],
   ['/teacher/homework', 'homework.title', 'homework.hint', BookOpenCheck],

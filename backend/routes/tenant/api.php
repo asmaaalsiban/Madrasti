@@ -45,6 +45,7 @@ use App\Modules\People\Http\Controllers\StaffTypeController;
 use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
+use App\Modules\Scheduling\Http\Controllers\ExamController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use App\Modules\Motivation\Http\Controllers\BadgeController;
 use App\Modules\Motivation\Http\Controllers\MotivationController;
@@ -181,6 +182,10 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('periods', [PeriodController::class, 'index']);
     Route::put('periods/setup', [PeriodController::class, 'setup']);
     Route::put('periods/grades', [PeriodController::class, 'grades']);
+    Route::get('exams', [ExamController::class, 'index']);
+    Route::post('exams/generate', [ExamController::class, 'generate']);
+    Route::put('exams/{session}', [ExamController::class, 'update']);
+    Route::delete('exams/{session}', [ExamController::class, 'destroy']);
     Route::post('timetable/generate', [TimetableController::class, 'generate']);
     Route::get('timetable', [TimetableController::class, 'show']);
     Route::put('timetable/entries', [TimetableController::class, 'place']);
@@ -221,6 +226,8 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->
 Route::middleware('school-user')->get('attendance/students/{student}', [AttendanceReportController::class, 'student']);
 
 // The week of the signed-in teacher or student, and of a student (the student, their parents, admins: a gate checks).
+Route::middleware('school-user')->get('exams/me', [ExamController::class, 'mine']);
+Route::middleware('school-user')->get('students/{student}/exams', [ExamController::class, 'forStudent']);
 Route::middleware('school-user')->get('timetable/me', [TimetableController::class, 'mine']);
 Route::middleware('school-user')->get('students/{student}/timetable', [TimetableController::class, 'forStudent']);
 

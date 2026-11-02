@@ -123,7 +123,8 @@
       "payroll": "Payroll",
       "renewals": "Student renewal",
       "staffAttendance": "Staff attendance",
-      "auditLog": "Audit log"
+      "auditLog": "Audit log",
+      "exams": "Exam timetable"
     },
     "actions": {
       "add": "Add",
@@ -835,7 +836,9 @@
       "payroll_returned": "Payroll {{month}} was sent back: {{note}}",
       "payslip_paid": "Your salary for {{month}} was paid",
       "contract_expiring": "{{name}}'s contract ends on {{date}}",
-      "student_renewed": "{{student}} is registered for {{title}}"
+      "student_renewed": "{{student}} is registered for {{title}}",
+      "exam_schedule": "The {{title}} exam schedule is published",
+      "exam_duty": "{{title}}: you have exam duty"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1694,5 +1697,41 @@
   },
   "student": {
     "welcome": "Welcome back"
+  },
+  "exams": {
+    "title": "Exam timetable",
+    "help": "Pick the term and the days, the exam time and how many teachers watch each room. Preview first; publishing replaces the exams of those grades and tells students, parents and teachers. Every section of a grade sits the same subject together.",
+    "term": "Term",
+    "from": "From",
+    "to": "To",
+    "startTime": "First exam starts",
+    "duration": "Exam length (min)",
+    "slotsPerDay": "Exam times a day",
+    "gradePerDay": "Exams a day per grade",
+    "invigilators": "Teachers per room",
+    "grades": "Grades",
+    "gradesHint": "none selected = all",
+    "holidays": "Days off (holidays)",
+    "addHoliday": "Add day off",
+    "preview": "Preview",
+    "publish": "Publish",
+    "previewDone": "Preview: {{sessions}} exams over {{days}} days (nothing saved yet).",
+    "published": "Published: {{sessions}} exams over {{days}} days.",
+    "current": "Current timetable",
+    "allGrades": "All grades",
+    "none": "No exams scheduled yet.",
+    "date": "Date",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "watchers": "Watching",
+    "deleteConfirm": "Delete this exam?",
+    "myTitle": "Exams",
+    "watching": "Rooms I watch",
+    "teaching": "Exams of my classes",
+    "noneWatching": "You are not watching any exam.",
+    "noneTeaching": "No exams for your classes yet.",
+    "childTitle": "Exams of {{name}}",
+    "nav": "Exam timetable",
+    "tile": "Exam timetable"
   }
 }
