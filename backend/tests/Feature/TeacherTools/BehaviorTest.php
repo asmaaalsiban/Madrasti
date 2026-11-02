@@ -78,10 +78,13 @@ class BehaviorTest extends AcademicTestCase
         $this->assertFalse(BehaviorCriterion::find($this->c[0])->is_active);
     }
 
-    public function test_a_teacher_cannot_change_criteria(): void
+    public function test_a_teacher_can_add_a_permanent_criterion_but_not_change_or_remove_one(): void
     {
         Sanctum::actingAs($this->teacher);
-        $this->postJson('/api/behavior/criteria', ['name_ar' => 'x', 'name_en' => 'x'])->assertForbidden();
+        $id = $this->postJson('/api/behavior/criteria', ['name_ar' => 'القراءة', 'name_en' => 'Reading'])->assertCreated()->json('data.id');
+        $this->assertContains($id, collect($this->getJson('/api/behavior/criteria')->json('data'))->pluck('id')->all());
+        $this->putJson("/api/behavior/criteria/$id", ['name_ar' => 'x', 'name_en' => 'x'])->assertForbidden();
+        $this->deleteJson("/api/behavior/criteria/$id")->assertForbidden();
     }
 
     public function test_a_teacher_sees_only_their_sections_and_evaluates_a_student_for_a_week(): void

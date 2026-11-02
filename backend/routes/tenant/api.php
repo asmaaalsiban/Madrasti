@@ -224,6 +224,7 @@ Route::middleware('school-user')->get('students/{student}/lesson-plans', [Lesson
 // Behaviour evaluation: teachers evaluate the students they teach each week (months and terms are built from the weeks).
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->group(function (): void {
     Route::get('criteria', [BehaviorCriteriaController::class, 'index']);
+    Route::post('criteria', [BehaviorCriteriaController::class, 'store']); // a teacher can add a permanent criterion too
     Route::get('classrooms', [BehaviorController::class, 'classrooms']);
     Route::get('week', [BehaviorController::class, 'week']);
     Route::put('evaluations', [BehaviorController::class, 'save']);
@@ -231,7 +232,6 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->gr
     Route::delete('notes/{note}', [BehaviorController::class, 'deleteNote']);
 });
 Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->group(function (): void {
-    Route::post('/', [BehaviorCriteriaController::class, 'store']);
     Route::put('{criterion}', [BehaviorCriteriaController::class, 'update']);
     Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
 });
