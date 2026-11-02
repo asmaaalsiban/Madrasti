@@ -371,3 +371,98 @@ describe('students answering', () => {
     expect(within(ali).getByText('5-A')).toBeInTheDocument()
   })
 })
+
+describe('surveys for the staff', () => {
+  const staff = [
+    { id: 1, name: 'Sara Hassan', staff_type: 'teacher', subject: { name_ar: 'الرياضيات', name_en: 'Math' } },
+    { id: 2, name: 'Omar Nasser', staff_type: 'head_of_department', subject: { name_ar: 'العلوم', name_en: 'Science' } },
+    { id: 3, name: 'Huda Ali', staff_type: 'teacher', subject: null },
+    { id: 4, name: 'Principal Khaled', staff_type: 'principal', subject: null },
+  ]
+  beforeEach(() => api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/surveys/staff' ? staff : url === '/my-surveys/pending' ? { count: 0 } : [] } })))
+  const open = async (base = '/admin') => { wrap(<SurveysPage base={base} />); fireEvent.click(await screen.findByRole('button', { name: 'New' })) }
+  const fillPoll = () => {
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Meeting day' } })
+    fireEvent.change(screen.getByLabelText('Question'), { target: { value: 'Which day?' } })
+    fireEvent.change(screen.getByLabelText('Choices'), { target: { value: 'Sunday\nMonday' } })
+  }
+
+  it('offers "Staff" only to the admin, and it hides the parents/grades/sections choices', async () => {
+    await open()
+    fireEvent.click(screen.getByLabelText('Staff'))
+    expect(await screen.findByText('Choose the staff')).toBeInTheDocument()
+    expect(screen.queryByLabelText('From grade … to grade …')).not.toBeInTheDocument()
+    expect(await screen.findByLabelText('Sara Hassan')).toBeInTheDocument()
+    expect(screen.getByText(/Teacher · Math/)).toBeInTheDocument()
+  })
+
+  it('a teacher is not offered staff', async () => {
+    await open('/teacher')
+    expect(screen.queryByLabelText('Staff')).not.toBeInTheDocument()
+    expect(api.get).not.toHaveBeenCalledWith('/surveys/staff')
+  })
+
+  it('shows who to add: search, filter by position, tick one by one or everyone shown', async () => {
+    await open()
+    fireEvent.click(screen.getByLabelText('Staff'))
+    await screen.findByLabelText('Sara Hassan')
+    expect(screen.getByText('0 chosen')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('Sara Hassan'))
+    expect(screen.getByText('1 chosen')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('All positions'), { target: { value: 'teacher' } })
+    expect(screen.queryByLabelText('Omar Nasser')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Select all shown (2)'))
+    expect(screen.getByText('2 chosen')).toBeInTheDocument() // Sara and Huda
+
+    fireEvent.change(screen.getByLabelText('Search by name'), { target: { value: 'huda' } })
+    expect(screen.getAllByRole('checkbox', { name: /Huda|Sara/ })).toHaveLength(1)
+    fireEvent.click(screen.getByLabelText('Select all shown (1)')) // un-ticks the shown one only
+    expect(screen.getByText('1 chosen')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Search by name'), { target: { value: 'zzz' } })
+    expect(screen.getByText('No staff match.')).toBeInTheDocument()
+  })
+
+  it('cannot be sent before someone is chosen, then sends the chosen people', async () => {
+    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
+    await open()
+    fireEvent.click(screen.getByLabelText('Staff'))
+    await screen.findByLabelText('Sara Hassan')
+    fillPoll()
+    expect(screen.getByRole('button', { name: 'Send to parents' })).toBeDisabled()
+    fireEvent.click(screen.getByLabelText('Sara Hassan'))
+    fireEvent.click(screen.getByLabelText('Principal Khaled'))
+    fireEvent.click(screen.getByRole('button', { name: 'Send to parents' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/surveys', expect.objectContaining({ type: 'poll', respondents: 'staff', staff_ids: [1, 4] })))
+    expect(api.post.mock.calls[0][1]).not.toHaveProperty('audience')
+    expect(api.post.mock.calls[0][1]).not.toHaveProperty('classroom_ids')
+  })
+
+  it('an approval goes back to parents even after choosing staff', async () => {
+    await open()
+    fireEvent.click(screen.getByLabelText('Staff'))
+    await screen.findByText('Choose the staff')
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'approval' } })
+    expect(screen.queryByText('Choose the staff')).not.toBeInTheDocument()
+    expect(screen.getByText('An approval is always answered by the parents.')).toBeInTheDocument()
+  })
+
+  it('has a link to the surveys addressed to me, with how many are waiting', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/my-surveys/pending' ? { count: 2 } : [] } }))
+    wrap(<SurveysPage base="/teacher" />)
+    const link = await screen.findByRole('link', { name: /Surveys for me/ })
+    expect(link).toHaveAttribute('href', '/teacher/my-surveys')
+    expect(await within(link).findByText('2')).toBeInTheDocument()
+  })
+
+  it('the results say it was sent to staff and the table shows their position', async () => {
+    api.get.mockResolvedValue({ data: { data: {
+      id: 1, type: 'poll', title: 'Meeting day', status: 'open', recipient_count: 2, response_count: 1, respondents: 'staff', audience: 'staff', audience_detail: null, approved: 0, declined: 0, questions: [],
+      recipients: [{ id: 1, name: 'Sara Hassan', role: 'staff', position: 'head_of_department', phone: null, student: null, classroom: null, state: 'answered', answered_at: null, answers: {} }] } } })
+    wrap(<SurveyResponsesPage base="/admin" />, '/s/1', '/s/:id')
+    await screen.findByText('Meeting day')
+    expect(within(screen.getByText('Sara Hassan').closest('tr')).getByText('Staff · Head of department')).toBeInTheDocument()
+  })
+})

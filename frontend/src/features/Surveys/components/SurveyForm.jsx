@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import StaffPicker from './StaffPicker'
 
 const CHOICE = ['single_choice', 'multiple_choice']
 const blank = (type = 'single_choice') => ({ type, text: '', options: '', is_required: true })
@@ -13,6 +14,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
   const client = useQueryClient()
   const [form, setForm] = useState({ type: 'poll', title: '', description: '', respondents: 'parents', audience: isAdmin ? 'all' : 'classrooms', grade_from_id: '', grade_to_id: '', closes_at: '' })
   const [picked, setPicked] = useState([])
+  const [staffPicked, setStaffPicked] = useState([])
   const [questions, setQuestions] = useState([blank()])
   const [error, setError] = useState('')
   const classrooms = useQuery({ queryKey: ['behavior', 'classrooms'], queryFn: async () => (await api.get('/behavior/classrooms')).data.data })
@@ -21,23 +23,31 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
   const gradeName = (g) => g[`name_${i18n.language}`] || g.name_ar
   const allIds = (classrooms.data ?? []).map((c) => c.id)
   const toggle = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+  const staffMode = form.respondents === 'staff' && form.type !== 'approval'
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
   const setQ = (i, patch) => setQuestions((qs) => qs.map((q, j) => (j === i ? { ...q, ...patch } : q)))
 
   const changeType = (e) => {
     const type = e.target.value
-    setForm({ ...form, type })
+    setForm({ ...form, type, respondents: type === 'approval' ? 'parents' : form.respondents })
     if (type === 'poll') setQuestions((qs) => [qs[0] && qs[0].type !== 'text' ? qs[0] : blank()])
     if (type === 'approval') setQuestions((qs) => qs.filter((q) => q.text))
     if (type === 'survey' && questions.length === 0) setQuestions([blank()])
   }
 
+  // Who gets it: the chosen staff, or parents/students of all, a range of grades, or chosen sections.
+  const who = () => {
+    if (staffMode) return { staff_ids: staffPicked }
+    if (form.audience === 'grades') return { audience: 'grades', grade_from_id: Number(form.grade_from_id), grade_to_id: Number(form.grade_to_id) }
+    if (form.audience === 'classrooms') return { audience: 'classrooms', classroom_ids: picked }
+    return { audience: 'all' }
+  }
+
   const save = useMutation({
     mutationFn: () => api.post('/surveys', {
-      type: form.type, title: form.title, description: form.description, closes_at: form.closes_at || null, audience: form.audience,
+      type: form.type, title: form.title, description: form.description, closes_at: form.closes_at || null,
       respondents: form.type === 'approval' ? 'parents' : form.respondents,
-      ...(form.audience === 'grades' ? { grade_from_id: Number(form.grade_from_id), grade_to_id: Number(form.grade_to_id) } : {}),
-      ...(form.audience === 'classrooms' ? { classroom_ids: picked } : {}),
+      ...who(),
       questions: questions.map((q) => ({ type: q.type, text: q.text, is_required: q.is_required, ...(CHOICE.includes(q.type) ? { options: q.options.split('\n').map((o) => o.trim()).filter(Boolean) } : {}) })),
     }),
     onSuccess: (r) => { client.invalidateQueries({ queryKey: ['surveys'] }); onCreated(r.data.data) },
@@ -63,12 +73,14 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
             <p className="text-sm text-slate-600">{t('surveys.approvalParentsOnly')}</p>
           ) : (
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              {['parents', 'students', 'both'].map((r) => (
+              {['parents', 'students', 'both', ...(isAdmin ? ['staff'] : [])].map((r) => (
                 <label key={r} className="flex items-center gap-1.5"><input type="radio" name="respondents" checked={form.respondents === r} onChange={() => setForm({ ...form, respondents: r })} />{t(`surveys.who.${r}`)}</label>
               ))}
             </div>
           )}
         </fieldset>
+        {staffMode && <StaffPicker picked={staffPicked} onChange={setStaffPicked} />}
+        {!staffMode && (
         <fieldset className="space-y-2 rounded border p-3">
           <legend className="px-1 text-sm font-medium">{t('surveys.audience')}</legend>
           {isAdmin && (
@@ -107,6 +119,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
           )}
           {form.audience === 'all' && <p className="text-sm text-slate-600">{t('surveys.allParents')}</p>}
         </fieldset>
+        )}
         <label className="block text-sm">{t('surveys.closesAt')}<input type="datetime-local" className="mt-1 w-full rounded border p-2" value={form.closes_at} onChange={set('closes_at')} /></label>
 
         <div className="space-y-3">
@@ -133,7 +146,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
 
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || (form.audience === 'classrooms' && picked.length === 0)} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('surveys.send')}</button>
+          <button type="submit" disabled={save.isPending || (staffMode ? staffPicked.length === 0 : form.audience === 'classrooms' && picked.length === 0)} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('surveys.send')}</button>
         </div>
       </form>
     </Modal>

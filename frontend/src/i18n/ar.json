@@ -1195,13 +1195,23 @@
     "who": {
       "parents": "أولياء الأمور",
       "students": "الطلاب",
-      "both": "أولياء الأمور والطلاب"
+      "both": "أولياء الأمور والطلاب",
+      "staff": "الكادر"
     },
     "approvalParentsOnly": "الموافقة يجيب عنها أولياء الأمور دائماً.",
     "answeredBy": "يجيب",
     "role": {
       "parent": "ولي أمر",
-      "student": "طالب"
-    }
+      "student": "طالب",
+      "staff": "موظف"
+    },
+    "pickStaff": "اختر الموظفين",
+    "searchStaff": "ابحث بالاسم",
+    "allPositions": "كل الوظائف",
+    "selectShown": "تحديد كل الظاهرين ({{count}})",
+    "staffChosen": "تم اختيار {{count}}",
+    "noStaff": "لا يوجد موظفون مطابقون.",
+    "staffCount": "{{count}} موظف",
+    "forMe": "الاستطلاعات الموجهة لي"
   }
 }

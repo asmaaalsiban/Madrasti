@@ -10,13 +10,17 @@ export default function SurveysPage({ base }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
+  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count })
   const list = useQuery({ queryKey: ['surveys'], queryFn: async () => (await api.get('/surveys')).data.data })
 
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('surveys.title')}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={() => setCreating(true)}>{t('surveys.new')}</button>
+        <div className="flex flex-wrap gap-2">
+          <Link to={`${base}/my-surveys`} className="rounded border px-3 py-2 text-sm text-brand">{t('surveys.forMe')}{pending.data > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs text-white">{pending.data}</span>}</Link>
+          <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={() => setCreating(true)}>{t('surveys.new')}</button>
+        </div>
       </div>
       <p className="text-sm text-slate-600">{t('surveys.help')}</p>
       {list.isSuccess && list.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('surveys.none')}</p>}

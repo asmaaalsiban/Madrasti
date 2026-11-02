@@ -26,7 +26,7 @@ export default function SurveyResultsPage({ base }) {
   if (isError || !data) return <p role="alert" className="text-red-700">{t('admin.actions.error')}</p>
   const nameOf = (s) => (s ? s[`name_${i18n.language}`] || s.name_ar : '')
   const grade = (g) => (g ? g[`name_${i18n.language}`] || g.name_ar : '')
-  const audienceText = data.audience === 'grades' ? t('surveys.gradeRange', { from: grade(data.audience_detail.from), to: grade(data.audience_detail.to) }) : data.audience === 'classrooms' ? (data.audience_detail ?? []).join(' · ') : t('surveys.allParents')
+  const audienceText = data.audience === 'grades' ? t('surveys.gradeRange', { from: grade(data.audience_detail.from), to: grade(data.audience_detail.to) }) : data.audience === 'classrooms' ? (data.audience_detail ?? []).join(' · ') : data.audience === 'staff' ? t('surveys.staffCount', { count: data.recipient_count }) : t('surveys.allParents')
   const open = data.status === 'open'
   const pending = data.recipients.filter((r) => r.state === 'pending').length
 
@@ -81,7 +81,7 @@ export default function SurveyResultsPage({ base }) {
         <ul className="divide-y text-sm">
           {data.recipients.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
-              <span>{r.name}<span className="ms-1 rounded bg-slate-100 px-1.5 text-xs text-slate-600">{t(`surveys.role.${r.role}`)}</span>{r.role === 'parent' && r.student && <span className="text-slate-500"> · {nameOf(r.student)}</span>}{r.role === 'student' && r.classroom && <span className="text-slate-500"> · {r.classroom}</span>}{r.phone && <span dir="ltr" className="ms-2 text-xs text-slate-400">{r.phone}</span>}</span>
+              <span>{r.name}<span className="ms-1 rounded bg-slate-100 px-1.5 text-xs text-slate-600">{t(`surveys.role.${r.role}`)}</span>{r.role === 'staff' && r.position && <span className="text-slate-500"> · {t(`staff.types.${r.position}`)}</span>}{r.role === 'parent' && r.student && <span className="text-slate-500"> · {nameOf(r.student)}</span>}{r.role === 'student' && r.classroom && <span className="text-slate-500"> · {r.classroom}</span>}{r.phone && <span dir="ltr" className="ms-2 text-xs text-slate-400">{r.phone}</span>}</span>
               <span className={`rounded-full px-2 py-0.5 text-xs ${STATE_STYLE[r.state]}`}>{t(`surveys.state.${r.state}`)}</span>
             </li>
           ))}
