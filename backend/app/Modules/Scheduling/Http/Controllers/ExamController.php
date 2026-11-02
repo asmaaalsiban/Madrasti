@@ -40,9 +40,8 @@ class ExamController extends Controller
     {
         $data = $request->validate([
             'term_id' => ['required', 'integer', 'exists:terms,id'], 'from' => ['required', 'date_format:Y-m-d'], 'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
-            'exclude_dates' => ['nullable', 'array'], 'exclude_dates.*' => ['date_format:Y-m-d'], 'start_time' => ['required', 'date_format:H:i'], 'duration_minutes' => ['required', 'integer', 'between:20,240'],
-            'gap_minutes' => ['nullable', 'integer', 'between:0,120'], 'slots_per_day' => ['required', 'integer', 'between:1,4'], 'grade_per_day' => ['required', 'integer', 'between:1,4', 'lte:slots_per_day'],
-            'invigilators' => ['required', 'integer', 'between:0,4'], 'grade_level_ids' => ['nullable', 'array'], 'grade_level_ids.*' => ['integer'], 'dry_run' => ['sometimes', 'boolean'],
+            'exclude_dates' => ['nullable', 'array'], 'exclude_dates.*' => ['date_format:Y-m-d'], 'first_period' => ['required', 'integer', 'between:1,12'], 'periods_per_exam' => ['required', 'integer', 'between:1,4'],
+            'slots_per_day' => ['required', 'integer', 'between:1,4'], 'grade_per_day' => ['required', 'integer', 'between:1,4', 'lte:slots_per_day'], 'fill_missing' => ['sometimes', 'boolean'], 'grade_level_ids' => ['nullable', 'array'], 'grade_level_ids.*' => ['integer'], 'dry_run' => ['sometimes', 'boolean'],
         ]);
         $term = Term::findOrFail($data['term_id']);
         $plan = $this->scheduler->plan($term, $data);
@@ -57,10 +56,23 @@ class ExamController extends Controller
     /** Moves an exam by hand and/or changes who watches it; clashes are refused. */
     public function update(Request $request, ExamSession $session): JsonResponse
     {
-        $data = $request->validate(['exam_date' => ['sometimes', 'date_format:Y-m-d'], 'starts_at' => ['sometimes', 'date_format:H:i'], 'ends_at' => ['sometimes', 'date_format:H:i'], 'invigilator_ids' => ['sometimes', 'array', 'max:6'], 'invigilator_ids.*' => ['integer', 'exists:users,id']]);
+        $data = $request->validate(['exam_date' => ['sometimes', 'date_format:Y-m-d'], 'period_from' => ['sometimes', 'integer', 'between:1,12'], 'period_to' => ['sometimes', 'integer', 'between:1,12', 'gte:period_from'], 'starts_at' => ['sometimes', 'date_format:H:i'], 'ends_at' => ['sometimes', 'date_format:H:i'], 'invigilator_ids' => ['sometimes', 'array', 'max:6'], 'invigilator_ids.*' => ['integer', 'exists:users,id']]);
         $date = $data['exam_date'] ?? $session->exam_date->toDateString();
         $start = isset($data['starts_at']) ? $data['starts_at'].':00' : $session->starts_at;
         $end = isset($data['ends_at']) ? $data['ends_at'].':00' : $session->ends_at;
+        $periods = ['period_from' => $session->period_from, 'period_to' => $session->period_to];
+        if (isset($data['period_from'])) {
+            // Moved to other periods: the times are the school's, and the teachers who have the section then watch it.
+            $times = $this->scheduler->timesFor($date, $data['period_from'], $data['period_to'] ?? $data['period_from']);
+            if ($times === null) {
+                throw ValidationException::withMessages(['period_from' => [__('exams.no_such_period')]]);
+            }
+            [$start, $end] = [$times['start'], $times['end']];
+            $periods = ['period_from' => $data['period_from'], 'period_to' => $data['period_to'] ?? $data['period_from']];
+            $data['invigilator_ids'] ??= $this->scheduler->watchersFor($session->classroom, $date, $periods['period_from'], $periods['period_to']);
+        } elseif (isset($data['starts_at']) || isset($data['ends_at'])) {
+            $periods = ['period_from' => null, 'period_to' => null]; // set by hand: no longer tied to periods
+        }
         if ($end <= $start) {
             throw ValidationException::withMessages(['ends_at' => [__('exams.time_order')]]);
         }
@@ -72,7 +84,7 @@ class ExamController extends Controller
         if ($busy->intersect($teachers)->isNotEmpty()) {
             throw ValidationException::withMessages(['invigilator_ids' => [__('exams.teacher_clash')]]);
         }
-        $session->update(['exam_date' => $date, 'starts_at' => $start, 'ends_at' => $end]);
+        $session->update(['exam_date' => $date, 'starts_at' => $start, 'ends_at' => $end] + $periods);
         if (isset($data['invigilator_ids'])) {
             $session->invigilators()->sync($data['invigilator_ids']);
         }
@@ -133,7 +145,7 @@ class ExamController extends Controller
     private function present(ExamSession $s): array
     {
         return [
-            'id' => $s->id, 'term' => ['id' => $s->term->id, 'name' => $s->term->name], 'date' => $s->exam_date->toDateString(), 'starts_at' => substr($s->starts_at, 0, 5), 'ends_at' => substr($s->ends_at, 0, 5),
+            'id' => $s->id, 'term' => ['id' => $s->term->id, 'name' => $s->term->name], 'date' => $s->exam_date->toDateString(), 'period_from' => $s->period_from, 'period_to' => $s->period_to, 'starts_at' => substr($s->starts_at, 0, 5), 'ends_at' => substr($s->ends_at, 0, 5),
             'classroom' => ['id' => $s->classroom->id, 'name' => $s->classroom->name, 'grade' => ['id' => $s->classroom->gradeLevel->id, 'name_ar' => $s->classroom->gradeLevel->name_ar, 'name_en' => $s->classroom->gradeLevel->name_en]],
             'subject' => ['id' => $s->subject->id, 'name_ar' => $s->subject->name_ar, 'name_en' => $s->subject->name_en],
             'invigilators' => $s->invigilators->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),

@@ -13,7 +13,7 @@ const auth = { user: { role: 'admin' } }
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: auth.user }) }))
 const wrap = (ui, path = '/', route = '/') => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter initialEntries={[path]}><Routes><Route path={route} element={ui} /></Routes></MemoryRouter></QueryClientProvider>)
 
-const session = (id, date, subject, extra = {}) => ({ id, date, starts_at: '08:00', ends_at: '09:30', term: { id: 1, name: 'Term 1' }, classroom: { id: 1, name: '1-A', grade: { id: 1, name_ar: 'الأول', name_en: 'Grade 1' } }, subject: { id: id, name_ar: subject, name_en: subject }, invigilators: [{ id: 9, name: 'Sara Ali' }], ...extra })
+const session = (id, date, subject, extra = {}) => ({ id, date, period_from: 2, period_to: 3, starts_at: '08:35', ends_at: '10:10', term: { id: 1, name: 'Term 1' }, classroom: { id: 1, name: '1-A', grade: { id: 1, name_ar: 'الأول', name_en: 'Grade 1' } }, subject: { id: id, name_ar: subject, name_en: subject }, invigilators: [{ id: 9, name: 'Sara Ali' }], ...extra })
 
 beforeEach(async () => {
   vi.resetAllMocks()
@@ -32,10 +32,11 @@ describe('ExamsAdminPage', () => {
     await screen.findByText('Maths')
     fireEvent.change(screen.getAllByLabelText('From')[0], { target: { value: '2027-01-03' } })
     fireEvent.change(screen.getAllByLabelText('To')[0], { target: { value: '2027-01-14' } })
-    fireEvent.change(screen.getByLabelText('Teachers per room'), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText('First period of the exam'), { target: { value: '3' } })
+    fireEvent.change(screen.getByLabelText('Periods per exam'), { target: { value: '1' } })
     fireEvent.click(screen.getAllByText('Grade 2')[0]) // only grade 2 (the chip)
     fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/exams/generate', expect.objectContaining({ term_id: 1, from: '2027-01-03', to: '2027-01-14', invigilators: '2', grade_level_ids: [2], dry_run: true })))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/exams/generate', expect.objectContaining({ term_id: 1, from: '2027-01-03', to: '2027-01-14', first_period: '3', periods_per_exam: '1', fill_missing: true, grade_level_ids: [2], dry_run: true })))
     expect(await screen.findByText('Preview: 8 exams over 3 days (nothing saved yet).')).toBeInTheDocument()
     expect(screen.getByText(/1-A has too few teachers/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
@@ -49,10 +50,24 @@ describe('ExamsAdminPage', () => {
     expect(await screen.findByText('Maths')).toBeInTheDocument()
     expect(screen.getByText('2027-01-04')).toBeInTheDocument()
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
-    fireEvent.change(await screen.findByLabelText('Starts'), { target: { value: '10:00' } })
+    fireEvent.change(await screen.findByLabelText('From period'), { target: { value: '4' } })
+    fireEvent.change(screen.getByLabelText('To period'), { target: { value: '4' } })
     expect(screen.queryByLabelText('Omar')).not.toBeInTheDocument() // only teachers can watch
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/exams/1', expect.objectContaining({ starts_at: '10:00', exam_date: '2027-01-03', invigilator_ids: [9] })))
+    // Moved by periods: the server picks the teachers of those periods (no list sent unless it was changed).
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/exams/1', { exam_date: '2027-01-03', period_from: 4, period_to: 4 }))
+  })
+
+  it('can set a custom time and choose the watchers by hand', async () => {
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<ExamsAdminPage />)
+    await screen.findByText('Maths')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    fireEvent.change(await screen.findByLabelText('Set the time'), { target: { value: 'time' } })
+    fireEvent.change(screen.getByLabelText('Starts'), { target: { value: '10:00' } })
+    fireEvent.click(screen.getByLabelText('Sara Ali')) // untick
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/exams/1', expect.objectContaining({ starts_at: '10:00', invigilator_ids: [] })))
   })
 })
 
@@ -63,7 +78,9 @@ describe('what students, parents and teachers see', () => {
     wrap(<MyExamsPage />)
     expect(await screen.findByText('Maths')).toBeInTheDocument()
     expect(screen.getByText('Arabic')).toBeInTheDocument()
-    expect(screen.getAllByText('08:00 – 09:30')).toHaveLength(2)
+    expect(screen.getAllByText('08:35 – 10:10')).toHaveLength(2)
+    expect(screen.getAllByText('Periods 2–3')).toHaveLength(2)
+    expect(screen.getByText('The lessons of these periods are replaced by the exam.')).toBeInTheDocument()
   })
 
   it('shows a teacher the rooms they watch and the exams of their classes', async () => {
