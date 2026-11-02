@@ -30,6 +30,7 @@ use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\Reports\Http\Controllers\ReportCardController;
+use App\Modules\Reports\Http\Controllers\SignatureController;
 use App\Modules\Surveys\Http\Controllers\MySurveyController;
 use App\Modules\Surveys\Http\Controllers\SurveyController;
 use App\Modules\People\Http\Controllers\ImportController;
@@ -285,6 +286,14 @@ Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->g
 });
 Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
 Route::middleware('school-user')->get('students/{student}/report-card', ReportCardController::class);
+// Signatures printed on the report card: the admin manages the school's and anyone's; a teacher only their own.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('signatures')->group(function (): void {
+    Route::get('/', [SignatureController::class, 'index']);
+    Route::post('/', [SignatureController::class, 'store']);
+    Route::post('{signature}/reprocess', [SignatureController::class, 'reprocess']);
+    Route::put('{signature}', [SignatureController::class, 'update']);
+    Route::delete('{signature}', [SignatureController::class, 'destroy']);
+});
 
 // Motivation: points, badges, star of the week.
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('motivation')->group(function (): void {

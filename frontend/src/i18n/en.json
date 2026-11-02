@@ -114,7 +114,8 @@
       "finance": "Finance",
       "motivation": "Points & badges",
       "import": "Import",
-      "surveys": "Surveys"
+      "surveys": "Surveys",
+      "signatures": "Signatures"
     },
     "actions": {
       "add": "Add",
@@ -1241,5 +1242,37 @@
     "noStaff": "No staff match.",
     "staffCount": "{{count}} staff members",
     "forMe": "Surveys for me"
+  },
+  "signatures": {
+    "title_page": "Signatures for the report card",
+    "help": "Upload a photo or scan of a signature on white paper. The paper is removed automatically so only the signature is printed on the report card.",
+    "schoolSection": "School signatures",
+    "schoolHelp": "For example the principal, the vice principal, the counsellor. They print on every report card, in this order.",
+    "addSchool": "Add a school signature",
+    "teachersSection": "Homeroom teachers",
+    "teachersHelp": "A homeroom teacher's signature prints on the report cards of their own section. A teacher can also upload their own from their page.",
+    "forTeacher": "Add or replace the signature of",
+    "addForTeacher": "Upload this teacher's signature",
+    "mine": "My signature",
+    "mineTitle": "My signature",
+    "mineHint": "Your signature for the report cards of your section.",
+    "mineHelp": "Printed on the report cards of the section you are the homeroom teacher of.",
+    "addMine": "Upload my signature",
+    "replaceMine": "Replace my signature",
+    "title": "What it is for",
+    "titleHint": "e.g. Principal",
+    "signerName": "Name under the signature",
+    "pickFile": "Click to choose the signature picture",
+    "changeFile": "Choose another picture",
+    "chosen": "Picture: {{name}}",
+    "file": "Signature picture",
+    "tips": "Tip: sign with a dark pen on plain white paper, in good light, and take the photo straight from above.",
+    "save": "Save the signature",
+    "strength": "Remove the paper",
+    "keepMore": "Keep more",
+    "removeMore": "Remove more",
+    "show": "Print it on the report cards",
+    "preview": "Signature {{name}}",
+    "noImage": "No picture"
   }
 }

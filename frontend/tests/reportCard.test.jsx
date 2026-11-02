@@ -58,6 +58,27 @@ describe('ReportCard', () => {
     for (const who of ['Homeroom teacher', 'Principal', 'Parent']) expect(screen.getByText(who)).toBeInTheDocument()
   })
 
+  it('prints the signatures over the signature lines: the homeroom teacher and the school\'s', async () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo='
+    api.get.mockResolvedValue({ data: { data: card({ signatures: { homeroom: { name: 'Sara Hassan', image: png }, school: [{ id: 1, title: 'Principal', name: 'Mr. Khaled', image: png }, { id: 2, title: 'Vice principal', name: null, image: null }] } }) } })
+    wrap()
+    await screen.findByText('Bright School')
+    const sheet = within(screen.getByLabelText('Report card'))
+    expect(sheet.getByText('Sara Hassan')).toBeInTheDocument()
+    expect(sheet.getByText('Mr. Khaled')).toBeInTheDocument()
+    expect(sheet.getByText('Vice principal')).toBeInTheDocument()
+    expect(sheet.getByText('Parent')).toBeInTheDocument()
+    expect(screen.getByLabelText('Report card').querySelectorAll('img[src^="data:image/png"]')).toHaveLength(2) // two have a picture
+    expect(sheet.getAllByText('Principal')).toHaveLength(1) // the default "Principal" line is not added when the school has its own
+  })
+
+  it('still has the plain signature lines when no signature was uploaded', async () => {
+    api.get.mockResolvedValue({ data: { data: card({ signatures: { homeroom: null, school: [] } }) } })
+    wrap()
+    await screen.findByText('Bright School')
+    for (const who of ['Homeroom teacher', 'Principal', 'Parent']) expect(screen.getByText(who)).toBeInTheDocument()
+  })
+
   it('prints with the browser dialog', async () => {
     api.get.mockResolvedValue({ data: { data: card() } })
     wrap()
