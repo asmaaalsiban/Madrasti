@@ -5,7 +5,7 @@ import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 
 const KINDS = ['students', 'staff']
-const CREATED_COLUMNS = { students: ['student_number', 'name', 'email'], staff: ['name', 'email', 'staff_type'] }
+const CREATED_COLUMNS = { students: ['student_number', 'name', 'email', 'parent_login'], staff: ['name', 'email', 'staff_type'] }
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
 // Admin: add many students or staff from the school's own Excel/CSV file.
@@ -157,7 +157,7 @@ export default function ImportPage() {
                   <thead className="bg-slate-50"><tr>{CREATED_COLUMNS[kind].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`import.cols.${c}`)}</th>)}</tr></thead>
                   <tbody>
                     {report.created.map((row, i) => (
-                      <tr key={i} className="border-t">{CREATED_COLUMNS[kind].map((c) => <td key={c} className="p-2" dir={c === 'email' ? 'ltr' : undefined}>{row[c]}</td>)}</tr>
+                      <tr key={i} className="border-t">{CREATED_COLUMNS[kind].map((c) => <td key={c} className="p-2" dir={c === 'email' || c === 'parent_login' ? 'ltr' : undefined}>{row[c]}</td>)}</tr>
                     ))}
                   </tbody>
                 </table>

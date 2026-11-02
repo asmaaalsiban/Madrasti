@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\Payment;
 use App\Shared\Enums\Role;
+use App\Shared\Support\PhoneNumber;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -41,17 +42,25 @@ class StudentRequest extends FormRequest
         ];
     }
 
-    /** The parent phone may only belong to that same parent: users.phone is unique across every account. */
+    /**
+     * The parent phone may only belong to that same parent: users.phone is unique across every account. With no parent
+     * email the phone is the parent's login, so it may only be unused or already belong to a parent.
+     */
     private function guardianPhoneRule(): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail): void {
-            $email = $this->input('guardian_email');
-            if (! is_string($value) || $value === '' || ! is_string($email) || $email === '') {
-                return; // without a parent email the phone is ignored
+            if (! is_string($value) || $value === '') {
+                return;
             }
 
-            $owner = User::withTrashed()->where('phone', $value)->first();
-            if ($owner && $owner->email !== $email) {
+            $email = $this->input('guardian_email');
+            $owner = User::findByLogin($value);
+            if (is_string($email) && $email !== '') {
+                $owner = $owner ?? User::withTrashed()->where('phone', PhoneNumber::normalize($value))->first();
+                if ($owner && filled($owner->email) && $owner->email !== $email) { // a parent registered by phone only may be given an email
+                    $fail(__('people.guardian_phone_conflict'));
+                }
+            } elseif (($owner && $owner->role !== Role::Guardian) || (! $owner && User::onlyTrashed()->where('phone', PhoneNumber::normalize($value))->exists())) {
                 $fail(__('people.guardian_phone_conflict'));
             }
         };

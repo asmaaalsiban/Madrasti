@@ -292,3 +292,9 @@ Upload the **school's own file** as it is — no template needed.
 - `.xlsx` and `.csv`, up to 1000 rows / 2 MB. A template is still offered for schools that start from scratch.
 - Endpoints (admin): `POST /api/import/{students|staff}/analyze`, `POST /api/import/{students|staff}` (`file`, `mapping`, `confirm`, `default_staff_type`), `GET /api/import/{kind}/template`.
 - A new kind of import = one `Importer` class (`columns()` with aliases, `check()`, `create()`).
+
+## Parents without an email (sign in with the phone number)
+- A parent does not need an email. If a student's parent has only a phone number, the parent account is created with that number (no email is invented) and the parent signs in with it and the default password, then must choose a new one.
+- Phone numbers match however they are typed (`0790 000 001`, `079-000-0001`, `+962790000001`, `00962790000001` are the same line). Children with the same number share one parent. If an email is added later, it goes on the same parent account.
+- Works when adding a student by hand and in the Excel import (the result table shows how each parent signs in). A phone that belongs to staff or a student cannot be used for a parent.
+- "Forgot my password" sends the code by email, so a phone-only parent asks the school; the admin resets it from the students page (back to the default password).

@@ -9,6 +9,8 @@ use App\Modules\People\Models\StaffProfile;
 use App\Shared\Enums\Role;
 use App\Shared\Traits\Auditable;
 use Database\Factories\UserFactory;
+use App\Shared\Support\PhoneNumber;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -59,6 +61,37 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
         ];
+    }
+
+    /** Phones are stored without spaces or dashes, so the same number is always written the same way. */
+    protected function phone(): Attribute
+    {
+        return Attribute::set(fn (?string $value) => PhoneNumber::normalize($value));
+    }
+
+    /**
+     * The account a person signs in (or asks for a password reset) with: an email, or a phone number. A phone number
+     * matches however it is typed ("0790 000 001", "+962790000001"); two accounts on the same line match nobody.
+     */
+    public static function findByLogin(string $login): ?self
+    {
+        $login = trim($login);
+        if (! PhoneNumber::looks($login)) {
+            return static::whereRaw('lower(email) = ?', [mb_strtolower($login)])->first();
+        }
+
+        $phone = PhoneNumber::normalize($login);
+        $exact = static::where('phone', $phone)->first();
+        if ($exact) {
+            return $exact;
+        }
+
+        $tail = PhoneNumber::tail($login);
+        $matches = strlen($tail) >= 8
+            ? static::where('phone', 'like', '%'.$tail)->get()->filter(fn (self $u) => PhoneNumber::tail((string) $u->phone) === $tail)
+            : collect();
+
+        return $matches->count() === 1 ? $matches->first() : null;
     }
 
     public function hasRole(Role ...$roles): bool

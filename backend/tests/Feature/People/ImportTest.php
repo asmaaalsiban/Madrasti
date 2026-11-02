@@ -243,4 +243,19 @@ class ImportTest extends AcademicTestCase
         $file = $this->sheet([['Name', 'Email'], ['Lina Omar', 'lina@example.com']]);
         $this->post('/api/import/staff', ['file' => $file, 'confirm' => '1', 'default_staff_type' => 'registrar'], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.created.0.staff_type', 'registrar');
     }
+
+    public function test_parents_without_an_email_get_an_account_by_phone_and_the_result_says_how_they_sign_in(): void
+    {
+        $file = $this->sheet([
+            ['Student number', 'Name (Arabic)', 'Parent name', 'Parent phone', 'Parent email'],
+            [1, 'علي', 'Abu Ali', '0790 000 001', null],
+            [2, 'سامي', 'Abu Ali', '+962790000001', null], // the same father
+            [3, 'ليلى', 'Abu Layla', '0790000002', 'layla.dad@example.com'],
+        ]);
+        $created = $this->upload('students', $file, true)->assertOk()->assertJsonPath('data.problem_count', 0)->json('data.created');
+
+        $this->assertSame(['0790000001', '0790000001', 'layla.dad@example.com'], array_column($created, 'parent_login'));
+        $this->assertSame(2, User::where('role', Role::Guardian)->count());
+        $this->postJson('/api/auth/login', ['login' => '0790 000 001', 'password' => config('accounts.default_password')])->assertOk();
+    }
 }

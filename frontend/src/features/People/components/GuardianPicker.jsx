@@ -17,7 +17,7 @@ export default function GuardianPicker({ setForm }) {
   const childName = (c) => c[`name_${i18n.language}`] || c.name_ar
 
   const pick = (g) => {
-    setForm((form) => ({ ...form, guardian_email: g.email, guardian_name: g.name, guardian_phone: g.phone ?? '' }))
+    setForm((form) => ({ ...form, guardian_email: g.email ?? '', guardian_name: g.name, guardian_phone: g.phone ?? '' }))
     setTerm('')
   }
 
