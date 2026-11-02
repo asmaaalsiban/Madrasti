@@ -40,4 +40,10 @@ class BehaviorEvaluation extends Model
     {
         return $this->hasMany(BehaviorEvaluationScore::class);
     }
+
+    /** The scores on the student's own (special) criteria. */
+    public function specialScores(): HasMany
+    {
+        return $this->hasMany(BehaviorSpecialScore::class);
+    }
 }

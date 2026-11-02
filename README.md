@@ -321,3 +321,9 @@ Upload the **school's own file** as it is — no template needed.
 - The creator sees the counts per choice, the written answers, and **who has not answered** (those first, with their phone); *Remind* notifies only those (at most every 6 hours). A survey that already has answers cannot be deleted, only closed.
 - **Table of answers** (*Open the table of answers*): every parent with the child, section, phone, decision and the extra answers; filter to approved / declined / waiting, search, and **Export to Excel** (also per filter).
 - A teacher sees only the surveys they sent; the admin sees all. Who can send: the admin account and the management positions (principal, vice principal, general manager), and teachers for the sections they teach or are homeroom of. Requires `php artisan tenants:migrate`.
+
+### Special evaluation (criteria for one student)
+- When evaluating a student, under the school's general criteria there is a **Special evaluation** box: write criteria for **that student only** (e.g. "Raises his hand before speaking") and score them 1-5 together with the weekly evaluation. They appear only for that student (the list shows "★ N special" next to him/her) and never for the other students; the general criteria and everyone else's evaluations are untouched.
+- Every teacher who evaluates the student and the admin share and manage the student's criteria (add, remove; one already scored is hidden so its history stays). Names must be unique per student.
+- The student's behaviour results (staff, parent, student) show a **Special evaluation** block: each criterion with its average and weekly scores; the family sees only the evaluations the teacher marked "visible to parent".
+- Endpoints: `GET|POST /api/behavior/students/{student}/special`, `PUT|DELETE /api/behavior/special/{criterion}`; `special_scores` on `PUT /api/behavior/evaluations`. Requires `php artisan tenants:migrate`.
