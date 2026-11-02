@@ -266,3 +266,11 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - Admin manages the categories and badges at `/admin/motivation-settings`.
 - Students (`/student/motivation`) and parents (`/parent/children/:id/motivation`) see points, badges, the next badge to aim for and the latest awards.
 - Requires `php artisan tenants:migrate`.
+
+## Online payment (parents pay by card)
+- A parent opens a child's fees and taps **Pay online**: picks an installment (or the whole balance), the amount and the **payer name** (the receipt is written in it). The result is a normal `Payment` with method `online`; the parent gets a notification.
+- **No school page ever sees a card number.** A real provider takes the parent to its own hosted page and tells us the result by webhook (`POST /api/payments/webhook/{provider}`, signature checked by the driver). Money is applied only from that webhook, once (retries are safe).
+- The provider is pluggable, like messaging: implement `App\Shared\Payments\PaymentGateway` (`start()` and `parseWebhook()`), add the class to `config/payments.php` under its key, put its keys in `.env`, set `PAYMENT_GATEWAY=<key>`. No screen changes.
+- `PAYMENT_GATEWAY=demo` (default in development) shows a fake card form: `4242 4242 4242 4242` is approved, `4000 0000 0000 0002` declined. Nothing is charged, the card is not stored, and the demo is switched off in production. `PAYMENT_GATEWAY=none` turns online payment off (the button disappears).
+- If the provider took the money but the fee had already been paid another way, the payment is kept with status `review` (table `online_payments`) for a person to refund.
+- Requires `php artisan tenants:migrate`.

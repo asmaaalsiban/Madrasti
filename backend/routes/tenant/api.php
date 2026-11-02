@@ -22,6 +22,7 @@ use App\Modules\Communication\Http\Controllers\ChatController;
 use App\Modules\Communication\Http\Controllers\NotificationController;
 use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
 use App\Modules\Finance\Http\Controllers\FinanceController;
+use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\StudentFeesController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
@@ -206,6 +207,14 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::delete('payments/{payment}', [FinanceController::class, 'voidPayment']);
 });
 Route::middleware('school-user')->get('students/{student}/fees', StudentFeesController::class);
+
+// Online payment by a parent. The webhook is called by the payment provider, not by a signed-in user.
+Route::middleware('school-user')->group(function (): void {
+    Route::post('students/{student}/online-payments', [OnlinePaymentController::class, 'start']);
+    Route::post('online-payments/{reference}/demo-confirm', [OnlinePaymentController::class, 'demoConfirm'])->middleware('throttle:20,1');
+    Route::get('online-payments/{reference}', [OnlinePaymentController::class, 'status']);
+});
+Route::post('payments/webhook/{provider}', [OnlinePaymentController::class, 'webhook'])->middleware('throttle:120,1');
 
 // Lesson plans: the teacher writes and submits, the head of department reviews, approved shared plans reach students and parents.
 Route::middleware(['school-user', 'role:teacher'])->group(function (): void {

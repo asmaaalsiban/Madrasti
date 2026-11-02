@@ -1,0 +1,106 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Finance\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Modules\Academic\Models\Student;
+use App\Modules\Finance\Models\OnlinePayment;
+use App\Modules\Finance\Models\StudentFee;
+use App\Modules\Finance\Services\OnlinePayments;
+use App\Shared\Enums\Role;
+use App\Shared\Payments\Checkout;
+use App\Shared\Payments\DemoPaymentGateway;
+use App\Shared\Payments\InvalidWebhook;
+use App\Shared\Payments\PaymentManager;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+
+/** A parent pays a child's fee online. Money moves only when the provider says so (webhook), never on the parent's word. */
+class OnlinePaymentController extends Controller
+{
+    public function __construct(private readonly OnlinePayments $online, private readonly PaymentManager $manager) {}
+
+    /** Starts a payment: returns how to continue (the demo card form, or the provider's page to go to). */
+    public function start(Request $request, Student $student): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        abort_unless($user->hasRole(Role::Guardian), 403);
+        Gate::authorize('view-student-fees', $student);
+        abort_unless($this->manager->enabled(), 404);
+
+        $data = $request->validate([
+            'student_fee_id' => ['required', 'integer', 'exists:student_fees,id'],
+            'installment_id' => ['nullable', 'integer'],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'payer_name' => ['required', 'string', 'max:255'],
+            'return_url' => ['nullable', 'url', 'max:500'], // where a provider's page sends the parent back
+        ]);
+        $payment = $this->online->open($student, $user, StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['installment_id'] ?? null, $data['payer_name']);
+        $checkout = $this->manager->gateway()->start($payment, ($data['return_url'] ?? '').(str_contains($data['return_url'] ?? '', '?') ? '&' : '?').'online='.$payment->reference);
+        if ($checkout->providerReference) {
+            $payment->update(['provider_reference' => $checkout->providerReference]);
+        }
+
+        return response()->json(['data' => ['reference' => $payment->reference, 'mode' => $checkout->mode, 'url' => $checkout->url]], 201);
+    }
+
+    /** The demo card form: judges the typed card. The card is never stored or logged. */
+    public function demoConfirm(Request $request, string $reference): JsonResponse
+    {
+        $payment = $this->mine($request, $reference);
+        abort_unless($this->manager->driverName() === 'demo', 404);
+        $data = $request->validate(['card_number' => ['required', 'string', 'max:32'], 'expiry' => ['required', 'regex:/^(0[1-9]|1[0-2])\/\d{2}$/'], 'cvc' => ['required', 'digits_between:3,4'], 'holder' => ['required', 'string', 'max:255']]);
+        [$month, $year] = array_map('intval', explode('/', $data['expiry']));
+        if (now()->format('ym') > sprintf('%02d%02d', $year, $month)) {
+            return response()->json(['message' => __('finance.card_expired'), 'errors' => ['expiry' => [__('finance.card_expired')]]], 422);
+        }
+
+        /** @var DemoPaymentGateway $gateway */
+        $gateway = $this->manager->gateway('demo');
+
+        return response()->json(['data' => $this->show($this->online->settle($payment, $gateway->charge($payment, $data['card_number'])))]);
+    }
+
+    /** Where a payment stands: the page the parent returns to polls this. */
+    public function status(Request $request, string $reference): JsonResponse
+    {
+        return response()->json(['data' => $this->show($this->mine($request, $reference))]);
+    }
+
+    /** A provider's webhook (public, no login): trusted only after the driver verifies the provider's signature. */
+    public function webhook(Request $request, string $provider): JsonResponse
+    {
+        $gateway = $this->manager->gateway($provider);
+        try {
+            $event = $gateway->parseWebhook($request);
+        } catch (InvalidWebhook $e) {
+            Log::warning('Rejected a payment webhook from '.$provider.': '.$e->getMessage());
+            abort(400);
+        }
+        $payment = OnlinePayment::where('reference', $event->reference)->where('provider', $provider)->first();
+        if ($payment) {
+            $this->online->settle($payment, $event);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    private function mine(Request $request, string $reference): OnlinePayment
+    {
+        return OnlinePayment::where('reference', $reference)->where('user_id', $request->user()->id)->with('payment')->firstOrFail();
+    }
+
+    /** @return array<string, mixed> */
+    private function show(OnlinePayment $p): array
+    {
+        $p->loadMissing('payment');
+
+        return ['reference' => $p->reference, 'status' => $p->status, 'amount' => $p->amount, 'failure_reason' => $p->failure_reason, 'receipt' => $p->payment?->receiptNumber()];
+    }
+}
