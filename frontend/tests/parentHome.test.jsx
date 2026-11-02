@@ -39,21 +39,25 @@ describe('ParentHome', () => {
     expect(screen.queryByText(/You have not added an email yet/)).not.toBeInTheDocument()
   })
 
-  it('shows a card per child with the sign-in email', () => {
+  it('shows a tab per child and the chosen child with the sign-in email', () => {
     render(<Wrap><ParentHome /></Wrap>)
-    expect(screen.getByRole('heading', { name: 'My children' })).toBeInTheDocument()
-    expect(screen.getByText('Ahmad Khaled')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'My children' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Ahmad Khaled/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: /Layla Khaled/ })).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByRole('heading', { level: 2, name: 'Ahmad Khaled' })).toBeInTheDocument()
     expect(screen.getByText('ahmad.d1001@school2.edu')).toBeInTheDocument()
-    expect(screen.getByText('layla.d1002@school2.edu')).toBeInTheDocument()
     expect(screen.getByText('D-1001')).toBeInTheDocument()
     expect(screen.getByText('1-A')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: /Layla Khaled/ }))
+    expect(screen.getByText('layla.d1002@school2.edu')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Grades' })).toHaveAttribute('href', '/parent/children/2/grades')
   })
 
   it('keeps emails left-to-right in Arabic and uses the Arabic name', async () => {
     await i18n.changeLanguage('ar')
     render(<Wrap><ParentHome /></Wrap>)
-    expect(screen.getByRole('heading', { name: 'أبنائي' })).toBeInTheDocument()
-    expect(screen.getByText('أحمد خالد')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'أبنائي' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'أحمد خالد' })).toBeInTheDocument()
     expect(screen.getByText('ahmad.d1001@school2.edu')).toHaveAttribute('dir', 'ltr')
   })
 
@@ -66,13 +70,13 @@ describe('ParentHome', () => {
   it('shows each child\'s attendance and the dates of absence on demand', async () => {
     render(<Wrap><ParentHome /></Wrap>)
     expect(await screen.findByText('Absent: 3 · Late: 1')).toBeInTheDocument()
-    fireEvent.click(screen.getAllByRole('button', { name: 'Show dates' })[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Show dates' }))
     expect(await screen.findByText('2026-10-18')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/attendance/students/1', { params: expect.any(Object) })
   })
 
   it('links every child to the grades page', () => {
     render(<Wrap><ParentHome /></Wrap>)
-    expect(screen.getAllByRole('link', { name: 'Grades' })[0]).toHaveAttribute('href', '/parent/children/1/grades')
+    expect(screen.getByRole('link', { name: 'Grades' })).toHaveAttribute('href', '/parent/children/1/grades')
   })
 })

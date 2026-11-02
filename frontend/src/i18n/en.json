@@ -335,7 +335,9 @@
     "home": {
       "title": "My children",
       "emailHint": "Your child signs in with this email",
-      "empty": "No children are linked to your account yet."
+      "empty": "No children are linked to your account yet.",
+      "welcome": "Welcome, {{name}}",
+      "follow": "Follow {{name}}"
     }
   },
   "attendance": {
@@ -366,7 +368,9 @@
     "showDates": "Show dates",
     "hideDates": "Hide dates",
     "loading": "Loading…",
-    "noAbsences": "No student was absent or late in this period."
+    "noAbsences": "No student was absent or late in this period.",
+    "absentLabel": "Days absent",
+    "lateLabel": "Days late"
   },
   "department": {
     "title": "Department: {{subject}}",
@@ -1687,5 +1691,8 @@
     "department": "My department",
     "money": "School money",
     "mine": "Me"
+  },
+  "student": {
+    "welcome": "Welcome back"
   }
 }

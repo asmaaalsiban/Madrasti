@@ -71,7 +71,7 @@ describe('the signed-in name in the header', () => {
   it('shows the student their own full name', async () => {
     auth.user = { role: 'student', name: 'Salma Ahmad Nasser', student_id: 17 }
     at('/student')
-    expect(await screen.findByText('Salma Ahmad Nasser')).toBeInTheDocument()
+    expect((await screen.findAllByText('Salma Ahmad Nasser')).length).toBeGreaterThan(0)
   })
 })
 

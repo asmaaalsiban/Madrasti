@@ -33,7 +33,7 @@ export default function StudentGrades({ studentId }) {
         {data.terms.map((x) => (
           <button
             key={x.id} type="button" role="tab" aria-selected={x.id === term?.id}
-            className={`rounded-full border px-3 py-1 text-sm ${x.id === term?.id ? 'bg-brand text-white' : 'bg-white'}`}
+            className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${x.id === term?.id ? 'bg-brand text-white' : 'bg-snow'}`}
             onClick={() => setTermId(x.id)}
           >
             {x.name}
@@ -47,11 +47,12 @@ export default function StudentGrades({ studentId }) {
         {term?.subjects.map((s) => {
           const key = `${term.id}-${s.subject.id}`
           return (
-            <div key={key} role="group" aria-label={subjectName(s.subject)} className="space-y-2 rounded-lg border bg-white p-4">
+            <div key={key} role="group" aria-label={subjectName(s.subject)} className="space-y-3 rounded-lg border bg-snow p-4">
               <div className="flex items-center justify-between gap-2">
-                <p className="font-bold">{subjectName(s.subject)}</p>
-                {s.percent !== null && <span dir="ltr" className="text-sm text-slate-600">{s.percent}%</span>}
+                <p className="font-bold text-deep-harbor">{subjectName(s.subject)}</p>
+                {s.percent !== null && <span dir="ltr" className="text-lg font-extrabold text-deep-harbor">{s.percent}%</span>}
               </div>
+              {s.percent !== null && <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${s.result === 'fail' ? 'bg-red-500' : s.result === 'pass' ? 'bg-brand' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, Math.max(0, s.percent))}%` }} /></div>}
               <ResultBadge kind={KIND[s.result]} label={t(`studentGrades.result.${s.result}`)} />
               <div>
                 <button type="button" className="text-sm text-brand underline" aria-expanded={Boolean(open[key])} onClick={() => setOpen({ ...open, [key]: !open[key] })}>
