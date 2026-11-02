@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ExportButton from '../../../components/shared/ExportButton'
 import { api } from '../../../api/client'
 import Money from '../components/Money'
 
@@ -20,7 +21,10 @@ export default function AccountsPage({ base }) {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('finance.accounts')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('finance.accounts')}</h1>
+        <ExportButton path="/finance/accounts/export" params={Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== ''))} fallbackName="accounts.xlsx" />
+      </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">{t('finance.fields.grade')}
           <select className="mt-1 block rounded border p-2" value={filters.grade_level_id} onChange={(e) => { setFilters({ ...filters, grade_level_id: e.target.value, classroom_id: '' }); setPage(1) }}>

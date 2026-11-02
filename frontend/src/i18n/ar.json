@@ -4,7 +4,9 @@
     "language": "English",
     "logout": "تسجيل الخروج",
     "loading": "جاري التحميل...",
-    "back": "رجوع"
+    "back": "رجوع",
+    "exportExcel": "تصدير إلى Excel",
+    "exportFailed": "تعذّر تنزيل الملف."
   },
   "auth": {
     "title": "تسجيل الدخول",

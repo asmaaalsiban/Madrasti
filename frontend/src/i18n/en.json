@@ -4,7 +4,9 @@
     "language": "العربية",
     "logout": "Log out",
     "loading": "Loading...",
-    "back": "Back"
+    "back": "Back",
+    "exportExcel": "Export to Excel",
+    "exportFailed": "The file could not be downloaded."
   },
   "auth": {
     "title": "Sign in",

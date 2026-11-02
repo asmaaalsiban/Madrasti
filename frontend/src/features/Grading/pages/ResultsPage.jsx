@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ExportButton from '../../../components/shared/ExportButton'
 import { api } from '../../../api/client'
 import { useStudentName } from '../../Attendance/components/useStudentName'
 import ResultBadge from '../components/ResultBadge'
@@ -23,7 +24,10 @@ export default function ResultsPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('grading.resultsTitle', { name: title })}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('grading.resultsTitle', { name: title })}</h1>
+        <ExportButton path="/grading/results/export" params={params} fallbackName="results.xlsx" />
+      </div>
       {results.data && (
         <p className="text-sm text-slate-600">
           <span>{t('grading.passedFailed', { passed, failed })}</span> · <span>{t('grading.passMark', { percent: results.data.pass_percent })}</span>

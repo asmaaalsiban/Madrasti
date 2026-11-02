@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'attendance_file' => 'Attendance_report',
+    'attendance_sheet' => 'Attendance',
+    'accounts_file' => 'Student_accounts',
+    'accounts_sheet' => 'Accounts',
+    'results_file' => 'Results',
+    'results_sheet' => 'Results',
+    'student_number' => 'Student number',
+    'name_ar' => 'Name (Arabic)',
+    'name_en' => 'Name (English)',
+    'classroom' => 'Section',
+    'absent_days' => 'Days absent',
+    'late_days' => 'Days late',
+    'net' => 'Fees (:currency)',
+    'paid' => 'Paid (:currency)',
+    'remaining' => 'Remaining (:currency)',
+    'overdue' => 'Overdue (:currency)',
+    'percent' => 'Percent',
+    'result' => 'Result',
+    'passed' => 'Passed',
+    'failed' => 'Failed',
+    'graded' => 'Graded',
+    'pending' => 'Pending',
+    'retake' => 'Retake',
+];

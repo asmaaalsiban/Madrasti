@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import ExportButton from '../../../components/shared/ExportButton'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import StatusDates from '../components/StatusDates'
@@ -38,7 +39,10 @@ export default function AttendanceReportPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('attendance.reportTitle')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('attendance.reportTitle')}</h1>
+        <ExportButton path="/attendance/report/export" params={Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== ''))} fallbackName="attendance.xlsx" />
+      </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
           {t('attendance.classroom')}

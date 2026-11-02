@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'attendance_file' => 'تقرير_الغياب',
+    'attendance_sheet' => 'الغياب',
+    'accounts_file' => 'حسابات_الطلاب',
+    'accounts_sheet' => 'الحسابات',
+    'results_file' => 'النتائج',
+    'results_sheet' => 'النتائج',
+    'student_number' => 'رقم الطالب',
+    'name_ar' => 'الاسم (عربي)',
+    'name_en' => 'الاسم (إنجليزي)',
+    'classroom' => 'الشعبة',
+    'absent_days' => 'أيام الغياب',
+    'late_days' => 'أيام التأخر',
+    'net' => 'الرسوم (:currency)',
+    'paid' => 'المدفوع (:currency)',
+    'remaining' => 'المتبقي (:currency)',
+    'overdue' => 'المتأخر (:currency)',
+    'percent' => 'النسبة',
+    'result' => 'النتيجة',
+    'passed' => 'ناجح',
+    'failed' => 'راسب',
+    'graded' => 'مُقيَّم',
+    'pending' => 'قيد الانتظار',
+    'retake' => 'إعادة',
+];
