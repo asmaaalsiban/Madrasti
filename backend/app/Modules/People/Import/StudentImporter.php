@@ -23,21 +23,37 @@ class StudentImporter extends Importer
     public function columns(): array
     {
         return [
-            'student_number' => ['en' => 'Student number', 'ar' => 'رقم الطالب', 'required' => true, 'example' => '2026001'],
-            'name_ar' => ['en' => 'Name (Arabic)', 'ar' => 'الاسم بالعربي', 'required' => true, 'example' => 'ليلى أحمد'],
-            'name_en' => ['en' => 'Name (English)', 'ar' => 'الاسم بالإنجليزي', 'required' => false, 'example' => 'Layla Ahmad'],
-            'birth_date' => ['en' => 'Birth date', 'ar' => 'تاريخ الميلاد', 'required' => false, 'example' => '2015-03-21'],
-            'gender' => ['en' => 'Gender', 'ar' => 'الجنس', 'required' => false, 'example' => 'female'],
-            'classroom' => ['en' => 'Section', 'ar' => 'الشعبة', 'required' => false, 'example' => '5-A'],
-            'guardian_name' => ['en' => 'Parent name', 'ar' => 'اسم ولي الأمر', 'required' => false, 'example' => 'Ahmad Ali'],
-            'guardian_email' => ['en' => 'Parent email', 'ar' => 'بريد ولي الأمر', 'required' => false, 'example' => 'ahmad@example.com'],
-            'guardian_phone' => ['en' => 'Parent phone', 'ar' => 'هاتف ولي الأمر', 'required' => false, 'example' => '0790000000'],
+            'student_number' => ['en' => 'Student number', 'ar' => 'رقم الطالب', 'required' => true, 'example' => '2026001', 'aliases' => ['رقم الطالب', 'الرقم الاكاديمي', 'رقم التسجيل', 'رقم القيد', 'الرقم التعريفي', 'الرقم', 'رقم', 'id', 'student id', 'student no', 'code']],
+            'name_ar' => ['en' => 'Name (Arabic)', 'ar' => 'الاسم بالعربي', 'required' => true, 'example' => 'ليلى أحمد', 'aliases' => ['اسم الطالب بالعربي', 'الاسم بالعربي', 'اسم الطالب', 'اسم الطالبه', 'الاسم الكامل', 'arabic name', 'student name']],
+            'name_en' => ['en' => 'Name (English)', 'ar' => 'الاسم بالإنجليزي', 'required' => false, 'example' => 'Layla Ahmad', 'aliases' => ['الاسم بالانجليزي', 'الاسم بالانجليزية', 'اسم الطالب بالانجليزي', 'english name', 'name en', 'name english']],
+            'birth_date' => ['en' => 'Birth date', 'ar' => 'تاريخ الميلاد', 'required' => false, 'example' => '2015-03-21', 'aliases' => ['تاريخ الميلاد', 'تاريخ الولاده', 'الميلاد', 'birthdate', 'birth date', 'date of birth', 'dob']],
+            'gender' => ['en' => 'Gender', 'ar' => 'الجنس', 'required' => false, 'example' => 'female', 'aliases' => ['الجنس', 'النوع', 'gender', 'sex']],
+            'classroom' => ['en' => 'Section', 'ar' => 'الشعبة', 'required' => false, 'example' => '5-A', 'aliases' => ['الشعبه', 'الصف', 'الفصل', 'القسم', 'class', 'section', 'classroom', 'grade']],
+            'guardian_name' => ['en' => 'Parent name', 'ar' => 'اسم ولي الأمر', 'required' => false, 'example' => 'Ahmad Ali', 'aliases' => ['اسم ولي الامر', 'ولي الامر', 'اسم الاب', 'الاب', 'اسم الام', 'parent name', 'guardian name', 'guardian', 'father name']],
+            'guardian_email' => ['en' => 'Parent email', 'ar' => 'بريد ولي الأمر', 'required' => false, 'example' => 'ahmad@example.com', 'aliases' => ['بريد ولي الامر', 'ايميل ولي الامر', 'الايميل', 'البريد الالكتروني', 'البريد', 'parent email', 'guardian email', 'email']],
+            'guardian_phone' => ['en' => 'Parent phone', 'ar' => 'هاتف ولي الأمر', 'required' => false, 'example' => '0790000000', 'aliases' => ['هاتف ولي الامر', 'جوال ولي الامر', 'رقم ولي الامر', 'جوال الاب', 'رقم الهاتف', 'الهاتف', 'الجوال', 'موبايل', 'parent phone', 'guardian phone', 'phone', 'mobile']],
         ];
     }
+
+    public function genericName(): array
+    {
+        return ['keys' => ['name_ar', 'name_en'], 'aliases' => ['الاسم', 'اسم', 'name', 'full name']];
+    }
+
+    /** A student needs some name; the number is made up when the file has none. */
+    public function missingFields(array $mapped): array
+    {
+        return array_intersect($mapped, ['name_ar', 'name_en']) === [] ? ['name_ar'] : [];
+    }
+
+    private ?int $next = null;
 
     public function check(array $row): array
     {
         $errors = [];
+        // A file with only one (say English) name still gets a name to show; a missing number is generated.
+        $row['name_ar'] ??= $row['name_en'] ?? null;
+        $row['student_number'] ??= $this->nextNumber();
         $data = array_filter($row, fn ($v) => $v !== null);
         unset($data['classroom']);
 
@@ -78,6 +94,17 @@ class StudentImporter extends Importer
         return ['student_number' => $student->student_number, 'name' => $student->name_ar, 'email' => $student->generated_account['email']];
     }
 
+    /** The next free student number after the highest numeric one (so a school's own numbers are never touched). */
+    private function nextNumber(): string
+    {
+        $this->next ??= (int) \App\Modules\Academic\Models\Student::withTrashed()->pluck('student_number')->filter(fn ($n) => ctype_digit((string) $n))->map(fn ($n) => (int) $n)->max();
+        do {
+            $number = (string) ++$this->next;
+        } while (\App\Modules\Academic\Models\Student::withTrashed()->where('student_number', $number)->exists());
+
+        return $number;
+    }
+
     private function gender(string $value): ?string
     {
         return match (mb_strtolower(trim($value))) {
@@ -90,6 +117,11 @@ class StudentImporter extends Importer
     /** A section of the current academic year, by its name. */
     private function classroom(string $name): ?Classroom
     {
-        return Classroom::whereIn('academic_year_id', AcademicYear::where('is_current', true)->select('id'))->where('name', trim($name))->first();
+        $matcher = new \App\Shared\Import\ColumnMatcher();
+        $strip = fn (string $v) => str_replace(['الصف', 'شعبه', 'شعبة', 'class', 'grade'], '', $matcher->norm($v));
+        $wanted = $strip($name);
+
+        return Classroom::whereIn('academic_year_id', AcademicYear::where('is_current', true)->select('id'))->get()
+            ->first(fn (Classroom $c) => $matcher->norm($c->name) === $matcher->norm($name) || $strip($c->name) === $wanted);
     }
 }

@@ -105,6 +105,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::apiResource('staff', StaffController::class);
     Route::apiResource('students', StudentController::class);
     Route::get('import/{kind}/template', [ImportController::class, 'template'])->whereIn('kind', ['students', 'staff']);
+    Route::post('import/{kind}/analyze', [ImportController::class, 'analyze'])->whereIn('kind', ['students', 'staff']);
     Route::post('import/{kind}', [ImportController::class, 'store'])->whereIn('kind', ['students', 'staff']);
     Route::get('guardians', [GuardianController::class, 'index']);
     Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);

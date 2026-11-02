@@ -282,9 +282,13 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - Excel import is the next step.
 
 ## Excel import (students and staff)
-- Admin: **Import** in the side menu. Pick Students or Staff, download the template, fill it (one row per person), upload it. Step 1 only **checks** the file (every row, with the same rules as the forms) and lists the problems by row; step 2 imports the valid rows and skips the rest, so a file can be fixed and uploaded again (rows already added are reported as duplicates, never added twice).
-- Columns can be named by key, English or Arabic label. `.xlsx` and `.csv`, up to 1000 rows / 2 MB per file.
-- Students: required student number and Arabic name; section by name (current year); parent email creates or reuses the parent account (siblings share one). Accounts, the grade's yearly fee and the default password work exactly as when adding a student by hand.
-- Staff: required name, email and position (`teacher`, `head_of_department`, `accountant`, ...); subject by name.
-- Endpoints: `GET /api/import/{students|staff}/template`, `POST /api/import/{students|staff}` (`file`, `confirm`).
-- A new kind of import = one `Importer` class (`columns()`, `check()`, `create()`).
+Upload the **school's own file** as it is — no template needed.
+1. Admin: **Import** in the side menu, choose Students or Staff, pick the file, **Read the file**.
+2. The columns are recognised automatically from the header words (Arabic or English, e.g. "اسم الطالب", "الصف", "جوال ولي الأمر", "Phone") and, for a plain "Name" column, from the script of the values (Arabic letters → Arabic name, Latin → English). The first rows are shown so the admin can fix any wrong guess or ignore columns.
+3. **Check the file**: every row is validated with the same rules as the forms and problems are listed by row; nothing is created yet.
+4. **Import**: valid rows are created, the rest skipped. Fix and re-upload the same file safely (existing rows are reported as duplicates).
+- Generated for the school: student numbers when the file has none (after the highest existing one), student login emails (as when adding a student), staff login emails from the name (`sara.khaled@<domain>`, `STAFF_EMAIL_DOMAIN`; Arabic names are transliterated), the parent account from the parent email (siblings share it), and the grade's yearly fee.
+- Sections match however they are written ("5-A", "الصف 5 أ"); gender accepts male/female/ذكر/أنثى; staff positions accept codes, English words and the usual Arabic job titles (معلمة, محاسب, مديرة...) or one default position for the whole file.
+- `.xlsx` and `.csv`, up to 1000 rows / 2 MB. A template is still offered for schools that start from scratch.
+- Endpoints (admin): `POST /api/import/{students|staff}/analyze`, `POST /api/import/{students|staff}` (`file`, `mapping`, `confirm`, `default_staff_type`), `GET /api/import/{kind}/template`.
+- A new kind of import = one `Importer` class (`columns()` with aliases, `check()`, `create()`).

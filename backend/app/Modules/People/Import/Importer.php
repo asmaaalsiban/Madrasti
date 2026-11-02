@@ -16,9 +16,32 @@ abstract class Importer
     /**
      * Column key => labels in both languages, whether it is required, and an example for the template.
      *
-     * @return array<string, array{en: string, ar: string, required: bool, example: string}>
+     * @return array<string, array{en: string, ar: string, required: bool, example: string, aliases: list<string>}>
      */
     abstract public function columns(): array;
+
+    /**
+     * A plain "name" header that may mean one of two fields (decided by the script of its values), or null.
+     *
+     * @return ?array{keys: array{0: string, 1: string}, aliases: list<string>}
+     */
+    public function genericName(): ?array
+    {
+        return null;
+    }
+
+    /** Fields that must be present in the mapping (a field may be satisfied by a fallback, so not just the required flag). */
+    abstract public function missingFields(array $mapped): array;
+
+    /**
+     * Settings from the admin that fill blanks (e.g. the position of staff whose file has no such column).
+     *
+     * @param  array<string, mixed>  $defaults
+     */
+    public function withDefaults(array $defaults): static
+    {
+        return $this;
+    }
 
     /**
      * Checks one row (keys are the column keys, values text or null).
@@ -43,6 +66,12 @@ abstract class Importer
     protected function messages(\Illuminate\Contracts\Validation\Validator $validator): array
     {
         return collect($validator->errors()->all())->unique()->values()->all();
+    }
+
+    /** True when the value was already seen in this file (without remembering it). */
+    protected function wasSeen(string $namespace, string $value): bool
+    {
+        return isset($this->seen[$namespace.':'.mb_strtolower($value)]);
     }
 
     /** Remembers a value; true when it was already seen in this file. */
