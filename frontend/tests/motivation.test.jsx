@@ -73,6 +73,19 @@ describe('MotivationPage', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/motivation/star', { classroom_id: 3, student_id: 2 }))
   })
 
+  it('creates a badge of its own from the badge list, then it is selected to give', async () => {
+    api.post.mockResolvedValue({ data: { data: { id: 21 } } })
+    wrap(<MotivationPage base="/teacher" />)
+    await screen.findByText('Salma')
+    fireEvent.change(screen.getByLabelText('Badge'), { target: { value: 'new' } })
+    fireEvent.change(screen.getByLabelText('Name (Arabic)'), { target: { value: 'قارئ' } })
+    fireEvent.change(screen.getByLabelText('Name (English)'), { target: { value: 'Reader' } })
+    fireEvent.change(screen.getByLabelText('Icon (emoji)'), { target: { value: '📚' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save badge' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/motivation/badges', { name_ar: 'قارئ', name_en: 'Reader', icon: '📚' }))
+    await waitFor(() => expect(screen.getByLabelText('Badge')).toHaveValue(''))
+  })
+
   it('links the admin to the settings', async () => {
     wrap(<MotivationPage base="/admin" />)
     expect(await screen.findByRole('link', { name: 'Points & badges settings' })).toHaveAttribute('href', '/admin/motivation-settings')

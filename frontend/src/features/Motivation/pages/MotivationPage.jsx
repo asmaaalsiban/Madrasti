@@ -12,6 +12,7 @@ export default function MotivationPage({ base }) {
   const [picked, setPicked] = useState([])
   const [custom, setCustom] = useState({ points: '', note: '' })
   const [badgeId, setBadgeId] = useState('')
+  const [newBadge, setNewBadge] = useState({ name_ar: '', name_en: '', icon: '' })
   const [error, setError] = useState('')
   const name = (x) => x[`name_${i18n.language}`] || x.name_ar
 
@@ -34,6 +35,11 @@ export default function MotivationPage({ base }) {
   const giveBadge = useMutation({
     mutationFn: () => Promise.all(picked.map((id) => api.post(`/motivation/students/${id}/badges`, { badge_id: Number(badgeId) }))),
     onSuccess: () => { setError(''); setBadgeId(''); setPicked([]); refresh() },
+    onError: fail,
+  })
+  const createBadge = useMutation({
+    mutationFn: async () => (await api.post('/motivation/badges', newBadge)).data.data,
+    onSuccess: (badge) => { setError(''); setNewBadge({ name_ar: '', name_en: '', icon: '' }); setBadgeId(String(badge.id)); refresh() },
     onError: fail,
   })
   const crown = useMutation({
@@ -83,11 +89,20 @@ export default function MotivationPage({ base }) {
             <label className="text-sm">{t('motivation.badge')}
               <select className="mt-1 block rounded border p-2" value={badgeId} onChange={(e) => setBadgeId(e.target.value)}>
                 <option value="">—</option>
+                <option value="new">＋ {t('motivation.addOwnBadge')}</option>
                 {(roster.data?.badges ?? []).map((b) => <option key={b.id} value={b.id}>{b.icon} {name(b)}</option>)}
               </select>
             </label>
-            <button type="button" disabled={picked.length === 0 || !badgeId || giveBadge.isPending} onClick={() => giveBadge.mutate()} className="rounded border px-4 py-2 text-brand disabled:opacity-40">{t('motivation.giveBadge')}</button>
+            {badgeId !== 'new' && <button type="button" disabled={picked.length === 0 || !badgeId || giveBadge.isPending} onClick={() => giveBadge.mutate()} className="rounded border px-4 py-2 text-brand disabled:opacity-40">{t('motivation.giveBadge')}</button>}
           </div>
+          {badgeId === 'new' && (
+            <div className="flex flex-wrap items-end gap-2 rounded border bg-slate-50 p-2">
+              <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newBadge.name_ar} onChange={(e) => setNewBadge({ ...newBadge, name_ar: e.target.value })} /></label>
+              <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newBadge.name_en} onChange={(e) => setNewBadge({ ...newBadge, name_en: e.target.value })} /></label>
+              <label className="text-sm">{t('motivation.icon')}<input className="mt-1 block w-20 rounded border p-2" value={newBadge.icon} onChange={(e) => setNewBadge({ ...newBadge, icon: e.target.value })} /></label>
+              <button type="button" disabled={!newBadge.name_ar || !newBadge.name_en || !newBadge.icon || createBadge.isPending} onClick={() => createBadge.mutate()} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-40">{t('motivation.saveBadge')}</button>
+            </div>
+          )}
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         </div>
       )}

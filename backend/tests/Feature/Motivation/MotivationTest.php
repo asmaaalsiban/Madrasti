@@ -185,7 +185,9 @@ class MotivationTest extends AcademicTestCase
     {
         Sanctum::actingAs($this->teacher);
         $this->postJson('/api/motivation/categories', ['name_ar' => 'x', 'name_en' => 'x', 'points' => 1])->assertForbidden();
-        $this->postJson('/api/motivation/badges', ['name_ar' => 'x', 'name_en' => 'x', 'icon' => '⭐'])->assertForbidden();
+        $id = $this->postJson('/api/motivation/badges', ['name_ar' => 'قارئ', 'name_en' => 'Reader', 'icon' => '📚', 'points_required' => 5])->assertCreated()->assertJsonPath('data.points_required', null)->json('data.id');
+        $this->putJson("/api/motivation/badges/$id", ['name_ar' => 'x', 'name_en' => 'x', 'icon' => '⭐'])->assertForbidden();
+        $this->deleteJson("/api/motivation/badges/$id")->assertForbidden();
 
         $this->actAsAdmin();
         $id = $this->postJson('/api/motivation/categories', ['name_ar' => 'قراءة', 'name_en' => 'Reading', 'points' => 2])->assertCreated()->json('data.id');

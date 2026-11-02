@@ -246,12 +246,12 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('motivation')->
     Route::post('students/{student}/badges', [MotivationController::class, 'giveBadge']);
     Route::get('categories', [PointCategoryController::class, 'index']);
     Route::get('badges', [BadgeController::class, 'index']);
+    Route::post('badges', [BadgeController::class, 'store']); // a teacher can create a badge of their own
 });
 Route::middleware(['school-user', 'role:admin'])->prefix('motivation')->group(function (): void {
     Route::post('categories', [PointCategoryController::class, 'store']);
     Route::put('categories/{category}', [PointCategoryController::class, 'update']);
     Route::delete('categories/{category}', [PointCategoryController::class, 'destroy']);
-    Route::post('badges', [BadgeController::class, 'store']);
     Route::put('badges/{badge}', [BadgeController::class, 'update']);
     Route::delete('badges/{badge}', [BadgeController::class, 'destroy']);
 });

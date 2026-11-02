@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/** The school's badges. Teachers read the active ones; the admin manages them. Deleting a badge removes it from students too. */
+/** The school's badges. Teachers read the active ones and can add their own (given by hand); the admin manages them. Deleting a badge removes it from students too. */
 class BadgeController extends Controller
 {
     public function index(Request $request): JsonResponse
@@ -25,7 +25,13 @@ class BadgeController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        return response()->json(['data' => Badge::create($this->validated($request))], 201);
+        $data = $this->validated($request);
+        // Only the admin sets a points threshold; a teacher's own badge is given by hand.
+        if (! $request->user()->hasRole(Role::Admin)) {
+            $data['points_required'] = null;
+        }
+
+        return response()->json(['data' => Badge::create($data)], 201);
     }
 
     public function update(Request $request, Badge $badge): JsonResponse

@@ -972,6 +972,8 @@
     "icon": "الرمز (إيموجي)",
     "pointsRequired": "النقاط المطلوبة",
     "atPoints": "عند {{count}} نقطة",
-    "byHand": "تُمنح يدويًا"
+    "byHand": "تُمنح يدويًا",
+    "addOwnBadge": "أضف شارة من عندي",
+    "saveBadge": "حفظ الشارة"
   }
 }
