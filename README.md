@@ -368,3 +368,8 @@ Upload the **school's own file** as it is — no template needed.
 - **Own rules** (`/admin/payroll/templates`, `/teacher/payroll/templates`; the principal and the accountant both write them): a name, bonus / allowance / deduction, a fixed amount or a percent of the salary, and an optional category (private lessons, summer club, club, other). In a draft payroll the accountant gives a rule to everyone ("Give a rule to everyone") or to one person ("Rule"); percent rules are worked out from each person's base salary, and a deduction that would take someone's net below zero is skipped for them. Manual lines can carry a category too.
 - **My salary** (`/teacher/payslips`, `/admin/payslips`): the last paid month with how it was calculated (base, bonuses, deductions grouped by category), the current contract, the commitment score, a chart of the net salary by month, and the previous months (tap one to see its breakdown).
 - After pulling: `php artisan tenants:migrate`.
+
+### Deduction steps and absence
+
+- Each commitment measure can have **steps**: e.g. below 80% lose 10, below 60% lose 25, below 50% lose 20% of the salary. Only the strictest step the score falls under applies (they do not add up). Old single-threshold rules keep working as one step.
+- **Absence**: a working day with no check-in (after recording started) costs a fixed amount, or a percent of one day's pay (salary / working days of the month); approved leave costs nothing.

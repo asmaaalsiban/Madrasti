@@ -86,9 +86,17 @@ class StaffAttendanceController extends Controller
             $rules["$code.deduction_below"] = ['integer', 'min:1', 'max:100'];
             $rules["$code.bonus_type"] = [Rule::in(['percent', 'amount'])];
             $rules["$code.deduction_type"] = [Rule::in(['percent', 'amount'])];
+            $rules["$code.deduction_tiers"] = ['sometimes', 'array', 'max:6'];
+            $rules["$code.deduction_tiers.*.below"] = ['required', 'integer', 'min:1', 'max:100'];
+            $rules["$code.deduction_tiers.*.type"] = ['required', Rule::in(['percent', 'amount'])];
+            $rules["$code.deduction_tiers.*.value"] = ['required', 'numeric', 'min:0', 'max:100000'];
             $rules["$code.bonus_value"] = ['numeric', 'min:0', 'max:100000'];
             $rules["$code.deduction_value"] = ['numeric', 'min:0', 'max:100000'];
         }
+        $rules['absence'] = ['sometimes', 'array'];
+        $rules['absence.enabled'] = ['boolean'];
+        $rules['absence.type'] = [Rule::in(['percent', 'amount'])];
+        $rules['absence.value'] = ['numeric', 'min:0', 'max:100000'];
         $this->rules->save($request->validate($rules));
 
         return response()->json(['data' => $this->rules->all()]);

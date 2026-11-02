@@ -67,8 +67,8 @@ describe('StaffAttendancePage', () => {
 })
 
 describe('RulesPage', () => {
-  const rule = { enabled: false, bonus_min: 90, bonus_type: 'amount', bonus_value: 0, deduction_below: 70, deduction_type: 'percent', deduction_value: 0 }
-  const rules = { grace_minutes: 10, punctuality: rule, daily_summary: rule, weekly_plan: rule }
+  const rule = { enabled: false, bonus_min: 90, bonus_type: 'amount', bonus_value: 0, deduction_tiers: [] }
+  const rules = { grace_minutes: 10, punctuality: rule, daily_summary: rule, weekly_plan: rule, absence: { enabled: false, type: 'amount', value: 0 } }
 
   it('saves the rules the principal sets', async () => {
     api.get.mockResolvedValue({ data: { data: rules } })
@@ -78,6 +78,27 @@ describe('RulesPage', () => {
     fireEvent.change(screen.getByLabelText('Punctuality (arriving on time) Bonus'), { target: { value: '20' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/payroll/rules', expect.objectContaining({ punctuality: expect.objectContaining({ enabled: true, bonus_value: '20' }) })))
+  })
+
+  it('adds a deduction step', async () => {
+    api.get.mockResolvedValue({ data: { data: rules } })
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<RulesPage base="/admin" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: '+ Add a step' }))[0])
+    fireEvent.change(screen.getByLabelText('Punctuality (arriving on time) Deduction 1'), { target: { value: '25' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/payroll/rules', expect.objectContaining({ punctuality: expect.objectContaining({ deduction_tiers: [{ below: 60, type: 'amount', value: '25' }] }) })))
+  })
+
+  it('saves steps and the absence rule', async () => {
+    api.get.mockResolvedValue({ data: { data: { ...rules, punctuality: { ...rule, enabled: true, deduction_tiers: [{ below: 80, type: 'amount', value: 10 }] } } } })
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<RulesPage base="/admin" />)
+    fireEvent.change(await screen.findByLabelText('Punctuality (arriving on time) Deduction 1'), { target: { value: '15' } })
+    fireEvent.click(screen.getAllByRole('checkbox').at(-1))
+    fireEvent.change(screen.getByLabelText('Absence'), { target: { value: '12' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/payroll/rules', expect.objectContaining({ punctuality: expect.objectContaining({ deduction_tiers: [{ below: 80, type: 'amount', value: '15' }] }), absence: { enabled: true, type: 'amount', value: '12' } })))
   })
 
   it('is read only for the accountant', async () => {

@@ -103,7 +103,7 @@ class CommitmentTest extends AcademicTestCase
         $this->day($this->sara, '2026-11-09', 'leave'); // not counted; 2026-11-10 has no record: an absence
         Sanctum::actingAs($this->sara);
         $p = $this->getJson('/api/payroll/commitment?month=2026-11')->assertOk()->json('scores.punctuality');
-        $this->assertSame(['score' => 71, 'done' => 5, 'expected' => 7], $p); // 5 on time out of the 7 days without leave
+        $this->assertSame(['score' => 71, 'done' => 5, 'expected' => 7, 'absent' => 1], $p); // 5 on time out of the 7 days without leave
     }
 
     public function test_summaries_and_weekly_plans_are_scored_from_the_timetable(): void
@@ -171,6 +171,69 @@ class CommitmentTest extends AcademicTestCase
         Sanctum::actingAs($this->accountant);
         $runId = $this->postJson('/api/payroll/runs', ['month' => '2026-11'])->json('data.id');
         $this->assertSame('0.00', $this->getJson("/api/payroll/runs/$runId")->json('data.payslips.0.net')); // 300 - 290 - 10: only what is left
+    }
+
+    /** Sara's punctuality for November: `$ontime` of the 8 working days on time, the rest absent. */
+    private function punctualityOf(User $u, int $ontime): void
+    {
+        foreach (array_slice(self::DAYS, 0, $ontime) as $d) {
+            $this->day($u, $d, 'present');
+        }
+    }
+
+    private function net(User $u): string
+    {
+        Sanctum::actingAs($this->accountant);
+        $this->postJson('/api/payroll/contracts', ['user_id' => $u->id, 'starts_on' => '2026-09-01', 'ends_on' => '2027-08-31', 'base_salary' => 300])->assertCreated();
+        $runId = $this->postJson('/api/payroll/runs', ['month' => '2026-11'])->json('data.id');
+
+        return collect($this->getJson("/api/payroll/runs/$runId")->json('data.payslips'))->firstWhere('user.id', $u->id)['net'];
+    }
+
+    public function test_the_deeper_the_shortfall_the_bigger_the_deduction_and_only_the_strictest_tier_applies(): void
+    {
+        $tiers = [['below' => 80, 'type' => 'amount', 'value' => 10], ['below' => 60, 'type' => 'amount', 'value' => 25], ['below' => 50, 'type' => 'percent', 'value' => 20]];
+        $this->rule('punctuality', ['deduction_tiers' => $tiers]);
+        // The tiers are kept strictest-last: 80, 60, 50 (highest first).
+        $this->assertSame([80, 60, 50], array_column($this->getJson('/api/payroll/rules')->json('data.punctuality.deduction_tiers'), 'below'));
+
+        // 7 of 8 on time = 88%: no tier. 6 of 8 = 75%: first tier. 4 of 8 = 50%: second (below 60). 3 of 8 = 38%: the third.
+        $this->assertSame('300.00', $this->net($this->userWith(7)));
+        $this->assertSame('290.00', $this->net($this->userWith(6)));
+        $this->assertSame('275.00', $this->net($this->userWith(4)));
+        $this->assertSame('240.00', $this->net($this->userWith(3))); // 20% of 300
+    }
+
+    private function userWith(int $ontime): User
+    {
+        static $n = 0;
+        $u = User::factory()->staff(StaffType::Teacher)->create(['name' => 'T'.++$n]);
+        $this->punctualityOf($u, $ontime);
+
+        return $u;
+    }
+
+    public function test_every_day_of_absence_costs_a_fixed_amount_or_a_part_of_a_day_and_leave_costs_nothing(): void
+    {
+        $u = $this->userWith(5); // 5 present, 3 absent
+        $this->day($this->sara, '2026-11-01', 'present'); // someone has a record, so recording has started
+        $this->rule('absence', ['type' => 'amount', 'value' => 12]);
+        $this->assertSame('264.00', $this->net($u)); // 300 - 3 x 12
+        $line = DB::table('payslip_items')->where('auto_code', 'absence')->first();
+        $this->assertSame('3', $line->detail);
+        $this->assertSame('deduction', $line->kind);
+
+        $off = $this->userWith(5);
+        $this->day($off, '2026-11-08', 'leave'); // two of the absent days are excused: 2026-11-08 now leave
+        $this->day($off, '2026-11-09', 'leave');
+        $this->assertSame('288.00', $this->net($off)); // 1 absence only
+    }
+
+    public function test_a_day_of_absence_can_cost_a_percent_of_a_days_pay(): void
+    {
+        $u = $this->userWith(7); // 1 absent day
+        $this->rule('absence', ['type' => 'percent', 'value' => 100]); // one day of pay per absence: 300 / 22 working days of November (Sun-Thu)
+        $this->assertSame('286.36', $this->net($u));
     }
 
     public function test_only_the_principal_changes_the_rules_and_they_are_validated(): void
