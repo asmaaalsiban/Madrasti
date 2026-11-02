@@ -98,6 +98,7 @@ const HOME_ROUTES = {
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'motivation', element: <MyMotivationPage /> },
+    { path: 'surveys', element: <MySurveysPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
   ],

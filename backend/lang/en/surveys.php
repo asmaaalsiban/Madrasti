@@ -12,7 +12,6 @@ return [
     'has_answers' => 'This survey already has answers: close it instead of deleting it.',
     'file' => 'Survey_responses',
     'sheet' => 'Responses',
-    'col_parent' => 'Parent',
     'col_phone' => 'Phone',
     'col_student' => 'Student',
     'col_classroom' => 'Section',
@@ -24,4 +23,9 @@ return [
     'state_declined' => 'Declined',
     'yes' => 'Yes',
     'no' => 'No',
+    'approval_parents_only' => 'An approval is always answered by the parents.',
+    'col_name' => 'Name',
+    'col_role' => 'Who',
+    'role_parent' => 'Parent',
+    'role_student' => 'Student',
 ];

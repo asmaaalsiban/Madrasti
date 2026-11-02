@@ -126,8 +126,8 @@ describe('SurveyResultsPage', () => {
   const data = (over = {}) => ({
     id: 1, type: 'poll', title: 'Trip day', description: 'Pick one', status: 'open', recipient_count: 3, response_count: 2, approved: 0, declined: 0,
     questions: [{ id: 5, type: 'single_choice', text: 'Which day?', answered: 2, counts: [{ option: 'Sunday', count: 2 }, { option: 'Monday', count: 0 }] }, { id: 6, type: 'text', text: 'Ideas?', answered: 1, texts: ['More sport'] }],
-    audience: 'grades', audience_detail: { from: { name_ar: 'الرابع', name_en: 'Grade 4' }, to: { name_ar: 'السادس', name_en: 'Grade 6' } },
-    recipients: [{ id: 1, parent: 'Abu Khaled', phone: '0790000003', student: null, state: 'pending' }, { id: 2, parent: 'Abu Ali', phone: null, student: null, state: 'answered' }], ...over,
+    audience: 'grades', respondents: 'parents', audience_detail: { from: { name_ar: 'الرابع', name_en: 'Grade 4' }, to: { name_ar: 'السادس', name_en: 'Grade 6' } },
+    recipients: [{ id: 1, name: 'Abu Khaled', role: 'parent', phone: '0790000003', student: null, state: 'pending' }, { id: 2, name: 'Abu Ali', role: 'parent', phone: null, student: null, state: 'answered' }], ...over,
   })
 
   it('shows the counts, the written answers, and who is still waiting first', async () => {
@@ -143,7 +143,7 @@ describe('SurveyResultsPage', () => {
   it('says who it was sent to and links to the table of answers', async () => {
     api.get.mockResolvedValue({ data: { data: data() } })
     wrap(<SurveyResultsPage base="/admin" />, '/s/1', '/s/:id')
-    expect(await screen.findByText('Sent to: Grade 4 to Grade 6')).toBeInTheDocument()
+    expect(await screen.findByText('Sent to: Grade 4 to Grade 6 · Answered by: Parents')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open the table of answers' })).toHaveAttribute('href', '/admin/surveys/1/responses')
   })
 
@@ -181,13 +181,13 @@ describe('SurveyResponsesPage', () => {
     id: 1, type: 'approval', title: 'Zoo trip', status: 'open', recipient_count: 4, response_count: 3, approved: 2, declined: 1,
     questions: [{ id: 5, type: 'text', text: 'Emergency phone', answered: 2, texts: [] }],
     recipients: [
-      { id: 1, parent: 'Abu Khaled', phone: '0790000003', student: { id: 4, name_ar: 'خالد', name_en: 'Khaled' }, classroom: '5-B', state: 'pending', answered_at: null, answers: {} },
-      { id: 2, parent: 'Abu Ali', phone: '0790000001', student: { id: 1, name_ar: 'علي', name_en: 'Ali' }, classroom: '5-A', state: 'approved', answered_at: '2026-11-02T10:30:00Z', answers: { 5: '0791111111' } },
-      { id: 3, parent: 'Abu Ali', phone: '0790000001', student: { id: 2, name_ar: 'دانا', name_en: 'Dana' }, classroom: '5-B', state: 'declined', answered_at: '2026-11-02T10:31:00Z', answers: {} },
-      { id: 4, parent: 'Um Sami', phone: null, student: { id: 3, name_ar: 'سامي', name_en: 'Sami' }, classroom: '5-A', state: 'approved', answered_at: '2026-11-02T11:00:00Z', answers: { 5: '0792222222' } },
+      { id: 1, name: 'Abu Khaled', role: 'parent', phone: '0790000003', student: { id: 4, name_ar: 'خالد', name_en: 'Khaled' }, classroom: '5-B', state: 'pending', answered_at: null, answers: {} },
+      { id: 2, name: 'Abu Ali', role: 'parent', phone: '0790000001', student: { id: 1, name_ar: 'علي', name_en: 'Ali' }, classroom: '5-A', state: 'approved', answered_at: '2026-11-02T10:30:00Z', answers: { 5: '0791111111' } },
+      { id: 3, name: 'Abu Ali', role: 'parent', phone: '0790000001', student: { id: 2, name_ar: 'دانا', name_en: 'Dana' }, classroom: '5-B', state: 'declined', answered_at: '2026-11-02T10:31:00Z', answers: {} },
+      { id: 4, name: 'Um Sami', role: 'parent', phone: null, student: { id: 3, name_ar: 'سامي', name_en: 'Sami' }, classroom: '5-A', state: 'approved', answered_at: '2026-11-02T11:00:00Z', answers: { 5: '0792222222' } },
     ], ...over,
   })
-  const names = () => screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0].textContent + '/' + within(r).getAllByRole('cell')[1].textContent)
+  const names = () => screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0].textContent + '/' + within(r).getAllByRole('cell')[2].textContent)
 
   it('shows every parent with the child, section, phone, decision and the extra answers', async () => {
     api.get.mockResolvedValue({ data: { data: table() } })
@@ -244,7 +244,7 @@ describe('SurveyResponsesPage', () => {
   })
 
   it('has no child or section columns for a poll', async () => {
-    api.get.mockResolvedValue({ data: { data: table({ type: 'poll', recipients: [{ id: 1, parent: 'Abu Ali', phone: null, student: null, classroom: null, state: 'answered', answered_at: null, answers: {} }] }) } })
+    api.get.mockResolvedValue({ data: { data: table({ type: 'poll', recipients: [{ id: 1, name: 'Abu Ali', role: 'parent', phone: null, student: null, classroom: null, state: 'answered', answered_at: null, answers: {} }] }) } })
     wrap(<SurveyResponsesPage base="/admin" />, '/s/1', '/s/:id')
     await screen.findByText('Zoo trip')
     expect(screen.queryByRole('columnheader', { name: 'Section' })).not.toBeInTheDocument()
@@ -309,5 +309,65 @@ describe('notifications', () => {
     expect(notificationText(i18n.t, 'en', n('survey_reminder', 'poll'))).toBe('Reminder: please answer Zoo trip')
     await i18n.changeLanguage('ar')
     expect(notificationText(i18n.t, 'ar', n('survey_new', 'approval'))).toBe('مطلوب موافقتك: Zoo trip')
+  })
+})
+
+describe('students answering', () => {
+  const studentRow = { id: 21, type: 'poll', title: 'Lunch menu', description: null, open: true, state: 'pending', decision: null, student: { id: 1, name_ar: 'علي', name_en: 'Ali' }, closes_at: null, answers: {}, questions: [{ id: 9, type: 'single_choice', text: 'Favourite?', options: ['Pizza', 'Rice'], is_required: true }] }
+
+  it('a student answers a poll with no child name and no approve/decline buttons', async () => {
+    api.get.mockResolvedValue({ data: { data: [studentRow] } })
+    api.post.mockResolvedValue({ data: { data: { state: 'answered' } } })
+    wrap(<MySurveysPage />)
+    const card = (await screen.findByText('Lunch menu')).closest('li')
+    fireEvent.click(within(card).getByLabelText('Rice'))
+    fireEvent.click(within(card).getByRole('button', { name: 'Send my answer' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/my-surveys/21/respond', { decision: null, answers: { 9: 'Rice' } }))
+    expect(within(card).queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
+  })
+
+  it('the survey form says an approval is only for parents and offers students and both for the rest', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/behavior/classrooms' ? [] : [] } }))
+    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
+    wrap(<SurveysPage base="/admin" />)
+    fireEvent.click(await screen.findByRole('button', { name: 'New' }))
+    expect(screen.getByLabelText('Students')).toBeInTheDocument()
+    expect(screen.getByLabelText('Parents and students')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('Parents and students'))
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'approval' } })
+    expect(screen.queryByLabelText('Students')).not.toBeInTheDocument()
+    expect(screen.getByText('An approval is always answered by the parents.')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Trip' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send to parents' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/surveys', expect.objectContaining({ type: 'approval', respondents: 'parents' })))
+  })
+
+  it('sends a poll to students only', async () => {
+    api.get.mockImplementation(() => Promise.resolve({ data: { data: [] } }))
+    api.post.mockResolvedValue({ data: { data: { id: 9 } } })
+    wrap(<SurveysPage base="/admin" />)
+    fireEvent.click(await screen.findByRole('button', { name: 'New' }))
+    fireEvent.click(screen.getByLabelText('Students'))
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Lunch' } })
+    fireEvent.change(screen.getByLabelText('Question'), { target: { value: 'Favourite?' } })
+    fireEvent.change(screen.getByLabelText('Choices'), { target: { value: 'Pizza\nRice' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send to parents' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/surveys', expect.objectContaining({ type: 'poll', respondents: 'students', audience: 'all' })))
+  })
+
+  it('the table tells students from parents', async () => {
+    api.get.mockResolvedValue({ data: { data: {
+      id: 1, type: 'poll', title: 'Lunch menu', status: 'open', recipient_count: 2, response_count: 1, respondents: 'both', approved: 0, declined: 0, questions: [],
+      recipients: [
+        { id: 1, name: 'Ali', role: 'student', phone: null, student: { id: 1, name_ar: 'علي', name_en: 'Ali' }, classroom: '5-A', state: 'answered', answered_at: null, answers: {} },
+        { id: 2, name: 'Abu Ali', role: 'parent', phone: '0790000001', student: null, classroom: null, state: 'pending', answered_at: null, answers: {} },
+      ] } } })
+    wrap(<SurveyResponsesPage base="/admin" />, '/s/1', '/s/:id')
+    await screen.findByText('Lunch menu')
+    expect(within(screen.getByText('Abu Ali').closest('tr')).getByText('Parent')).toBeInTheDocument()
+    const ali = screen.getAllByText('Ali')[0].closest('tr')
+    expect(within(ali).getByText('Student')).toBeInTheDocument()
+    expect(within(ali).getByText('5-A')).toBeInTheDocument()
   })
 })

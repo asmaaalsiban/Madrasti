@@ -35,7 +35,7 @@ export default function SurveyResultsPage({ base }) {
       <div className="space-y-1">
         <h1 className="text-xl font-bold">{data.title}</h1>
         <p className="text-sm text-slate-600">{t(`surveys.types.${data.type}`)} · {t(`surveys.status.${data.status}`)} · {t('surveys.answered', { done: data.response_count, total: data.recipient_count })}</p>
-        <p className="text-sm text-slate-600">{t('surveys.sentTo')}: {audienceText}</p>
+        <p className="text-sm text-slate-600">{t('surveys.sentTo')}: {audienceText} · {t('surveys.answeredBy')}: {t(`surveys.who.${data.respondents}`)}</p>
         {data.description && <p className="rounded bg-white p-3 text-sm">{data.description}</p>}
       </div>
 
@@ -81,7 +81,7 @@ export default function SurveyResultsPage({ base }) {
         <ul className="divide-y text-sm">
           {data.recipients.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
-              <span>{r.parent}{r.student && <span className="text-slate-500"> · {nameOf(r.student)}</span>}{r.phone && <span dir="ltr" className="ms-2 text-xs text-slate-400">{r.phone}</span>}</span>
+              <span>{r.name}<span className="ms-1 rounded bg-slate-100 px-1.5 text-xs text-slate-600">{t(`surveys.role.${r.role}`)}</span>{r.role === 'parent' && r.student && <span className="text-slate-500"> · {nameOf(r.student)}</span>}{r.role === 'student' && r.classroom && <span className="text-slate-500"> · {r.classroom}</span>}{r.phone && <span dir="ltr" className="ms-2 text-xs text-slate-400">{r.phone}</span>}</span>
               <span className={`rounded-full px-2 py-0.5 text-xs ${STATE_STYLE[r.state]}`}>{t(`surveys.state.${r.state}`)}</span>
             </li>
           ))}

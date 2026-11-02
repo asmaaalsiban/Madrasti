@@ -186,7 +186,7 @@ class SurveyTest extends AcademicTestCase
         $this->assertSame([3, 2], [$data['recipient_count'], $data['response_count']]);
         $this->assertSame(['Sunday' => 2, 'Monday' => 0], collect($data['questions'][0]['counts'])->pluck('count', 'option')->all());
         $this->assertSame(['pending'], collect($data['recipients'])->pluck('state')->unique()->reject(fn ($s) => $s === 'answered')->values()->all());
-        $this->assertSame('Abu Khaled', $data['recipients'][0]['parent']); // the ones still waiting come first
+        $this->assertSame('Abu Khaled', $data['recipients'][0]['name']); // the ones still waiting come first
     }
 
     public function test_an_approval_result_counts_approved_and_declined_children(): void
@@ -328,7 +328,7 @@ class SurveyTest extends AcademicTestCase
         $table = collect($this->getJson("/api/surveys/$id")->json('data.recipients'));
         $this->assertSame(4, $table->count());
         $row = $table->first(fn ($r) => $r['student']['name_en'] === 'ali');
-        $this->assertSame(['Abu Ali', '0790000001', '5-A', 'approved'], [$row['parent'], $row['phone'], $row['classroom'], $row['state']]);
+        $this->assertSame(['Abu Ali', '0790000001', '5-A', 'approved'], [$row['name'], $row['phone'], $row['classroom'], $row['state']]);
         $this->assertSame('0791111111', array_values($row['answers'])[0]);
         $this->assertSame('declined', $table->first(fn ($r) => $r['student']['name_en'] === 'dana')['state']);
         $this->assertSame(['pending', 'pending'], $table->take(2)->pluck('state')->all()); // those still waiting come first
@@ -362,16 +362,16 @@ class SurveyTest extends AcademicTestCase
 
         $this->actAsAdmin();
         $all = $this->sheet($this->get("/api/surveys/$id/export", ['Accept-Language' => 'en']));
-        $this->assertSame(['Parent', 'Phone', 'Student', 'Section', 'Answer', 'Answered at', 'Emergency phone'], $all[0]);
+        $this->assertSame(['Name', 'Who', 'Phone', 'Student', 'Section', 'Answer', 'Answered at', 'Emergency phone'], $all[0]);
         $this->assertCount(5, $all); // header + 4 children
 
         $approved = $this->sheet($this->get("/api/surveys/$id/export?state=approved", ['Accept-Language' => 'en']));
         $this->assertCount(2, $approved);
-        $this->assertSame(['Abu Ali', '0790000001', 'ali', '5-A', 'Approved'], array_slice($approved[1], 0, 5));
-        $this->assertSame('0791111111', $approved[1][6]);
+        $this->assertSame(['Abu Ali', 'Parent', '0790000001', 'ali', '5-A', 'Approved'], array_slice($approved[1], 0, 6));
+        $this->assertSame('0791111111', $approved[1][7]);
 
         $arabic = $this->sheet($this->get("/api/surveys/$id/export?state=approved", ['Accept-Language' => 'ar']));
-        $this->assertSame('ولي الأمر', $arabic[0][0]);
+        $this->assertSame('الاسم', $arabic[0][0]);
 
         $this->get("/api/surveys/$id/export?state=nonsense")->assertStatus(422);
     }
@@ -388,5 +388,133 @@ class SurveyTest extends AcademicTestCase
         $this->get("/api/surveys/$theirs/export")->assertForbidden();
         Sanctum::actingAs($this->dad);
         $this->get("/api/surveys/$mine/export")->assertForbidden();
+    }
+
+    /** Gives Ali and Sami (5-A) and Dana (6-B) their own student accounts. */
+    private function studentAccounts(): array
+    {
+        $accounts = [];
+        foreach (['ali', 'sami', 'dana'] as $key) {
+            $accounts[$key] = User::factory()->role(Role::Student)->create(['name' => ucfirst($key)]);
+            $this->kids[$key]->update(['user_id' => $accounts[$key]->id]);
+        }
+
+        return $accounts;
+    }
+
+    public function test_a_poll_can_be_for_the_students_the_parents_or_both(): void
+    {
+        $this->studentAccounts();
+        $this->actAsAdmin();
+
+        $parents = $this->postJson('/api/surveys', $this->pollBody())->assertCreated()->assertJsonPath('data.respondents', 'parents');
+        $this->assertSame(3, $parents->json('data.recipient_count'));
+        $students = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'students']))->assertCreated();
+        $this->assertSame(3, $students->json('data.recipient_count')); // Ali, Sami, Dana: Khaled has no account
+        $both = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'both']))->assertCreated();
+        $this->assertSame(6, $both->json('data.recipient_count'));
+
+        $this->assertSame(0, SurveyRecipient::where('survey_id', $students->json('data.id'))->whereIn('user_id', [$this->dad->id, $this->mum->id])->count());
+    }
+
+    public function test_an_approval_is_only_for_parents(): void
+    {
+        $this->studentAccounts();
+        $this->actAsAdmin();
+
+        $this->postJson('/api/surveys', $this->approvalBody(['respondents' => 'students']))->assertUnprocessable()->assertJsonValidationErrors('respondents');
+        $this->postJson('/api/surveys', $this->approvalBody(['respondents' => 'both']))->assertUnprocessable();
+        $ok = $this->postJson('/api/surveys', $this->approvalBody(['respondents' => 'parents']))->assertCreated();
+        $this->assertSame(2, $ok->json('data.recipient_count'));
+        // No answer is asked of any student.
+        $this->assertSame(0, SurveyRecipient::where('survey_id', $ok->json('data.id'))->whereIn('user_id', User::where('role', Role::Student)->pluck('id'))->count());
+    }
+
+    public function test_a_student_sees_and_answers_a_poll_made_for_students_and_each_side_only_their_own(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'both', 'title' => 'Lunch menu']))->json('data.id');
+
+        Sanctum::actingAs($accounts['ali']);
+        $mine = $this->mine();
+        $this->assertCount(1, $mine);
+        $this->assertSame('Lunch menu', $mine[0]['title']);
+        $this->assertSame(1, $this->getJson('/api/my-surveys/pending')->json('data.count'));
+        $this->postJson("/api/my-surveys/{$mine[0]['id']}/respond", ['answers' => [$mine[0]['questions'][0]['id'] => 'Monday']])->assertOk();
+        $this->assertSame('answered', $this->mine()[0]['state']);
+        $this->assertSame(0, $this->getJson('/api/my-surveys/pending')->json('data.count'));
+
+        // Ali's parent has their own copy; one answer does not answer the other.
+        Sanctum::actingAs($this->dad);
+        $this->assertSame('pending', $this->mine()[0]['state']);
+        // A student cannot answer on behalf of a parent or another student.
+        $dadRow = SurveyRecipient::where('survey_id', $id)->where('user_id', $this->dad->id)->first();
+        $samiRow = SurveyRecipient::where('survey_id', $id)->where('user_id', $accounts['sami']->id)->first();
+        Sanctum::actingAs($accounts['ali']);
+        $this->postJson("/api/my-surveys/{$dadRow->id}/respond", ['answers' => []])->assertNotFound();
+        $this->postJson("/api/my-surveys/{$samiRow->id}/respond", ['answers' => []])->assertNotFound();
+    }
+
+    public function test_a_student_gets_nothing_from_a_parents_only_survey_and_an_approval(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $this->postJson('/api/surveys', $this->pollBody());
+        $this->postJson('/api/surveys', $this->approvalBody());
+
+        Sanctum::actingAs($accounts['ali']);
+        $this->assertCount(0, $this->mine());
+        $this->assertSame(0, $this->getJson('/api/my-surveys/pending')->json('data.count'));
+    }
+
+    public function test_students_are_told_on_their_own_page_and_the_parents_on_theirs(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'both']));
+
+        $link = fn (User $u) => json_decode((string) DB::table('notifications')->where('notifiable_id', $u->id)->value('data'), true)['link'];
+        $this->assertSame('/student/surveys', $link($accounts['ali']));
+        $this->assertSame('/parent/surveys', $link($this->dad));
+    }
+
+    public function test_the_results_table_says_who_answered_a_survey_for_both(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'both']))->json('data.id');
+        Sanctum::actingAs($accounts['ali']);
+        $row = $this->mine()[0];
+        $this->postJson("/api/my-surveys/{$row['id']}/respond", ['answers' => [$row['questions'][0]['id'] => 'Sunday']])->assertOk();
+
+        $this->actAsAdmin();
+        $data = $this->getJson("/api/surveys/$id")->json('data');
+        $this->assertSame(['Sunday' => 1, 'Monday' => 0], collect($data['questions'][0]['counts'])->pluck('count', 'option')->all());
+        $ali = collect($data['recipients'])->firstWhere('name', 'Ali');
+        $this->assertSame(['student', 'answered', '5-A'], [$ali['role'], $ali['state'], $ali['classroom']]);
+        $this->assertSame(['parent', 'student'], collect($data['recipients'])->pluck('role')->unique()->sort()->values()->all());
+    }
+
+    public function test_a_reminder_goes_to_students_and_parents_on_their_own_pages(): void
+    {
+        $accounts = $this->studentAccounts();
+        $this->actAsAdmin();
+        $id = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'both']))->json('data.id');
+        DB::table('notifications')->delete();
+
+        $this->postJson("/api/surveys/$id/remind")->assertOk()->assertJsonPath('data.reminded', 6);
+        $this->assertSame('/student/surveys', json_decode((string) DB::table('notifications')->where('notifiable_id', $accounts['dana']->id)->value('data'), true)['link']);
+        $this->assertSame('/parent/surveys', json_decode((string) DB::table('notifications')->where('notifiable_id', $this->mum->id)->value('data'), true)['link']);
+    }
+
+    public function test_a_teacher_can_also_ask_their_students(): void
+    {
+        $accounts = $this->studentAccounts();
+        Sanctum::actingAs($this->teacher);
+
+        $r = $this->postJson('/api/surveys', $this->pollBody(['respondents' => 'students', 'audience' => 'classrooms', 'classroom_ids' => [$this->a->id]]))->assertCreated();
+        $this->assertSame(2, $r->json('data.recipient_count')); // Ali and Sami are in 5-A
+        $this->postJson('/api/surveys', $this->approvalBody(['respondents' => 'students']))->assertUnprocessable();
     }
 }

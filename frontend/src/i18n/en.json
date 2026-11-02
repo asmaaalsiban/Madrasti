@@ -1172,8 +1172,22 @@
       "classroom": "Section",
       "phone": "Phone",
       "state": "Answer",
-      "answeredAt": "Answered at"
+      "answeredAt": "Answered at",
+      "name": "Name",
+      "role": "Who"
     },
-    "noRows": "No one matches."
+    "noRows": "No one matches.",
+    "respondents": "Who answers",
+    "who": {
+      "parents": "Parents",
+      "students": "Students",
+      "both": "Parents and students"
+    },
+    "approvalParentsOnly": "An approval is always answered by the parents.",
+    "answeredBy": "Answered by",
+    "role": {
+      "parent": "Parent",
+      "student": "Student"
+    }
   }
 }
