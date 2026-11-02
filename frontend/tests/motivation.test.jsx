@@ -16,8 +16,8 @@ const wrap = (ui, path = '/', route = '/') =>
 
 const roster = {
   students: [
-    { id: 1, name_ar: 'سلمى', name_en: 'Salma', total: 12, week: 4, is_star: true, is_leader: true },
-    { id: 2, name_ar: 'عمر', name_en: 'Omar', total: 3, week: 4, is_star: false, is_leader: true },
+    { id: 1, name_ar: 'سلمى', name_en: 'Salma', total: 12, week: 4, is_star: true, is_leader: true, badges: [{ id: 8, name_ar: 'مبدع', name_en: 'Creative', icon: '🎨', mine: true }, { id: 9, name_ar: 'نجم', name_en: 'Rising star', icon: '🌟', mine: false }] },
+    { id: 2, name_ar: 'عمر', name_en: 'Omar', total: 3, week: 4, is_star: false, is_leader: true, badges: [] },
   ],
   categories: [{ id: 5, name_ar: 'مساعدة', name_en: 'Helping', points: 2, is_active: true }, { id: 6, name_ar: 'تأخر', name_en: 'Late', points: -1, is_active: true }],
   badges: [{ id: 8, name_ar: 'مبدع', name_en: 'Creative', icon: '🎨' }],
@@ -41,6 +41,24 @@ describe('MotivationPage', () => {
     expect(screen.getByText(/Star of the week/)).toBeInTheDocument()
     expect(screen.getByText(/Leading/)).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument()
+  })
+
+  it('shows every badge each student has, marking the ones I gave', async () => {
+    wrap(<MotivationPage base="/teacher" />)
+    expect(await screen.findByTitle('Creative (given by me)')).toHaveTextContent('🎨 Creative')
+    expect(screen.getByTitle('Rising star')).toHaveTextContent('🌟 Rising star')
+  })
+
+  it('adds my own category with its points', async () => {
+    api.post.mockResolvedValue({ data: { data: { id: 30 } } })
+    wrap(<MotivationPage base="/teacher" />)
+    await screen.findByText('Salma')
+    fireEvent.click(screen.getByRole('button', { name: 'Add my own reason' }))
+    fireEvent.change(screen.getAllByLabelText('Name (Arabic)')[0], { target: { value: 'قراءة' } })
+    fireEvent.change(screen.getAllByLabelText('Name (English)')[0], { target: { value: 'Reading' } })
+    fireEvent.change(screen.getAllByLabelText('Points')[0], { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save reason' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/motivation/categories', { name_ar: 'قراءة', name_en: 'Reading', points: 3 }))
   })
 
   it('gives points by category to the ticked students only', async () => {
