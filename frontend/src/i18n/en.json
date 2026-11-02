@@ -972,6 +972,8 @@
     "icon": "Icon (emoji)",
     "pointsRequired": "Points needed",
     "atPoints": "at {{count}} points",
-    "byHand": "given by hand"
+    "byHand": "given by hand",
+    "addOwnBadge": "Add my own badge",
+    "saveBadge": "Save badge"
   }
 }
