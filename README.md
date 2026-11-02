@@ -400,3 +400,7 @@ Upload the **school's own file** as it is — no template needed.
 - **Header** (all roles): school name on one side; round icon buttons for chat, announcements and notifications (with unread badges), and one **account menu** (avatar, name and role, language, change password, switch school, log out) instead of a row of text buttons (`UserMenu`, `IconButton`).
 - **Admin sidebar**: grouped (People, Learning & follow-up, Schedules, Money & staff, Communication, School setup, System), each item with an icon, sticky and scrollable on desktop.
 - **Teacher home**: arrive/leave card, then tiles in groups (Teaching, Follow-up, Department, Me); an accountant sees School money. Each tile has an icon, a title and a hint.
+
+### Landing page
+
+The school's public page (`/`) shows a welcome hero: the school's **logo** (or a graduation-cap badge / first letter when it has none) and **name** as the big title, soft clouds, stars and floating feature chips, a small school-building illustration (inline SVG in the palette), role cards, a features band and a closing call to action. The name, logo and colour come from the school's branding; motion is switched off for people who prefer reduced motion.

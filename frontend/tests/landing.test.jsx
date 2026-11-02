@@ -31,7 +31,8 @@ describe('LandingPage', () => {
     mockUser.current = null
     await i18n.changeLanguage('ar')
     renderLanding()
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('مدرستك كلها في مكان واحد')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('مدرسة النور')
+    expect(screen.getByText('مدرستك كلها في مكان واحد')).toBeInTheDocument()
     expect(screen.getAllByText('مدرسة النور').length).toBeGreaterThan(0)
   })
 
@@ -39,7 +40,8 @@ describe('LandingPage', () => {
     mockUser.current = null
     await i18n.changeLanguage('en')
     renderLanding()
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your whole school in one place')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('مدرسة النور')
+    expect(screen.getByText('Your whole school in one place')).toBeInTheDocument()
     expect(document.documentElement.dir).toBe('ltr')
     await i18n.changeLanguage('ar')
   })
