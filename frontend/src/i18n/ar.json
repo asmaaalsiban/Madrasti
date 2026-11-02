@@ -218,7 +218,8 @@
       "remaining": "المتبقي من الرسوم",
       "firstPayment": "الدفعة الأولى (اختياري)",
       "firstPaymentMethod": "طريقة الدفع",
-      "firstPaymentPayer": "اسم الدافع (اختياري)"
+      "firstPaymentPayer": "اسم الدافع (اختياري)",
+      "studentEmail": "بريد دخول الطالب"
     },
     "male": "ذكر",
     "female": "أنثى",

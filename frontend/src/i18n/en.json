@@ -218,7 +218,8 @@
       "remaining": "Remaining fees",
       "firstPayment": "First payment (optional)",
       "firstPaymentMethod": "Payment method",
-      "firstPaymentPayer": "Paid by (optional)"
+      "firstPaymentPayer": "Paid by (optional)",
+      "studentEmail": "Student sign-in email"
     },
     "male": "Male",
     "female": "Female",
