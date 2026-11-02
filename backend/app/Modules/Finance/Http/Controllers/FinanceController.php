@@ -17,11 +17,13 @@ use App\Modules\Finance\Models\StudentFee;
 use App\Modules\Finance\Services\AccountReader;
 use App\Modules\Finance\Services\FeeBilling;
 use App\Modules\Finance\Services\FinanceAccess;
+use App\Shared\Export\XlsxExport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -50,6 +52,25 @@ class FinanceController extends Controller
         ]);
 
         return response()->json($this->reader->accounts($this->year(), $filters)->toArray() + ['currency' => $this->currency()]);
+    }
+
+    /** The accounts list (same filters) as an Excel file: what each student owes, paid, remains and is overdue. */
+    public function exportAccounts(Request $request, XlsxExport $xlsx): BinaryFileResponse
+    {
+        $this->view($request);
+        $filters = $request->validate([
+            'grade_level_id' => ['sometimes', 'integer'], 'classroom_id' => ['sometimes', 'integer'],
+            'status' => ['sometimes', Rule::in(['overdue', 'owing', 'settled'])], 'search' => ['sometimes', 'string', 'max:100'],
+        ]);
+        $currency = $this->currency();
+        $rows = collect($this->reader->accounts($this->year(), $filters, 100000)->items())->map(fn ($r) => [
+            $r['student_number'], $r['name_ar'], $r['name_en'], $r['classroom'], (float) $r['net'], (float) $r['paid'], (float) $r['remaining'], (float) $r['overdue'],
+        ]);
+
+        return $xlsx->download(__('reports.accounts_file').'_'.now()->toDateString(), __('reports.accounts_sheet'), [
+            __('reports.student_number'), __('reports.name_ar'), __('reports.name_en'), __('reports.classroom'),
+            __('reports.net', ['currency' => $currency]), __('reports.paid', ['currency' => $currency]), __('reports.remaining', ['currency' => $currency]), __('reports.overdue', ['currency' => $currency]),
+        ], $rows);
     }
 
     public function statement(Request $request, Student $student): JsonResponse

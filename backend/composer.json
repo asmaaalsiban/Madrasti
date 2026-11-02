@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "minishlink/web-push": "^11.0",
+        "openspout/openspout": "^5.3",
         "stancl/tenancy": "^3.10"
     },
     "require-dev": {

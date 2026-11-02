@@ -274,3 +274,9 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - `PAYMENT_GATEWAY=demo` (default in development) shows a fake card form: `4242 4242 4242 4242` is approved, `4000 0000 0000 0002` declined. Nothing is charged, the card is not stored, and the demo is switched off in production. `PAYMENT_GATEWAY=none` turns online payment off (the button disappears).
 - If the provider took the money but the fee had already been paid another way, the payment is kept with status `review` (table `online_payments`) for a person to refund.
 - Requires `php artisan tenants:migrate`.
+
+## Excel export
+- **Export to Excel** buttons on the attendance report, the student fee accounts and a subject's results. The file has every row (not just the page shown), uses the page's filters, and the headers follow the interface language (the sheet reads right-to-left in Arabic).
+- Endpoints (same permissions as the screens they export): `GET /api/attendance/report/export`, `GET /api/finance/accounts/export`, `GET /api/grading/results/export`.
+- Built on `openspout/openspout` through `App\Shared\Export\XlsxExport`; a new export is a controller method that passes headers and rows to it.
+- Excel import is the next step.

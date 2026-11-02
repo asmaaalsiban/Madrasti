@@ -15,12 +15,42 @@ use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use App\Shared\Export\XlsxExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Absence reports: per student for a period, and the dates behind one student's numbers. */
 class AttendanceReportController extends Controller
 {
     /** How many days each student was absent / late (only the students who were at least once). Admin: any classroom. Teacher: only their own. */
     public function index(Request $request): JsonResponse
+    {
+        [$query, $from, $to] = $this->report($request);
+        $rows = $query->paginate((int) ($request->query('per_page') ?: 15));
+
+        return response()->json([
+            'data' => $rows->getCollection()->map(fn ($row) => [
+                'student' => $row->only(['id', 'student_number', 'name_ar', 'name_en']),
+                'classroom' => $row->classroom,
+                'absent' => (int) $row->absent_count,
+                'late' => (int) $row->late_count,
+            ])->values(),
+            'meta' => ['current_page' => $rows->currentPage(), 'last_page' => $rows->lastPage(), 'total' => $rows->total(), 'from' => $from, 'to' => $to],
+        ]);
+    }
+
+    /** The same report as an Excel file (every row, not one page). */
+    public function export(Request $request, XlsxExport $xlsx): BinaryFileResponse
+    {
+        [$query, $from, $to] = $this->report($request);
+        $rows = $query->get()->map(fn ($r) => [$r->student_number, $r->name_ar, $r->name_en, $r->classroom, (int) $r->absent_count, (int) $r->late_count]);
+
+        return $xlsx->download(__('reports.attendance_file').'_'.$from.'_'.$to, __('reports.attendance_sheet'), [
+            __('reports.student_number'), __('reports.name_ar'), __('reports.name_en'), __('reports.classroom'), __('reports.absent_days'), __('reports.late_days'),
+        ], $rows);
+    }
+
+    /** @return array{0: \Illuminate\Database\Eloquent\Builder<Enrollment>, 1: string, 2: string} the report query and its period */
+    private function report(Request $request): array
     {
         $user = $request->user();
         $data = $request->validate([
@@ -43,7 +73,7 @@ class AttendanceReportController extends Controller
             ->whereColumn('student_attendances.student_id', 'students.id')
             ->where('status', $status->value)->whereBetween('date', [$from, $to]);
 
-        $rows = Enrollment::query()
+        $query = Enrollment::query()
             ->when($year, fn ($q) => $q->where('enrollments.academic_year_id', $year->id))
             ->when(isset($data['classroom_id']), fn ($q) => $q->where('enrollments.classroom_id', $data['classroom_id']))
             ->when(! $user->hasRole(Role::Admin), fn ($q) => $q->whereIn('enrollments.classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->select('id')))
@@ -56,17 +86,9 @@ class AttendanceReportController extends Controller
             ->selectSub($count(AttendanceStatus::Absent), 'absent_count')
             ->selectSub($count(AttendanceStatus::Late), 'late_count')
             ->orderByRaw('absent_count desc')->orderByRaw('late_count desc')->orderBy('students.name_ar')
-            ->paginate((int) ($data['per_page'] ?? 15));
+            ;
 
-        return response()->json([
-            'data' => $rows->getCollection()->map(fn ($row) => [
-                'student' => $row->only(['id', 'student_number', 'name_ar', 'name_en']),
-                'classroom' => $row->classroom,
-                'absent' => (int) $row->absent_count,
-                'late' => (int) $row->late_count,
-            ])->values(),
-            'meta' => ['current_page' => $rows->currentPage(), 'last_page' => $rows->lastPage(), 'total' => $rows->total(), 'from' => $from, 'to' => $to],
-        ]);
+        return [$query, $from, $to];
     }
 
     /** One student's days (newest first) and totals. ?status=absent|late limits the list, not the totals. */

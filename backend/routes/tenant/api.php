@@ -113,6 +113,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->
     Route::get('/', [AttendanceController::class, 'show']);
     Route::put('/', [AttendanceController::class, 'update']);
     Route::get('report', [AttendanceReportController::class, 'index']);
+    Route::get('report/export', [AttendanceReportController::class, 'export']);
 });
 
 // One student's days: admin, the homeroom teacher, the student and the student's parents (checked by a gate).
@@ -129,6 +130,7 @@ Route::middleware(['school-user', 'role:teacher'])->get('department', Department
 Route::middleware(['school-user', 'role:admin,teacher'])->group(function (): void {
     Route::get('grading/options', GradingOptionsController::class);
     Route::get('grading/results', ResultsController::class);
+    Route::get('grading/results/export', [ResultsController::class, 'export']);
     Route::apiResource('assessments', AssessmentController::class)->except('store', 'update');
     Route::post('assessments', [AssessmentController::class, 'store']);
     Route::put('assessments/{assessment}', [AssessmentController::class, 'update']);
@@ -191,6 +193,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::get('options', [FinanceController::class, 'options']);
     Route::get('summary', [FinanceController::class, 'summary']);
     Route::get('accounts', [FinanceController::class, 'accounts']);
+    Route::get('accounts/export', [FinanceController::class, 'exportAccounts']);
     Route::get('students/{student}', [FinanceController::class, 'statement']);
     Route::post('students/{student}/fees', [FinanceController::class, 'storeFee']);
     Route::put('students/{student}/transport', [FinanceController::class, 'setTransport']);
