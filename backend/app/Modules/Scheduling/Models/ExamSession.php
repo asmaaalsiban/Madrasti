@@ -21,7 +21,7 @@ class ExamSession extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['term_id', 'classroom_id', 'subject_id', 'room_id', 'schedule_generation_id', 'exam_date', 'starts_at', 'ends_at'];
+    protected $fillable = ['term_id', 'classroom_id', 'subject_id', 'room_id', 'schedule_generation_id', 'exam_date', 'period_from', 'period_to', 'starts_at', 'ends_at'];
 
     /**
      * @return array<string, string>

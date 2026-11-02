@@ -1700,7 +1700,7 @@
   },
   "exams": {
     "title": "Exam timetable",
-    "help": "Pick the term and the days, the exam time and how many teachers watch each room. Preview first; publishing replaces the exams of those grades and tells students, parents and teachers. Every section of a grade sits the same subject together.",
+    "help": "Pick the term and the days, and which periods the exams take (e.g. periods 2 and 3: the lessons are replaced by the exam and the teacher who already has that section then watches it). Preview first; publishing replaces the exams of those grades and tells students, parents and teachers. Every section of a grade sits the same subject together.",
     "term": "Term",
     "from": "From",
     "to": "To",
@@ -1732,6 +1732,19 @@
     "noneTeaching": "No exams for your classes yet.",
     "childTitle": "Exams of {{name}}",
     "nav": "Exam timetable",
-    "tile": "Exam timetable"
+    "tile": "Exam timetable",
+    "firstPeriod": "First period of the exam",
+    "periodsPerExam": "Periods per exam",
+    "periodsHelp": "Each exam takes the place of lessons in periods {{from}} to {{to}} (the school's own times). The teacher who already has that section in those periods watches it automatically.",
+    "fillMissing": "If a period has no teacher on the timetable, use a free teacher",
+    "when": "Set the time",
+    "byPeriods": "By periods (replaces lessons)",
+    "byTime": "By a custom time",
+    "periodFrom": "From period",
+    "periodTo": "To period",
+    "periodsMoveHelp": "The times are the school's, and the watchers become the teachers who have the section in those periods (unless you tick others).",
+    "periodOne": "Period {{n}}",
+    "periodsRange": "Periods {{from}}–{{to}}",
+    "lessonsReplaced": "The lessons of these periods are replaced by the exam."
   }
 }

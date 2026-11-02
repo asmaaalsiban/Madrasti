@@ -11,11 +11,16 @@ function EditDialog({ session, onClose }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const staff = useQuery({ queryKey: ['payroll', 'staff'], queryFn: async () => (await api.get('/payroll/staff')).data })
-  const [form, setForm] = useState({ exam_date: session.date, starts_at: session.starts_at, ends_at: session.ends_at })
+  const byPeriods = session.period_from !== null
+  const [form, setForm] = useState({ exam_date: session.date, starts_at: session.starts_at, ends_at: session.ends_at, period_from: session.period_from ?? '', period_to: session.period_to ?? '' })
+  const [mode, setMode] = useState(byPeriods ? 'periods' : 'time')
   const [watchers, setWatchers] = useState(session.invigilators.map((u) => u.id))
+  const [touched, setTouched] = useState(false)
   const [error, setError] = useState('')
   const save = useMutation({
-    mutationFn: () => api.put(`/exams/${session.id}`, { ...form, invigilator_ids: watchers }),
+    mutationFn: () => api.put(`/exams/${session.id}`, mode === 'periods'
+      ? { exam_date: form.exam_date, period_from: Number(form.period_from), period_to: Number(form.period_to || form.period_from), ...(touched ? { invigilator_ids: watchers } : {}) }
+      : { exam_date: form.exam_date, starts_at: form.starts_at, ends_at: form.ends_at, invigilator_ids: watchers }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['exams'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -29,13 +34,29 @@ function EditDialog({ session, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="block text-sm">{t('exams.date')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.exam_date} onChange={set('exam_date')} /></label>
-          <label className="block text-sm">{t('exams.startsAt')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.starts_at} onChange={set('starts_at')} /></label>
-          <label className="block text-sm">{t('exams.endsAt')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.ends_at} onChange={set('ends_at')} /></label>
+          <label className="block text-sm sm:col-span-2">{t('exams.when')}
+            <select className="mt-1 w-full rounded border p-2" value={mode} onChange={(e) => setMode(e.target.value)}>
+              <option value="periods">{t('exams.byPeriods')}</option>
+              <option value="time">{t('exams.byTime')}</option>
+            </select>
+          </label>
         </div>
+        {mode === 'periods' ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm">{t('exams.periodFrom')}<input required type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.period_from} onChange={set('period_from')} /></label>
+            <label className="block text-sm">{t('exams.periodTo')}<input type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.period_to} onChange={set('period_to')} /></label>
+            <p className="text-xs text-slate-500 sm:col-span-2">{t('exams.periodsMoveHelp')}</p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm">{t('exams.startsAt')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.starts_at} onChange={set('starts_at')} /></label>
+            <label className="block text-sm">{t('exams.endsAt')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.ends_at} onChange={set('ends_at')} /></label>
+          </div>
+        )}
         <div>
           <p className="mb-1 text-sm font-medium">{t('exams.watchers')}</p>
           <ul className="grid max-h-44 gap-1 overflow-y-auto rounded border p-2 sm:grid-cols-2">
-            {teachers.map((s) => <li key={s.id}><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={watchers.includes(s.id)} onChange={() => setWatchers(watchers.includes(s.id) ? watchers.filter((x) => x !== s.id) : [...watchers, s.id])} />{s.name}</label></li>)}
+            {teachers.map((s) => <li key={s.id}><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={watchers.includes(s.id)} onChange={() => { setTouched(true); setWatchers(watchers.includes(s.id) ? watchers.filter((x) => x !== s.id) : [...watchers, s.id]) }} />{s.name}</label></li>)}
           </ul>
         </div>
         <div className="flex justify-between gap-2">
@@ -56,8 +77,9 @@ export default function ExamsAdminPage() {
   const client = useQueryClient()
   const terms = useQuery({ queryKey: ['terms', 'all'], queryFn: async () => (await api.get('/terms', { params: { per_page: 100 } })).data.data })
   const grades = useQuery({ queryKey: ['grade-levels', 'all'], queryFn: async () => (await api.get('/grade-levels', { params: { per_page: 100 } })).data.data })
-  const [form, setForm] = useState({ term_id: '', from: '', to: '', start_time: '08:00', duration_minutes: 90, slots_per_day: 1, grade_per_day: 1, invigilators: 1 })
+  const [form, setForm] = useState({ term_id: '', from: '', to: '', first_period: 2, periods_per_exam: 2, slots_per_day: 1, grade_per_day: 1 })
   const [only, setOnly] = useState([])
+  const [fill, setFill] = useState(true)
   const [off, setOff] = useState([])
   const [offDraft, setOffDraft] = useState('')
   const [result, setResult] = useState(null)
@@ -67,7 +89,7 @@ export default function ExamsAdminPage() {
   // Until a term is chosen the server says which one is meant (the running or the next one).
   const list = useQuery({ queryKey: ['exams', 'admin', form.term_id, gradeFilter], queryFn: async () => (await api.get('/exams', { params: { ...(form.term_id ? { term_id: form.term_id } : {}), ...(gradeFilter ? { grade_level_id: gradeFilter } : {}) } })).data })
   const termId = form.term_id || String(list.data?.term_id ?? terms.data?.[0]?.id ?? '')
-  const body = (dry) => ({ ...form, term_id: Number(termId), exclude_dates: off, grade_level_ids: only.length ? only : null, dry_run: dry })
+  const body = (dry) => ({ ...form, term_id: Number(termId), fill_missing: fill, exclude_dates: off, grade_level_ids: only.length ? only : null, dry_run: dry })
   const run = useMutation({
     mutationFn: (dry) => api.post('/exams/generate', body(dry)),
     onSuccess: (res) => { setError(''); setResult(res.data.data); if (!res.data.data.dry_run) client.invalidateQueries({ queryKey: ['exams'] }) },
@@ -92,13 +114,14 @@ export default function ExamsAdminPage() {
           <label className="block text-sm">{t('exams.from')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.from} onChange={set('from')} /></label>
           <label className="block text-sm">{t('exams.to')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.to} onChange={set('to')} /></label>
         </div>
-        <div className="grid gap-3 sm:grid-cols-5">
-          <label className="block text-sm">{t('exams.startTime')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.start_time} onChange={set('start_time')} /></label>
-          <label className="block text-sm">{t('exams.duration')}<input required type="number" min="20" max="240" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.duration_minutes} onChange={set('duration_minutes')} /></label>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <label className="block text-sm">{t('exams.firstPeriod')}<input required type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.first_period} onChange={set('first_period')} /></label>
+          <label className="block text-sm">{t('exams.periodsPerExam')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.periods_per_exam} onChange={set('periods_per_exam')} /></label>
           <label className="block text-sm">{t('exams.slotsPerDay')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.slots_per_day} onChange={set('slots_per_day')} /></label>
           <label className="block text-sm">{t('exams.gradePerDay')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.grade_per_day} onChange={set('grade_per_day')} /></label>
-          <label className="block text-sm">{t('exams.invigilators')}<input required type="number" min="0" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.invigilators} onChange={set('invigilators')} /></label>
         </div>
+        <p className="rounded-lg bg-sky-tint/40 p-3 text-sm text-deep-harbor">{t('exams.periodsHelp', { from: form.first_period, to: Number(form.first_period) + Number(form.periods_per_exam) - 1 })}</p>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fill} onChange={(e) => setFill(e.target.checked)} />{t('exams.fillMissing')}</label>
         <div className="text-sm">
           <p className="mb-1 font-medium">{t('exams.grades')} <span className="font-normal text-slate-500">({t('exams.gradesHint')})</span></p>
           <div className="flex flex-wrap gap-2">
@@ -159,7 +182,7 @@ function AdminList({ sessions, onEdit }) {
           <ul className="divide-y">
             {sessions.filter((s) => s.date === d).map((s) => (
               <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-2 text-sm">
-                <span className="w-28 text-slate-600" dir="ltr">{s.starts_at} – {s.ends_at}</span>
+                <span className="w-44 text-slate-600"><span dir="ltr">{s.starts_at} – {s.ends_at}</span>{s.period_from !== null && <span className="ms-2 text-xs text-slate-400">{s.period_from === s.period_to ? t('exams.periodOne', { n: s.period_from }) : t('exams.periodsRange', { from: s.period_from, to: s.period_to })}</span>}</span>
                 <span className="font-bold text-deep-harbor">{subject(s)}</span>
                 <span className="rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => u.name).join('، ')}</span>
