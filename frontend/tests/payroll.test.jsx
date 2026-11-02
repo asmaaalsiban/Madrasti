@@ -111,7 +111,7 @@ describe('PayrollRunPage', () => {
 
 describe('MyPayslipsPage and notifications', () => {
   it('lists paid payslips', async () => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/my-contract' ? { base_salary: '900.00', payment_method: 'cheque', starts_on: '2026-09-01', ends_on: null, items: [{ kind: 'allowance', label: 'Transport', amount: '30.00' }] } : [{ id: 4, month: '2026-10', net: '950.00', paid_on: '2026-10-30' }] } }))
+    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/commitment' ? { scores: {}, lines: [] } : url === '/payroll/my-contract' ? { base_salary: '900.00', payment_method: 'cheque', starts_on: '2026-09-01', ends_on: null, items: [{ kind: 'allowance', label: 'Transport', amount: '30.00' }] } : [{ id: 4, month: '2026-10', net: '950.00', paid_on: '2026-10-30' }] } }))
     wrap(<MyPayslipsPage base="/teacher" />)
     expect(await screen.findByText('2026-10')).toBeInTheDocument()
     expect(await screen.findByLabelText('My salary')).toHaveTextContent('900.00 JOD')

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { itemLabel } from '../itemLabel'
 import Money from '../../Finance/components/Money'
 
 // A payslip on one A4 page: print it or save it as PDF.
@@ -22,8 +23,8 @@ export default function PayslipPage() {
         <table className="w-full text-sm">
           <tbody>
             <tr className="border-b"><td className="py-1">{t('payroll.cols.base')}</td><td className="py-1 text-end"><Money value={s.base_salary} currency={c} /></td></tr>
-            {lines(['allowance', 'bonus']).map((i) => <tr key={i.id} className="border-b text-green-800"><td className="py-1">{t(`payroll.kinds.${i.kind}`)}: {i.label}</td><td className="py-1 text-end" dir="ltr">+{i.amount}</td></tr>)}
-            {lines(['deduction']).map((i) => <tr key={i.id} className="border-b text-red-700"><td className="py-1">{t('payroll.kinds.deduction')}: {i.label}</td><td className="py-1 text-end" dir="ltr">−{i.amount}</td></tr>)}
+            {lines(['allowance', 'bonus']).map((i) => <tr key={i.id} className="border-b text-green-800"><td className="py-1">{t(`payroll.kinds.${i.kind}`)}: {itemLabel(t, i)}</td><td className="py-1 text-end" dir="ltr">+{i.amount}</td></tr>)}
+            {lines(['deduction']).map((i) => <tr key={i.id} className="border-b text-red-700"><td className="py-1">{t('payroll.kinds.deduction')}: {itemLabel(t, i)}</td><td className="py-1 text-end" dir="ltr">−{i.amount}</td></tr>)}
             <tr className="font-bold"><td className="py-2">{t('payroll.cols.net')}</td><td className="py-2 text-end"><Money value={s.net} currency={c} /></td></tr>
           </tbody>
         </table>

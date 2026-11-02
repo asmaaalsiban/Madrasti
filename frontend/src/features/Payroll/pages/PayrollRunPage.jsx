@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import Money from '../../Finance/components/Money'
 import { useAuth } from '../../Auth/AuthProvider'
+import { itemLabel } from '../itemLabel'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -166,7 +167,7 @@ export default function PayrollRunPage({ base }) {
                   {s.items.length > 0 && (
                     <ul className="mt-1 space-y-0.5 text-xs font-normal text-slate-600">
                       {s.items.map((i) => (
-                        <li key={i.id}>{t(`payroll.kinds.${i.kind}`)}: {i.label} <span dir="ltr">{i.kind === 'deduction' ? '−' : '+'}{i.amount}</span>
+                        <li key={i.id}>{t(`payroll.kinds.${i.kind}`)}: {itemLabel(t, i)} <span dir="ltr">{i.kind === 'deduction' ? '−' : '+'}{i.amount}</span>
                           {manage && draft && !i.from_contract && <button type="button" aria-label={t('admin.actions.delete')} className="ms-2 text-red-700" onClick={() => removeItem.mutate(i.id)}>✕</button>}
                         </li>
                       ))}

@@ -117,7 +117,8 @@
       "surveys": "Surveys",
       "signatures": "Signatures",
       "payroll": "Payroll",
-      "renewals": "Student renewal"
+      "renewals": "Student renewal",
+      "staffAttendance": "Staff attendance"
     },
     "actions": {
       "add": "Add",
@@ -1409,7 +1410,39 @@
     "payDetails": "Details",
     "payDetailsHint": "IBAN, cheque payee...",
     "methodForRest": "{{count}} payslip(s) have no method: pay them by",
-    "mySalary": "My salary"
+    "mySalary": "My salary",
+    "rulesTitle": "Commitment rules",
+    "rulesHelp": "Each month every person gets a score from what the system records. At or above the bonus score they earn a bonus; below the deduction score they lose an amount. The lines are added automatically when the payroll is prepared (the accountant can still remove one).",
+    "rulesGrace": "Grace minutes after the day starts",
+    "rulesEnabled": "Apply this rule",
+    "rulesBonus": "Bonus",
+    "rulesDeduction": "Deduction",
+    "rulesAtLeast": "Score at least",
+    "rulesBelow": "Score below",
+    "rulesType": "type",
+    "rulesPercent": "% of salary",
+    "rulesAmount": "fixed amount",
+    "rulesSaved": "Rules saved.",
+    "rulesCodes": {
+      "punctuality": "Punctuality (arriving on time)",
+      "daily_summary": "Daily summaries of each lesson",
+      "weekly_plan": "Weekly lesson plans"
+    },
+    "myCommitment": "My commitment this month",
+    "auto": {
+      "punctuality": {
+        "bonus": "Punctuality bonus ({{score}}%)",
+        "deduction": "Punctuality deduction ({{score}}%)"
+      },
+      "daily_summary": {
+        "bonus": "Daily summaries bonus ({{score}}%)",
+        "deduction": "Missing daily summaries ({{score}}%)"
+      },
+      "weekly_plan": {
+        "bonus": "Weekly plans bonus ({{score}}%)",
+        "deduction": "Missing weekly plans ({{score}}%)"
+      }
+    }
   },
   "renewals": {
     "title": "Student renewal",
@@ -1449,6 +1482,32 @@
       "from": "Now",
       "to": "Next year",
       "state": "Status"
+    }
+  },
+  "staffAttendance": {
+    "myDay": "My working day",
+    "notYet": "You have not checked in yet. The day starts at {{time}}.",
+    "arrived": "arrived {{time}}",
+    "left": "left {{time}}",
+    "checkIn": "I arrived",
+    "checkOut": "I'm leaving",
+    "title": "Staff attendance",
+    "hint": "Who arrived, who was late.",
+    "date": "Date",
+    "dayOff": "This is not a working day.",
+    "note": "Note",
+    "editFor": "Edit the day of {{name}}",
+    "status": {
+      "present": "On time",
+      "late": "Late",
+      "absent": "Absent",
+      "leave": "On leave"
+    },
+    "cols": {
+      "name": "Name",
+      "state": "Status",
+      "in": "Arrived",
+      "out": "Left"
     }
   }
 }

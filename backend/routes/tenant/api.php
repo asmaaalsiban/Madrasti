@@ -30,6 +30,7 @@ use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\Academic\Http\Controllers\RenewalController;
 use App\Modules\HR\Http\Controllers\ContractController;
+use App\Modules\HR\Http\Controllers\StaffAttendanceController;
 use App\Modules\HR\Http\Controllers\PayrollController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\Reports\Http\Controllers\ReportCardController;
@@ -100,6 +101,15 @@ Route::middleware(['school-user', 'role:parent,student,teacher,admin'])->prefix(
     Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);
 });
 
+// Staff working day: everyone checks in and out; the principal can fix any day.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('staff-attendance')->group(function (): void {
+    Route::get('me', [StaffAttendanceController::class, 'me']);
+    Route::post('check-in', [StaffAttendanceController::class, 'checkIn']);
+    Route::post('check-out', [StaffAttendanceController::class, 'checkOut']);
+    Route::get('day', [StaffAttendanceController::class, 'day']);
+    Route::put('{user}', [StaffAttendanceController::class, 'set']);
+});
+
 // Yearly re-registration of students: school management and the accountant.
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('renewals')->group(function (): void {
     Route::get('/', [RenewalController::class, 'index']);
@@ -132,6 +142,9 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
     Route::post('payslips/{payslip}/items', [PayrollController::class, 'addItem']);
     Route::delete('payslip-items/{item}', [PayrollController::class, 'removeItem']);
     Route::delete('payslips/{payslip}', [PayrollController::class, 'removePayslip']);
+    Route::get('rules', [StaffAttendanceController::class, 'rules']);
+    Route::put('rules', [StaffAttendanceController::class, 'saveRules']);
+    Route::get('commitment', [StaffAttendanceController::class, 'commitment']);
     Route::get('my-contract', [PayrollController::class, 'myContract']);
     Route::get('payslips/mine', [PayrollController::class, 'mine']);
     Route::get('payslips/{payslip}', [PayrollController::class, 'payslip']);

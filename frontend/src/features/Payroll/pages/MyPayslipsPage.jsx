@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import CommitmentCard from '../components/CommitmentCard'
+import { itemLabel } from '../itemLabel'
 import Money from '../../Finance/components/Money'
 
 // The signed-in person's own paid payslips.
@@ -19,9 +21,10 @@ export default function MyPayslipsPage({ base }) {
           <p className="text-2xl font-bold"><Money value={mine.data.data.base_salary} currency={mine.data.currency} /></p>
           <p className="text-sm text-slate-600">{t('payroll.payMethod')}: {mine.data.data.payment_method ? t(`finance.methods.${mine.data.data.payment_method}`) : '—'}</p>
           <p className="text-sm text-slate-600" dir="ltr">{mine.data.data.starts_on} → {mine.data.data.ends_on ?? '—'}</p>
-          {mine.data.data.items.map((i, k) => <p key={k} className="text-sm">{t(`payroll.kinds.${i.kind}`)}: {i.label} <span dir="ltr">{i.kind === 'deduction' ? '−' : '+'}{i.amount}</span></p>)}
+          {mine.data.data.items.map((i, k) => <p key={k} className="text-sm">{t(`payroll.kinds.${i.kind}`)}: {itemLabel(t, i)} <span dir="ltr">{i.kind === 'deduction' ? '−' : '+'}{i.amount}</span></p>)}
         </div>
       )}
+      <CommitmentCard currency={data.currency} />
       <ul className="space-y-2">
         {data.data.map((p) => (
           <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3">
