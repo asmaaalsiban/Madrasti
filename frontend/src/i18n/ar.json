@@ -113,7 +113,8 @@
       "chat": "المحادثات",
       "finance": "الماليات",
       "motivation": "النقاط والشارات",
-      "import": "استيراد"
+      "import": "استيراد",
+      "surveys": "الاستطلاعات"
     },
     "actions": {
       "add": "إضافة",
@@ -687,7 +688,21 @@
     "monthRow": "{{month}} ({{weeks}} أسابيع)",
     "termRow": "{{name}} ({{months}} أشهر)",
     "addCriterion": "إضافة معيار دائم",
-    "saveCriterion": "حفظ المعيار"
+    "saveCriterion": "حفظ المعيار",
+    "special": {
+      "title": "تقييم خاص: {{name}}",
+      "help": "معايير لهذا الطالب فقط. تظهر عند تقييمه ولا تظهر لأي طالب آخر، لتتابع حالته الخاصة.",
+      "none": "لا توجد معايير خاصة بعد. أضف واحداً بالأسفل.",
+      "newName": "معيار خاص جديد (مثل \"يرفع يده قبل الكلام\")",
+      "add": "إضافة",
+      "remove": "حذف {{name}}",
+      "badge": "{{count}} خاص",
+      "badgeHint": "لهذا الطالب معاييره الخاصة",
+      "resultsTitle": "التقييم الخاص",
+      "average": "المعدل {{value}}",
+      "noScores": "لا توجد علامات بعد",
+      "history": "علامات {{name}}"
+    }
   },
   "dailySummary": {
     "title": "الملخص اليومي",
@@ -786,7 +801,13 @@
       "installment_overdue": "قسط متأخر بقيمة {{amount}} (استحقاقه {{due}})",
       "badge_earned": "{{student}} حصل على الشارة {{icon}} {{badge}}",
       "star_of_week": "{{student}} هو نجم الأسبوع!",
-      "online_payment": "تم استلام دفعة أونلاين بقيمة {{amount}}"
+      "online_payment": "تم استلام دفعة أونلاين بقيمة {{amount}}",
+      "survey_new": {
+        "poll": "تصويت جديد من المدرسة: {{title}}",
+        "survey": "استطلاع جديد من المدرسة: {{title}}",
+        "approval": "مطلوب موافقتك: {{title}}"
+      },
+      "survey_reminder": "تذكير: الرجاء الإجابة على {{title}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -1098,6 +1119,117 @@
       "homeroom": "مربّي الشعبة",
       "principal": "مدير المدرسة",
       "parent": "ولي الأمر"
+    }
+  },
+  "surveys": {
+    "title": "الاستطلاعات والموافقات",
+    "hint": "تصويت واستطلاع وموافقات أولياء الأمور.",
+    "help": "أرسل تصويتاً أو استطلاعاً أو طلب موافقة (مثل إذن رحلة) لأولياء الأمور وتابع من أجاب.",
+    "new": "جديد",
+    "none": "لم يُرسل شيء بعد.",
+    "type": "النوع",
+    "types": {
+      "poll": "تصويت",
+      "survey": "استطلاع",
+      "approval": "موافقة"
+    },
+    "typeHelp": {
+      "poll": "سؤال واحد يختار ولي الأمر إجابته وترى النتائج.",
+      "survey": "عدة أسئلة من أنواع مختلفة.",
+      "approval": "يوافق كل ولي أمر أو يرفض لكل ابن (مثل رحلة). يمكنك إضافة أسئلة مثل هاتف الطوارئ."
+    },
+    "description": "التفاصيل",
+    "audience": "إرسال إلى",
+    "allParents": "كل أولياء الأمور",
+    "oneClassroom": "شعبة واحدة",
+    "closesAt": "يُغلق في (اختياري)",
+    "questions": "الأسئلة",
+    "optional": "(اختياري)",
+    "addQuestion": "أضف سؤالاً",
+    "questionType": "نوع السؤال",
+    "questionText": "السؤال",
+    "options": "الخيارات",
+    "optionsHelp": "خيار في كل سطر",
+    "required": "إجباري",
+    "qtypes": {
+      "single_choice": "خيار واحد",
+      "multiple_choice": "عدة خيارات",
+      "yes_no": "نعم / لا",
+      "text": "إجابة كتابية"
+    },
+    "send": "إرسال لأولياء الأمور",
+    "status": {
+      "open": "مفتوح",
+      "closed": "مغلق"
+    },
+    "answered": "أجاب {{done}} من {{total}}",
+    "state": {
+      "pending": "بانتظار الرد",
+      "answered": "تمت الإجابة",
+      "approved": "موافق",
+      "declined": "رفض"
+    },
+    "remind": "ذكّر {{count}} لم يجيبوا",
+    "reminded": "أُرسل التذكير إلى {{count}} من أولياء الأمور.",
+    "close": "إغلاقه",
+    "confirmDelete": "حذف هذا الاستطلاع؟",
+    "parents": "أولياء الأمور",
+    "noAnswers": "لا توجد إجابات بعد.",
+    "yes": "نعم",
+    "no": "لا",
+    "mine": "الاستطلاعات والموافقات",
+    "noneForMe": "لا يوجد شيء من المدرسة لك الآن.",
+    "waiting": "لديك {{count}} بانتظار إجابتك",
+    "until": "حتى {{date}}",
+    "approve": "موافقة",
+    "decline": "رفض",
+    "submit": "إرسال إجابتي",
+    "thanks": "شكراً، تم إرسال إجابتك.",
+    "change": "تغيير إجابتي",
+    "fieldTitle": "العنوان",
+    "audiences": {
+      "all": "كل أولياء الأمور",
+      "grades": "من صف … إلى صف …",
+      "classrooms": "اختيار شعب"
+    },
+    "fromGrade": "من الصف",
+    "toGrade": "إلى الصف",
+    "allMySections": "الكل",
+    "pickedCount": "تم اختيار {{count}} شعبة",
+    "sentTo": "أُرسل إلى",
+    "gradeRange": "من {{from}} إلى {{to}}",
+    "openTable": "فتح جدول الردود",
+    "responsesTable": "جدول الردود",
+    "backToResults": "رجوع إلى النتائج",
+    "filter": {
+      "all": "الكل",
+      "approved": "موافقون",
+      "declined": "رافضون",
+      "pending": "بانتظار الرد",
+      "answered": "أجابوا"
+    },
+    "cols": {
+      "parent": "ولي الأمر",
+      "student": "الطالب",
+      "classroom": "الشعبة",
+      "phone": "الهاتف",
+      "state": "الرد",
+      "answeredAt": "وقت الرد",
+      "name": "الاسم",
+      "role": "الصفة"
+    },
+    "noRows": "لا يوجد أحد مطابق.",
+    "respondents": "مَن يجيب",
+    "who": {
+      "parents": "أولياء الأمور",
+      "students": "الطلاب",
+      "both": "أولياء الأمور والطلاب"
+    },
+    "approvalParentsOnly": "الموافقة يجيب عنها أولياء الأمور دائماً.",
+    "answeredBy": "يجيب",
+    "role": {
+      "parent": "ولي أمر",
+      "student": "طالب"
     }
   }
 }

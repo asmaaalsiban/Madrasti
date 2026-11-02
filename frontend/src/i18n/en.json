@@ -113,7 +113,8 @@
       "chat": "Chat",
       "finance": "Finance",
       "motivation": "Points & badges",
-      "import": "Import"
+      "import": "Import",
+      "surveys": "Surveys"
     },
     "actions": {
       "add": "Add",
@@ -687,7 +688,21 @@
     "monthRow": "{{month}} ({{weeks}} weeks)",
     "termRow": "{{name}} ({{months}} months)",
     "addCriterion": "Add a permanent criterion",
-    "saveCriterion": "Save criterion"
+    "saveCriterion": "Save criterion",
+    "special": {
+      "title": "Special evaluation: {{name}}",
+      "help": "Criteria for this student only. They appear when you evaluate this student and for no one else, so you can follow his or her own situation.",
+      "none": "No special criteria yet. Add one below.",
+      "newName": "New special criterion (e.g. \"Raises his hand\")",
+      "add": "Add",
+      "remove": "Remove {{name}}",
+      "badge": "{{count}} special",
+      "badgeHint": "This student has their own criteria",
+      "resultsTitle": "Special evaluation",
+      "average": "Average {{value}}",
+      "noScores": "No scores yet",
+      "history": "Scores of {{name}}"
+    }
   },
   "dailySummary": {
     "title": "Daily summary",
@@ -786,7 +801,13 @@
       "installment_overdue": "Overdue installment of {{amount}} (due {{due}})",
       "badge_earned": "{{student}} earned the badge {{icon}} {{badge}}",
       "star_of_week": "{{student}} is the star of the week!",
-      "online_payment": "Online payment of {{amount}} received"
+      "online_payment": "Online payment of {{amount}} received",
+      "survey_new": {
+        "poll": "New poll from the school: {{title}}",
+        "survey": "New survey from the school: {{title}}",
+        "approval": "Your approval is needed: {{title}}"
+      },
+      "survey_reminder": "Reminder: please answer {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1098,6 +1119,117 @@
       "homeroom": "Homeroom teacher",
       "principal": "Principal",
       "parent": "Parent"
+    }
+  },
+  "surveys": {
+    "title": "Surveys and approvals",
+    "hint": "Polls, surveys and parent approvals.",
+    "help": "Send a poll, a survey or an approval (for example a trip permission) to parents and follow who answered.",
+    "new": "New",
+    "none": "Nothing sent yet.",
+    "type": "Type",
+    "types": {
+      "poll": "Poll",
+      "survey": "Survey",
+      "approval": "Approval"
+    },
+    "typeHelp": {
+      "poll": "One question; the parents pick an answer and you see the counts.",
+      "survey": "Several questions of different kinds.",
+      "approval": "Each parent approves or declines for each child (e.g. a trip). You can add questions such as an emergency phone."
+    },
+    "description": "Details",
+    "audience": "Send to",
+    "allParents": "All parents",
+    "oneClassroom": "One section",
+    "closesAt": "Closes at (optional)",
+    "questions": "Questions",
+    "optional": "(optional)",
+    "addQuestion": "Add a question",
+    "questionType": "Question type",
+    "questionText": "Question",
+    "options": "Choices",
+    "optionsHelp": "One choice per line",
+    "required": "Required",
+    "qtypes": {
+      "single_choice": "One choice",
+      "multiple_choice": "Several choices",
+      "yes_no": "Yes / No",
+      "text": "Written answer"
+    },
+    "send": "Send to parents",
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "answered": "{{done}} of {{total}} answered",
+    "state": {
+      "pending": "Waiting",
+      "answered": "Answered",
+      "approved": "Approved",
+      "declined": "Declined"
+    },
+    "remind": "Remind {{count}} who have not answered",
+    "reminded": "Reminder sent to {{count}} parents.",
+    "close": "Close it",
+    "confirmDelete": "Delete this survey?",
+    "parents": "Parents",
+    "noAnswers": "No answers yet.",
+    "yes": "Yes",
+    "no": "No",
+    "mine": "Surveys and approvals",
+    "noneForMe": "Nothing from the school for you right now.",
+    "waiting": "You have {{count}} waiting for your answer",
+    "until": "until {{date}}",
+    "approve": "Approve",
+    "decline": "Decline",
+    "submit": "Send my answer",
+    "thanks": "Thank you, your answer was sent.",
+    "change": "Change my answer",
+    "fieldTitle": "Title",
+    "audiences": {
+      "all": "All parents",
+      "grades": "From grade … to grade …",
+      "classrooms": "Choose sections"
+    },
+    "fromGrade": "From grade",
+    "toGrade": "To grade",
+    "allMySections": "All",
+    "pickedCount": "{{count}} sections chosen",
+    "sentTo": "Sent to",
+    "gradeRange": "{{from}} to {{to}}",
+    "openTable": "Open the table of answers",
+    "responsesTable": "Table of answers",
+    "backToResults": "Back to the results",
+    "filter": {
+      "all": "All",
+      "approved": "Approved",
+      "declined": "Declined",
+      "pending": "Waiting",
+      "answered": "Answered"
+    },
+    "cols": {
+      "parent": "Parent",
+      "student": "Student",
+      "classroom": "Section",
+      "phone": "Phone",
+      "state": "Answer",
+      "answeredAt": "Answered at",
+      "name": "Name",
+      "role": "Who"
+    },
+    "noRows": "No one matches.",
+    "respondents": "Who answers",
+    "who": {
+      "parents": "Parents",
+      "students": "Students",
+      "both": "Parents and students"
+    },
+    "approvalParentsOnly": "An approval is always answered by the parents.",
+    "answeredBy": "Answered by",
+    "role": {
+      "parent": "Parent",
+      "student": "Student"
     }
   }
 }

@@ -41,7 +41,7 @@ export default function BehaviorPage({ base }) {
       <ul className="space-y-2">
         {(week.data?.students ?? []).map((s) => (
           <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded border bg-white p-3">
-            <span>{s[`name_${i18n.language}`] || s.name_ar} {s.evaluation && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{t('behavior.done')}</span>}</span>
+            <span>{s[`name_${i18n.language}`] || s.name_ar} {s.special_count > 0 && <span title={t('behavior.special.badgeHint')} className="ms-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800">★ {t('behavior.special.badge', { count: s.special_count })}</span>} {s.evaluation && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{t('behavior.done')}</span>}</span>
             <span className="flex gap-2">
               <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setEditing(s)}>{t('behavior.evaluate')}</button>
               <Link to={`${base}/behavior/students/${s.id}`} className="rounded border px-3 py-1 text-sm text-brand">{t('behavior.results')}</Link>

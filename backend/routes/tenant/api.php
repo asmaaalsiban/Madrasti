@@ -30,6 +30,8 @@ use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\People\Http\Controllers\DepartmentController;
 use App\Modules\Reports\Http\Controllers\ReportCardController;
+use App\Modules\Surveys\Http\Controllers\MySurveyController;
+use App\Modules\Surveys\Http\Controllers\SurveyController;
 use App\Modules\People\Http\Controllers\ImportController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
@@ -43,6 +45,7 @@ use App\Modules\Motivation\Http\Controllers\MotivationController;
 use App\Modules\Motivation\Http\Controllers\PointCategoryController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorSpecialController;
 use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
@@ -74,6 +77,22 @@ Route::prefix('auth')->group(function (): void {
 Route::middleware(['school-user', 'throttle:email-code'])->prefix('auth')->group(function (): void {
     Route::post('email/request', [AuthController::class, 'requestEmail']);
     Route::post('email/confirm', [AuthController::class, 'confirmEmail']);
+});
+
+// Polls, surveys and parent approvals: admin and teachers write them, parents answer.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('surveys')->group(function (): void {
+    Route::get('/', [SurveyController::class, 'index']);
+    Route::post('/', [SurveyController::class, 'store']);
+    Route::get('{survey}', [SurveyController::class, 'show']);
+    Route::get('{survey}/export', [SurveyController::class, 'export']);
+    Route::post('{survey}/close', [SurveyController::class, 'close']);
+    Route::post('{survey}/remind', [SurveyController::class, 'remind']);
+    Route::delete('{survey}', [SurveyController::class, 'destroy']);
+});
+Route::middleware(['school-user', 'role:parent,student'])->prefix('my-surveys')->group(function (): void {
+    Route::get('/', [MySurveyController::class, 'index']);
+    Route::get('pending', [MySurveyController::class, 'pending']);
+    Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);
 });
 
 // School structure: admin only.
@@ -253,6 +272,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->gr
     Route::put('evaluations', [BehaviorController::class, 'save']);
     Route::post('notes', [BehaviorController::class, 'addNote']);
     Route::delete('notes/{note}', [BehaviorController::class, 'deleteNote']);
+    // A student's special evaluation: criteria for that student alone.
+    Route::get('students/{student}/special', [BehaviorSpecialController::class, 'index']);
+    Route::post('students/{student}/special', [BehaviorSpecialController::class, 'store']);
+    Route::put('special/{criterion}', [BehaviorSpecialController::class, 'update']);
+    Route::delete('special/{criterion}', [BehaviorSpecialController::class, 'destroy']);
 });
 Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->group(function (): void {
     Route::put('{criterion}', [BehaviorCriteriaController::class, 'update']);
