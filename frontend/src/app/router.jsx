@@ -40,6 +40,7 @@ import StaffPage from '../features/People/pages/StaffPage'
 import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
+import ImportPage from '../features/Import/pages/ImportPage'
 import MotivationPage from '../features/Motivation/pages/MotivationPage'
 import MotivationSettingsPage from '../features/Motivation/pages/MotivationSettingsPage'
 import StudentMotivationPage, { MyMotivationPage } from '../features/Motivation/pages/StudentMotivationPage'
@@ -166,6 +167,7 @@ export const routes = [
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
+              { path: '/admin/import', element: <ImportPage /> },
               { path: '/admin/motivation', element: <MotivationPage base="/admin" /> },
               { path: '/admin/motivation/students/:id', element: <StudentMotivationPage staff /> },
               { path: '/admin/motivation-settings', element: <MotivationSettingsPage /> },

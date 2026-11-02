@@ -29,6 +29,7 @@ use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\People\Http\Controllers\DepartmentController;
+use App\Modules\People\Http\Controllers\ImportController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
@@ -103,6 +104,8 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('staff-types', StaffTypeController::class);
     Route::apiResource('staff', StaffController::class);
     Route::apiResource('students', StudentController::class);
+    Route::get('import/{kind}/template', [ImportController::class, 'template'])->whereIn('kind', ['students', 'staff']);
+    Route::post('import/{kind}', [ImportController::class, 'store'])->whereIn('kind', ['students', 'staff']);
     Route::get('guardians', [GuardianController::class, 'index']);
     Route::post('users/{user}/reset-password', [UserPasswordController::class, 'reset']);
 });
