@@ -764,7 +764,8 @@
       "installment": "Installment of {{amount}} due {{due}}",
       "installment_overdue": "Overdue installment of {{amount}} (due {{due}})",
       "badge_earned": "{{student}} earned the badge {{icon}} {{badge}}",
-      "star_of_week": "{{student}} is the star of the week!"
+      "star_of_week": "{{student}} is the star of the week!",
+      "online_payment": "Online payment of {{amount}} received"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -939,7 +940,32 @@
       "transport": "Transport"
     },
     "transport": "Transport",
-    "firstPaymentTitle": "First payment (optional)"
+    "firstPaymentTitle": "First payment (optional)",
+    "close": "Close",
+    "payOnline": "Pay online",
+    "payOnlineFor": "Pay online: {{fee}}",
+    "wholeBalance": "The whole remaining balance",
+    "receiptInName": "The receipt will be written in this name.",
+    "continueToPay": "Continue to payment",
+    "demoNotice": "Demo mode: no real money is taken. Use 4242 4242 4242 4242 (approved) or 4000 0000 0000 0002 (declined), any future date and any 3 digits.",
+    "card": {
+      "number": "Card number",
+      "holder": "Name on card",
+      "expiry": "Expiry (MM/YY)",
+      "cvc": "Security code",
+      "pay": "Pay {{amount}} {{currency}}"
+    },
+    "online": {
+      "paid": "Payment received. Receipt number: {{receipt}}.",
+      "pending": "We are waiting for the payment to be confirmed…",
+      "review": "The payment went through but could not be applied to the fee. The school will contact you.",
+      "tryAgain": "Try again",
+      "failed": {
+        "declined": "The card was declined.",
+        "invalid_card": "The card number is not valid.",
+        "default": "The payment did not go through. You were not charged."
+      }
+    }
   },
   "motivation": {
     "title": "Points & badges",

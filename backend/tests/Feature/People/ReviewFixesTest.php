@@ -32,7 +32,7 @@ class ReviewFixesTest extends AcademicTestCase
 
     public function test_every_signed_in_school_route_checks_the_account_is_active_and_the_password_was_changed(): void
     {
-        $open = ['api/school', 'api/auth/login', 'api/auth/forgot-password', 'api/auth/reset-password', 'api/auth/logout', 'api/auth/me', 'api/auth/change-password'];
+        $open = ['api/school', 'api/auth/login', 'api/auth/forgot-password', 'api/auth/reset-password', 'api/auth/logout', 'api/auth/me', 'api/auth/change-password', 'api/payments/webhook/{provider}']; // the webhook is called by the payment provider and trusted only by its signature
         $checked = 0;
 
         foreach (Route::getRoutes() as $route) {

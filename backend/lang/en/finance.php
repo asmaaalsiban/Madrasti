@@ -16,4 +16,6 @@ return [
     'first_payment_note' => 'First payment at registration',
     'not_enrolled' => 'The student is not placed in a section this year.',
     'discount_line' => 'Discount',
+    'online_note' => 'Paid online.',
+    'card_expired' => 'This card has expired.',
 ];

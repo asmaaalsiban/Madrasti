@@ -16,4 +16,6 @@ return [
     'first_payment_note' => 'الدفعة الأولى عند التسجيل',
     'not_enrolled' => 'الطالب غير مسجّل في شعبة هذه السنة.',
     'discount_line' => 'خصم',
+    'online_note' => 'دفع أونلاين.',
+    'card_expired' => 'انتهت صلاحية هذه البطاقة.',
 ];
