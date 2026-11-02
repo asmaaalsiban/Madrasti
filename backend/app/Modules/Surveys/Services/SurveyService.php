@@ -102,7 +102,7 @@ class SurveyService
     private function notify(Survey $survey, string $kind, ?\Illuminate\Support\Collection $userIds = null): void
     {
         $ids = $userIds ?? $survey->recipients()->pluck('user_id')->unique();
-        $params = ['title' => $survey->title, 'type' => $survey->type];
+        $params = ['title' => $survey->title, 'type' => $survey->type, 'survey' => $survey->id];
         // Everyone gets the link to their own page: students, teachers and admin-side staff each have theirs; parents the default.
         $links = ['student' => '/student/surveys', 'teacher' => '/teacher/my-surveys', 'admin' => '/admin/my-surveys'];
         $roles = User::whereIn('id', $ids)->pluck('role', 'id')->map(fn ($role) => $role->value);
@@ -170,7 +170,7 @@ class SurveyService
             throw ValidationException::withMessages($errors);
         }
 
-        return DB::transaction(function () use ($recipient, $survey, $decision, $clean): SurveyResponse {
+        $response = DB::transaction(function () use ($recipient, $survey, $decision, $clean): SurveyResponse {
             $response = SurveyResponse::updateOrCreate(
                 ['survey_id' => $survey->id, 'user_id' => $recipient->user_id, 'student_id' => $recipient->student_id],
                 ['decision' => $survey->type === 'approval' ? $decision : null, 'submitted_at' => now()],
@@ -182,6 +182,28 @@ class SurveyService
 
             return $response;
         });
+        $this->settle($survey, $recipient->user_id);
+
+        return $response;
+    }
+
+    /**
+     * Once a person has answered everything the survey asks of them (every child, for an approval), the invitation and any reminder
+     * still waiting in their bell are marked read: they must not keep being nagged about something already done.
+     */
+    private function settle(Survey $survey, int $userId): void
+    {
+        $left = $survey->recipients()->where('user_id', $userId)->whereNotExists(function ($q): void {
+            $q->from('survey_responses')->whereColumn('survey_responses.survey_id', 'survey_recipients.survey_id')->whereColumn('survey_responses.user_id', 'survey_recipients.user_id')
+                ->where(fn ($w) => $w->whereColumn('survey_responses.student_id', 'survey_recipients.student_id')->orWhere(fn ($n) => $n->whereNull('survey_responses.student_id')->whereNull('survey_recipients.student_id')));
+        })->exists();
+        if ($left) {
+            return;
+        }
+        DB::table('notifications')->where('notifiable_id', $userId)->whereNull('read_at')
+            ->where(fn ($q) => $q->where('data', 'like', '%"kind":"survey_new"%')->orWhere('data', 'like', '%"kind":"survey_reminder"%'))
+            ->where(fn ($q) => $q->where('data', 'like', '%"survey":'.$survey->id.'}%')->orWhere('data', 'like', '%"survey":'.$survey->id.',%'))
+            ->update(['read_at' => now()]);
     }
 
     /** The answer in its stored form, or null when it does not fit the question. */

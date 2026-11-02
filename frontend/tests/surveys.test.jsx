@@ -152,7 +152,7 @@ describe('SurveyResultsPage', () => {
     api.post.mockImplementation((url) => Promise.resolve({ data: { data: url.endsWith('remind') ? { reminded: 1 } : {} } }))
     wrap(<SurveyResultsPage base="/admin" />, '/s/1', '/s/:id')
     fireEvent.click(await screen.findByRole('button', { name: 'Remind 1 who have not answered' }))
-    expect(await screen.findByText('Reminder sent to 1 parents.')).toBeInTheDocument()
+    expect(await screen.findByText(/Reminder sent to 1 people who have not answered yet/)).toBeInTheDocument()
     expect(api.post).toHaveBeenCalledWith('/surveys/1/remind')
     fireEvent.click(screen.getByRole('button', { name: 'Close it' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/surveys/1/close'))
