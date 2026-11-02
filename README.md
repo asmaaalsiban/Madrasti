@@ -314,6 +314,10 @@ Upload the **school's own file** as it is — no template needed.
 
 > Backups and account merges list the tables of the **current** database only (`App\Shared\Support\CurrentDatabase`). Laravel's `Schema::getTables()` with no argument lists every database on a MySQL/PostgreSQL server, which mixed the central and the schools' tables.
 
+## Report card (student certificate)
+- `GET /api/students/{student}/report-card` and the page **Report card** (parent: per child; student: own; admin: *Open* in the students table). One A4 page with the school name and logo, the student, every subject with each term's percent, the annual percent and result, the term and annual averages, days absent and late per term and for the year, behaviour, the pass mark and signature lines (homeroom teacher, principal, parent). **Print** opens the browser's dialog (which can also save a PDF).
+- Only **published** grades count; a subject waiting for a makeup exam or a retake shows "Pending". The annual percent of a subject is the mean of its terms that have a percent. Behaviour is the average of the weekly evaluations (parents and the student see only those marked visible to parents).
+- Same access as the grades: the admin, the student and their parents.
 ## Surveys, polls and parent approvals
 - **Admin** (all parents, a range of grades *from … to …*, or hand-picked sections) and **teachers** (several of their own sections) send a **poll** (one question: choices or yes/no), a **survey** (several questions: one choice, several choices, yes/no, written) or an **approval** (e.g. permission for a trip: each parent approves or declines **for each child**; extra questions such as an emergency phone are optional). Parents are notified (bell + phone); an optional closing time, or close it by hand.
 - **Who answers**: a poll or survey can be answered by the **parents**, the **students**, or **both** (each gets their own copy and their own page, `/parent/surveys` or `/student/surveys`, with a banner on their home page); an **approval is always the parents'** (students never get one, and the server refuses it).

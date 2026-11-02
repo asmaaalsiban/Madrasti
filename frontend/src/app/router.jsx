@@ -41,6 +41,7 @@ import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import ImportPage from '../features/Import/pages/ImportPage'
+import ReportCardPage, { MyReportCardPage } from '../features/Reports/pages/ReportCardPage'
 import MySurveysPage from '../features/Surveys/pages/MySurveysPage'
 import SurveyResponsesPage from '../features/Surveys/pages/SurveyResponsesPage'
 import SurveyResultsPage from '../features/Surveys/pages/SurveyResultsPage'
@@ -86,6 +87,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
+    { path: 'children/:id/report-card', element: <ReportCardPage /> },
     { path: 'surveys', element: <MySurveysPage /> },
     { path: 'children/:id/fees', element: <ChildFeesPage /> },
     { path: 'children/:id/summaries', element: <ChildSummariesPage /> },
@@ -98,6 +100,7 @@ const HOME_ROUTES = {
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'motivation', element: <MyMotivationPage /> },
+    { path: 'report-card', element: <MyReportCardPage /> },
     { path: 'surveys', element: <MySurveysPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
@@ -176,6 +179,7 @@ export const routes = [
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
+              { path: '/admin/report-card/:id', element: <ReportCardPage /> },
               { path: '/admin/surveys', element: <SurveysPage base="/admin" /> },
               { path: '/admin/surveys/:id', element: <SurveyResultsPage base="/admin" /> },
               { path: '/admin/surveys/:id/responses', element: <SurveyResponsesPage base="/admin" /> },

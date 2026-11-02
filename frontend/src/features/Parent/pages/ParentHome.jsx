@@ -40,6 +40,7 @@ export default function ParentHome() {
               <p className="pt-1 text-xs text-slate-500">{t('parent.home.emailHint')}</p>
               <p dir="ltr" className="font-mono text-sm">{c.email}</p>
               <div className="mt-2 flex flex-wrap gap-2">
+                <Link to={`/parent/children/${c.id}/report-card`} className="rounded border px-3 py-1 text-sm text-brand">{t('reportCard.title')}</Link>
                 <Link to={`/parent/children/${c.id}/grades`} className="rounded border px-3 py-1 text-sm text-brand">{t('studentGrades.linkLabel')}</Link>
                 <Link to={`/parent/children/${c.id}/timetable`} className="rounded border px-3 py-1 text-sm text-brand">{t('timetable.linkLabel')}</Link>
                 <Link to={`/parent/children/${c.id}/lesson-plans`} className="rounded border px-3 py-1 text-sm text-brand">{t('lessonPlans.title')}</Link>

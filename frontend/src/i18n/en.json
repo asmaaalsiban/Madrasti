@@ -1093,6 +1093,34 @@
     "autoEmails": "No email column: login emails are generated from the names.",
     "defaultPosition": "Position of everyone in this file (it has no position column)"
   },
+  "reportCard": {
+    "title": "Report card",
+    "open": "Open",
+    "print": "Print",
+    "student": "Student",
+    "number": "Student number",
+    "classroom": "Grade / section",
+    "subject": "Subject",
+    "annual": "Annual",
+    "result": "Result",
+    "average": "Average",
+    "absentDays": "Days absent",
+    "lateDays": "Days late",
+    "behavior": "Behaviour",
+    "empty": "No published grades yet.",
+    "passMark": "Pass mark: {{percent}}%. Only published grades are shown; a subject waiting for a makeup exam or a retake shows \"Pending\".",
+    "results": {
+      "pass": "Pass",
+      "fail": "Fail",
+      "pending": "Pending",
+      "none": "—"
+    },
+    "sign": {
+      "homeroom": "Homeroom teacher",
+      "principal": "Principal",
+      "parent": "Parent"
+    }
+  },
   "surveys": {
     "title": "Surveys and approvals",
     "hint": "Polls, surveys and parent approvals.",

@@ -17,7 +17,7 @@ export default function BackButton() {
   return (
     <button
       type="button"
-      className="mb-3 inline-flex items-center gap-2 rounded border bg-white px-3 py-1.5 text-sm text-brand hover:bg-slate-50"
+      className="mb-3 inline-flex items-center gap-2 rounded border bg-white px-3 py-1.5 text-sm text-brand hover:bg-slate-50 print:hidden"
       onClick={() => (key === 'default' ? navigate(home) : navigate(-1))}
     >
       <BackArrow />

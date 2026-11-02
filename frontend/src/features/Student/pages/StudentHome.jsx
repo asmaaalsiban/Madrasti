@@ -15,6 +15,7 @@ export default function StudentHome() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('studentGrades.myGrades')}</h1>
         <div className="flex flex-wrap gap-2">
+          <Link to="/student/report-card" className="rounded border px-3 py-1.5 text-sm text-brand">{t('reportCard.title')}</Link>
           <Link to="/student/surveys" className="rounded border px-3 py-1.5 text-sm text-brand">{t('surveys.mine')}{pending.data > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs text-white">{pending.data}</span>}</Link>
           <Link to="/student/homework" className="rounded border px-3 py-1.5 text-sm text-brand">{t('homework.title')}</Link>
           <Link to="/student/lesson-plans" className="rounded border px-3 py-1.5 text-sm text-brand">{t('lessonPlans.title')}</Link>

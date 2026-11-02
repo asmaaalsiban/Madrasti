@@ -48,12 +48,18 @@ const fields = [
   { name: 'guardian_phone', label: 'people.fields.guardianPhone', getValue: (row) => row.guardians?.[0]?.phone },
 ]
 
+function ReportCardLink({ id }) {
+  const { t } = useTranslation()
+  return <Link to={`/admin/report-card/${id}`} className="text-brand underline">{t('reportCard.open')}</Link>
+}
+
 const baseColumns = [
   { key: 'student_number', label: 'people.fields.studentNumber' },
   { key: 'name_ar', label: 'academic.fields.nameAr' },
   { key: 'email', label: 'people.fields.studentEmail' },
   { key: 'classroom', label: 'people.fields.classroom', render: (r) => r.classroom?.name },
   { key: 'guardians', label: 'people.fields.guardians', render: (r) => r.guardians?.map((g) => g.email || g.phone).join(', ') },
+  { key: 'report_card', label: 'reportCard.title', render: (r) => <ReportCardLink id={r.id} /> },
 ]
 
 const rowActions = [
