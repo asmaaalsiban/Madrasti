@@ -1172,8 +1172,22 @@
       "classroom": "الشعبة",
       "phone": "الهاتف",
       "state": "الرد",
-      "answeredAt": "وقت الرد"
+      "answeredAt": "وقت الرد",
+      "name": "الاسم",
+      "role": "الصفة"
     },
-    "noRows": "لا يوجد أحد مطابق."
+    "noRows": "لا يوجد أحد مطابق.",
+    "respondents": "مَن يجيب",
+    "who": {
+      "parents": "أولياء الأمور",
+      "students": "الطلاب",
+      "both": "أولياء الأمور والطلاب"
+    },
+    "approvalParentsOnly": "الموافقة يجيب عنها أولياء الأمور دائماً.",
+    "answeredBy": "يجيب",
+    "role": {
+      "parent": "ولي أمر",
+      "student": "طالب"
+    }
   }
 }

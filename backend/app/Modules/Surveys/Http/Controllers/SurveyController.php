@@ -46,6 +46,7 @@ class SurveyController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:3000'],
             'closes_at' => ['nullable', 'date', 'after:now'],
+            'respondents' => ['sometimes', Rule::in(Survey::RESPONDENTS)],
             'audience' => ['required', Rule::in(['all', 'grades', 'classrooms'])],
             'grade_from_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
             'grade_to_id' => ['required_if:audience,grades', 'nullable', 'integer', 'exists:grade_levels,id'],
@@ -58,6 +59,11 @@ class SurveyController extends Controller
             'questions.*.options' => ['nullable', 'array', 'max:12'],
             'questions.*.options.*' => ['string', 'max:150'],
         ]);
+
+        // A permission is the parents' to give: students never answer an approval.
+        if ($data['type'] === 'approval' && ($data['respondents'] ?? 'parents') !== 'parents') {
+            throw ValidationException::withMessages(['respondents' => [__('surveys.approval_parents_only')]]);
+        }
 
         $questions = $data['questions'] ?? [];
         if ($data['type'] !== 'approval' && $questions === []) {
@@ -89,7 +95,7 @@ class SurveyController extends Controller
         $this->owns($request, $survey);
         $survey->load(['questions', 'author:id,name', 'classrooms:id,name', 'gradeFrom', 'gradeTo'])->loadCount(['recipients', 'responses']);
         $responses = $survey->responses()->with('answers')->get()->keyBy(fn ($r) => $r->user_id.'-'.($r->student_id ?? 0));
-        $recipients = $survey->recipients()->with(['parent:id,name,phone', 'student:id,name_ar,name_en'])->get();
+        $recipients = $survey->recipients()->with(['parent:id,name,phone,role', 'student:id,name_ar,name_en'])->get();
         $rows = $this->rows($survey, $responses, $recipients);
 
         return response()->json(['data' => $this->summary($survey) + [
@@ -107,18 +113,18 @@ class SurveyController extends Controller
         $state = $request->validate(['state' => ['nullable', Rule::in(['approved', 'declined', 'answered', 'pending'])]])['state'] ?? null;
         $survey->load('questions');
         $responses = $survey->responses()->with('answers')->get()->keyBy(fn ($r) => $r->user_id.'-'.($r->student_id ?? 0));
-        $recipients = $survey->recipients()->with(['parent:id,name,phone', 'student:id,name_ar,name_en'])->get();
+        $recipients = $survey->recipients()->with(['parent:id,name,phone,role', 'student:id,name_ar,name_en'])->get();
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         $rows = $this->rows($survey, $responses, $recipients)->when($state, fn ($c) => $c->where('state', $state))->map(function (array $r) use ($survey, $lang): array {
             return [
-                $r['parent'], $r['phone'], $r['student']["name_$lang"] ?? $r['student']['name_ar'] ?? '', $r['classroom'], __("surveys.state_$r[state]"), $r['answered_at'] ? substr(str_replace('T', ' ', $r['answered_at']), 0, 16) : '',
+                $r['name'], __('surveys.role_'.$r['role']), $r['phone'], $r['student']["name_$lang"] ?? $r['student']['name_ar'] ?? '', $r['classroom'], __("surveys.state_$r[state]"), $r['answered_at'] ? substr(str_replace('T', ' ', $r['answered_at']), 0, 16) : '',
                 ...$survey->questions->map(fn ($q) => $this->plain($r['answers'][$q->id] ?? null))->all(),
             ];
         })->values();
 
         return $xlsx->download(__('surveys.file').'_'.$survey->id, __('surveys.sheet'), [
-            __('surveys.col_parent'), __('surveys.col_phone'), __('surveys.col_student'), __('surveys.col_classroom'), __('surveys.col_state'), __('surveys.col_answered_at'),
+            __('surveys.col_name'), __('surveys.col_role'), __('surveys.col_phone'), __('surveys.col_student'), __('surveys.col_classroom'), __('surveys.col_state'), __('surveys.col_answered_at'),
             ...$survey->questions->pluck('text')->all(),
         ], $rows);
     }
@@ -139,11 +145,11 @@ class SurveyController extends Controller
             $response = $responses->get($r->user_id.'-'.($r->student_id ?? 0));
 
             return [
-                'id' => $r->id, 'parent' => $r->parent->name, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']), 'classroom' => $r->student_id ? ($sections[$r->student_id] ?? null) : null,
+                'id' => $r->id, 'name' => $r->parent->name, 'role' => $r->parent->role->value, 'phone' => $r->parent->phone, 'student' => $r->student?->only(['id', 'name_ar', 'name_en']), 'classroom' => $r->student_id ? ($sections[$r->student_id] ?? null) : null,
                 'state' => $response === null ? 'pending' : ($response->decision ?? 'answered'), 'answered_at' => $response?->submitted_at?->toIso8601String(),
                 'answers' => $response ? $response->answers->mapWithKeys(fn ($a) => [$a->survey_question_id => $a->value])->all() : [],
             ];
-        })->sortBy(fn ($r) => [$r['state'] === 'pending' ? 0 : 1, $r['classroom'], $r['parent']])->values();
+        })->sortBy(fn ($r) => [$r['state'] === 'pending' ? 0 : 1, $r['classroom'], $r['name']])->values();
     }
 
     /** An answer as text for a spreadsheet cell. */
@@ -204,7 +210,7 @@ class SurveyController extends Controller
         $status = $s->closed_at !== null || ($s->closes_at !== null && $s->closes_at->isPast()) ? 'closed' : 'open';
 
         return [
-            'id' => $s->id, 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'audience' => $s->audience,
+            'id' => $s->id, 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'audience' => $s->audience, 'respondents' => $s->respondents,
             'audience_detail' => match ($s->audience) {
                 'grades' => ['from' => $s->gradeFrom?->only(['name_ar', 'name_en']), 'to' => $s->gradeTo?->only(['name_ar', 'name_en'])],
                 'classrooms' => $s->classrooms->pluck('name')->sort()->values(),

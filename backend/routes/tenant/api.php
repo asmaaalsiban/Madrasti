@@ -87,7 +87,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('surveys')->gro
     Route::post('{survey}/remind', [SurveyController::class, 'remind']);
     Route::delete('{survey}', [SurveyController::class, 'destroy']);
 });
-Route::middleware(['school-user', 'role:parent'])->prefix('my-surveys')->group(function (): void {
+Route::middleware(['school-user', 'role:parent,student'])->prefix('my-surveys')->group(function (): void {
     Route::get('/', [MySurveyController::class, 'index']);
     Route::get('pending', [MySurveyController::class, 'pending']);
     Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);

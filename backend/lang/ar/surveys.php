@@ -12,7 +12,6 @@ return [
     'has_answers' => 'لهذا الاستطلاع إجابات: أغلقه بدل حذفه.',
     'file' => 'ردود_الاستطلاع',
     'sheet' => 'الردود',
-    'col_parent' => 'ولي الأمر',
     'col_phone' => 'الهاتف',
     'col_student' => 'الطالب',
     'col_classroom' => 'الشعبة',
@@ -24,4 +23,9 @@ return [
     'state_declined' => 'رفض',
     'yes' => 'نعم',
     'no' => 'لا',
+    'approval_parents_only' => 'الموافقة يجيب عنها أولياء الأمور فقط.',
+    'col_name' => 'الاسم',
+    'col_role' => 'الصفة',
+    'role_parent' => 'ولي أمر',
+    'role_student' => 'طالب',
 ];

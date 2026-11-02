@@ -20,11 +20,12 @@ export default function SurveyResponsesPage({ base }) {
 
   const nameOf = (s) => (s ? s[`name_${i18n.language}`] || s.name_ar : '')
   const approval = data.type === 'approval'
+  const withChild = data.recipients.some((r) => r.student)
   const states = approval ? ['approved', 'declined', 'pending'] : ['answered', 'pending']
   const count = (s) => data.recipients.filter((r) => r.state === s).length
   const q = search.trim().toLowerCase()
   const rows = data.recipients.filter((r) => (filter === 'all' || r.state === filter)
-    && (!q || [r.parent, r.phone, nameOf(r.student), r.classroom].filter(Boolean).join(' ').toLowerCase().includes(q)))
+    && (!q || [r.name, r.phone, nameOf(r.student), r.classroom].filter(Boolean).join(' ').toLowerCase().includes(q)))
 
   return (
     <section className="space-y-4">
@@ -52,16 +53,17 @@ export default function SurveyResponsesPage({ base }) {
         <table className="w-full text-start text-sm">
           <thead className="bg-slate-50">
             <tr>
-              {['parent', ...(approval ? ['student', 'classroom'] : []), 'phone', 'state', 'answeredAt'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`surveys.cols.${c}`)}</th>)}
+              {['name', 'role', ...(withChild ? ['student', 'classroom'] : []), 'phone', 'state', 'answeredAt'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`surveys.cols.${c}`)}</th>)}
               {data.questions.map((qn) => <th key={qn.id} className="p-2 text-start font-medium">{qn.text}</th>)}
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t">
-                <td className="p-2 font-medium">{r.parent}</td>
-                {approval && <td className="p-2">{nameOf(r.student)}</td>}
-                {approval && <td className="p-2">{r.classroom ?? '—'}</td>}
+                <td className="p-2 font-medium">{r.name}</td>
+                <td className="p-2">{t(`surveys.role.${r.role}`)}</td>
+                {withChild && <td className="p-2">{nameOf(r.student)}</td>}
+                {withChild && <td className="p-2">{r.classroom ?? '—'}</td>}
                 <td dir="ltr" className="p-2 text-start">{r.phone ?? '—'}</td>
                 <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-xs ${STYLE[r.state]}`}>{t(`surveys.state.${r.state}`)}</span></td>
                 <td dir="ltr" className="p-2 text-start text-slate-600">{r.answered_at ? r.answered_at.slice(0, 16).replace('T', ' ') : '—'}</td>

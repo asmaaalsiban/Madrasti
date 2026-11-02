@@ -14,6 +14,7 @@ use App\Modules\Communication\Services\Notifier;
 use App\Modules\Surveys\Models\Survey;
 use App\Modules\Surveys\Models\SurveyQuestion;
 use App\Modules\Surveys\Models\SurveyRecipient;
+use App\Shared\Enums\Role;
 use App\Modules\Surveys\Models\SurveyResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,7 @@ class SurveyService
         $survey = DB::transaction(function () use ($author, $data, $questions): Survey {
             $survey = Survey::create([
                 'created_by' => $author->id, 'type' => $data['type'], 'title' => $data['title'], 'description' => $data['description'] ?? null,
-                'closes_at' => $data['closes_at'] ?? null, 'audience' => $data['audience'],
+                'closes_at' => $data['closes_at'] ?? null, 'audience' => $data['audience'], 'respondents' => $data['type'] === 'approval' ? 'parents' : ($data['respondents'] ?? 'parents'),
                 'grade_from_id' => $data['audience'] === 'grades' ? $data['grade_from_id'] : null, 'grade_to_id' => $data['audience'] === 'grades' ? $data['grade_to_id'] : null,
             ]);
             if ($data['audience'] === 'classrooms') {
@@ -51,7 +52,7 @@ class SurveyService
             return $survey;
         });
 
-        $this->notifier->toUsers($survey->recipients()->pluck('user_id'), 'survey_new', ['title' => $survey->title, 'type' => $survey->type], '/parent/surveys');
+        $this->notify($survey, 'survey_new');
 
         return $survey;
     }
@@ -76,13 +77,29 @@ class SurveyService
 
         $rows = [];
         foreach (Student::with('guardians:users.id')->whereIn('id', $studentIds)->get() as $student) {
-            foreach ($student->guardians as $guardian) {
-                $perChild = $survey->type === 'approval';
-                $rows["{$guardian->id}-".($perChild ? $student->id : 0)] = ['user_id' => $guardian->id, 'student_id' => $perChild ? $student->id : null];
+            if ($survey->respondents !== 'students') {
+                foreach ($student->guardians as $guardian) {
+                    $perChild = $survey->type === 'approval';
+                    $rows["{$guardian->id}-".($perChild ? $student->id : 0)] = ['user_id' => $guardian->id, 'student_id' => $perChild ? $student->id : null];
+                }
+            }
+            // The student answers for themselves (never an approval: that is the parents').
+            if ($survey->respondents !== 'parents' && $student->user_id !== null) {
+                $rows["{$student->user_id}-{$student->id}"] = ['user_id' => $student->user_id, 'student_id' => $student->id];
             }
         }
 
         return array_values($rows);
+    }
+
+    /** Tells the people who have to answer (or, for a reminder, those who have not yet): parents and students each get the link to their own page. */
+    private function notify(Survey $survey, string $kind, ?\Illuminate\Support\Collection $userIds = null): void
+    {
+        $ids = $userIds ?? $survey->recipients()->pluck('user_id')->unique();
+        $students = User::whereIn('id', $ids)->where('role', Role::Student)->pluck('id');
+        $params = ['title' => $survey->title, 'type' => $survey->type];
+        $this->notifier->toUsers($ids->diff($students), $kind, $params, '/parent/surveys');
+        $this->notifier->toUsers($students, $kind, $params, '/student/surveys');
     }
 
     /** Tells the parents who have not answered yet (at most once every 6 hours). Returns how many were told. */
@@ -96,7 +113,7 @@ class SurveyService
             $q->from('survey_responses')->whereColumn('survey_responses.survey_id', 'survey_recipients.survey_id')->whereColumn('survey_responses.user_id', 'survey_recipients.user_id')
                 ->where(fn ($w) => $w->whereColumn('survey_responses.student_id', 'survey_recipients.student_id')->orWhere(fn ($n) => $n->whereNull('survey_responses.student_id')->whereNull('survey_recipients.student_id')));
         })->pluck('user_id')->unique();
-        $this->notifier->toUsers($pending, 'survey_reminder', ['title' => $survey->title, 'type' => $survey->type], '/parent/surveys');
+        $this->notify($survey, 'survey_reminder', $pending);
         $survey->update(['reminded_at' => now()]);
 
         return $pending->count();

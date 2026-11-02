@@ -17,10 +17,12 @@ class Survey extends Model
 {
     public const TYPES = ['poll', 'survey', 'approval'];
 
+    public const RESPONDENTS = ['parents', 'students', 'both'];
+
     /**
      * @var list<string>
      */
-    protected $fillable = ['created_by', 'type', 'title', 'description', 'opens_at', 'closes_at', 'audience', 'classroom_id', 'grade_from_id', 'grade_to_id', 'closed_at', 'reminded_at'];
+    protected $fillable = ['created_by', 'type', 'title', 'description', 'opens_at', 'closes_at', 'audience', 'classroom_id', 'grade_from_id', 'grade_to_id', 'respondents', 'closed_at', 'reminded_at'];
 
     /**
      * @return array<string, string>

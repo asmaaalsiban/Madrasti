@@ -12,7 +12,7 @@ use App\Modules\Surveys\Services\SurveyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/** A parent's side: the surveys and approvals waiting for them (one per child for an approval), and sending the answer. */
+/** The answering side, for a parent or a student: the surveys and approvals waiting for them (one per child for a parent's approval), and sending the answer. */
 class MySurveyController extends Controller
 {
     public function index(Request $request): JsonResponse

@@ -11,7 +11,7 @@ const blank = (type = 'single_choice') => ({ type, text: '', options: '', is_req
 export default function SurveyForm({ isAdmin, onClose, onCreated }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ type: 'poll', title: '', description: '', audience: isAdmin ? 'all' : 'classrooms', grade_from_id: '', grade_to_id: '', closes_at: '' })
+  const [form, setForm] = useState({ type: 'poll', title: '', description: '', respondents: 'parents', audience: isAdmin ? 'all' : 'classrooms', grade_from_id: '', grade_to_id: '', closes_at: '' })
   const [picked, setPicked] = useState([])
   const [questions, setQuestions] = useState([blank()])
   const [error, setError] = useState('')
@@ -35,6 +35,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
   const save = useMutation({
     mutationFn: () => api.post('/surveys', {
       type: form.type, title: form.title, description: form.description, closes_at: form.closes_at || null, audience: form.audience,
+      respondents: form.type === 'approval' ? 'parents' : form.respondents,
       ...(form.audience === 'grades' ? { grade_from_id: Number(form.grade_from_id), grade_to_id: Number(form.grade_to_id) } : {}),
       ...(form.audience === 'classrooms' ? { classroom_ids: picked } : {}),
       questions: questions.map((q) => ({ type: q.type, text: q.text, is_required: q.is_required, ...(CHOICE.includes(q.type) ? { options: q.options.split('\n').map((o) => o.trim()).filter(Boolean) } : {}) })),
@@ -56,6 +57,18 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
         <p className="text-xs text-slate-500">{t(`surveys.typeHelp.${form.type}`)}</p>
         <label className="block text-sm">{t('surveys.fieldTitle')}<input required className="mt-1 w-full rounded border p-2" value={form.title} onChange={set('title')} /></label>
         <label className="block text-sm">{t('surveys.description')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={form.description} onChange={set('description')} /></label>
+        <fieldset className="space-y-1 rounded border p-3">
+          <legend className="px-1 text-sm font-medium">{t('surveys.respondents')}</legend>
+          {form.type === 'approval' ? (
+            <p className="text-sm text-slate-600">{t('surveys.approvalParentsOnly')}</p>
+          ) : (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              {['parents', 'students', 'both'].map((r) => (
+                <label key={r} className="flex items-center gap-1.5"><input type="radio" name="respondents" checked={form.respondents === r} onChange={() => setForm({ ...form, respondents: r })} />{t(`surveys.who.${r}`)}</label>
+              ))}
+            </div>
+          )}
+        </fieldset>
         <fieldset className="space-y-2 rounded border p-3">
           <legend className="px-1 text-sm font-medium">{t('surveys.audience')}</legend>
           {isAdmin && (

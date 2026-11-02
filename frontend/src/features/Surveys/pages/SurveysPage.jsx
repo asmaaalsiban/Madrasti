@@ -27,6 +27,7 @@ export default function SurveysPage({ base }) {
               <span>
                 <span className="font-bold">{s.title}</span>
                 <span className="ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs">{t(`surveys.types.${s.type}`)}</span>
+                {s.respondents !== 'parents' && <span className="ms-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800">{t(`surveys.who.${s.respondents}`)}</span>}
                 <span className={`ms-2 rounded-full px-2 py-0.5 text-xs ${s.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-700'}`}>{t(`surveys.status.${s.status}`)}</span>
               </span>
               <span className="text-sm text-slate-600">{t('surveys.answered', { done: s.response_count, total: s.recipient_count })}</span>
