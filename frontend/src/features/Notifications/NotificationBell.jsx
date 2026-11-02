@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
@@ -23,11 +23,27 @@ export default function NotificationBell() {
   const client = useQueryClient()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const box = useRef(null)
   const { data } = useQuery({ queryKey: ['notifications'], queryFn: async () => (await api.get('/notifications')).data.data, refetchInterval: 30000 })
   const refresh = () => client.invalidateQueries({ queryKey: ['notifications'] })
   const markRead = useMutation({ mutationFn: (id) => api.post(`/notifications/${id}/read`), onSuccess: refresh })
   const readAll = useMutation({ mutationFn: () => api.post('/notifications/read-all'), onSuccess: refresh })
   const unread = data?.unread ?? 0
+
+  // Clicking anywhere outside the bell, or pressing Escape, closes the list.
+  useEffect(() => {
+    if (!open) return undefined
+    const away = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false) }
+    const esc = (e) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', away)
+    document.addEventListener('touchstart', away)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('mousedown', away)
+      document.removeEventListener('touchstart', away)
+      document.removeEventListener('keydown', esc)
+    }
+  }, [open])
 
   const openOne = (n) => {
     if (!n.read) markRead.mutate(n.id)
@@ -36,7 +52,7 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={box}>
       <button type="button" className="relative rounded border px-3 py-1 text-sm" aria-expanded={open} aria-label={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
         <span aria-hidden="true">🔔</span>
         {unread > 0 && <span className="ms-1 rounded-full bg-white px-2 text-xs font-bold text-brand" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
