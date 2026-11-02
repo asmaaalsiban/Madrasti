@@ -46,7 +46,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen md:flex">
-      <aside className="bg-brand text-white md:min-h-screen md:w-60">
+      <aside className="bg-brand text-white md:min-h-screen md:w-60 print:hidden">
         <div className="flex items-center justify-between p-4">
           <span className="font-bold">{school?.name ?? t('common.appName')}</span>
           <button
@@ -77,7 +77,7 @@ export default function AdminLayout() {
         </nav>
       </aside>
       <div className="flex-1">
-        <header className="flex items-center justify-end gap-2 border-b bg-white px-4 py-3">
+        <header className="flex items-center justify-end gap-2 border-b bg-white px-4 py-3 print:hidden">
           <LanguageSwitcher />
           <Link to="/change-password" className="rounded border px-3 py-1 text-sm">{t('auth.changePassword.link')}</Link>
           <SwitchSchoolButton />

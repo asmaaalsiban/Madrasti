@@ -24,7 +24,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-2 bg-brand px-4 py-3 text-white">
+      <header className="flex flex-wrap items-center justify-between gap-2 bg-brand px-4 py-3 text-white print:hidden">
         <span className="font-bold">{school?.name ?? t('common.appName')}</span>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm">{label}: <strong>{user.name}</strong>{detail ? ` · ${detail}` : ''}</span>

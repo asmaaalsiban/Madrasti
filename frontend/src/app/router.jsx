@@ -41,6 +41,7 @@ import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import ImportPage from '../features/Import/pages/ImportPage'
+import ReportCardPage, { MyReportCardPage } from '../features/Reports/pages/ReportCardPage'
 import MotivationPage from '../features/Motivation/pages/MotivationPage'
 import MotivationSettingsPage from '../features/Motivation/pages/MotivationSettingsPage'
 import StudentMotivationPage, { MyMotivationPage } from '../features/Motivation/pages/StudentMotivationPage'
@@ -82,6 +83,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
+    { path: 'children/:id/report-card', element: <ReportCardPage /> },
     { path: 'children/:id/fees', element: <ChildFeesPage /> },
     { path: 'children/:id/summaries', element: <ChildSummariesPage /> },
     { path: 'children/:id/lesson-plans', element: <ChildPlansPage /> },
@@ -93,6 +95,7 @@ const HOME_ROUTES = {
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'motivation', element: <MyMotivationPage /> },
+    { path: 'report-card', element: <MyReportCardPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
   ],
@@ -167,6 +170,7 @@ export const routes = [
               { path: '/admin/behavior', element: <BehaviorPage base="/admin" /> },
               { path: '/admin/behavior/students/:id', element: <StudentBehaviorPage staff /> },
               { path: '/admin/behavior-criteria', element: <BehaviorCriteriaPage /> },
+              { path: '/admin/report-card/:id', element: <ReportCardPage /> },
               { path: '/admin/import', element: <ImportPage /> },
               { path: '/admin/motivation', element: <MotivationPage base="/admin" /> },
               { path: '/admin/motivation/students/:id', element: <StudentMotivationPage staff /> },

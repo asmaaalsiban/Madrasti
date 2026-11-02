@@ -29,6 +29,7 @@ use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
 use App\Modules\People\Http\Controllers\DepartmentController;
+use App\Modules\Reports\Http\Controllers\ReportCardController;
 use App\Modules\People\Http\Controllers\ImportController;
 use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\StaffController;
@@ -258,6 +259,7 @@ Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->g
     Route::delete('{criterion}', [BehaviorCriteriaController::class, 'destroy']);
 });
 Route::middleware('school-user')->get('students/{student}/behavior', [BehaviorController::class, 'student']);
+Route::middleware('school-user')->get('students/{student}/report-card', ReportCardController::class);
 
 // Motivation: points, badges, star of the week.
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('motivation')->group(function (): void {
