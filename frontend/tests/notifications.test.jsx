@@ -32,6 +32,21 @@ describe('NotificationBell', () => {
     expect(screen.getByText('Your lesson plan was rejected: Fractions — Add objectives')).toBeInTheDocument()
   })
 
+  it('closes when you click anywhere else or press Escape, but not when you click inside', async () => {
+    feed([n('1', 'homework', { subject_en: 'Math', title: 'Page 10' }, { read: true })], 0)
+    renderBell()
+    const open = () => fireEvent.click(screen.getByRole('button', { name: 'Notifications' }))
+    await screen.findByRole('button', { name: 'Notifications' })
+    open()
+    fireEvent.mouseDown(screen.getByRole('dialog'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.mouseDown(document.body)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    open()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('writes them in Arabic when the language is Arabic', async () => {
     await i18n.changeLanguage('ar')
     feed([n('1', 'grades', { subject_ar: 'رياضيات', subject_en: 'Math', title: 'اختبار 1' })], 1)
