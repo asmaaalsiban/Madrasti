@@ -44,6 +44,7 @@ use App\Modules\Motivation\Http\Controllers\MotivationController;
 use App\Modules\Motivation\Http\Controllers\PointCategoryController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
+use App\Modules\TeacherTools\Http\Controllers\BehaviorSpecialController;
 use App\Modules\TeacherTools\Http\Controllers\DailySummaryController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
@@ -270,6 +271,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('behavior')->gr
     Route::put('evaluations', [BehaviorController::class, 'save']);
     Route::post('notes', [BehaviorController::class, 'addNote']);
     Route::delete('notes/{note}', [BehaviorController::class, 'deleteNote']);
+    // A student's special evaluation: criteria for that student alone.
+    Route::get('students/{student}/special', [BehaviorSpecialController::class, 'index']);
+    Route::post('students/{student}/special', [BehaviorSpecialController::class, 'store']);
+    Route::put('special/{criterion}', [BehaviorSpecialController::class, 'update']);
+    Route::delete('special/{criterion}', [BehaviorSpecialController::class, 'destroy']);
 });
 Route::middleware(['school-user', 'role:admin'])->prefix('behavior/criteria')->group(function (): void {
     Route::put('{criterion}', [BehaviorCriteriaController::class, 'update']);

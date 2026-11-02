@@ -688,7 +688,21 @@
     "monthRow": "{{month}} ({{weeks}} weeks)",
     "termRow": "{{name}} ({{months}} months)",
     "addCriterion": "Add a permanent criterion",
-    "saveCriterion": "Save criterion"
+    "saveCriterion": "Save criterion",
+    "special": {
+      "title": "Special evaluation: {{name}}",
+      "help": "Criteria for this student only. They appear when you evaluate this student and for no one else, so you can follow his or her own situation.",
+      "none": "No special criteria yet. Add one below.",
+      "newName": "New special criterion (e.g. \"Raises his hand\")",
+      "add": "Add",
+      "remove": "Remove {{name}}",
+      "badge": "{{count}} special",
+      "badgeHint": "This student has their own criteria",
+      "resultsTitle": "Special evaluation",
+      "average": "Average {{value}}",
+      "noScores": "No scores yet",
+      "history": "Scores of {{name}}"
+    }
   },
   "dailySummary": {
     "title": "Daily summary",

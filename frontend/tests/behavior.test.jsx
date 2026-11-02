@@ -141,3 +141,93 @@ describe('StudentBehaviorPage', () => {
     expect(await screen.findByText('No evaluations yet.')).toBeInTheDocument()
   })
 })
+
+describe('special evaluation (criteria for one student)', () => {
+  const state = { special: [{ id: 41, name: 'Raises his hand', is_active: true }] }
+  const serve = () => api.get.mockImplementation((url) => {
+    if (url === '/behavior/classrooms') return Promise.resolve({ data: { data: [{ id: 3, name: '5-A' }] } })
+    if (url === '/behavior/week') return Promise.resolve({ data: { data: { week_starts_on: '2026-10-18', students: [
+      { id: 9, name_ar: 'سلمى', name_en: 'Salma', special_count: 1, evaluation: { id: 1, scores: { 1: 4 }, special_scores: { 41: 2 }, note: null, visible_to_parent: true } },
+      { id: 10, name_ar: 'علي', name_en: 'Ali', special_count: 0, evaluation: null },
+    ] } } })
+    if (url === '/behavior/criteria') return Promise.resolve({ data: { data: criteria } })
+    if (url === '/behavior/students/9/special') return Promise.resolve({ data: { data: state.special } })
+    if (url === '/behavior/students/10/special') return Promise.resolve({ data: { data: [] } })
+    return Promise.resolve({ data: { data: [] } })
+  })
+  beforeEach(() => { state.special = [{ id: 41, name: 'Raises his hand', is_active: true }]; serve() })
+
+  it('marks the students who have their own criteria on the list', async () => {
+    wrap(<BehaviorPage base="/teacher" />)
+    expect(await screen.findByText('★ 1 special')).toBeInTheDocument()
+    expect(screen.getAllByText(/★/)).toHaveLength(1) // not shown for the other student
+  })
+
+  it('shows the special section under the general criteria with this student\'s criteria and their saved scores', async () => {
+    wrap(<BehaviorPage base="/teacher" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Evaluate' }))[0])
+    expect(await screen.findByText('Special evaluation: Salma')).toBeInTheDocument()
+    expect(screen.getByText(/for this student only/i)).toBeInTheDocument()
+    const group = await screen.findByRole('group', { name: 'Raises his hand' })
+    expect(within(group).getByRole('button', { name: '2' })).toHaveAttribute('aria-pressed', 'true')
+    expect(api.get).toHaveBeenCalledWith('/behavior/students/9/special')
+  })
+
+  it('saves the special scores together with the general ones', async () => {
+    api.put.mockResolvedValue({ data: { data: {} } })
+    wrap(<BehaviorPage base="/teacher" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Evaluate' }))[0])
+    const group = await screen.findByRole('group', { name: 'Raises his hand' })
+    fireEvent.click(within(group).getByRole('button', { name: '5' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/behavior/evaluations', expect.objectContaining({ student_id: 9, scores: { 1: 4 }, special_scores: { 41: 5 } })))
+  })
+
+  it('adds a new special criterion for the student', async () => {
+    state.special = []
+    api.post.mockImplementation(() => { state.special = [{ id: 50, name: 'Stays in his seat', is_active: true }]; return Promise.resolve({ data: { data: state.special[0] } }) })
+    wrap(<BehaviorPage base="/teacher" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Evaluate' }))[0])
+    expect(await screen.findByText('No special criteria yet. Add one below.')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/New special criterion/), { target: { value: 'Stays in his seat' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/behavior/students/9/special', { name: 'Stays in his seat' }))
+    expect(await screen.findByRole('group', { name: 'Stays in his seat' })).toBeInTheDocument()
+  })
+
+  it('removes a special criterion and drops its score', async () => {
+    api.delete.mockResolvedValue({})
+    api.put.mockResolvedValue({ data: { data: {} } })
+    wrap(<BehaviorPage base="/teacher" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Evaluate' }))[0])
+    await screen.findByRole('group', { name: 'Raises his hand' })
+    state.special = []
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Raises his hand' }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/behavior/special/41'))
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Raises his hand' })).not.toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/behavior/evaluations', expect.objectContaining({ special_scores: {} })))
+  })
+
+  it('shows the message when a name is refused', async () => {
+    api.post.mockRejectedValue({ response: { data: { errors: { name: ['This student already has a special criterion with this name.'] } } } })
+    wrap(<BehaviorPage base="/teacher" />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Evaluate' }))[0])
+    fireEvent.change(await screen.findByLabelText(/New special criterion/), { target: { value: 'Raises his hand' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('already has a special criterion')
+  })
+
+  it('shows the results of each special criterion to the family and the staff', async () => {
+    api.get.mockResolvedValue({ data: { data: {
+      criteria, weeks: [], months: [], terms: [], remarks: [], notes: [],
+      special: [{ id: 41, name: 'Raises his hand', is_active: true, average: 3.5, history: [{ week_starts_on: '2026-10-11', score: 3, teacher: 'Sara' }, { week_starts_on: '2026-10-18', score: 4, teacher: 'Sara' }] }],
+    } } })
+    wrap(<StudentBehaviorPage />, '/c/7', '/c/:id')
+    expect(await screen.findByText('Special evaluation')).toBeInTheDocument()
+    expect(screen.getByText('Raises his hand')).toBeInTheDocument()
+    expect(screen.getByText('Average 3.5')).toBeInTheDocument()
+    const history = screen.getByLabelText('Scores of Raises his hand')
+    expect(within(history).getAllByRole('listitem')).toHaveLength(2)
+  })
+})

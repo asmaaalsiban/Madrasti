@@ -49,6 +49,27 @@ export default function StudentBehavior({ studentId, canEdit = false }) {
         </div>
       )}
 
+      {data.special?.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="font-bold">{t('behavior.special.resultsTitle')}</h3>
+          <ul className="space-y-2">
+            {data.special.map((c) => (
+              <li key={c.id} className="rounded-lg border bg-white p-3 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className={`font-medium ${c.is_active ? '' : 'text-slate-400'}`}>{c.name}</span>
+                  <span className="text-slate-600">{c.average === null ? t('behavior.special.noScores') : t('behavior.special.average', { value: c.average })}</span>
+                </div>
+                {c.history.length > 0 && (
+                  <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={t('behavior.special.history', { name: c.name })}>
+                    {c.history.map((h, i) => <li key={i} title={`${t('behavior.weekOf', { date: h.week_starts_on })} · ${h.teacher}`} className="rounded border px-2 py-0.5 text-xs"><span dir="ltr" className="text-slate-500">{h.week_starts_on.slice(5)}</span> <b>{h.score}</b></li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {data.remarks.length > 0 && (
         <div className="space-y-2">
           <h3 className="font-bold">{t('behavior.remarks')}</h3>

@@ -10,6 +10,8 @@ export default function EvaluateDialog({ student, date, onClose }) {
   const client = useQueryClient()
   const existing = student.evaluation
   const [scores, setScores] = useState(existing ? { ...existing.scores } : {})
+  const [specialScores, setSpecialScores] = useState(existing ? { ...(existing.special_scores ?? {}) } : {})
+  const [specialName, setSpecialName] = useState('')
   const [note, setNote] = useState(existing?.note ?? '')
   const [visible, setVisible] = useState(existing?.visible_to_parent ?? true)
   const [quick, setQuick] = useState({ type: 'positive', note: '' })
@@ -20,10 +22,21 @@ export default function EvaluateDialog({ student, date, onClose }) {
   const name = (c) => c[`name_${i18n.language}`] || c.name_ar
 
   const criteria = useQuery({ queryKey: ['behavior', 'criteria'], queryFn: async () => (await api.get('/behavior/criteria')).data.data })
+  const specialKey = ['behavior', 'special', student.id]
+  const special = useQuery({ queryKey: specialKey, queryFn: async () => (await api.get(`/behavior/students/${student.id}/special`)).data.data })
+  const addSpecial = useMutation({
+    mutationFn: () => api.post(`/behavior/students/${student.id}/special`, { name: specialName }),
+    onSuccess: () => { setSpecialName(''); setError(''); client.invalidateQueries({ queryKey: specialKey }); client.invalidateQueries({ queryKey: ['behavior', 'week'] }) },
+    onError: (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || t('admin.actions.error')),
+  })
+  const removeSpecial = useMutation({
+    mutationFn: (id) => api.delete(`/behavior/special/${id}`),
+    onSuccess: (_r, id) => { setSpecialScores((prev) => { const next = { ...prev }; delete next[id]; return next }); client.invalidateQueries({ queryKey: specialKey }); client.invalidateQueries({ queryKey: ['behavior', 'week'] }) },
+  })
   const fail = (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || t('admin.actions.error'))
 
   const save = useMutation({
-    mutationFn: () => api.put('/behavior/evaluations', { student_id: student.id, evaluated_on: date, scores, note: note || null, visible_to_parent: visible }),
+    mutationFn: () => api.put('/behavior/evaluations', { student_id: student.id, evaluated_on: date, scores, special_scores: specialScores, note: note || null, visible_to_parent: visible }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['behavior'] }); onClose() },
     onError: fail,
   })
@@ -37,6 +50,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
     onSuccess: () => { setNewCriterion({ name_ar: '', name_en: '' }); setAdding(false); setError(''); client.invalidateQueries({ queryKey: ['behavior', 'criteria'] }) },
     onError: fail,
   })
+  const pickSpecial = (id, value) => setSpecialScores((prev) => { const next = { ...prev }; if (next[id] === value) delete next[id]; else next[id] = value; return next })
   const pick = (id, value) => setScores((prev) => { const next = { ...prev }; if (next[id] === value) delete next[id]; else next[id] = value; return next })
 
   return (
@@ -67,6 +81,30 @@ export default function EvaluateDialog({ student, date, onClose }) {
             <button type="button" className="rounded border px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</button>
           </div>
         ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAdding(true)}>{t('behavior.addCriterion')}</button>}
+        <div className="space-y-2 rounded-lg border border-dashed border-brand bg-blue-50/40 p-3">
+          <h3 className="font-bold">{t('behavior.special.title', { name: student[`name_${i18n.language}`] || student.name_ar })}</h3>
+          <p className="text-xs text-slate-600">{t('behavior.special.help')}</p>
+          {(special.data ?? []).length === 0 && <p className="text-sm text-slate-500">{t('behavior.special.none')}</p>}
+          <ul className="space-y-2">
+            {(special.data ?? []).map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-medium">{c.name}</span>
+                <span className="flex items-center gap-1" role="group" aria-label={c.name}>
+                  {[1, 2, 3, 4, 5].map((v) => (
+                    <button key={v} type="button" aria-pressed={specialScores[c.id] === v} title={t(`behavior.levels.${v}`)}
+                      className={`h-8 w-8 rounded border text-sm ${specialScores[c.id] === v ? 'bg-brand text-white' : 'bg-white'}`} onClick={() => pickSpecial(c.id, v)}>{v}</button>
+                  ))}
+                  <button type="button" aria-label={t('behavior.special.remove', { name: c.name })} className="ms-1 rounded border border-red-300 px-2 py-1 text-xs text-red-700" onClick={() => removeSpecial.mutate(c.id)}>✕</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-wrap items-center gap-2">
+            <input aria-label={t('behavior.special.newName')} className="min-w-0 flex-1 rounded border p-2" placeholder={t('behavior.special.newName')} value={specialName} onChange={(e) => setSpecialName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (specialName.trim()) addSpecial.mutate() } }} />
+            <button type="button" className="rounded border px-3 py-2 text-brand disabled:opacity-50" disabled={!specialName.trim() || addSpecial.isPending} onClick={() => addSpecial.mutate()}>{t('behavior.special.add')}</button>
+          </div>
+        </div>
         <p className="text-xs text-slate-500">{[1, 2, 3, 4, 5].map((v) => `${v} = ${t(`behavior.levels.${v}`)}`).join(' · ')}</p>
         <label className="block text-sm">{t('behavior.note')}<textarea rows={3} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />{t('behavior.visibleToParent')}</label>
