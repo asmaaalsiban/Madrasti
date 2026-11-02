@@ -380,3 +380,8 @@ Upload the **school's own file** as it is — no template needed.
 - The commitment rules screen has a **Use suggested steps** button when a measure has no deduction steps yet.
 - Dates: the browser draws native date fields left-to-right, so in Arabic the app shows **day / month / year** as three fields from right to left (`DateInput` / `MonthInput`); in English the native field is kept.
 - After pulling: `php artisan tenants:migrate`.
+
+## Audit log
+
+- **Audit log** (`/admin/audit-log`, school management only, read only): every create / update / delete of sensitive data (grades, fees and payments, attendance, payroll, contracts, students, accounts...) with who, when, and the changed fields (old → new). Filter by action, kind of record, person, dates and record number; page through; **Export to Excel** (up to 10,000 rows). Password hashes are never shown.
+- No migration needed.

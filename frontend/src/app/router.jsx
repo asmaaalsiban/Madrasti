@@ -72,6 +72,7 @@ import RenewalsPage from '../features/Renewals/pages/RenewalsPage'
 import StaffAttendancePage from '../features/StaffAttendance/StaffAttendancePage'
 import RulesPage from '../features/Payroll/pages/RulesPage'
 import TemplatesPage from '../features/Payroll/pages/TemplatesPage'
+import AuditLogPage from '../features/Audit/AuditLogPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -198,6 +199,7 @@ export const routes = [
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
+              { path: '/admin/audit-log', element: <AuditLogPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },
               { path: '/admin/payroll/rules', element: <RulesPage base="/admin" /> },
               { path: '/admin/payroll/templates', element: <TemplatesPage base="/admin" /> },
