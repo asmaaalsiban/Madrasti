@@ -28,6 +28,7 @@ use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
 use App\Modules\Grading\Http\Controllers\ResultsController;
 use App\Modules\Grading\Http\Controllers\StudentGradesController;
+use App\Modules\Academic\Http\Controllers\RenewalController;
 use App\Modules\HR\Http\Controllers\ContractController;
 use App\Modules\HR\Http\Controllers\PayrollController;
 use App\Modules\People\Http\Controllers\DepartmentController;
@@ -97,6 +98,17 @@ Route::middleware(['school-user', 'role:parent,student,teacher,admin'])->prefix(
     Route::get('/', [MySurveyController::class, 'index']);
     Route::get('pending', [MySurveyController::class, 'pending']);
     Route::post('{recipient}/respond', [MySurveyController::class, 'respond']);
+});
+
+// Yearly re-registration of students: school management and the accountant.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('renewals')->group(function (): void {
+    Route::get('/', [RenewalController::class, 'index']);
+    Route::get('sections', [RenewalController::class, 'sections']);
+    Route::post('open', [RenewalController::class, 'open']);
+    Route::post('renew-all', [RenewalController::class, 'renewAll']);
+    Route::post('{renewal}/renew', [RenewalController::class, 'renew']);
+    Route::post('{renewal}/decline', [RenewalController::class, 'decline']);
+    Route::post('{renewal}/reopen', [RenewalController::class, 'reopen']);
 });
 
 // Staff contracts and payroll: the accountant manages, the principal (admin role) approves, everyone reads their own payslips.

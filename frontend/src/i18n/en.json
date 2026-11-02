@@ -116,7 +116,8 @@
       "import": "Import",
       "surveys": "Surveys",
       "signatures": "Signatures",
-      "payroll": "Payroll"
+      "payroll": "Payroll",
+      "renewals": "Student renewal"
     },
     "actions": {
       "add": "Add",
@@ -814,7 +815,8 @@
       "payroll_approved": "Payroll {{month}} was approved",
       "payroll_returned": "Payroll {{month}} was sent back: {{note}}",
       "payslip_paid": "Your salary for {{month}} was paid",
-      "contract_expiring": "{{name}}'s contract ends on {{date}}"
+      "contract_expiring": "{{name}}'s contract ends on {{date}}",
+      "student_renewed": "{{student}} is registered for {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1408,5 +1410,45 @@
     "payDetailsHint": "IBAN, cheque payee...",
     "methodForRest": "{{count}} payslip(s) have no method: pay them by",
     "mySalary": "My salary"
+  },
+  "renewals": {
+    "title": "Student renewal",
+    "hint": "Re-register students for the next academic year.",
+    "help": "Open the renewal for the next year, then renew each student: they move to the next grade and get the new year's fees. Declined students get no place.",
+    "forYear": "For year",
+    "noYear": "No next academic year yet: add it in Academic years first.",
+    "open": "Open renewal",
+    "addMissing": "Add students not listed yet",
+    "opened": "{{count}} student(s) added.",
+    "renewAll": "Renew all waiting ({{count}})",
+    "renewedAll": "{{count}} renewed, {{failed}} could not be placed.",
+    "renew": "Renew",
+    "decline": "Decline",
+    "reopen": "Reopen",
+    "reason": "Reason (optional)",
+    "renewFor": "Renew {{name}}",
+    "declineFor": "Decline renewal: {{name}}",
+    "moveInfo": "{{from}} → {{to}} ({{year}})",
+    "repeatGrade": "Repeat the same grade",
+    "section": "Section",
+    "autoSection": "Automatic (emptiest suitable section)",
+    "discount": "Discount",
+    "transport": "Transport fee",
+    "feesHint": "The new year's fees of the grade are given automatically.",
+    "lastGrade": "Last grade",
+    "noRows": "No students here.",
+    "status": {
+      "pending": "Waiting",
+      "renewed": "Renewed",
+      "declined": "Declined",
+      "graduating": "Last grade",
+      "all": "All"
+    },
+    "cols": {
+      "student": "Student",
+      "from": "Now",
+      "to": "Next year",
+      "state": "Status"
+    }
   }
 }

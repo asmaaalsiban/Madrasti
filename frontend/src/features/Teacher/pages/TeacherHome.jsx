@@ -25,7 +25,7 @@ export default function TeacherHome() {
   ]
   // An accountant is not a teacher: their home is the school's money.
   const cards = user?.staff_type === 'accountant'
-    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
+    ? [['/teacher/finance', 'finance.title', 'finance.hint'], ['/teacher/finance/accounts', 'finance.accounts', 'finance.accountsHint'], ['/teacher/finance/structures', 'finance.structures', 'finance.structuresHint'], ['/teacher/renewals', 'renewals.title', 'renewals.hint'], ['/teacher/payroll', 'payroll.title', 'payroll.hint'], ['/teacher/payroll/contracts', 'payroll.contractsTitle', 'payroll.contractsHint']]
     : teaching
   const all = [...cards, ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint']]
   return (
