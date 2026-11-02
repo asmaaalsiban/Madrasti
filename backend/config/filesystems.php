@@ -30,6 +30,13 @@ return [
 
     'disks' => [
 
+        // Backups (see config/backup.php). Not listed in tenancy's disks, so it is shared by all schools.
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
