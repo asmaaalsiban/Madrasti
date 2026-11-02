@@ -21,4 +21,7 @@ return [
     'reset_mail_for_self' => 'Hello :name, your password reset code is:',
     'reset_mail_valid' => 'The code is valid for :minutes minutes and can be used once.',
     'reset_mail_ignore' => 'If you did not ask for this, ignore this e-mail: nothing changes.',
+    'email_requested' => 'If this email can be used, a code was sent to it.',
+    'email_mail_subject' => 'Confirm your email',
+    'email_mail_intro' => 'Hello :name, use this code to confirm your email on your school account:',
 ];

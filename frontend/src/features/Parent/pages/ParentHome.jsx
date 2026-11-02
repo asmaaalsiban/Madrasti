@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ChildAttendance from '../components/ChildAttendance'
+import { useState } from 'react'
+import AddEmailForm from '../../Auth/components/AddEmailForm'
 import { useAuth } from '../../Auth/AuthProvider'
 
 // A parent sees each child with the email the child signs in with.
@@ -8,9 +10,18 @@ export default function ParentHome() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const children = user?.children ?? []
+  const [addingEmail, setAddingEmail] = useState(false)
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('parent.home.title')}</h1>
+      {user && !user.email && (
+        <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <p className="font-medium text-amber-900">{t('auth.addEmail.reminder')}</p>
+          {addingEmail ? <AddEmailForm onDone={() => setAddingEmail(false)} onSkip={() => setAddingEmail(false)} /> : (
+            <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={() => setAddingEmail(true)}>{t('auth.addEmail.button')}</button>
+          )}
+        </div>
+      )}
       {children.length === 0 ? (
         <p className="text-slate-600">{t('parent.home.empty')}</p>
       ) : (

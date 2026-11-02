@@ -298,3 +298,8 @@ Upload the **school's own file** as it is — no template needed.
 - Phone numbers match however they are typed (`0790 000 001`, `079-000-0001`, `+962790000001`, `00962790000001` are the same line). Children with the same number share one parent. If an email is added later, it goes on the same parent account.
 - Works when adding a student by hand and in the Excel import (the result table shows how each parent signs in). A phone that belongs to staff or a student cannot be used for a parent.
 - "Forgot my password" sends the code by email, so a phone-only parent asks the school; the admin resets it from the students page (back to the default password).
+
+### A phone-only parent adds their own email
+- After the parent chooses their own password (the first sign-in), the app offers **Add your email** (they can press *Later*; the parent home reminds them until they do). A 6-digit code is sent to that email and typed in; only then is it saved (`POST /api/auth/email/request`, `/confirm`), so a mistyped or someone else's email can never receive password codes.
+- If the email already belongs to **another parent account** (the same parent registered another way), the two accounts are **merged automatically**: every record pointing at the phone-only account (children, notifications, chat, payments...) moves to the kept account, which also gets the phone number and the password they just chose, and the person continues as it (a new token is returned). The merge works over every foreign key to `users`, so new tables are covered.
+- An email of staff, a student or a deleted account is never taken. Requires `php artisan tenants:migrate`.

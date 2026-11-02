@@ -27,6 +27,18 @@ beforeEach(async () => {
 })
 
 describe('ParentHome', () => {
+  it('reminds a parent without an email to add one, and not a parent who has one', () => {
+    render(<Wrap><ParentHome /></Wrap>)
+    expect(screen.getByText(/You have not added an email yet/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add my email' })).toBeInTheDocument()
+  })
+
+  it('does not remind a parent who already has an email', () => {
+    auth.user = { ...auth.user, email: 'abu@example.com' }
+    render(<Wrap><ParentHome /></Wrap>)
+    expect(screen.queryByText(/You have not added an email yet/)).not.toBeInTheDocument()
+  })
+
   it('shows a card per child with the sign-in email', () => {
     render(<Wrap><ParentHome /></Wrap>)
     expect(screen.getByRole('heading', { name: 'My children' })).toBeInTheDocument()

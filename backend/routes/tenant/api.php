@@ -69,6 +69,12 @@ Route::prefix('auth')->group(function (): void {
     });
 });
 
+// A parent signed in by phone number puts a verified email on the account (after choosing their own password).
+Route::middleware(['school-user', 'throttle:email-code'])->prefix('auth')->group(function (): void {
+    Route::post('email/request', [AuthController::class, 'requestEmail']);
+    Route::post('email/confirm', [AuthController::class, 'confirmEmail']);
+});
+
 // School structure: admin only.
 Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
