@@ -7,4 +7,7 @@ return [
 
     // Domain of the generated student emails (ahmad.d1001@<domain>). Empty: "<school code>.edu".
     'student_email_domain' => env('STUDENT_EMAIL_DOMAIN'),
+
+    // Domain of the staff emails generated when an imported file has none (sara.khaled@<domain>). Empty: the student domain.
+    'staff_email_domain' => env('STAFF_EMAIL_DOMAIN'),
 ];

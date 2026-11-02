@@ -112,7 +112,7 @@ class ImportTest extends AcademicTestCase
 
     public function test_a_file_without_the_required_columns_or_rows_is_refused(): void
     {
-        $this->upload('students', $this->sheet([['Name (Arabic)'], ['علي']]))->assertUnprocessable()->assertJsonValidationErrors('file');
+        $this->upload('students', $this->sheet([['Birth date'], ['2015-01-01']]))->assertUnprocessable()->assertJsonValidationErrors('file'); // no name at all
         $this->upload('students', $this->sheet([['Student number', 'Name (Arabic)']]))->assertUnprocessable()->assertJsonValidationErrors('file');
         $this->upload('students', UploadedFile::fake()->create('x.pdf', 10))->assertUnprocessable();
     }
@@ -165,5 +165,82 @@ class ImportTest extends AcademicTestCase
             $this->get('/api/import/students/template')->assertForbidden();
         }
         $this->assertSame(0, Student::count());
+    }
+
+    /** A file the way a school keeps it: its own Arabic headers, no student number, no template. */
+    private function schoolFile(): UploadedFile
+    {
+        return $this->sheet([
+            ['م', 'اسم الطالب', 'الصف', 'الجنس', 'اسم ولي الأمر', 'جوال ولي الأمر', 'ملاحظات'],
+            [1, 'ليلى أحمد', 'الصف 5-A', 'أنثى', 'أحمد علي', '0790000001', 'x'],
+            [2, 'سامي خالد', '5 A', 'ذكر', 'خالد نصر', '0790000002', null],
+        ]);
+    }
+
+    public function test_the_school_own_file_is_understood_without_a_template(): void
+    {
+        $analysis = $this->post('/api/import/students/analyze', ['file' => $this->schoolFile()], ['Accept' => 'application/json', 'Accept-Language' => 'en'])->assertOk()->json('data');
+
+        $this->assertSame(2, $analysis['row_count']);
+        $this->assertSame(['name_ar', 'classroom', 'gender', 'guardian_name', 'guardian_phone'], array_values(array_filter($analysis['suggested'])));
+        $this->assertNull($analysis['suggested'][0]); // "م" (a running number) and "ملاحظات" (notes) are left out
+        $this->assertNull($analysis['suggested'][6]);
+        $this->assertCount(2, $analysis['sample']);
+        $this->assertContains('student_number', collect($analysis['fields'])->pluck('key')->all());
+    }
+
+    public function test_numbers_are_generated_and_sections_match_however_they_are_written(): void
+    {
+        $data = $this->upload('students', $this->schoolFile(), true)->assertOk()->json('data');
+
+        $this->assertSame(0, $data['problem_count']);
+        $this->assertSame(['1', '2'], Student::orderBy('id')->pluck('student_number')->all());
+        $this->assertSame([$this->room->id, $this->room->id], \App\Modules\Academic\Models\Enrollment::pluck('classroom_id')->all());
+        $this->assertSame('female', Student::where('name_ar', 'ليلى أحمد')->first()->gender);
+    }
+
+    public function test_the_admin_can_choose_the_columns_himself(): void
+    {
+        $file = $this->sheet([['A', 'B'], ['9001', 'علي سعيد']]);
+        $this->post('/api/import/students', ['file' => $file, 'confirm' => '1', 'mapping' => json_encode([0 => 'student_number', 1 => 'name_ar'])], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.created.0.student_number', '9001');
+        $this->assertSame('علي سعيد', Student::first()->name_ar);
+
+        // A made-up field or a column that is not in the file is ignored; two columns cannot be the same field.
+        $bad = $this->post('/api/import/students', ['file' => $this->sheet([['A', 'B'], ['x', 'y']]), 'mapping' => json_encode([0 => 'hack', 5 => 'name_ar'])], ['Accept' => 'application/json']);
+        $bad->assertUnprocessable();
+    }
+
+    public function test_a_plain_name_column_is_english_or_arabic_by_what_is_in_it(): void
+    {
+        $analysis = fn (array $rows) => $this->post('/api/import/students/analyze', ['file' => $this->sheet($rows)], ['Accept' => 'application/json'])->json('data.suggested');
+
+        $this->assertSame('name_ar', $analysis([['Name'], ['علي']])[0]);
+        $this->assertSame('name_en', $analysis([['Name'], ['Ali Ahmad']])[0]);
+        $this->assertSame(['name_ar', 'name_en'], $analysis([['الاسم', 'Name'], ['علي', 'Ali']]));
+    }
+
+    public function test_staff_without_emails_get_them_generated_and_arabic_job_titles_are_understood(): void
+    {
+        Subject::factory()->create(['name_ar' => 'رياضيات', 'name_en' => 'Math']);
+        $file = $this->sheet([
+            ['الاسم', 'المسمى الوظيفي', 'التخصص', 'الجوال'],
+            ['Sara Khaled', 'معلمة', 'رياضيات', '0791111111'],
+            ['Sara Khaled', 'محاسب', null, null], // same name: the email still has to be different
+            ['منى أحمد', 'مديرة', null, null],
+        ]);
+
+        $created = $this->upload('staff', $file, true)->assertOk()->json('data.created');
+
+        $this->assertCount(3, $created);
+        $this->assertSame('sara.khaled@'.(tenant('id') ?? 'school').'.edu', $created[0]['email']);
+        $this->assertNotSame($created[0]['email'], $created[1]['email']);
+        $this->assertSame(StaffType::Principal, User::where('name', 'منى أحمد')->first()->staffProfile->staff_type);
+        $this->assertSame(StaffType::Teacher, User::where('email', $created[0]['email'])->first()->staffProfile->staff_type);
+    }
+
+    public function test_a_default_position_fills_files_that_have_none(): void
+    {
+        $file = $this->sheet([['Name', 'Email'], ['Lina Omar', 'lina@example.com']]);
+        $this->post('/api/import/staff', ['file' => $file, 'confirm' => '1', 'default_staff_type' => 'registrar'], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.created.0.staff_type', 'registrar');
     }
 }

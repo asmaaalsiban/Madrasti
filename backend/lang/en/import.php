@@ -3,7 +3,7 @@
 return [
     'too_many_rows' => 'The file has more than :max rows. Split it into smaller files.',
     'empty_file' => 'The file is empty or has no data rows under the header row.',
-    'missing_columns' => 'The file has no column for: :columns.',
+    'missing_columns' => 'Could not find a column for: :columns. Choose it in the list.',
     'bad_gender' => 'Gender must be male or female.',
     'unknown_classroom' => 'There is no section named ":name" this year.',
     'unknown_subject' => 'There is no subject named ":name".',

@@ -3,7 +3,7 @@
 return [
     'too_many_rows' => 'الملف فيه أكثر من :max صف. قسّمه إلى ملفات أصغر.',
     'empty_file' => 'الملف فارغ أو ما فيه صفوف بيانات تحت صف العناوين.',
-    'missing_columns' => 'الملف ما فيه عمود لـ: :columns.',
+    'missing_columns' => 'ما قدرت ألاقي عمود لـ: :columns. اخترها من القائمة.',
     'bad_gender' => 'الجنس يجب أن يكون ذكر أو أنثى.',
     'unknown_classroom' => 'ما في شعبة اسمها ":name" هذه السنة.',
     'unknown_subject' => 'ما في مادة اسمها ":name".',

@@ -8,10 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
+use App\Shared\Enums\StaffType;
 use App\Shared\Export\XlsxExport;
+use App\Shared\Import\ColumnMatcher;
 use App\Shared\Import\SpreadsheetReader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -41,19 +44,45 @@ class ImportController extends Controller
             [array_map(fn ($c) => $c['example'], array_values($columns))]);
     }
 
-    public function store(Request $request, string $kind, SpreadsheetReader $reader): JsonResponse
+    /**
+     * Reads the school's own file and says which column looks like which field (the admin can change it), with the first
+     * rows as a sample. Creates nothing.
+     */
+    public function analyze(Request $request, string $kind, SpreadsheetReader $reader, ColumnMatcher $matcher): JsonResponse
     {
         $importer = $this->importer($kind);
-        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:2048'], 'confirm' => ['sometimes', 'boolean']]);
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:2048']]);
+        $sheet = $reader->read($request->file('file'));
+        $sample = array_map(fn ($r) => array_pad($r['cells'], count($sheet['headers']), null), array_slice($sheet['rows'], 0, 5));
+        $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
+
+        return response()->json(['data' => [
+            'headers' => $sheet['headers'],
+            'sample' => $sample,
+            'row_count' => count($sheet['rows']),
+            'suggested' => $matcher->suggest($sheet['headers'], $sample, $importer->columns(), $importer->genericName()),
+            'fields' => collect($importer->columns())->map(fn ($c, $key) => ['key' => $key, 'label' => $c[$lang], 'required' => $c['required']])->values(),
+            'positions' => $kind === 'staff' ? array_column(StaffType::cases(), 'value') : null,
+        ]]);
+    }
+
+    public function store(Request $request, string $kind, SpreadsheetReader $reader, ColumnMatcher $matcher): JsonResponse
+    {
+        $importer = $this->importer($kind);
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:2048'], 'confirm' => ['sometimes', 'boolean'],
+            'mapping' => ['nullable', 'json'], 'default_staff_type' => ['nullable', Rule::enum(StaffType::class)],
+        ]);
         $confirm = $request->boolean('confirm');
+        $importer->withDefaults(['staff_type' => $request->input('default_staff_type')]);
 
         $sheet = $reader->read($request->file('file'));
-        $map = $this->columnMap($importer, $sheet['headers']);
+        $map = $this->columnMap($importer, $matcher, $sheet, $request->input('mapping'));
 
         $valid = [];
         $problems = [];
         foreach ($sheet['rows'] as $line) {
-            $row = [];
+            $row = array_fill_keys(array_keys($importer->columns()), null);
             foreach ($map as $index => $key) {
                 $row[$key] = $line['cells'][$index] ?? null;
             }
@@ -82,31 +111,28 @@ class ImportController extends Controller
     }
 
     /**
-     * Which file column holds which field: a header may be written as the key, or its English or Arabic label.
+     * Which file column holds which field: the admin's mapping when sent, else the matcher's guess.
      *
-     * @param  list<string>  $headers
+     * @param  array{headers: list<string>, rows: list<array{line: int, cells: list<?string>}>}  $sheet
      * @return array<int, string> file column index => field key
      */
-    private function columnMap(Importer $importer, array $headers): array
+    private function columnMap(Importer $importer, ColumnMatcher $matcher, array $sheet, ?string $mapping): array
     {
-        $norm = fn (string $s) => preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($s));
-        $names = [];
-        foreach ($importer->columns() as $key => $column) {
-            foreach ([$key, $column['en'], $column['ar']] as $name) {
-                $names[$norm($name)] = $key;
-            }
-        }
+        $guess = $matcher->suggest($sheet['headers'], array_map(fn ($r) => $r['cells'], array_slice($sheet['rows'], 0, 5)), $importer->columns(), $importer->genericName());
+        $chosen = $mapping !== null ? (json_decode($mapping, true) ?: []) : $guess;
 
         $map = [];
-        foreach ($headers as $index => $header) {
-            if (isset($names[$norm($header)]) && ! in_array($names[$norm($header)], $map, true)) {
-                $map[$index] = $names[$norm($header)];
+        foreach ($chosen as $index => $key) {
+            // Only real fields, each used once, only columns that exist in the file.
+            if (is_string($key) && isset($importer->columns()[$key]) && isset($sheet['headers'][(int) $index]) && ! in_array($key, $map, true)) {
+                $map[(int) $index] = $key;
             }
         }
 
-        $missing = collect($importer->columns())->filter(fn ($c, $key) => $c['required'] && ! in_array($key, $map, true))->map(fn ($c) => $c[app()->getLocale() === 'ar' ? 'ar' : 'en'])->values()->all();
+        $missing = $importer->missingFields(array_values($map));
         if ($missing !== []) {
-            throw ValidationException::withMessages(['file' => [__('import.missing_columns', ['columns' => implode(', ', $missing)])]]);
+            $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
+            throw ValidationException::withMessages(['file' => [__('import.missing_columns', ['columns' => implode(', ', array_map(fn ($k) => $importer->columns()[$k][$lang], $missing))])]]);
         }
 
         return $map;

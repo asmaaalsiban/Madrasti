@@ -1010,7 +1010,7 @@
   },
   "import": {
     "title": "Import from Excel",
-    "help": "Add many students or staff at once from an Excel or CSV file. First the file is only checked; nothing is added until you confirm.",
+    "help": "Upload your school's own Excel or CSV file as it is. The columns are recognised for you, the file is checked row by row, and login emails are generated. Nothing is added until you confirm.",
     "kinds": {
       "students": "Students",
       "staff": "Staff"
@@ -1018,8 +1018,8 @@
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
     "note": {
-      "students": "Required: student number and Arabic name. Section must match an existing section name. A parent email creates (or reuses) the parent account, so siblings share one parent. The yearly fee of the grade is applied automatically.",
-      "staff": "Required: name, email and position (for example teacher, head_of_department, accountant, registrar). Subject must match an existing subject."
+      "students": "Needed: a name. Student numbers are generated if the file has none. The section is matched by name (e.g. \"5-A\", \"Grade 5 A\"). A parent email creates or reuses the parent account (siblings share one). The login email of each student is generated, and the grade's yearly fee is applied automatically.",
+      "staff": "Needed: a name. If there is no email, one is generated from the name. The position can be written as \"teacher\", \"معلمة\", \"محاسب\"... or you pick one for everyone. Subject is matched by name."
     },
     "step2": "Choose the file and check it.",
     "file": "File",
@@ -1036,6 +1036,21 @@
       "name": "Name",
       "email": "Sign-in email",
       "staff_type": "Position"
-    }
+    },
+    "chooseFile": "Choose your file.",
+    "read": "Read the file",
+    "mapTitle": "We found {{count}} rows. Is each column understood correctly?",
+    "mapHelp": "Change a column's meaning if the guess is wrong, or choose \"Ignore\" for columns you do not need. * = required.",
+    "fileColumn": "Column in your file",
+    "example": "Examples",
+    "meaning": "It is the",
+    "ignore": "— Ignore —",
+    "otherFile": "Choose another file",
+    "back": "Back to the columns",
+    "another": "Import another file",
+    "needName": "Choose which column holds the name.",
+    "autoNumbers": "No student number column: numbers are generated (after the highest one you already have).",
+    "autoEmails": "No email column: login emails are generated from the names.",
+    "defaultPosition": "Position of everyone in this file (it has no position column)"
   }
 }
