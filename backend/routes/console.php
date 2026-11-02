@@ -10,3 +10,7 @@ Artisan::command('inspire', function () {
 
 // Every morning: tell the parents of every school about installments that are due soon or overdue.
 Schedule::command('tenants:run finance:remind')->dailyAt('08:00');
+
+// Every night: back up the central database and every school, then delete the old backups.
+Schedule::command('backup:run')->dailyAt('02:30')->onOneServer();
+Schedule::command('backup:prune')->dailyAt('03:30')->onOneServer();
