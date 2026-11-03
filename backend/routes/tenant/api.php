@@ -29,6 +29,7 @@ use App\Modules\Communication\Http\Controllers\StoryController;
 use App\Modules\Finance\Http\Controllers\FinanceController;
 use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
+use App\Modules\Finance\Http\Controllers\TransferController;
 use App\Modules\Finance\Http\Controllers\StudentFeesController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
@@ -367,6 +368,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::get('payment-settings', [PaymentSettingsController::class, 'show']);
     Route::put('payment-settings', [PaymentSettingsController::class, 'update']);
     Route::post('payment-settings/test', [PaymentSettingsController::class, 'test'])->middleware('throttle:10,1');
+    Route::get('transfers', [TransferController::class, 'index']);
+    Route::post('transfers/{payment}/approve', [TransferController::class, 'approve']);
+    Route::post('transfers/{payment}/reject', [TransferController::class, 'reject']);
+    Route::get('bank-transfer-settings', [TransferController::class, 'settings']);
+    Route::put('bank-transfer-settings', [TransferController::class, 'saveSettings']);
     Route::get('fee-structures', [FinanceController::class, 'structures']);
     Route::post('fee-structures', [FinanceController::class, 'storeStructure']);
     Route::put('fee-structures/{structure}', [FinanceController::class, 'updateStructure']);
@@ -500,7 +506,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group
 
 // Files attached to tasks, a task's hand-in and surveys: the checks are by owner (see AttachmentAccess).
 Route::middleware('school-user')->prefix('attachments')->group(function (): void {
-    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey'])->whereNumber('id');
+    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey', 'online_payment'])->whereNumber('id');
     Route::get('{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment');
     Route::delete('{attachment}', [AttachmentController::class, 'destroy'])->whereNumber('attachment');
 });

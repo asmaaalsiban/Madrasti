@@ -22,7 +22,7 @@ class OnlinePayments
     public function __construct(private readonly FeeBilling $billing, private readonly PaymentManager $manager, private readonly Notifier $notifier) {}
 
     /** Creates the pending payment. The amount can never be more than what is owed (on the installment, when one is chosen). */
-    public function open(Student $student, User $parent, StudentFee $fee, float|string $amount, ?int $installmentId, string $payerName): OnlinePayment
+    public function open(Student $student, User $parent, StudentFee $fee, float|string $amount, ?int $installmentId, string $payerName, ?string $provider = null): OnlinePayment
     {
         abort_unless($fee->student_id === $student->id, 404);
         $cents = Money::cents($amount);
@@ -37,7 +37,7 @@ class OnlinePayments
 
         return OnlinePayment::create([
             'reference' => (string) Str::uuid(), 'student_id' => $student->id, 'student_fee_id' => $fee->id, 'installment_id' => $installmentId, 'user_id' => $parent->id,
-            'amount' => Money::amount($cents), 'payer_name' => $payerName, 'provider' => $this->manager->driverName(), 'status' => OnlinePayment::PENDING,
+            'amount' => Money::amount($cents), 'payer_name' => $payerName, 'provider' => $provider ?? $this->manager->driverName(), 'status' => OnlinePayment::PENDING,
         ]);
     }
 
@@ -62,7 +62,7 @@ class OnlinePayments
             }
             try {
                 $payment = $this->billing->recordPayment(
-                    $row->fee, $row->amount, 'online', now()->toDateString(), User::findOrFail($row->user_id),
+                    $row->fee, $row->amount, $row->provider === 'bank_transfer' ? 'bank_transfer' : 'online', now()->toDateString(), User::findOrFail($row->user_id),
                     $row->provider_reference ?? $row->reference, __('finance.online_note'), $row->installment_id, $row->payer_name,
                 );
                 $row->update(['status' => OnlinePayment::PAID, 'payment_id' => $payment->id]);

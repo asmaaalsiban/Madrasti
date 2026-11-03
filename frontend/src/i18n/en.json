@@ -857,7 +857,9 @@
       "task_new": "{{name}} gave you a task: {{title}}",
       "task_done": "{{name}} finished the task: {{title}}",
       "task_reminder": "Task due tomorrow: {{title}}",
-      "task_overdue": "Task overdue: {{title}}"
+      "task_overdue": "Task overdue: {{title}}",
+      "transfer_submitted": "{{name}} reported a bank transfer of {{amount}} for {{child_en}}",
+      "transfer_rejected": "Your transfer of {{amount}} for {{child_en}} was not accepted: {{note}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1057,6 +1059,22 @@
         "invalid_card": "The card number is not valid.",
         "default": "The payment did not go through. You were not charged."
       }
+    },
+    "payBy": "Pay by",
+    "payMethod": {
+      "card": "Card (online)",
+      "bank_transfer": "Bank transfer / CliQ"
+    },
+    "transfer": {
+      "send": "Transfer this amount",
+      "reference": "Transfer reference number",
+      "referenceHint": "The number the bank or CliQ gave you",
+      "proof": "Proof of the transfer (a photo or PDF)",
+      "back": "Back",
+      "submit": "I made the transfer",
+      "sent": "Thank you. The school will confirm the transfer and you will get a notification.",
+      "waiting": "A transfer of {{amount}} is waiting for the school to confirm it.",
+      "refused": "The transfer of {{amount}} was not accepted: {{note}}"
     }
   },
   "motivation": {
@@ -2169,5 +2187,34 @@
     "saved": "Saved.",
     "test": "Test the connection",
     "testing": "Testing…"
+  },
+  "transfers": {
+    "title": "Bank transfers",
+    "help": "Parents who paid by bank transfer or CliQ send the reference and a proof here. Check the money arrived, then confirm (the payment is recorded and the parent is told) or refuse with a reason.",
+    "none": "No transfers yet.",
+    "from": "Paid by {{name}}",
+    "reference": "Reference",
+    "status": {
+      "pending": "Waiting",
+      "paid": "Confirmed",
+      "failed": "Refused",
+      "review": "Needs a look"
+    },
+    "approve": "Confirm: the money arrived",
+    "reject": "Refuse",
+    "rejectTitle": "Refuse the transfer of {{name}}",
+    "reason": "Reason (the parent will read it)",
+    "noProof": "No proof attached."
+  },
+  "bankSettings": {
+    "title": "Bank transfer / CliQ",
+    "help": "Let parents pay by transferring to your bank account (or CliQ) and sending the proof. You confirm each transfer.",
+    "bank": "Bank",
+    "holder": "Account holder",
+    "addAccount": "Add an account",
+    "removeAccount": "Remove this account",
+    "instructions": "Instructions for parents (optional)",
+    "instructionsHint": "e.g. write the student name in the transfer note",
+    "enabled": "Offer bank transfer to parents"
   }
 }
