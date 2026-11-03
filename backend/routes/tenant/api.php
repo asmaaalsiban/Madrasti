@@ -19,6 +19,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Auth\Http\Controllers\LayoutController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
 use App\Modules\Communication\Http\Controllers\BadgesController;
 use App\Modules\Communication\Http\Controllers\ChatController;
@@ -84,6 +85,7 @@ Route::prefix('auth')->group(function (): void {
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::put('layout', [LayoutController::class, 'update']);
         Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('throttle:change-password');
     });
 });

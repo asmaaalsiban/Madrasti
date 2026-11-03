@@ -60,6 +60,7 @@ class User extends Authenticatable
             'role' => Role::class,
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
+            'layout' => 'array',
         ];
     }
 

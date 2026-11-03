@@ -28,6 +28,8 @@ class UserResource extends JsonResource
             'avatar_path' => $this->avatar_path,
             'is_active' => $this->is_active,
             'must_change_password' => $this->must_change_password,
+            // How the person arranged their own icons and menus (see LayoutController).
+            'layout' => (object) ($this->layout ?? []),
             // Only for staff: what kind of employee (the app shows the tools that fit).
             'staff_type' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->staff_type->value),
             // Only for staff: the screens the principal switched off for them.

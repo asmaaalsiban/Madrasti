@@ -12,16 +12,16 @@ export default function StudentHome() {
   const { user } = useAuth()
   const pending = { data: useBadges().surveys }
   const tiles = [
-    { to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
-    { to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },
-    { to: '/student/exams', label: t('exams.myTitle'), icon: FileCheck2 },
-    { to: '/student/summaries', label: t('dailySummary.title'), icon: FileText },
-    { to: '/student/lesson-plans', label: t('lessonPlans.title'), icon: NotebookPen },
-    { to: '/student/report-card', label: t('reportCard.title'), icon: FileBadge },
-    { to: '/student/behavior', label: t('behavior.title'), icon: Smile },
-    { to: '/student/motivation', label: t('motivation.title'), icon: Star },
-    { to: '/student/transport', label: t('transport.myTitle'), icon: Bus },
-    { to: '/student/surveys', label: t('surveys.mine'), icon: Vote, badge: pending.data },
+    { key: 'timetable', to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
+    { key: 'homework', to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },
+    { key: 'exams', to: '/student/exams', label: t('exams.myTitle'), icon: FileCheck2 },
+    { key: 'summaries', to: '/student/summaries', label: t('dailySummary.title'), icon: FileText },
+    { key: 'lesson-plans', to: '/student/lesson-plans', label: t('lessonPlans.title'), icon: NotebookPen },
+    { key: 'report-card', to: '/student/report-card', label: t('reportCard.title'), icon: FileBadge },
+    { key: 'behavior', to: '/student/behavior', label: t('behavior.title'), icon: Smile },
+    { key: 'motivation', to: '/student/motivation', label: t('motivation.title'), icon: Star },
+    { key: 'transport', to: '/student/transport', label: t('transport.myTitle'), icon: Bus },
+    { key: 'surveys', to: '/student/surveys', label: t('surveys.mine'), icon: Vote, badge: pending.data },
   ]
   return (
     <div className="space-y-6">
@@ -38,7 +38,7 @@ export default function StudentHome() {
         </Link>
       )}
 
-      <SectionTiles tiles={tiles} />
+      <SectionTiles tiles={tiles} surface="student_home" />
 
       <section className="space-y-3">
         <h2 className="text-lg">{t('studentGrades.myGrades')}</h2>
