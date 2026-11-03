@@ -17,3 +17,6 @@ Schedule::command('backup:prune')->dailyAt('03:30')->onOneServer();
 
 // Every morning: tell the accountants and the principal about staff contracts that end soon.
 Schedule::command('tenants:run contracts:remind')->dailyAt('08:10');
+
+// Every afternoon: remind the staff who are on duty tomorrow.
+Schedule::command('tenants:run duties:remind')->dailyAt('15:30');

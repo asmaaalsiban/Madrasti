@@ -45,6 +45,7 @@ use App\Modules\People\Http\Controllers\StaffTypeController;
 use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
+use App\Modules\Scheduling\Http\Controllers\DutyController;
 use App\Modules\Scheduling\Http\Controllers\ExamController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use App\Modules\Motivation\Http\Controllers\BadgeController;
@@ -182,6 +183,15 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('periods', [PeriodController::class, 'index']);
     Route::put('periods/setup', [PeriodController::class, 'setup']);
     Route::put('periods/grades', [PeriodController::class, 'grades']);
+    Route::get('duties/posts', [DutyController::class, 'posts']);
+    Route::post('duties/posts', [DutyController::class, 'storePost']);
+    Route::put('duties/posts/{post}', [DutyController::class, 'updatePost']);
+    Route::delete('duties/posts/{post}', [DutyController::class, 'destroyPost']);
+    Route::post('duties/generate', [DutyController::class, 'generate']);
+    Route::get('duties', [DutyController::class, 'index']);
+    Route::post('duties', [DutyController::class, 'store']);
+    Route::put('duties/{duty}', [DutyController::class, 'update']);
+    Route::delete('duties/{duty}', [DutyController::class, 'destroy']);
     Route::get('exams', [ExamController::class, 'index']);
     Route::post('exams/generate', [ExamController::class, 'generate']);
     Route::put('exams/{session}', [ExamController::class, 'update']);
@@ -226,6 +236,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('attendance')->
 Route::middleware('school-user')->get('attendance/students/{student}', [AttendanceReportController::class, 'student']);
 
 // The week of the signed-in teacher or student, and of a student (the student, their parents, admins: a gate checks).
+Route::middleware('school-user')->get('duties/me', [DutyController::class, 'mine']);
 Route::middleware('school-user')->get('exams/me', [ExamController::class, 'mine']);
 Route::middleware('school-user')->get('students/{student}/exams', [ExamController::class, 'forStudent']);
 Route::middleware('school-user')->get('timetable/me', [TimetableController::class, 'mine']);

@@ -124,7 +124,8 @@
       "renewals": "Student renewal",
       "staffAttendance": "Staff attendance",
       "auditLog": "Audit log",
-      "exams": "Exam timetable"
+      "exams": "Exam timetable",
+      "duties": "Duty roster"
     },
     "actions": {
       "add": "Add",
@@ -838,7 +839,9 @@
       "contract_expiring": "{{name}}'s contract ends on {{date}}",
       "student_renewed": "{{student}} is registered for {{title}}",
       "exam_schedule": "The {{title}} exam schedule is published",
-      "exam_duty": "{{title}}: you have exam duty"
+      "exam_duty": "{{title}}: you have exam duty",
+      "duty_assigned": "You have been given duties: {{title}}",
+      "duty_reminder": "Duty tomorrow: {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1757,5 +1760,56 @@
     "gap": "Gap between exams (min)",
     "show": "Show",
     "allExams": "All exams"
+  },
+  "duties": {
+    "title": "Duty roster",
+    "myTitle": "My duties",
+    "tile": "Supervision duties and reminders.",
+    "help": "Set the posts (the gate, the yard at break...) with their time and how many people each needs, then build the roster of a period. It uses teachers who have no lesson during the post and shares the duties fairly (the one who waited longest goes first). Preview first; publishing replaces the unlocked duties of those posts; ones you set by hand are kept.",
+    "posts": "Posts",
+    "newPost": "New post",
+    "editPost": "Edit post",
+    "noPosts": "No posts yet: add the gate, the yard at break...",
+    "postName": "Name",
+    "postNameHint": "e.g. Morning gate",
+    "from": "From",
+    "to": "To",
+    "staffCount": "People needed",
+    "days": "Days",
+    "daysHint": "none selected = every working day",
+    "active": "Active",
+    "deletePostConfirm": "Delete this post? Past duties keep its name.",
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "generate": "Build the roster",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "gradesHint": "none selected = all",
+    "holidays": "Days off",
+    "addHoliday": "Add day off",
+    "preview": "Preview",
+    "publish": "Publish",
+    "previewDone": "Preview: {{duties}} duties over {{days}} days (nothing saved yet).",
+    "published": "Published: {{duties}} duties over {{days}} days.",
+    "roster": "Roster",
+    "none": "No duties in this period.",
+    "locked": "set by hand",
+    "addDuty": "Add a duty",
+    "person": "Person",
+    "post": "Post",
+    "customPost": "Custom (set time and place)",
+    "date": "Date",
+    "location": "Place",
+    "upcoming": "Coming up",
+    "past": "Last 30 days",
+    "noneUpcoming": "You have no duties coming up.",
+    "total": "{{count}} duties in total."
   }
 }

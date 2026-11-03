@@ -429,3 +429,11 @@ The same welcome page (`LandingView`) is the very first page for everyone: with 
 ### Monthly and final exams
 
 An exam has a **type**: *monthly exam 1, 2, 3...* (in lesson periods; the section's own teacher watches) or *final exams* (own start time, length and gap; students come only for the exam; free teachers watch, never the subject's own teacher and never two rooms at once). Each round is independent: generating one replaces only that round of those grades. The list can be filtered by type, and every exam shows its type. After pulling: `php artisan tenants:migrate` (adds `kind` and `round` to exam sessions and lets a subject have one exam per round).
+
+## Duty roster (المناوبات)
+
+- **Posts** (`/admin/duties`, under Schedules): where staff supervise (the gate, the yard at break...), the time, how many people, and the days (none = every working day).
+- **Build the roster** of a period: preview, then publish. For each working day and post it picks teachers who have **no lesson during the post's time** and no other duty that day, sharing the duties fairly (fewest duties so far, then the one who waited longest). Days off can be excluded. Too few free teachers is a warning. Publishing replaces the *unlocked* duties of those posts in the range and notifies the people who got one.
+- **By hand**: add a duty (a post or a custom time and place), change the person or time, delete. A hand-made change is **locked**: regenerating keeps it and counts it. A person cannot have two overlapping duties.
+- **Teachers** (`/teacher/duties`): coming duties (the next one highlighted), the last 30 days, and a **reminder the afternoon before** (`duties:remind`, scheduled daily at 15:30 for every school).
+- After pulling: `php artisan tenants:migrate`.
