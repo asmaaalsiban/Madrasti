@@ -441,3 +441,7 @@ An exam has a **type**: *monthly exam 1, 2, 3...* (in lesson periods; the sectio
 ### Who does duty
 
 On `/admin/duties` the section **Who does duty** lists the teachers with a checkbox each (search, select all / none, "12 of 32 teachers"). Only the ticked teachers are put on the generated roster; everyone is ticked by default. Duties can still be added by hand for anyone. After pulling: `php artisan tenants:migrate` (adds `does_duty` to staff profiles).
+
+### No teacher in two exam rooms at once
+
+When exams are generated, teachers already watching other exams (other grades, rounds or kinds that the run does not replace) are not used again at that time, and a teacher who has two sections in consecutive periods (1-A in period 2, 1-B in period 3) watches each **in its own period** (the lists show "Sara (Period 3)" and a teacher's own list shows only her window). Moving an exam or changing its watchers by hand is refused when a teacher would be in two rooms at the same moment. After pulling: `php artisan tenants:migrate` (adds the periods to exam watchers); regenerate the exams to apply it to existing ones.

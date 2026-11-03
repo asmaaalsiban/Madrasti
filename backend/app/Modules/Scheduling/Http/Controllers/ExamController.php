@@ -64,6 +64,8 @@ class ExamController extends Controller
         $start = isset($data['starts_at']) ? $data['starts_at'].':00' : $session->starts_at;
         $end = isset($data['ends_at']) ? $data['ends_at'].':00' : $session->ends_at;
         $periods = ['period_from' => $session->period_from, 'period_to' => $session->period_to];
+        // Who watches and when: [id => [period_from, period_to]] (null periods = the whole exam).
+        $watch = null;
         if (isset($data['period_from'])) {
             if ($session->kind === 'final') {
                 throw ValidationException::withMessages(['period_from' => [__('exams.final_no_periods')]]);
@@ -75,9 +77,14 @@ class ExamController extends Controller
             }
             [$start, $end] = [$times['start'], $times['end']];
             $periods = ['period_from' => $data['period_from'], 'period_to' => $data['period_to'] ?? $data['period_from']];
-            $data['invigilator_ids'] ??= $this->scheduler->watchersFor($session->classroom, $date, $periods['period_from'], $periods['period_to']);
+            if (! isset($data['invigilator_ids'])) {
+                $watch = $this->scheduler->watchersFor($session->classroom, $date, $periods['period_from'], $periods['period_to']);
+            }
         } elseif (isset($data['starts_at']) || isset($data['ends_at'])) {
             $periods = ['period_from' => null, 'period_to' => null]; // set by hand: no longer tied to periods
+        }
+        if (isset($data['invigilator_ids'])) {
+            $watch = collect($data['invigilator_ids'])->mapWithKeys(fn ($id) => [(int) $id => ['period_from' => null, 'period_to' => null]])->all();
         }
         if ($end <= $start) {
             throw ValidationException::withMessages(['ends_at' => [__('exams.time_order')]]);
@@ -85,14 +92,25 @@ class ExamController extends Controller
         if ($this->scheduler->clash($session, $date, $start, $end) !== null) {
             throw ValidationException::withMessages(['exam_date' => [__('exams.class_clash')]]);
         }
-        $busy = $this->scheduler->busyInvigilators($session, $date, $start, $end);
-        $teachers = $data['invigilator_ids'] ?? $session->invigilators()->pluck('users.id')->all();
-        if ($busy->intersect($teachers)->isNotEmpty()) {
+        // A teacher already watching another exam at that time (only the periods they were given count) cannot be put here too.
+        $candidates = $watch !== null ? collect($watch)->map(function ($w, $id) use ($session, $date, $start, $end, $periods) {
+            if ($w['period_from'] === null || $periods['period_from'] === null) {
+                return [(int) $id, $start, $end];
+            }
+            $t = $this->scheduler->timesFor($date, $w['period_from'], $w['period_to']);
+
+            return [(int) $id, $t['start'] ?? $start, $t['end'] ?? $end];
+        })->values()->all() : $session->invigilators->map(function ($u) use ($date, $start, $end, $periods) {
+            $t = $periods['period_from'] !== null && $u->pivot->period_from !== null ? $this->scheduler->timesFor($date, $u->pivot->period_from, $u->pivot->period_to) : null;
+
+            return [$u->id, $t['start'] ?? $start, $t['end'] ?? $end];
+        })->all();
+        if ($this->scheduler->busyInvigilators($session, $date, $start, $end, $candidates)->isNotEmpty()) {
             throw ValidationException::withMessages(['invigilator_ids' => [__('exams.teacher_clash')]]);
         }
         $session->update(['exam_date' => $date, 'starts_at' => $start, 'ends_at' => $end] + $periods);
-        if (isset($data['invigilator_ids'])) {
-            $session->invigilators()->sync($data['invigilator_ids']);
+        if ($watch !== null) {
+            $session->invigilators()->sync($watch);
         }
 
         return response()->json(['data' => $this->present($session->refresh()->load($this->with()))]);
@@ -154,7 +172,12 @@ class ExamController extends Controller
             'id' => $s->id, 'kind' => $s->kind, 'round' => $s->round, 'term' => ['id' => $s->term->id, 'name' => $s->term->name], 'date' => $s->exam_date->toDateString(), 'period_from' => $s->period_from, 'period_to' => $s->period_to, 'starts_at' => substr($s->starts_at, 0, 5), 'ends_at' => substr($s->ends_at, 0, 5),
             'classroom' => ['id' => $s->classroom->id, 'name' => $s->classroom->name, 'grade' => ['id' => $s->classroom->gradeLevel->id, 'name_ar' => $s->classroom->gradeLevel->name_ar, 'name_en' => $s->classroom->gradeLevel->name_en]],
             'subject' => ['id' => $s->subject->id, 'name_ar' => $s->subject->name_ar, 'name_en' => $s->subject->name_en],
-            'invigilators' => $s->invigilators->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),
+            'invigilators' => $s->invigilators->map(function ($u) use ($s) {
+                // A watcher who has only some of the periods: when exactly (the school's times for those periods).
+                $t = $s->period_from !== null && $u->pivot->period_from !== null ? $this->scheduler->timesFor($s->exam_date->toDateString(), $u->pivot->period_from, $u->pivot->period_to) : null;
+
+                return ['id' => $u->id, 'name' => $u->name, 'period_from' => $u->pivot->period_from, 'period_to' => $u->pivot->period_to, 'starts_at' => $t ? substr($t['start'], 0, 5) : null, 'ends_at' => $t ? substr($t['end'], 0, 5) : null];
+            })->values(),
         ];
     }
 }

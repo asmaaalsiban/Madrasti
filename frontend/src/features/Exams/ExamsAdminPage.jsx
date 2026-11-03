@@ -217,7 +217,7 @@ function AdminList({ sessions, onEdit }) {
                 <span className="font-bold text-deep-harbor">{subject(s)}</span>
                 <span className="rounded-full bg-deep-harbor px-2 py-0.5 text-[11px] font-semibold text-white">{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</span>
                 <span className="rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>
-                <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => u.name).join('، ')}</span>
+                <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => (u.period_from !== null && s.period_from !== null && (u.period_from !== s.period_from || u.period_to !== s.period_to) ? `${u.name} (${u.period_from === u.period_to ? t('exams.periodOne', { n: u.period_from }) : t('exams.periodsRange', { from: u.period_from, to: u.period_to })})` : u.name)).join('، ')}</span>
                 <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => onEdit(s)}>{t('admin.actions.edit')}</button>
               </li>
             ))}

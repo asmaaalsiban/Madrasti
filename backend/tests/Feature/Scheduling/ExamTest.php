@@ -275,4 +275,60 @@ class ExamTest extends AcademicTestCase
         $this->postJson('/api/exams/generate', ['term_id' => $this->term->id, 'kind' => 'final', 'from' => '2027-01-17', 'to' => '2027-01-28', 'slots_per_day' => 1, 'grade_per_day' => 1])->assertUnprocessable()->assertJsonValidationErrors(['start_time', 'duration_minutes', 'invigilators']);
         $this->postJson('/api/exams/generate', ['term_id' => $this->term->id, 'kind' => 'monthly', 'from' => '2027-01-17', 'to' => '2027-01-28', 'slots_per_day' => 1, 'grade_per_day' => 1])->assertUnprocessable()->assertJsonValidationErrors(['round', 'first_period', 'periods_per_exam']);
     }
+
+    /** True when any teacher is in two exam rooms at overlapping moments (watching only the periods they were given counts). */
+    private function doubleBooked(): bool
+    {
+        $slots = [];
+        foreach (ExamSession::with('invigilators')->get() as $s) {
+            foreach ($s->invigilators as $u) {
+                $from = $s->period_from !== null && $u->pivot->period_from !== null ? Period::where('day_of_week', $s->exam_date->dayOfWeek)->where('number', $u->pivot->period_from)->value('starts_at') : $s->starts_at;
+                $to = $s->period_from !== null && $u->pivot->period_to !== null ? Period::where('day_of_week', $s->exam_date->dayOfWeek)->where('number', $u->pivot->period_to)->value('ends_at') : $s->ends_at;
+                $slots[$u->id][] = [$s->exam_date->toDateString(), $from, $to];
+            }
+        }
+        foreach ($slots as $list) {
+            foreach ($list as $i => $a) {
+                foreach (array_slice($list, $i + 1) as $b) {
+                    if ($a[0] === $b[0] && $a[1] < $b[2] && $a[2] > $b[1]) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function test_a_teacher_who_has_two_sections_in_consecutive_periods_watches_each_in_its_own_period(): void
+    {
+        // Teacher 2 now teaches 1-A in period 2 and 1-B in period 3 (instead of Teacher 4 there).
+        DB::table('timetable_entries')->where('classroom_id', $this->b->id)->whereIn('period_id', Period::where('number', 3)->pluck('id'))->update(['teacher_id' => $this->teachers[1]->id]);
+        DB::table('timetable_entries')->where('classroom_id', $this->a->id)->whereIn('period_id', Period::where('number', 2)->pluck('id'))->update(['teacher_id' => $this->teachers[1]->id]);
+        $this->postJson('/api/exams/generate', $this->body())->assertOk()->assertJsonPath('data.warnings', []);
+        $a = ExamSession::where('classroom_id', $this->a->id)->first()->invigilators->firstWhere('id', $this->teachers[1]->id);
+        $b = ExamSession::where('classroom_id', $this->b->id)->first()->invigilators->firstWhere('id', $this->teachers[1]->id);
+        $this->assertSame([2, 2], [$a->pivot->period_from, $a->pivot->period_to]); // 1-A during period 2 only
+        $this->assertSame([3, 3], [$b->pivot->period_from, $b->pivot->period_to]); // 1-B during period 3 only
+        $this->assertFalse($this->doubleBooked());
+        $list = $this->getJson('/api/exams?term_id='.$this->term->id.'&kind=monthly')->json('data');
+        $mine = collect($list)->firstWhere('classroom.name', '1-B')['invigilators'];
+        $this->assertSame(3, collect($mine)->firstWhere('id', $this->teachers[1]->id)['period_from']);
+    }
+
+    public function test_final_exams_generated_grade_by_grade_never_put_a_teacher_in_two_rooms_at_once(): void
+    {
+        $this->postJson('/api/exams/generate', $this->finalBody(['grade_level_ids' => [$this->g1->id], 'invigilators' => 3]))->assertOk(); // 2 rooms x 3 = all 6 teachers on the first day
+        $r = $this->postJson('/api/exams/generate', $this->finalBody(['grade_level_ids' => [$this->g2->id], 'invigilators' => 3]))->assertOk()->json('data'); // same day and time: nobody is free
+        $this->assertNotEmpty($r['warnings']);
+        $this->assertFalse($this->doubleBooked());
+    }
+
+    public function test_a_stand_in_for_a_period_without_a_teacher_is_not_already_watching_elsewhere(): void
+    {
+        $this->postJson('/api/exams/generate', $this->finalBody(['from' => '2027-01-03', 'to' => '2027-01-06', 'start_time' => '08:35', 'duration_minutes' => 90, 'invigilators' => 1, 'grade_level_ids' => [$this->g1->id]]))->assertOk();
+        // Monthly for grade 2 (period 3 has no timetable teacher): the stand-in must not be someone watching a final exam at that time.
+        $this->postJson('/api/exams/generate', $this->body(['from' => '2027-01-03', 'to' => '2027-01-04', 'grade_level_ids' => [$this->g2->id], 'periods_per_exam' => 1, 'first_period' => 3, 'slots_per_day' => 1, 'round' => 1]))->assertOk();
+        $this->assertFalse($this->doubleBooked());
+    }
 }

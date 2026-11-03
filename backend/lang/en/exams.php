@@ -9,6 +9,7 @@ return [
     'final_no_periods' => 'Final exams have their own times, not lesson periods: set a custom time.',
     'kind_final' => 'Final exams',
     'kind_monthly' => 'Monthly exam :n',
+    'teacher_double' => ':class on :date: :teacher is already watching another exam at that time.',
     'time_order' => 'The exam must end after it starts.',
     'class_clash' => 'This section already has an exam at that time.',
     'teacher_clash' => 'One of these teachers is watching another room at that time.',
