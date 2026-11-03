@@ -492,3 +492,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - Allowed: images, PDF, Word, Excel, PowerPoint, text/CSV; up to 10 files of 10 MB each per owner. Files open only for people who may see the owner (task people, the giver and management; a survey's author and recipients; a hand-in only by its author, the giver and management). Deleting the owner deletes its files.
 - Frontend: `AttachmentsField` (choose files in a form, uploaded after saving), `LiveAttachments` (add/remove at once), `AttachmentList` (show) in `components/shared/Attachments.jsx`: reuse them for any new screen that needs files.
 - Needs `php artisan tenants:migrate`.
+
+### Payroll: updating a draft from the attendance
+- The automatic lines (punctuality, summaries, plans, **absence**) are worked out when the month's payroll is prepared. If absences are recorded or fixed afterwards, press **Update from attendance** on the draft payroll: it works them out again (lines added by hand, contract items and assigned rules are kept; it never charges twice). Absence deduction also needs the **absence** rule switched on with an amount in the commitment rules, and days before anybody's attendance was first recorded are not counted.

@@ -66,6 +66,15 @@ class PayrollController extends Controller
         return response()->json(['data' => $this->detail($run->refresh())]);
     }
 
+    /** Updates the automatic deductions and bonuses of a draft payroll from the attendance recorded so far. */
+    public function refreshCommitment(Request $request, PayrollRun $run): JsonResponse
+    {
+        $by = $this->manage($request);
+        $count = $this->payroll->refreshCommitment($run, $by);
+
+        return response()->json(['refreshed' => $count, 'data' => $this->detail($run->refresh())]);
+    }
+
     public function approve(Request $request, PayrollRun $run): JsonResponse
     {
         $by = $this->user($request);
