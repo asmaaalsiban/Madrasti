@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Breakdown from '../components/Breakdown'
 import CommitmentCard from '../components/CommitmentCard'
+import ThisMonthCard from '../components/ThisMonthCard'
 import SalaryDonut from '../components/SalaryDonut'
 import Money from '../../Finance/components/Money'
 
@@ -20,6 +21,8 @@ export default function MyPayslipsPage({ base }) {
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('payroll.mineTitle')}</h1>
+
+      <ThisMonthCard currency={data.currency} />
 
       {latest && (
         <div className="space-y-3 rounded-lg border bg-white p-4" aria-label={t('payroll.latestMonth')}>

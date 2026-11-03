@@ -103,7 +103,7 @@ class CommitmentTest extends AcademicTestCase
         $this->day($this->sara, '2026-11-09', 'leave'); // not counted; 2026-11-10 has no record: an absence
         Sanctum::actingAs($this->sara);
         $p = $this->getJson('/api/payroll/commitment?month=2026-11')->assertOk()->json('scores.punctuality');
-        $this->assertSame(['score' => 71, 'done' => 5, 'expected' => 7, 'absent' => 1], $p); // 5 on time out of the 7 days without leave
+        $this->assertSame(['score' => 71, 'done' => 5, 'expected' => 7, 'absent' => 1, 'absent_dates' => ['2026-11-10']], $p); // 5 on time out of the 7 days without leave
     }
 
     public function test_summaries_and_weekly_plans_are_scored_from_the_timetable(): void
@@ -227,6 +227,26 @@ class CommitmentTest extends AcademicTestCase
         $this->day($off, '2026-11-08', 'leave'); // two of the absent days are excused: 2026-11-08 now leave
         $this->day($off, '2026-11-09', 'leave');
         $this->assertSame('288.00', $this->net($off)); // 1 absence only
+    }
+
+    public function test_my_salary_shows_the_absence_days_and_the_expected_net_of_the_month_at_once(): void
+    {
+        $u = User::factory()->staff(StaffType::Teacher)->create(['name' => 'Absent teacher']);
+        Sanctum::actingAs($this->accountant);
+        $this->postJson('/api/payroll/contracts', ['user_id' => $u->id, 'starts_on' => '2026-09-01', 'ends_on' => '2027-08-31', 'base_salary' => 300, 'items' => [['kind' => 'allowance', 'label' => 'Transport', 'amount' => 20]]])->assertCreated();
+        $this->day($this->sara, '2026-11-01', 'present'); // attendance recording has started
+        foreach (array_slice(self::DAYS, 0, 6) as $d) {
+            $this->day($u, $d, 'present');
+        }
+        $this->day($u, '2026-11-09', 'leave'); // the 9th is an excused day; the 10th (today) has no record
+        $this->rule('absence', ['type' => 'amount', 'value' => 12]);
+
+        Sanctum::actingAs($u);
+        $r = $this->getJson('/api/payroll/commitment?month=2026-11')->assertOk();
+        $r->assertJsonPath('scores.punctuality.absent', 1)->assertJsonPath('scores.punctuality.absent_dates', ['2026-11-10']);
+        $r->assertJsonPath('estimate.base', '300.00')->assertJsonPath('estimate.additions', '20.00')->assertJsonPath('estimate.deductions', '12.00')->assertJsonPath('estimate.net', '308.00');
+        $this->day($u, '2026-11-10', 'absent'); // the same whether it is recorded or simply missing
+        $this->getJson('/api/payroll/commitment?month=2026-11')->assertJsonPath('estimate.net', '308.00');
     }
 
     public function test_absences_recorded_after_the_payroll_was_prepared_are_deducted_when_it_is_refreshed_from_attendance(): void

@@ -501,3 +501,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - Stored in `staff_profiles.hidden_features` (list of keys, see `StaffProfile::FEATURES` and `frontend/src/features/StaffAccess/staffFeatures.js`; keep both lists in sync when adding a screen). Only staff are affected: students and parents are not.
 - This hides the screens (home, menus, addresses); the API itself still follows the job's permissions.
 - API: `GET/PUT /api/staff-visibility` (admin). Needs `php artisan tenants:migrate`.
+
+### My salary: "This month so far"
+- The top card of **My salary** shows, at once and without waiting for the payroll: the salary, the contract's monthly items, the automatic deductions/bonuses so far (e.g. **"Absent 2 days: −24.00"** with the dates missed) and the expected net. It is an estimate; the real amount is the approved payroll. `GET /api/payroll/commitment` returns it as `estimate` (and `scores.punctuality.absent_dates`). The absence deduction still needs the absence rule switched on in the commitment rules.

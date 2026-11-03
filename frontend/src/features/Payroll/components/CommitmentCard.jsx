@@ -13,7 +13,6 @@ export default function CommitmentCard({ currency }) {
   return (
     <div className="space-y-3 rounded-lg border bg-white p-4" aria-label={t('payroll.myCommitment')}>
       <p className="font-bold">{t('payroll.myCommitment')}</p>
-      {data.lines.filter((l) => l.code === 'absence').map((l) => <p key="absence" className="text-sm text-red-700">{t('payroll.auto.absence.deduction', { score: l.score })}: <span dir="ltr">−{l.amount} {currency}</span></p>)}
       {rows.map(([code, s]) => {
         const l = line(code)
         return (

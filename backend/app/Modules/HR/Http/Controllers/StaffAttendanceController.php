@@ -6,7 +6,9 @@ namespace App\Modules\HR\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Finance\Models\Money;
 use App\Modules\HR\Models\StaffAttendance;
+use App\Modules\HR\Models\StaffContract;
 use App\Modules\HR\Services\CommitmentRules;
 use App\Modules\HR\Services\CommitmentService;
 use App\Modules\HR\Services\PayrollAccess;
@@ -112,7 +114,28 @@ class StaffAttendanceController extends Controller
         $contract = $target->staffContracts()->where('status', 'active')->first();
         $base = $contract?->base_salary ?? '0';
 
-        return response()->json(['month' => $month->format('Y-m'), 'scores' => $this->commitment->scores($target, $month), 'lines' => $this->commitment->lines($target, $month, $base), 'rules' => $this->rules->all()]);
+        $lines = $this->commitment->lines($target, $month, $base);
+
+        return response()->json(['month' => $month->format('Y-m'), 'scores' => $this->commitment->scores($target, $month), 'lines' => $lines, 'rules' => $this->rules->all(), 'estimate' => $contract === null ? null : $this->estimate($contract, $lines)]);
+    }
+
+    /**
+     * What the month would pay if it were paid now: the salary, the contract's monthly items and the automatic bonuses and deductions
+     * so far. The real amount is the approved payroll; a deduction never takes the net below zero.
+     *
+     * @param  list<array{code: string, kind: string, amount: string, score: int}>  $lines
+     * @return array{base: string, additions: string, deductions: string, net: string}
+     */
+    private function estimate(StaffContract $contract, array $lines): array
+    {
+        $cents = fn ($v) => Money::cents($v);
+        $base = $cents($contract->base_salary);
+        $items = $contract->items;
+        $additions = $items->whereIn('kind', ['bonus', 'allowance'])->sum(fn ($i) => $cents($i->amount)) + collect($lines)->where('kind', 'bonus')->sum(fn ($l) => $cents($l['amount']));
+        $deductions = $items->where('kind', 'deduction')->sum(fn ($i) => $cents($i->amount)) + collect($lines)->where('kind', 'deduction')->sum(fn ($l) => $cents($l['amount']));
+        $deductions = min($deductions, $base + $additions);
+
+        return ['base' => Money::amount($base), 'additions' => Money::amount($additions), 'deductions' => Money::amount($deductions), 'net' => Money::amount($base + $additions - $deductions)];
     }
 
     /** @return array<string, mixed>|null */
