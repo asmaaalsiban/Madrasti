@@ -2135,8 +2135,17 @@
     "start": "Arrange",
     "done": "Done",
     "reset": "Back to the default order",
-    "help": "Move things with the arrows. It is saved on your account.",
+    "help": "Move things with the arrows, choose the icon size and colours. It is saved on your account.",
     "earlier": "Move {{name}} earlier",
-    "later": "Move {{name}} later"
+    "later": "Move {{name}} later",
+    "size": "Icon size",
+    "sizes": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "colorOf": "Colour of {{name}}",
+    "custom": "Another colour",
+    "defaultColor": "Default colour"
   }
 }

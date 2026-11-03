@@ -6,9 +6,9 @@ import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardLi
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 import { isHidden } from '../../StaffAccess/staffFeatures'
-import { ArrangeBar, MoveButtons } from '../../../components/shared/Arrange'
+import { ArrangeBar, ColorButton, MoveButtons } from '../../../components/shared/Arrange'
 import useLayout from '../../Layout/useLayout'
-import { orderBy, swap } from '../../Layout/arrange'
+import { iconPaint, iconSize, orderBy, swap } from '../../Layout/arrange'
 
 // [path, title key, hint key, icon]
 const TEACHING = [
@@ -48,7 +48,8 @@ const MINE = [
 ]
 
 // One group of tiles. While arranging, the group has up/down buttons and each tile has earlier/later buttons.
-function Section({ id, title, tiles, t, user, editing, first, last, onMoveGroup, onMoveTile }) {
+function Section({ id, title, tiles, t, user, editing, first, last, onMoveGroup, onMoveTile, size, colors, onColor }) {
+  const { box, icon: iconPx } = iconSize(size, 'card')
   const shown = tiles.filter(([to]) => !isHidden(user, to))
   if (shown.length === 0) return null
   return (
@@ -62,11 +63,16 @@ function Section({ id, title, tiles, t, user, editing, first, last, onMoveGroup,
           const Wrapper = editing ? 'div' : Link
           return (
             <Wrapper key={to} {...(editing ? {} : { to })} className={`feature-card flex items-start gap-4 ${editing ? 'outline-dashed outline-2 outline-white/70' : ''}`}>
-              <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15"><Icon size={22} /></span>
+              <span aria-hidden style={{ width: box, height: box, ...iconPaint(colors[to], true) }} className="grid shrink-0 place-items-center rounded-2xl bg-white/15"><Icon size={iconPx} /></span>
               <span className="min-w-0 flex-1">
                 <span className="title block">{t(name)}</span>
                 <span className="hint block">{t(hint)}</span>
-                {editing && <MoveButtons className="mt-2" label={t(name)} canEarlier={i > 0} canLater={i < shown.length - 1} onEarlier={() => onMoveTile(to, -1)} onLater={() => onMoveTile(to, 1)} />}
+                {editing && (
+                  <span className="mt-2 flex items-center gap-1">
+                    <MoveButtons label={t(name)} canEarlier={i > 0} canLater={i < shown.length - 1} onEarlier={() => onMoveTile(to, -1)} onLater={() => onMoveTile(to, 1)} />
+                    <ColorButton label={t(name)} value={colors[to]} onChange={(c) => onColor(to, c)} />
+                  </span>
+                )}
               </span>
             </Wrapper>
           )
@@ -89,6 +95,7 @@ export default function TeacherHome() {
   const base = accountant ? [['money', MONEY]] : [['teaching', TEACHING], ['followUp', FOLLOW_UP], ...(head ? [['department', HEAD]] : [])]
   const sections = orderBy([...base, ['mine', MINE]], (x) => x[0], layout.groups)
   const flat = () => sections.flatMap(([, tiles]) => orderBy(tiles, (x) => x[0], layout.items).map((x) => x[0]))
+  const setColor = (key, color) => { const colors = { ...layout.colors }; if (color) colors[key] = color; else delete colors[key]; layout.save({ colors }) }
   const moveGroup = (id, delta) => layout.save({ groups: swap(sections.map((x) => x[0]), id, delta), items: flat() })
   const moveTile = (path, delta) => {
     const section = sections.find(([, tiles]) => tiles.some((x) => x[0] === path))
@@ -102,10 +109,10 @@ export default function TeacherHome() {
       {pending.data > 0 && (
         <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
       )}
-      <ArrangeBar editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} />
+      <ArrangeBar editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} size={layout.size} onSize={(size) => layout.save({ size })} />
       {sections.map(([id, tiles], i) => (
         <Section key={id} id={id} title={t(`teacherHome.${id}`)} tiles={orderBy(tiles, (x) => x[0], layout.items)} t={t} user={user} editing={editing}
-          first={i === 0} last={i === sections.length - 1} onMoveGroup={moveGroup} onMoveTile={moveTile} />
+          first={i === 0} last={i === sections.length - 1} onMoveGroup={moveGroup} onMoveTile={moveTile} size={layout.size} colors={layout.colors} onColor={setColor} />
       ))}
     </div>
   )
