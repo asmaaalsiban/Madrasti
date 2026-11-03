@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, Images, FileCheck2, FileUp, Fingerprint, GraduationCap, LayoutDashboard, Layers, ListChecks, Megaphone, Menu, MessageCircle, PenLine, RefreshCw, ScrollText, ShieldCheck, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, Images, FileCheck2, FileUp, Fingerprint, GraduationCap, LayoutDashboard, Layers, ListChecks, Megaphone, Menu, MessageCircle, PenLine, RefreshCw, ScrollText, ShieldCheck, ListTodo, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
@@ -12,7 +12,7 @@ import { useSchool } from '../tenant/useSchool'
 // The menu in groups, each item with its icon: what the principal reaches for most is at the top.
 const GROUPS = [
   { key: null, items: [['/admin', 'overview', LayoutDashboard, true]] },
-  { key: 'people', items: [['/admin/students', 'students', GraduationCap], ['/admin/renewals', 'renewals', RefreshCw], ['/admin/staff', 'staff', Briefcase], ['/admin/import', 'import', FileUp]] },
+  { key: 'people', items: [['/admin/students', 'students', GraduationCap], ['/admin/renewals', 'renewals', RefreshCw], ['/admin/staff', 'staff', Briefcase], ['/admin/tasks', 'tasks', ListTodo], ['/admin/import', 'import', FileUp]] },
   { key: 'learning', items: [['/admin/attendance', 'attendance', CircleCheck], ['/admin/attendance-report', 'attendanceReport', FileBarChart], ['/admin/grades', 'grades', ClipboardList], ['/admin/behavior', 'behavior', Smile], ['/admin/motivation', 'motivation', Award], ['/admin/surveys', 'surveys', Vote], ['/admin/signatures', 'signatures', PenLine]] },
   { key: 'schedule', items: [['/admin/timetable', 'timetable', CalendarClock], ['/admin/exams', 'exams', FileCheck2], ['/admin/duties', 'duties', ShieldCheck], ['/admin/school-day', 'schoolDay', Clock], ['/admin/transport', 'transport', Bus], ['/admin/availability', 'availability', UserCheck], ['/admin/teaching', 'teaching', Users]] },
   { key: 'money', items: [['/admin/finance', 'finance', Wallet], ['/admin/payroll', 'payroll', Banknote], ['/admin/staff-attendance', 'staffAttendance', Fingerprint], ['/admin/procurement', 'procurement', ShoppingCart]] },

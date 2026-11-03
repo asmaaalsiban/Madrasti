@@ -20,3 +20,4 @@ Schedule::command('tenants:run contracts:remind')->dailyAt('08:10');
 
 // Every afternoon: remind the staff who are on duty tomorrow.
 Schedule::command('tenants:run duties:remind')->dailyAt('15:30');
+Schedule::command('tenants:run tasks:remind')->dailyAt('07:30');

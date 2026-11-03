@@ -128,7 +128,8 @@
       "duties": "Duty roster",
       "stories": "Class feed",
       "procurement": "Purchase requests",
-      "transport": "Transport"
+      "transport": "Transport",
+      "tasks": "Tasks"
     },
     "actions": {
       "add": "Add",
@@ -851,7 +852,11 @@
       "procurement_approved": "Your request was approved: {{title}}",
       "procurement_rejected": "Your request was declined: {{title}} — {{note}}",
       "procurement_to_buy": "Approved, please buy: {{title}}",
-      "procurement_purchased": "Bought: {{title}}"
+      "procurement_purchased": "Bought: {{title}}",
+      "task_new": "{{name}} gave you a task: {{title}}",
+      "task_done": "{{name}} finished the task: {{title}}",
+      "task_reminder": "Task due tomorrow: {{title}}",
+      "task_overdue": "Task overdue: {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -2010,5 +2015,42 @@
     "eveningRound": "Evening round",
     "bus": "Bus",
     "noRoundsInPeriod": "No rounds yet."
+  },
+  "tasks": {
+    "title": "Tasks",
+    "tile": "Tasks given to you and tasks you give.",
+    "tabs": {
+      "mine": "My tasks",
+      "given": "Tasks I gave"
+    },
+    "new": "New task",
+    "edit": "Edit the task",
+    "what": "Task",
+    "details": "Details (optional)",
+    "dueOn": "Due date",
+    "priority": "Priority",
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "assignTo": "Give it to",
+    "selectAll": "Select all",
+    "clearAll": "Clear",
+    "noPeople": "There is nobody you can give tasks to.",
+    "status": "Status",
+    "statuses": {
+      "todo": "To do",
+      "doing": "In progress",
+      "done": "Done"
+    },
+    "note": "Note (optional)",
+    "from": "From {{name}}",
+    "by": "Given by {{name}}",
+    "overdue": "overdue",
+    "progress": "{{done}} of {{total}} done",
+    "noneMine": "You have no tasks.",
+    "noneGiven": "You have not given any task yet.",
+    "deleteQuestion": "Delete the task \"{{title}}\"?"
   }
 }

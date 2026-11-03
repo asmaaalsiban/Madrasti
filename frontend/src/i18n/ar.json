@@ -128,7 +128,8 @@
       "duties": "جدول المناوبات",
       "stories": "أخبار الصف",
       "procurement": "طلبات الشراء",
-      "transport": "المواصلات"
+      "transport": "المواصلات",
+      "tasks": "المهام"
     },
     "actions": {
       "add": "إضافة",
@@ -851,7 +852,11 @@
       "procurement_approved": "تمت الموافقة على طلبك: {{title}}",
       "procurement_rejected": "رُفض طلبك: {{title}} — {{note}}",
       "procurement_to_buy": "تمت الموافقة، يرجى الشراء: {{title}}",
-      "procurement_purchased": "تم شراء: {{title}}"
+      "procurement_purchased": "تم شراء: {{title}}",
+      "task_new": "أعطاك {{name}} مهمة: {{title}}",
+      "task_done": "أنجز {{name}} المهمة: {{title}}",
+      "task_reminder": "مهمة موعدها غداً: {{title}}",
+      "task_overdue": "مهمة متأخرة: {{title}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -2014,5 +2019,42 @@
     "eveningRound": "الجولة المسائية",
     "bus": "الباص",
     "noRoundsInPeriod": "لا توجد جولات بعد."
+  },
+  "tasks": {
+    "title": "المهام",
+    "tile": "المهام الموجّهة إليك والمهام التي توزّعها.",
+    "tabs": {
+      "mine": "مهامي",
+      "given": "مهام وزّعتها"
+    },
+    "new": "مهمة جديدة",
+    "edit": "تعديل المهمة",
+    "what": "المهمة",
+    "details": "التفاصيل (اختياري)",
+    "dueOn": "موعد التسليم",
+    "priority": "الأولوية",
+    "priorities": {
+      "low": "منخفضة",
+      "normal": "عادية",
+      "high": "عالية"
+    },
+    "assignTo": "أعطها لـ",
+    "selectAll": "تحديد الكل",
+    "clearAll": "إلغاء التحديد",
+    "noPeople": "لا يوجد أحد يمكنك إعطاؤه مهام.",
+    "status": "الحالة",
+    "statuses": {
+      "todo": "جديدة",
+      "doing": "قيد التنفيذ",
+      "done": "منجزة"
+    },
+    "note": "ملاحظة (اختياري)",
+    "from": "من {{name}}",
+    "by": "وزّعها {{name}}",
+    "overdue": "متأخرة",
+    "progress": "أُنجزت {{done}} من {{total}}",
+    "noneMine": "لا توجد مهام لديك.",
+    "noneGiven": "لم توزّع أي مهمة بعد.",
+    "deleteQuestion": "حذف المهمة \"{{title}}\"؟"
   }
 }

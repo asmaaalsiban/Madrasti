@@ -53,6 +53,7 @@ use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
 use App\Modules\Surveys\Http\Controllers\MySurveyController;
 use App\Modules\Surveys\Http\Controllers\SurveyController;
+use App\Modules\Tasks\Http\Controllers\TaskController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorCriteriaController;
 use App\Modules\TeacherTools\Http\Controllers\BehaviorSpecialController;
@@ -470,3 +471,14 @@ Route::middleware(['school-user', 'role:admin'])->prefix('transport')->group(fun
     Route::delete('students/{student}', [TransportController::class, 'unassign']);
 });
 Route::middleware('school-user')->get('students/{student}/transport', [TransportController::class, 'forStudent']);
+
+// Tasks for staff: management gives to any teacher, a head of department to their department; each assignee moves their own part.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group(function (): void {
+    Route::get('mine', [TaskController::class, 'mine']);
+    Route::get('given', [TaskController::class, 'given']);
+    Route::get('people', [TaskController::class, 'people']);
+    Route::post('/', [TaskController::class, 'store']);
+    Route::put('{task}', [TaskController::class, 'update']);
+    Route::delete('{task}', [TaskController::class, 'destroy']);
+    Route::put('{task}/status', [TaskController::class, 'status']);
+});
