@@ -129,6 +129,9 @@ class StoryTest extends AcademicTestCase
         $id = $this->publish($this->teacher, ['audience' => 'classroom', 'classroom_id' => $this->a->id, 'body' => 'Hello'], [$this->image()])->assertCreated()->json('data.id');
         $this->assertSame(1, DB::table('notifications')->where('notifiable_id', $this->dad->id)->where('data', 'like', '%story_new%')->count());
         $this->assertSame(1, DB::table('notifications')->where('notifiable_id', $this->kid->id)->where('data', 'like', '%story_new%')->count());
+        // The notification opens the class feed itself: it is one page per role, not one per child.
+        $this->assertStringContainsString('"link":"\/parent\/stories"', (string) DB::table('notifications')->where('notifiable_id', $this->dad->id)->where('data', 'like', '%story_new%')->value('data'));
+        $this->assertStringContainsString('"link":"\/student\/stories"', (string) DB::table('notifications')->where('notifiable_id', $this->kid->id)->where('data', 'like', '%story_new%')->value('data'));
         $this->assertSame(0, DB::table('notifications')->where('notifiable_id', $this->mum->id)->count());
 
         $media = Story::find($id)->media->first();

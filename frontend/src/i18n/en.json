@@ -131,7 +131,8 @@
       "transport": "Transport",
       "tasks": "Tasks",
       "staffAccess": "What staff see",
-      "privacyRequests": "Data requests"
+      "privacyRequests": "Data requests",
+      "photoConsent": "Photo consent"
     },
     "actions": {
       "add": "Add",
@@ -1908,7 +1909,11 @@
     "deleteTitle": "Delete this post?",
     "deleteHelp": "The post, its photos and its comments will be removed for everyone.",
     "photos": "Photos",
-    "openPhoto": "Open photo {{number}}"
+    "openPhoto": "Open photo {{number}}",
+    "consentWarn_one": "The parents of {{count}} student in this group have not allowed photos:",
+    "consentWarn_other": "The parents of {{count}} students in this group have not allowed photos:",
+    "consentBlocked_one": "Photos cannot be posted: the parents of {{count}} student in this group have not allowed photos:",
+    "consentBlocked_other": "Photos cannot be posted: the parents of {{count}} students in this group have not allowed photos:"
   },
   "procurement": {
     "title": "Purchase requests",
@@ -2457,11 +2462,45 @@
       "whatDone": "What was done (the person will read it)",
       "whyRefused": "Why it is not possible (the person will read it)",
       "send": "Send the answer"
+    },
+    "photo": {
+      "title": "Photos of my children",
+      "help": "The school may publish photos of students in the class feed. Say whether you allow photos of each of your children. You can change your mind at any time.",
+      "state": {
+        "yes": "Allowed",
+        "no": "Not allowed",
+        "unknown": "No answer yet"
+      },
+      "allow": "Allow",
+      "deny": "Do not allow",
+      "allowFor": "Allow photos of {{name}}",
+      "denyFor": "Do not allow photos of {{name}}",
+      "saved": "Saved."
     }
   },
   "a11y": {
     "actions": "Actions",
     "skip": "Skip to the main content",
     "corner": "Periods and days"
+  },
+  "photoConsent": {
+    "title": "Photo consent",
+    "help": "Parents say whether photos of their child may be published in the class feed. You can also record the answer of a family that gave it on paper.",
+    "mode": "What happens when a teacher posts photos",
+    "modes": {
+      "required": "Only with consent (recommended)",
+      "warn": "Warn the teacher",
+      "off": "No check"
+    },
+    "modeHelp": {
+      "required": "Photos can only be posted to a group where every child's parents said yes. A \"no\" or no answer blocks the photo.",
+      "warn": "Photos can be posted, and the teacher sees who has not said yes.",
+      "off": "Nothing is checked."
+    },
+    "section": "Section",
+    "all": "All the school",
+    "missing": "{{count}} without a yes",
+    "student": "Student",
+    "answer": "Answer"
   }
 }

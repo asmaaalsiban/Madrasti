@@ -10,6 +10,7 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\Auth\Models\DataRequest;
 use App\Modules\Auth\Services\PersonalDataExport;
 use App\Modules\Communication\Services\Notifier;
+use App\Modules\Communication\Services\PhotoConsent;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ use Illuminate\Validation\ValidationException;
  */
 class PrivacyController extends Controller
 {
-    public function __construct(private readonly PersonalDataExport $export, private readonly Notifier $notifier) {}
+    public function __construct(private readonly PersonalDataExport $export, private readonly Notifier $notifier, private readonly PhotoConsent $consent) {}
 
     /** A copy of my data, or of one of my children's (`?student_id=`), as a JSON file. */
     public function export(Request $request): \Symfony\Component\HttpFoundation\Response
@@ -37,9 +38,9 @@ class PrivacyController extends Controller
     {
         $me = $this->user($request);
         $rows = DataRequest::where('user_id', $me->id)->latest('id')->limit(20)->get();
-        $children = $me->hasRole(Role::Guardian) ? $me->children()->get(['students.id', 'name_ar', 'name_en']) : collect();
+        $children = $me->hasRole(Role::Guardian) ? $me->children()->get(['students.id', 'name_ar', 'name_en', 'photo_consent']) : collect();
 
-        return response()->json(['data' => $rows->map(fn ($r) => $this->present($r))->values(), 'children' => $children->map->only(['id', 'name_ar', 'name_en'])->values()]);
+        return response()->json(['data' => $rows->map(fn ($r) => $this->present($r))->values(), 'children' => $children->map->only(['id', 'name_ar', 'name_en', 'photo_consent'])->values()]);
     }
 
     public function store(Request $request): JsonResponse
@@ -57,6 +58,37 @@ class PrivacyController extends Controller
         $this->notifier->toUsers(User::where('role', Role::Admin)->where('is_active', true)->pluck('id'), 'data_request', ['name' => $me->name, 'type' => $data['type']], '/admin/privacy-requests');
 
         return response()->json(['data' => $this->present($req)], 201);
+    }
+
+    /** A parent says yes or no to photos of their child in the class feed; the principal can record it for a family (a paper form). */
+    public function setPhotoConsent(Request $request): JsonResponse
+    {
+        $me = $this->user($request);
+        $data = $request->validate(['student_id' => ['required', 'integer'], 'allowed' => ['required', 'boolean']]);
+        $student = Student::findOrFail($data['student_id']);
+        abort_unless($me->hasRole(Role::Admin) || ($me->hasRole(Role::Guardian) && $student->guardians()->whereKey($me->id)->exists()), 403);
+        $this->consent->set($student, (bool) $data['allowed'], $me->id);
+
+        return response()->json(['data' => ['student_id' => $student->id, 'photo_consent' => (bool) $data['allowed']]]);
+    }
+
+    /** The principal's view: the mode, and the answer of every student of a section (or all). */
+    public function photoConsent(Request $request): JsonResponse
+    {
+        $this->admin($request);
+        $room = $request->query('classroom_id');
+        $students = $room ? $this->consent->audience('classroom', (int) $room, null) : $this->consent->audience('school', null, null);
+
+        return response()->json(['mode' => $this->consent->mode(), 'data' => $students->map->only(['id', 'name_ar', 'name_en', 'photo_consent'])->values(), 'missing' => $students->filter(fn ($s) => $s->photo_consent !== true)->count()]);
+    }
+
+    public function setPhotoConsentMode(Request $request): JsonResponse
+    {
+        $this->admin($request);
+        $data = $request->validate(['mode' => ['required', 'in:'.implode(',', PhotoConsent::MODES)]]);
+        $this->consent->setMode($data['mode']);
+
+        return response()->json(['mode' => $data['mode']]);
     }
 
     /** The principal sees every request. */

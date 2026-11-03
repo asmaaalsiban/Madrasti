@@ -81,6 +81,7 @@ import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
 import PrivacyPage from '../features/Privacy/PrivacyPage'
+import PhotoConsentPage from '../features/Privacy/PhotoConsentPage'
 import PrivacyRequestsPage from '../features/Privacy/PrivacyRequestsPage'
 import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
@@ -115,6 +116,7 @@ const HOME_ROUTES = {
     { path: 'privacy', element: <PrivacyPage /> },
     { path: 'children/:id/transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
+    { path: 'children/:id/stories', element: <Navigate to="/parent/stories" replace /> }, // old notifications pointed here
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
@@ -237,6 +239,7 @@ export const routes = [
               { path: '/admin/tasks', element: <TasksPage /> },
               { path: '/admin/privacy', element: <PrivacyPage /> },
               { path: '/admin/privacy-requests', element: <PrivacyRequestsPage /> },
+              { path: '/admin/photo-consent', element: <PhotoConsentPage /> },
               { path: '/admin/staff-access', element: <StaffAccessPage /> },
               { path: '/admin/transport', element: <TransportPage /> },
               { path: '/admin/stories', element: <StoriesPage /> },
