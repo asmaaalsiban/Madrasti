@@ -9,14 +9,14 @@ use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Where one student rides: a round, the bus that picks them up and the bus that takes them home (may be different, may be empty). */
+/** Where one student rides: the morning round and bus to school, the evening round and bus home (may be different, may be empty). */
 class StudentTransport extends Model
 {
     use Auditable;
 
     protected $table = 'student_transport';
 
-    protected $fillable = ['student_id', 'transport_round_id', 'pickup_bus_id', 'dropoff_bus_id'];
+    protected $fillable = ['student_id', 'pickup_round_id', 'pickup_bus_id', 'dropoff_round_id', 'dropoff_bus_id'];
 
     /** @return BelongsTo<Student, $this> */
     public function student(): BelongsTo
@@ -25,9 +25,15 @@ class StudentTransport extends Model
     }
 
     /** @return BelongsTo<TransportRound, $this> */
-    public function round(): BelongsTo
+    public function pickupRound(): BelongsTo
     {
-        return $this->belongsTo(TransportRound::class, 'transport_round_id');
+        return $this->belongsTo(TransportRound::class, 'pickup_round_id');
+    }
+
+    /** @return BelongsTo<TransportRound, $this> */
+    public function dropoffRound(): BelongsTo
+    {
+        return $this->belongsTo(TransportRound::class, 'dropoff_round_id');
     }
 
     /** @return BelongsTo<Bus, $this> */
