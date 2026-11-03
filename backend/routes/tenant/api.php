@@ -28,6 +28,7 @@ use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
 use App\Modules\Communication\Http\Controllers\StoryController;
 use App\Modules\Finance\Http\Controllers\FinanceController;
 use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
+use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\StudentFeesController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
@@ -363,6 +364,9 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::put('students/{student}/transport', [FinanceController::class, 'setTransport']);
     Route::get('settings', [FinanceController::class, 'settings']);
     Route::put('settings', [FinanceController::class, 'saveSettings']);
+    Route::get('payment-settings', [PaymentSettingsController::class, 'show']);
+    Route::put('payment-settings', [PaymentSettingsController::class, 'update']);
+    Route::post('payment-settings/test', [PaymentSettingsController::class, 'test'])->middleware('throttle:10,1');
     Route::get('fee-structures', [FinanceController::class, 'structures']);
     Route::post('fee-structures', [FinanceController::class, 'storeStructure']);
     Route::put('fee-structures/{structure}', [FinanceController::class, 'updateStructure']);

@@ -2147,5 +2147,27 @@
     "colorOf": "Colour of {{name}}",
     "custom": "Another colour",
     "defaultColor": "Default colour"
+  },
+  "paySettings": {
+    "title": "Online payment (PayTabs)",
+    "help": "Parents pay by card on PayTabs' own page and the money goes to YOUR PayTabs account. Take the profile ID and the server key from your PayTabs dashboard.",
+    "platformAccount": "Until you switch your own account on, payments go through the platform's account.",
+    "profileId": "Profile ID",
+    "serverKey": "Server key",
+    "keepKey": "(saved: leave empty to keep)",
+    "region": "PayTabs region",
+    "regions": {
+      "jordan": "Jordan",
+      "saudi": "Saudi Arabia",
+      "uae": "UAE",
+      "egypt": "Egypt",
+      "oman": "Oman",
+      "global": "Global"
+    },
+    "enabled": "Take online payments through this account",
+    "callback": "Callback address (set automatically with every payment)",
+    "saved": "Saved.",
+    "test": "Test the connection",
+    "testing": "Testing…"
   }
 }

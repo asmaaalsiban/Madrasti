@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Money from '../components/Money'
+import PaymentSettingsCard from '../components/PaymentSettingsCard'
 
 // The money of the school at a glance: expected, collected, remaining, overdue. The accountant also sets the currency.
 export default function FinanceDashboardPage({ base }) {
@@ -45,6 +46,7 @@ export default function FinanceDashboardPage({ base }) {
           <button type="submit" className="rounded border px-3 py-2 text-sm" disabled={!currency}>{t('admin.actions.save')}</button>
         </form>
       )}
+      <PaymentSettingsCard />
     </section>
   )
 }
