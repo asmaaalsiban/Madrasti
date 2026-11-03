@@ -1810,6 +1810,12 @@
     "upcoming": "Coming up",
     "past": "Last 30 days",
     "noneUpcoming": "You have no duties coming up.",
-    "total": "{{count}} duties in total."
+    "total": "{{count}} duties in total.",
+    "who": "Who does duty",
+    "whoCount": "{{chosen}} of {{total}} teachers",
+    "whoHelp": "Tick the teachers who take part in the duty roster. The others are never put on it (you can still add a duty for them by hand).",
+    "selectAll": "Select all",
+    "selectNone": "Select none",
+    "whoSaved": "Saved."
   }
 }

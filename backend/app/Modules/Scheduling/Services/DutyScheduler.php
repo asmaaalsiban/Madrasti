@@ -36,7 +36,7 @@ class DutyScheduler
         $workdays = array_map('intval', $this->periods->current()['days']);
         $exclude = collect($o['exclude_dates'] ?? [])->flip();
         $max = (int) ($o['max_per_day'] ?? 1);
-        $teachers = User::where('role', Role::Teacher)->where('is_active', true)->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', collect(StaffType::cases())->filter(fn ($t) => $t->category() === 'teaching')->map->value->all()))->orderBy('name')->get(['id', 'name']);
+        $teachers = User::where('role', Role::Teacher)->where('is_active', true)->whereHas('staffProfile', fn ($q) => $q->where('does_duty', true)->whereIn('staff_type', collect(StaffType::cases())->filter(fn ($t) => $t->category() === 'teaching')->map->value->all()))->orderBy('name')->get(['id', 'name']);
         if ($teachers->isEmpty()) {
             throw ValidationException::withMessages(['from' => [__('duties.no_staff')]]);
         }

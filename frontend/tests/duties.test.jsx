@@ -20,7 +20,7 @@ beforeEach(async () => {
 
 describe('DutiesAdminPage', () => {
   beforeEach(() => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/duties/posts' ? { data: [post] } : url === '/payroll/staff' ? { data: [{ id: 9, name: 'Sara Ali', staff_type: 'teacher' }, { id: 10, name: 'Omar', staff_type: 'accountant' }] } : { from: '2027-01-01', to: '2027-01-31', data: [duty(1, '2027-01-03'), duty(2, '2027-01-04', { is_locked: true })] } }))
+    api.get.mockImplementation((url) => Promise.resolve({ data: url === '/duties/staff' ? { data: [{ id: 9, name: 'Sara Ali', does_duty: true }, { id: 11, name: 'Layla Hasan', does_duty: true }, { id: 12, name: 'Khaled Omar', does_duty: false }] } : url === '/duties/posts' ? { data: [post] } : url === '/payroll/staff' ? { data: [{ id: 9, name: 'Sara Ali', staff_type: 'teacher' }, { id: 10, name: 'Omar', staff_type: 'accountant' }] } : { from: '2027-01-01', to: '2027-01-31', data: [duty(1, '2027-01-03'), duty(2, '2027-01-04', { is_locked: true })] } }))
   })
 
   it('lists the posts and the roster by day', async () => {
@@ -31,6 +31,26 @@ describe('DutiesAdminPage', () => {
     expect(screen.getAllByText('Morning gate').length).toBeGreaterThan(2)
   })
 
+  it('chooses which teachers do duty', async () => {
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<DutiesAdminPage />)
+    expect(await screen.findByText('2 of 3 teachers')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Khaled Omar')) // now does duty
+    fireEvent.click(screen.getByLabelText('Sara Ali')) // no longer does duty
+    expect(screen.getByText('2 of 3 teachers')).toBeInTheDocument()
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save' })[0])
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/duties/staff', { user_ids: [11, 12] }))
+    expect(await screen.findByText('Saved.')).toBeInTheDocument()
+  })
+
+  it('selects all or none at once', async () => {
+    wrap(<DutiesAdminPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Select none' }))
+    expect(screen.getByText('0 of 3 teachers')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Select all' }))
+    expect(screen.getByText('3 of 3 teachers')).toBeInTheDocument()
+  })
+
   it('adds a post with its days', async () => {
     api.post.mockResolvedValue({ data: {} })
     wrap(<DutiesAdminPage />)
@@ -38,7 +58,7 @@ describe('DutiesAdminPage', () => {
     fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'Yard at break' } })
     fireEvent.click(screen.getByText('Sun'))
     fireEvent.click(screen.getByText('Tue'))
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save' }).at(-1)) // the dialog's
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/duties/posts', expect.objectContaining({ name: 'Yard at break', staff_count: 1, days: [0, 2] })))
   })
 
@@ -66,7 +86,7 @@ describe('DutiesAdminPage', () => {
     await waitFor(() => expect(screen.getByRole('option', { name: 'Sara Ali' })).toBeInTheDocument())
     expect(screen.queryByRole('option', { name: 'Omar' })).not.toBeInTheDocument()
     fireEvent.change(person, { target: { value: '9' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save' }).at(-1)) // the dialog's
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/duties/2', { user_id: 9, date: '2027-01-04', starts_at: '07:15', ends_at: '07:40' }))
   })
 })

@@ -24,14 +24,14 @@ class StaffProfile extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours'];
+    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty'];
 
     /**
      * @return array<string, mixed>
      */
     protected function casts(): array
     {
-        return ['staff_type' => StaffType::class, 'hired_on' => 'date'];
+        return ['staff_type' => StaffType::class, 'hired_on' => 'date', 'does_duty' => 'boolean'];
     }
 
     public function user(): BelongsTo
