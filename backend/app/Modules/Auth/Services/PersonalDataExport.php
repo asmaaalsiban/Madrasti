@@ -38,7 +38,7 @@ class PersonalDataExport
 
         return [
             'exported_at' => now()->toIso8601String(),
-            'student' => $student->only(['student_number', 'name_ar', 'name_en', 'birth_date', 'gender']),
+            'student' => $student->only(['student_number', 'name_ar', 'name_en', 'birth_date', 'gender', 'photo_consent']),
             'guardians' => DB::table('guardian_student')->join('users', 'users.id', '=', 'guardian_student.guardian_id')->where('student_id', $id)->get(['users.name', 'users.email', 'users.phone', 'guardian_student.relation'])->all(),
             'enrollments' => DB::table('enrollments')->join('classrooms', 'classrooms.id', '=', 'enrollments.classroom_id')->where('student_id', $id)->get(['classrooms.name as classroom', 'enrollments.academic_year_id'])->all(),
             'attendance' => DB::table('student_attendances')->where('student_id', $id)->orderBy('date')->get(['date', 'status', 'note'])->all(),

@@ -81,6 +81,7 @@ import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
 import PrivacyPage from '../features/Privacy/PrivacyPage'
+import PhotoConsentPage from '../features/Privacy/PhotoConsentPage'
 import PrivacyRequestsPage from '../features/Privacy/PrivacyRequestsPage'
 import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
@@ -237,6 +238,7 @@ export const routes = [
               { path: '/admin/tasks', element: <TasksPage /> },
               { path: '/admin/privacy', element: <PrivacyPage /> },
               { path: '/admin/privacy-requests', element: <PrivacyRequestsPage /> },
+              { path: '/admin/photo-consent', element: <PhotoConsentPage /> },
               { path: '/admin/staff-access', element: <StaffAccessPage /> },
               { path: '/admin/transport', element: <TransportPage /> },
               { path: '/admin/stories', element: <StoriesPage /> },

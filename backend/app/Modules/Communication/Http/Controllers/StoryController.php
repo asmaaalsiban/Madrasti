@@ -12,6 +12,7 @@ use App\Modules\Communication\Models\Story;
 use App\Modules\Communication\Models\StoryComment;
 use App\Modules\Communication\Models\StoryMedia;
 use App\Modules\Communication\Services\Notifier;
+use App\Modules\Communication\Services\PhotoConsent;
 use App\Modules\Communication\Services\StoryAccess;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +26,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /** The class feed: teachers and the principal post news and photos; students and parents read, react and comment. */
 class StoryController extends Controller
 {
-    public function __construct(private readonly StoryAccess $access, private readonly Notifier $notifier) {}
+    public function __construct(private readonly StoryAccess $access, private readonly Notifier $notifier, private readonly PhotoConsent $consent) {}
 
     /** The feed of the signed-in person: pinned first, then newest. */
     public function index(Request $request): JsonResponse
@@ -56,6 +57,17 @@ class StoryController extends Controller
         ]]);
     }
 
+    /** Before posting photos: who in this audience has not allowed photos, and how strict the school is. */
+    public function consentCheck(Request $request): JsonResponse
+    {
+        $user = $this->user($request);
+        abort_unless($this->access->canPost($user), 403);
+        $q = $request->validate(['audience' => ['required', 'in:classroom,grade,school'], 'classroom_id' => ['nullable', 'integer'], 'grade_level_id' => ['nullable', 'integer']]);
+        $missing = $this->consent->missing($q['audience'], isset($q['classroom_id']) ? (int) $q['classroom_id'] : null, isset($q['grade_level_id']) ? (int) $q['grade_level_id'] : null);
+
+        return response()->json(['mode' => $this->consent->mode(), 'missing' => $missing->take(30)->map->only(['id', 'name_ar', 'name_en'])->values(), 'missing_count' => $missing->count()]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $user = $this->user($request);
@@ -70,6 +82,12 @@ class StoryController extends Controller
         if (! $user->hasRole(Role::Admin)) {
             // A teacher posts to one of their own classes only.
             abort_unless($data['audience'] === 'classroom' && $this->access->postableClassrooms($user)->contains('id', (int) $data['classroom_id']), 403, __('stories.not_allowed'));
+        }
+        if ($request->hasFile('images') && $this->consent->mode() === 'required') {
+            $missing = $this->consent->missing($data['audience'], isset($data['classroom_id']) ? (int) $data['classroom_id'] : null, isset($data['grade_level_id']) ? (int) $data['grade_level_id'] : null);
+            if ($missing->isNotEmpty()) {
+                throw ValidationException::withMessages(['images' => [__('stories.photo_consent_missing', ['count' => $missing->count()])]]);
+            }
         }
         $story = Story::create([
             'author_id' => $user->id, 'audience' => $data['audience'], 'classroom_id' => $data['audience'] === 'classroom' ? $data['classroom_id'] : null, 'grade_level_id' => $data['audience'] === 'grade' ? $data['grade_level_id'] : null,

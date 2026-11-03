@@ -30,6 +30,11 @@ export default function PrivacyPage() {
   const { data } = useQuery({ queryKey: ['privacy', 'requests'], queryFn: async () => (await api.get('/privacy/requests')).data })
   const children = data?.children ?? []
   const nameOf = (c) => c[`name_${i18n.language}`] || c.name_ar
+  const consent = useMutation({
+    mutationFn: ({ id, allowed }) => api.put('/privacy/photo-consent', { student_id: id, allowed }),
+    onSuccess: () => { setMessage({ ok: true, text: t('privacy.photo.saved') }); client.invalidateQueries({ queryKey: ['privacy'] }) },
+    onError: (err) => setMessage({ ok: false, text: errorOf(err, t('admin.actions.error')) }),
+  })
   const get = useMutation({ mutationFn: ({ params, name }) => download(params, name), onError: (err) => setMessage({ ok: false, text: errorOf(err, t('admin.actions.error')) }) })
   const ask = useMutation({
     mutationFn: () => api.post('/privacy/requests', { type: form.type, student_id: form.student_id ? Number(form.student_id) : null, message: form.message || null }),
@@ -41,6 +46,24 @@ export default function PrivacyPage() {
       <h1>{t('privacy.title')}</h1>
       <p className="text-sm text-slate-600">{t('privacy.help')} <Link to="/privacy" className="text-brand underline">{t('legal.privacy.title')}</Link></p>
       {message && <p role="status" className={`rounded p-2 text-sm ${message.ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'}`}>{message.text}</p>}
+
+      {children.length > 0 && (
+        <div className="space-y-2 rounded-lg border bg-white p-4">
+          <h2 className="text-lg">{t('privacy.photo.title')}</h2>
+          <p className="text-sm text-slate-600">{t('privacy.photo.help')}</p>
+          <ul className="space-y-2">
+            {children.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
+                <span><bdi className="font-medium">{nameOf(c)}</bdi> · <span className={c.photo_consent === true ? 'text-green-700' : c.photo_consent === false ? 'text-red-700' : 'text-amber-700'}>{t(`privacy.photo.state.${c.photo_consent === true ? 'yes' : c.photo_consent === false ? 'no' : 'unknown'}`)}</span></span>
+                <span className="flex gap-2">
+                  <button type="button" aria-label={t('privacy.photo.allowFor', { name: nameOf(c) })} aria-pressed={c.photo_consent === true} className={`rounded border px-3 py-1 text-sm ${c.photo_consent === true ? 'bg-green-700 text-white' : 'text-green-800'}`} onClick={() => consent.mutate({ id: c.id, allowed: true })}>{t('privacy.photo.allow')}</button>
+                  <button type="button" aria-label={t('privacy.photo.denyFor', { name: nameOf(c) })} aria-pressed={c.photo_consent === false} className={`rounded border px-3 py-1 text-sm ${c.photo_consent === false ? 'bg-red-700 text-white' : 'text-red-800'}`} onClick={() => consent.mutate({ id: c.id, allowed: false })}>{t('privacy.photo.deny')}</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="space-y-2 rounded-lg border bg-white p-4">
         <h2 className="text-lg">{t('privacy.download')}</h2>
