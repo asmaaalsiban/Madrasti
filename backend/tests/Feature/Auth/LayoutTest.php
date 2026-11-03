@@ -26,6 +26,17 @@ class LayoutTest extends AcademicTestCase
         $this->getJson('/api/auth/me')->assertJsonPath('data.layout', []);
     }
 
+    public function test_the_size_of_the_icons_and_a_colour_for_each_are_kept_and_checked(): void
+    {
+        Sanctum::actingAs(User::factory()->role(Role::Guardian)->create());
+        $this->putJson('/api/auth/layout', ['surface' => 'parent_home', 'order' => ['items' => ['fees'], 'size' => 'large', 'colors' => ['fees' => '#DC2626']]])->assertOk()
+            ->assertJsonPath('data.parent_home.size', 'large')->assertJsonPath('data.parent_home.colors.fees', '#dc2626');
+        $this->putJson('/api/auth/layout', ['surface' => 'parent_home', 'order' => ['size' => 'huge']])->assertStatus(422);
+        $this->putJson('/api/auth/layout', ['surface' => 'parent_home', 'order' => ['colors' => ['fees' => 'red']]])->assertStatus(422);
+        $this->putJson('/api/auth/layout', ['surface' => 'parent_home', 'order' => ['colors' => ['fees' => 'url(javascript:alert(1))']]])->assertStatus(422);
+        $this->getJson('/api/auth/me')->assertJsonPath('data.layout.parent_home.colors.fees', '#dc2626'); // a refused change keeps what was saved
+    }
+
     public function test_only_known_surfaces_and_short_lists_are_accepted(): void
     {
         Sanctum::actingAs(User::factory()->role(Role::Admin)->create());

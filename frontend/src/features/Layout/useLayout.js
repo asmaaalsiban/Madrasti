@@ -11,10 +11,12 @@ export default function useLayout(surface) {
   const store = useMutation({ mutationFn: (order) => api.put('/auth/layout', { surface, order }) })
   const write = useCallback((order) => {
     const layout = { ...(user?.layout ?? {}) }
-    if (order === null) delete layout[surface]
-    else layout[surface] = order
+    // A change names only what it changes: the rest of the person's arrangement (order, size, colours) is kept.
+    const next = order === null ? null : { groups: stored?.groups ?? [], items: stored?.items ?? [], ...(stored?.size ? { size: stored.size } : {}), ...(stored?.colors ? { colors: stored.colors } : {}), ...order }
+    if (next === null) delete layout[surface]
+    else layout[surface] = next
     updateUser({ ...user, layout })
-    store.mutate(order)
-  }, [user, surface, updateUser, store])
-  return { groups: stored?.groups ?? [], items: stored?.items ?? [], custom: Boolean(stored), save: (order) => write(order), reset: () => write(null) }
+    store.mutate(next)
+  }, [user, surface, updateUser, store, stored])
+  return { groups: stored?.groups ?? [], items: stored?.items ?? [], size: stored?.size ?? 'medium', colors: stored?.colors ?? {}, custom: Boolean(stored), save: (order) => write(order), reset: () => write(null) }
 }

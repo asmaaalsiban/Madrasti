@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
 import HeaderIcons from '../components/shared/HeaderIcons'
-import { ArrangeBar, MoveButtons } from '../components/shared/Arrange'
+import { ArrangeBar, ColorButton, MoveButtons } from '../components/shared/Arrange'
 import useLayout from '../features/Layout/useLayout'
-import { orderBy, swap } from '../features/Layout/arrange'
+import { iconPaint, iconSize, orderBy, swap } from '../features/Layout/arrange'
 import { useSchool } from '../tenant/useSchool'
 
 // The menu in groups, each item with its icon: what the principal reaches for most is at the top.
@@ -31,6 +31,9 @@ export default function AdminLayout() {
   const groups = [GROUPS[0], ...orderBy(GROUPS.slice(1), (g) => g.key, layout.groups)].map((g) => ({ ...g, items: g.key === null ? g.items : orderBy(g.items, (i) => i[0], layout.items) }))
   const groupKeys = groups.filter((g) => g.key).map((g) => g.key)
   const flat = () => groups.flatMap((g) => g.items.map((i) => i[0]))
+  const { box, icon: iconPx } = iconSize(layout.size, 'menu')
+  const setColor = (key, color) => { const colors = { ...layout.colors }; if (color) colors[key] = color; else delete colors[key]; layout.save({ colors }) }
+  const iconOf = (Icon, to) => <span aria-hidden style={{ width: layout.colors[to] ? box : iconPx, height: layout.colors[to] ? box : iconPx, ...iconPaint(layout.colors[to], true) }} className="grid shrink-0 place-items-center rounded-full"><Icon size={iconPx} /></span>
   const moveGroup = (key, delta) => layout.save({ groups: swap(groupKeys, key, delta), items: flat() })
   const moveItem = (group, path, delta) => {
     const within = swap(group.items.map((i) => i[0]), path, delta)
@@ -50,7 +53,7 @@ export default function AdminLayout() {
           </button>
         </div>
         <nav className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
-          <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} /></div>
+          <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} size={layout.size} onSize={(size) => layout.save({ size })} /></div>
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
               {group.key && (
@@ -61,8 +64,9 @@ export default function AdminLayout() {
               )}
               {group.items.map(([to, key, Icon, end], ii) => editing ? (
                 <div key={to} className="flex items-center gap-3 rounded-full border border-dashed border-white/30 px-3 py-1.5 text-sm text-white/90">
-                  <Icon aria-hidden size={18} className="shrink-0" />
+                  {iconOf(Icon, to)}
                   <span className="min-w-0 flex-1 truncate">{t(`admin.nav.${key}`)}</span>
+                  <ColorButton label={t(`admin.nav.${key}`)} value={layout.colors[to]} onChange={(c) => setColor(to, c)} />
                   {group.key && <MoveButtons vertical label={t(`admin.nav.${key}`)} canEarlier={ii > 0} canLater={ii < group.items.length - 1} onEarlier={() => moveItem(group, to, -1)} onLater={() => moveItem(group, to, 1)} />}
                 </div>
               ) : (
@@ -73,7 +77,7 @@ export default function AdminLayout() {
                   onClick={() => setOpen(false)}
                   className={({ isActive }) => `flex items-center gap-3 rounded-full px-3 py-2 text-sm ${isActive ? 'bg-sky-tint font-bold text-deep-harbor' : 'text-white/90 hover:bg-white/10'}`}
                 >
-                  <Icon aria-hidden size={18} className="shrink-0" />
+                  {iconOf(Icon, to)}
                   <span className="min-w-0 flex-1 truncate">{t(`admin.nav.${key}`)}</span>
                 </NavLink>
               ))}

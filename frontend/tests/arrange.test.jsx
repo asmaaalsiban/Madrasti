@@ -64,3 +64,27 @@ describe('arranging', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/auth/layout', expect.objectContaining({ surface: 'admin_nav', order: expect.objectContaining({ groups: expect.arrayContaining(['money', 'school']) }) })))
   })
 })
+
+describe('icon size and colour', () => {
+  it('the size of the icons is chosen in arrange mode and kept with the order', async () => {
+    auth.user = { role: 'parent', name: 'P', layout: { parent_home: { groups: [], items: ['fees'] } } }
+    wrap(<SectionTiles tiles={tiles} surface="parent_home" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Arrange' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Large' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/auth/layout', { surface: 'parent_home', order: { groups: [], items: ['fees'], size: 'large' } }))
+  })
+
+  it('every icon gets its own colour, can go back to the default colour, and the icon is painted', async () => {
+    auth.user = { role: 'parent', name: 'P', layout: { parent_home: { groups: [], items: [], colors: { fees: '#dc2626' } } } }
+    wrap(<SectionTiles tiles={tiles} surface="parent_home" />)
+    const paintedBefore = screen.getByRole('link', { name: 'Fees' }).querySelector('span[aria-hidden]')
+    expect(paintedBefore.style.color).toBe('rgb(220, 38, 38)')
+    fireEvent.click(screen.getByRole('button', { name: 'Arrange' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Colour of Grades' }))
+    fireEvent.click(screen.getByRole('button', { name: '#16a34a' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/auth/layout', { surface: 'parent_home', order: { groups: [], items: [], colors: { fees: '#dc2626', grades: '#16a34a' } } }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Colour of Fees' })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: 'Default colour' })[0])
+    await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/auth/layout', { surface: 'parent_home', order: { groups: [], items: [], colors: {} } }))
+  })
+})
