@@ -36,7 +36,7 @@ class Student extends Model
      */
     protected function casts(): array
     {
-        return ['birth_date' => 'date'];
+        return ['birth_date' => 'date', 'photo_consent' => 'boolean', 'photo_consent_at' => 'datetime'];
     }
 
     /** @return HasOne<StudentTransport, $this> */

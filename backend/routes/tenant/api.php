@@ -150,6 +150,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('procurement')-
 Route::middleware('school-user')->prefix('stories')->group(function (): void {
     Route::get('/', [StoryController::class, 'index']);
     Route::get('targets', [StoryController::class, 'targets']);
+    Route::get('consent-check', [StoryController::class, 'consentCheck']);
     Route::post('/', [StoryController::class, 'store']);
     Route::get('media/{media}', [StoryController::class, 'media']);
     Route::delete('comments/{comment}', [StoryController::class, 'removeComment']);
@@ -523,7 +524,10 @@ Route::middleware('school-user')->prefix('privacy')->group(function (): void {
     Route::get('export', [PrivacyController::class, 'export']);
     Route::get('requests', [PrivacyController::class, 'mineList']);
     Route::post('requests', [PrivacyController::class, 'store'])->middleware('throttle:10,1');
+    Route::put('photo-consent', [PrivacyController::class, 'setPhotoConsent']);
     Route::middleware('role:admin')->group(function (): void {
+        Route::get('photo-consent', [PrivacyController::class, 'photoConsent']);
+        Route::put('photo-consent-mode', [PrivacyController::class, 'setPhotoConsentMode']);
         Route::get('requests/all', [PrivacyController::class, 'index']);
         Route::put('requests/{dataRequest}', [PrivacyController::class, 'decide']);
     });

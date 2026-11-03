@@ -27,6 +27,14 @@ export default function StoryComposer() {
     ...(targets?.classrooms ?? []).map((c) => ({ value: `classroom:${c.id}`, label: c.name })),
   ]
   const chosen = target || options[0]?.value || ''
+  // With photos, who in this group has not allowed photos of their child? (the school chooses: only a warning, or photos blocked)
+  const [audience, audienceId] = chosen.split(':')
+  const consent = useQuery({
+    queryKey: ['stories', 'consent', chosen], enabled: files.length > 0 && Boolean(chosen),
+    queryFn: async () => (await api.get('/stories/consent-check', { params: { audience, ...(audience === 'classroom' ? { classroom_id: audienceId } : {}), ...(audience === 'grade' ? { grade_level_id: audienceId } : {}) } })).data,
+  })
+  const missing = files.length > 0 && consent.data?.mode !== 'off' ? consent.data?.missing_count ?? 0 : 0
+  const blocked = missing > 0 && consent.data?.mode === 'required'
   const send = useMutation({
     mutationFn: () => {
       const [audience, id] = chosen.split(':')
@@ -67,8 +75,14 @@ export default function StoryComposer() {
           <select className="rounded border p-1.5" value={chosen} onChange={(e) => setTarget(e.target.value)}>{options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select>
         </label>
         <label className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={comments} onChange={(e) => setComments(e.target.checked)} />{t('stories.allowComments')}</label>
-        <button type="submit" disabled={send.isPending || (!body.trim() && files.length === 0)} className="ms-auto rounded bg-brand px-6 py-2 text-white disabled:opacity-50">{t('stories.post')}</button>
+        <button type="submit" disabled={send.isPending || blocked || (!body.trim() && files.length === 0)} className="ms-auto rounded bg-brand px-6 py-2 text-white disabled:opacity-50">{t('stories.post')}</button>
       </div>
+      {missing > 0 && (
+        <p role={blocked ? 'alert' : 'status'} className={`rounded p-2 text-sm ${blocked ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-900'}`}>
+          {t(blocked ? 'stories.consentBlocked' : 'stories.consentWarn', { count: missing })}{' '}
+          <bdi>{(consent.data.missing ?? []).slice(0, 8).map((s) => s[`name_${i18n.language}`] || s.name_ar).join('، ')}{consent.data.missing_count > 8 ? '…' : ''}</bdi>
+        </p>
+      )}
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
     </form>
   )
