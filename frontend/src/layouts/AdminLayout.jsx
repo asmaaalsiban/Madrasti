@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, Fingerprint, GraduationCap, LayoutDashboard, Layers, ListChecks, Megaphone, Menu, MessageCircle, PenLine, RefreshCw, ScrollText, ShieldCheck, Smile, UserCheck, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, Images, FileCheck2, FileUp, Fingerprint, GraduationCap, LayoutDashboard, Layers, ListChecks, Megaphone, Menu, MessageCircle, PenLine, RefreshCw, ScrollText, ShieldCheck, Smile, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
@@ -16,7 +16,7 @@ const GROUPS = [
   { key: 'learning', items: [['/admin/attendance', 'attendance', CircleCheck], ['/admin/attendance-report', 'attendanceReport', FileBarChart], ['/admin/grades', 'grades', ClipboardList], ['/admin/behavior', 'behavior', Smile], ['/admin/motivation', 'motivation', Award], ['/admin/surveys', 'surveys', Vote], ['/admin/signatures', 'signatures', PenLine]] },
   { key: 'schedule', items: [['/admin/timetable', 'timetable', CalendarClock], ['/admin/exams', 'exams', FileCheck2], ['/admin/duties', 'duties', ShieldCheck], ['/admin/school-day', 'schoolDay', Clock], ['/admin/availability', 'availability', UserCheck], ['/admin/teaching', 'teaching', Users]] },
   { key: 'money', items: [['/admin/finance', 'finance', Wallet], ['/admin/payroll', 'payroll', Banknote], ['/admin/staff-attendance', 'staffAttendance', Fingerprint]] },
-  { key: 'communication', items: [['/admin/chat', 'chat', MessageCircle], ['/admin/announcements', 'announcements', Megaphone]] },
+  { key: 'communication', items: [['/admin/chat', 'chat', MessageCircle], ['/admin/announcements', 'announcements', Megaphone], ['/admin/stories', 'stories', Images]] },
   { key: 'school', items: [['/admin/academic-years', 'academicYears', CalendarRange], ['/admin/terms', 'terms', CalendarDays], ['/admin/grade-levels', 'gradeLevels', Layers], ['/admin/classrooms', 'classrooms', DoorOpen], ['/admin/subjects', 'subjects', BookOpen], ['/admin/curriculum', 'curriculum', ListChecks], ['/admin/buildings', 'buildings', Building2]] },
   { key: 'system', items: [['/admin/audit-log', 'auditLog', ScrollText]] },
 ]
