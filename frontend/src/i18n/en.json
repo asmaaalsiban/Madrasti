@@ -1700,7 +1700,7 @@
   },
   "exams": {
     "title": "Exam timetable",
-    "help": "Pick the term and the days, and which periods the exams take (e.g. periods 2 and 3: the lessons are replaced by the exam and the teacher who already has that section then watches it). Preview first; publishing replaces the exams of those grades and tells students, parents and teachers. Every section of a grade sits the same subject together.",
+    "help": "Choose the type: a monthly exam sits in lesson periods (the lessons are replaced and the section's own teacher watches), a final exam has its own times (students come only for it) with free teachers watching. Pick the term and dates, preview, then publish: it replaces only that round of those grades and tells students, parents and teachers. Every section of a grade sits the same subject together.",
     "term": "Term",
     "from": "From",
     "to": "To",
@@ -1745,6 +1745,17 @@
     "periodsMoveHelp": "The times are the school's, and the watchers become the teachers who have the section in those periods (unless you tick others).",
     "periodOne": "Period {{n}}",
     "periodsRange": "Periods {{from}}–{{to}}",
-    "lessonsReplaced": "The lessons of these periods are replaced by the exam."
+    "lessonsReplaced": "The lessons of these periods are replaced by the exam.",
+    "kind": "Exam type",
+    "kinds": {
+      "monthly": "Monthly exam",
+      "final": "Final exams"
+    },
+    "round": "Which monthly exam",
+    "monthlyN": "Monthly exam {{n}}",
+    "finalHelp": "Final exams have their own times: students come only for the exam. Set the first exam time, how long each lasts and the gap; free teachers (not the subject's own teacher) watch the rooms.",
+    "gap": "Gap between exams (min)",
+    "show": "Show",
+    "allExams": "All exams"
   }
 }
