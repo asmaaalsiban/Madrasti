@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
+import { Bus, Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
 import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -22,6 +22,7 @@ export default function StudentHome() {
     { to: '/student/report-card', label: t('reportCard.title'), icon: FileBadge },
     { to: '/student/behavior', label: t('behavior.title'), icon: Smile },
     { to: '/student/motivation', label: t('motivation.title'), icon: Star },
+    { to: '/student/transport', label: t('transport.myTitle'), icon: Bus },
     { to: '/student/surveys', label: t('surveys.mine'), icon: Vote, badge: pending.data },
   ]
   return (

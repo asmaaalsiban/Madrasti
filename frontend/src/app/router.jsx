@@ -80,6 +80,8 @@ import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
+import TransportPage from '../features/Transport/TransportPage'
+import MyTransportPage from '../features/Transport/MyTransportPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -103,6 +105,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/grades', element: <ChildGradesPage /> },
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/exams', element: <ChildExamsPage /> },
+    { path: 'children/:id/transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
@@ -122,6 +125,7 @@ const HOME_ROUTES = {
     { path: 'motivation', element: <MyMotivationPage /> },
     { path: 'report-card', element: <MyReportCardPage /> },
     { path: 'exams', element: <MyExamsPage /> },
+    { path: 'transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'surveys', element: <MySurveysPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
@@ -217,6 +221,7 @@ export const routes = [
               { path: '/admin/exams', element: <ExamsAdminPage /> },
               { path: '/admin/duties', element: <DutiesAdminPage /> },
               { path: '/admin/procurement', element: <ProcurementPage /> },
+              { path: '/admin/transport', element: <TransportPage /> },
               { path: '/admin/stories', element: <StoriesPage /> },
               { path: '/admin/audit-log', element: <AuditLogPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },

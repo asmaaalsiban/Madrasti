@@ -471,3 +471,12 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Receive**: the requester (or the principal / accountant) presses "It arrived".
 - **Board**: columns Waiting → Approved → Bought → Received (and Declined when there is one), urgent first; tabs on a phone. The principal and the accountant see everything with "waiting for a decision", "approved, to spend" and "spent so far"; everyone else sees only their own requests. Every change is in the audit log.
 - After pulling: `php artisan tenants:migrate` (replaces the old unused `procurement_requests` table).
+
+## School transport (المواصلات)
+- **Rounds** (up to 3): the shifts of the school day (first, second, third), each with an optional start/end time.
+- **Buses**: number, driver name and phone, seats, the area it covers (from → to), the rounds it serves, active or not.
+- **Rides**: each student has one round plus a bus *to school* and a bus *home*; they can be different buses, or only one of them can be set. A bus must serve the student's round and have a free seat (counted per round and per direction).
+- A round or a bus that still carries students cannot be deleted, and a round cannot be removed from a bus that carries students in it.
+- Transport fees already live in the student's fee account (`transport` line) and are unchanged.
+- Principal: `/admin/transport` (tabs Buses / Rounds / Students). Student and parent: a "School bus" tile (`/student/transport`, `/parent/children/:id/transport`).
+- API: `GET /api/transport`, rounds and buses CRUD under `/api/transport/...`, `PUT/DELETE /api/transport/students/{student}`, `GET /api/students/{student}/transport` (gate `view-student-transport`). Needs `php artisan tenants:migrate`.

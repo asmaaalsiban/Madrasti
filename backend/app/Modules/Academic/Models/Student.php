@@ -6,11 +6,13 @@ namespace App\Modules\Academic\Models;
 
 use App\Models\User;
 use App\Modules\Finance\Models\StudentFee;
+use App\Modules\Transport\Models\StudentTransport;
 use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
@@ -35,6 +37,12 @@ class Student extends Model
     protected function casts(): array
     {
         return ['birth_date' => 'date'];
+    }
+
+    /** @return HasOne<StudentTransport, $this> */
+    public function transport(): HasOne
+    {
+        return $this->hasOne(StudentTransport::class);
     }
 
     /**
