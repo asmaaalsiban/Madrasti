@@ -19,7 +19,7 @@ export default function ExamList({ sessions, showClass = true, showWatchers = fa
           <ul className="min-w-0 flex-1 divide-y">
             {sessions.filter((s) => s.date === d).map((s) => (
               <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
-                <span className="font-bold text-deep-harbor">{subject(s)}{showClass && <span className="ms-2 rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>}</span>
+                <span className="font-bold text-deep-harbor">{subject(s)}<span className="ms-2 rounded-full bg-deep-harbor px-2 py-0.5 text-[11px] font-semibold text-white">{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</span>{showClass && <span className="ms-2 rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>}</span>
                 <span className="text-sm text-slate-600">{s.period_from !== null && <span className="me-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs">{s.period_from === s.period_to ? t('exams.periodOne', { n: s.period_from }) : t('exams.periodsRange', { from: s.period_from, to: s.period_to })}</span>}<span dir="ltr">{s.starts_at} – {s.ends_at}</span></span>
                 {showWatchers && s.invigilators.length > 0 && <span className="w-full text-xs text-slate-500">{t('exams.watchers')}: {s.invigilators.map((u) => u.name).join('، ')}</span>}
               </li>

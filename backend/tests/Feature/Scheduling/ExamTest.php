@@ -79,7 +79,7 @@ class ExamTest extends AcademicTestCase
 
     private function body(array $extra = []): array
     {
-        return ['term_id' => $this->term->id, 'from' => '2027-01-03', 'to' => '2027-01-14', 'first_period' => 2, 'periods_per_exam' => 2, 'slots_per_day' => 1, 'grade_per_day' => 1, ...$extra];
+        return ['term_id' => $this->term->id, 'kind' => 'monthly', 'round' => 1, 'from' => '2027-01-03', 'to' => '2027-01-14', 'first_period' => 2, 'periods_per_exam' => 2, 'slots_per_day' => 1, 'grade_per_day' => 1, ...$extra];
     }
 
     public function test_each_grade_sits_one_subject_per_day_and_all_its_sections_sit_it_together(): void
@@ -216,5 +216,63 @@ class ExamTest extends AcademicTestCase
             $this->postJson('/api/exams/generate', $this->body())->assertForbidden();
             $this->deleteJson('/api/exams/'.ExamSession::value('id'))->assertForbidden();
         }
+    }
+
+    private function finalBody(array $extra = []): array
+    {
+        return ['term_id' => $this->term->id, 'kind' => 'final', 'from' => '2027-01-17', 'to' => '2027-01-28', 'start_time' => '09:00', 'duration_minutes' => 120, 'gap_minutes' => 30, 'slots_per_day' => 1, 'grade_per_day' => 1, 'invigilators' => 2, ...$extra];
+    }
+
+    public function test_final_exams_have_their_own_times_and_free_teachers_watch(): void
+    {
+        $this->postJson('/api/exams/generate', $this->finalBody())->assertOk()->assertJsonPath('data.sessions', 8)->assertJsonPath('data.warnings', []);
+        $rows = ExamSession::where('kind', 'final')->with('invigilators')->get();
+        $this->assertSame(['09:00:00'], $rows->pluck('starts_at')->unique()->values()->all());
+        $this->assertSame(['11:00:00'], $rows->pluck('ends_at')->unique()->values()->all());
+        $this->assertNull($rows->first()->period_from); // not tied to lesson periods
+        $this->assertSame(0, $rows->first()->round);
+        foreach ($rows as $s) {
+            $this->assertCount(2, $s->invigilators);
+        }
+        // Maths of grade 1 is taught by Teacher 1: they do not watch their own subject's exam.
+        $math = $rows->where('subject_id', $this->math->id)->whereIn('classroom_id', [$this->a->id, $this->b->id]);
+        foreach ($math as $s) {
+            $this->assertFalse($s->invigilators->contains('id', $this->teachers[0]->id));
+        }
+        // Nobody watches two rooms at the same time.
+        foreach ($rows->groupBy(fn ($s) => $s->exam_date->toDateString().$s->starts_at) as $group) {
+            $ids = $group->flatMap(fn ($s) => $s->invigilators->pluck('id'));
+            $this->assertSame($ids->count(), $ids->unique()->count());
+        }
+        // Too few free teachers for the rooms is only a warning.
+        $warn = $this->postJson('/api/exams/generate', $this->finalBody(['invigilators' => 5]))->assertOk()->json('data.warnings');
+        $this->assertNotEmpty($warn);
+    }
+
+    public function test_monthly_rounds_and_the_final_exams_live_side_by_side_and_each_run_only_replaces_its_own(): void
+    {
+        $this->postJson('/api/exams/generate', $this->body(['round' => 1]))->assertOk();
+        $this->postJson('/api/exams/generate', $this->body(['round' => 2, 'from' => '2027-02-01', 'to' => '2027-02-18']))->assertOk();
+        $this->postJson('/api/exams/generate', $this->finalBody(['from' => '2027-03-01', 'to' => '2027-03-18']))->assertOk();
+        $this->assertSame(24, ExamSession::count()); // 8 + 8 + 8: the same subjects in each round
+        $this->postJson('/api/exams/generate', $this->body(['round' => 1, 'first_period' => 3, 'periods_per_exam' => 1]))->assertOk(); // redo round 1 only
+        $this->assertSame(24, ExamSession::count());
+        $this->assertSame(8, ExamSession::where('kind', 'monthly')->where('round', 2)->count());
+        $this->assertSame(8, ExamSession::where('kind', 'final')->count());
+        $this->assertSame(0, ExamSession::where('kind', 'monthly')->where('round', 1)->where('period_from', 2)->count());
+
+        $this->getJson('/api/exams?term_id='.$this->term->id.'&kind=final')->assertOk()->assertJsonCount(8, 'data')->assertJsonPath('data.0.kind', 'final');
+        $this->getJson('/api/exams?term_id='.$this->term->id.'&kind=monthly&round=2')->assertOk()->assertJsonCount(8, 'data');
+        $this->getJson('/api/exams?term_id='.$this->term->id)->assertOk()->assertJsonCount(24, 'data');
+    }
+
+    public function test_a_final_exam_is_moved_by_time_not_by_periods_and_each_kind_needs_its_own_settings(): void
+    {
+        $this->postJson('/api/exams/generate', $this->finalBody())->assertOk();
+        $final = ExamSession::where('kind', 'final')->first();
+        $this->putJson("/api/exams/{$final->id}", ['period_from' => 2])->assertUnprocessable()->assertJsonValidationErrors('period_from');
+        $this->putJson("/api/exams/{$final->id}", ['starts_at' => '10:00', 'ends_at' => '12:00'])->assertOk()->assertJsonPath('data.starts_at', '10:00');
+        $this->postJson('/api/exams/generate', ['term_id' => $this->term->id, 'kind' => 'final', 'from' => '2027-01-17', 'to' => '2027-01-28', 'slots_per_day' => 1, 'grade_per_day' => 1])->assertUnprocessable()->assertJsonValidationErrors(['start_time', 'duration_minutes', 'invigilators']);
+        $this->postJson('/api/exams/generate', ['term_id' => $this->term->id, 'kind' => 'monthly', 'from' => '2027-01-17', 'to' => '2027-01-28', 'slots_per_day' => 1, 'grade_per_day' => 1])->assertUnprocessable()->assertJsonValidationErrors(['round', 'first_period', 'periods_per_exam']);
     }
 }

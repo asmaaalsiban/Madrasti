@@ -11,7 +11,7 @@ function EditDialog({ session, onClose }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const staff = useQuery({ queryKey: ['payroll', 'staff'], queryFn: async () => (await api.get('/payroll/staff')).data })
-  const byPeriods = session.period_from !== null
+  const byPeriods = session.period_from !== null && session.kind !== 'final'
   const [form, setForm] = useState({ exam_date: session.date, starts_at: session.starts_at, ends_at: session.ends_at, period_from: session.period_from ?? '', period_to: session.period_to ?? '' })
   const [mode, setMode] = useState(byPeriods ? 'periods' : 'time')
   const [watchers, setWatchers] = useState(session.invigilators.map((u) => u.id))
@@ -36,7 +36,7 @@ function EditDialog({ session, onClose }) {
           <label className="block text-sm">{t('exams.date')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.exam_date} onChange={set('exam_date')} /></label>
           <label className="block text-sm sm:col-span-2">{t('exams.when')}
             <select className="mt-1 w-full rounded border p-2" value={mode} onChange={(e) => setMode(e.target.value)}>
-              <option value="periods">{t('exams.byPeriods')}</option>
+              {session.kind !== 'final' && <option value="periods">{t('exams.byPeriods')}</option>}
               <option value="time">{t('exams.byTime')}</option>
             </select>
           </label>
@@ -77,7 +77,7 @@ export default function ExamsAdminPage() {
   const client = useQueryClient()
   const terms = useQuery({ queryKey: ['terms', 'all'], queryFn: async () => (await api.get('/terms', { params: { per_page: 100 } })).data.data })
   const grades = useQuery({ queryKey: ['grade-levels', 'all'], queryFn: async () => (await api.get('/grade-levels', { params: { per_page: 100 } })).data.data })
-  const [form, setForm] = useState({ term_id: '', from: '', to: '', first_period: 2, periods_per_exam: 2, slots_per_day: 1, grade_per_day: 1 })
+  const [form, setForm] = useState({ kind: 'monthly', round: 1, term_id: '', from: '', to: '', first_period: 2, periods_per_exam: 2, start_time: '09:00', duration_minutes: 120, gap_minutes: 30, invigilators: 2, slots_per_day: 1, grade_per_day: 1 })
   const [only, setOnly] = useState([])
   const [fill, setFill] = useState(true)
   const [off, setOff] = useState([])
@@ -86,9 +86,11 @@ export default function ExamsAdminPage() {
   const [error, setError] = useState('')
   const [edit, setEdit] = useState(null)
   const [gradeFilter, setGradeFilter] = useState('')
+  const [view, setView] = useState('') // '' = all, 'monthly-1', 'final'...
   // Until a term is chosen the server says which one is meant (the running or the next one).
-  const list = useQuery({ queryKey: ['exams', 'admin', form.term_id, gradeFilter], queryFn: async () => (await api.get('/exams', { params: { ...(form.term_id ? { term_id: form.term_id } : {}), ...(gradeFilter ? { grade_level_id: gradeFilter } : {}) } })).data })
+  const list = useQuery({ queryKey: ['exams', 'admin', form.term_id, gradeFilter, view], queryFn: async () => (await api.get('/exams', { params: { ...(form.term_id ? { term_id: form.term_id } : {}), ...(gradeFilter ? { grade_level_id: gradeFilter } : {}), ...(view ? { kind: view.split('-')[0], ...(view.includes('-') ? { round: view.split('-')[1] } : {}) } : {}) } })).data })
   const termId = form.term_id || String(list.data?.term_id ?? terms.data?.[0]?.id ?? '')
+  const final = form.kind === 'final'
   const body = (dry) => ({ ...form, term_id: Number(termId), fill_missing: fill, exclude_dates: off, grade_level_ids: only.length ? only : null, dry_run: dry })
   const run = useMutation({
     mutationFn: (dry) => api.post('/exams/generate', body(dry)),
@@ -114,6 +116,28 @@ export default function ExamsAdminPage() {
           <label className="block text-sm">{t('exams.from')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.from} onChange={set('from')} /></label>
           <label className="block text-sm">{t('exams.to')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.to} onChange={set('to')} /></label>
         </div>
+        <div role="tablist" aria-label={t('exams.kind')} className="inline-flex rounded-full border bg-slate-50 p-1">
+          {['monthly', 'final'].map((k) => (
+            <button key={k} type="button" role="tab" aria-selected={form.kind === k} className={`rounded-full px-5 py-1.5 text-sm font-bold ${form.kind === k ? '!bg-brand !text-white' : 'text-deep-harbor'}`} onClick={() => setForm({ ...form, kind: k })}>{t(`exams.kinds.${k}`)}</button>
+          ))}
+        </div>
+        {final ? (
+          <>
+            <p className="rounded-lg bg-sky-tint/40 p-3 text-sm text-deep-harbor">{t('exams.finalHelp')}</p>
+            <div className="grid gap-3 sm:grid-cols-5">
+              <label className="block text-sm">{t('exams.startTime')}<input required type="time" className="mt-1 w-full rounded border p-2" value={form.start_time} onChange={set('start_time')} /></label>
+              <label className="block text-sm">{t('exams.duration')}<input required type="number" min="20" max="300" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.duration_minutes} onChange={set('duration_minutes')} /></label>
+              <label className="block text-sm">{t('exams.gap')}<input type="number" min="0" max="120" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.gap_minutes} onChange={set('gap_minutes')} /></label>
+              <label className="block text-sm">{t('exams.slotsPerDay')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.slots_per_day} onChange={set('slots_per_day')} /></label>
+              <label className="block text-sm">{t('exams.gradePerDay')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.grade_per_day} onChange={set('grade_per_day')} /></label>
+            </div>
+            <label className="block max-w-xs text-sm">{t('exams.invigilators')}<input required type="number" min="0" max="6" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.invigilators} onChange={set('invigilators')} /></label>
+          </>
+        ) : (
+        <>
+        <label className="block max-w-xs text-sm">{t('exams.round')}
+          <select className="mt-1 w-full rounded border p-2" value={form.round} onChange={set('round')}>{[1, 2, 3, 4].map((n) => <option key={n} value={n}>{t('exams.monthlyN', { n })}</option>)}</select>
+        </label>
         <div className="grid gap-3 sm:grid-cols-4">
           <label className="block text-sm">{t('exams.firstPeriod')}<input required type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.first_period} onChange={set('first_period')} /></label>
           <label className="block text-sm">{t('exams.periodsPerExam')}<input required type="number" min="1" max="4" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.periods_per_exam} onChange={set('periods_per_exam')} /></label>
@@ -122,6 +146,8 @@ export default function ExamsAdminPage() {
         </div>
         <p className="rounded-lg bg-sky-tint/40 p-3 text-sm text-deep-harbor">{t('exams.periodsHelp', { from: form.first_period, to: Number(form.first_period) + Number(form.periods_per_exam) - 1 })}</p>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fill} onChange={(e) => setFill(e.target.checked)} />{t('exams.fillMissing')}</label>
+        </>
+        )}
         <div className="text-sm">
           <p className="mb-1 font-medium">{t('exams.grades')} <span className="font-normal text-slate-500">({t('exams.gradesHint')})</span></p>
           <div className="flex flex-wrap gap-2">
@@ -156,6 +182,11 @@ export default function ExamsAdminPage() {
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg">{t('exams.current')}</h2>
+          <select aria-label={t('exams.show')} className="rounded border p-1.5 text-sm" value={view} onChange={(e) => setView(e.target.value)}>
+            <option value="">{t('exams.allExams')}</option>
+            {[1, 2, 3, 4].map((n) => <option key={n} value={`monthly-${n}`}>{t('exams.monthlyN', { n })}</option>)}
+            <option value="final">{t('exams.kinds.final')}</option>
+          </select>
           <select aria-label={t('exams.grades')} className="rounded border p-1.5 text-sm" value={gradeFilter} onChange={(e) => setGradeFilter(e.target.value)}>
             <option value="">{t('exams.allGrades')}</option>
             {(grades.data ?? []).map((g) => <option key={g.id} value={g.id}>{gradeName(g)}</option>)}
@@ -184,6 +215,7 @@ function AdminList({ sessions, onEdit }) {
               <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-2 text-sm">
                 <span className="w-44 text-slate-600"><span dir="ltr">{s.starts_at} – {s.ends_at}</span>{s.period_from !== null && <span className="ms-2 text-xs text-slate-400">{s.period_from === s.period_to ? t('exams.periodOne', { n: s.period_from }) : t('exams.periodsRange', { from: s.period_from, to: s.period_to })}</span>}</span>
                 <span className="font-bold text-deep-harbor">{subject(s)}</span>
+                <span className="rounded-full bg-deep-harbor px-2 py-0.5 text-[11px] font-semibold text-white">{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</span>
                 <span className="rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => u.name).join('، ')}</span>
                 <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => onEdit(s)}>{t('admin.actions.edit')}</button>

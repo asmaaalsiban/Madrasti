@@ -425,3 +425,7 @@ The same welcome page (`LandingView`) is the very first page for everyone: with 
 - **By hand**: move an exam to other periods (times and watchers follow the timetable) or give it a custom time; clashes (same section, or a watcher already in another room) are refused; delete an exam.
 - **Everyone else**: students see their section's exams (`/student/exams`), parents each child's (`/parent/children/:id/exams`), teachers the rooms they watch and the exams of the classes they teach (`/teacher/exams`). Publishing notifies them.
 - After pulling: `php artisan tenants:migrate` (adds the periods to exam sessions).
+
+### Monthly and final exams
+
+An exam has a **type**: *monthly exam 1, 2, 3...* (in lesson periods; the section's own teacher watches) or *final exams* (own start time, length and gap; students come only for the exam; free teachers watch, never the subject's own teacher and never two rooms at once). Each round is independent: generating one replaces only that round of those grades. The list can be filtered by type, and every exam shows its type. After pulling: `php artisan tenants:migrate` (adds `kind` and `round` to exam sessions and lets a subject have one exam per round).

@@ -26,9 +26,10 @@ class ExamController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $data = $request->validate(['term_id' => ['nullable', 'integer'], 'grade_level_id' => ['nullable', 'integer']]);
+        $data = $request->validate(['term_id' => ['nullable', 'integer'], 'grade_level_id' => ['nullable', 'integer'], 'kind' => ['nullable', 'in:monthly,final'], 'round' => ['nullable', 'integer', 'between:0,9']]);
         $termId = $data['term_id'] ?? $this->defaultTerm()?->id;
         $rows = ExamSession::with($this->with())->when($termId, fn ($q) => $q->where('term_id', $termId), fn ($q) => $q->whereRaw('1 = 0'))
+            ->when($data['kind'] ?? null, fn ($q, $k) => $q->where('kind', $k))->when(isset($data['round']), fn ($q) => $q->where('round', $data['round']))
             ->when($data['grade_level_id'] ?? null, fn ($q, $g) => $q->whereHas('classroom', fn ($c) => $c->where('grade_level_id', $g)))
             ->orderBy('exam_date')->orderBy('starts_at')->get()->sortBy(fn ($s) => [$s->exam_date->toDateString(), $s->starts_at, $s->classroom->name])->values();
 
@@ -40,7 +41,9 @@ class ExamController extends Controller
     {
         $data = $request->validate([
             'term_id' => ['required', 'integer', 'exists:terms,id'], 'from' => ['required', 'date_format:Y-m-d'], 'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
-            'exclude_dates' => ['nullable', 'array'], 'exclude_dates.*' => ['date_format:Y-m-d'], 'first_period' => ['required', 'integer', 'between:1,12'], 'periods_per_exam' => ['required', 'integer', 'between:1,4'],
+            'exclude_dates' => ['nullable', 'array'], 'exclude_dates.*' => ['date_format:Y-m-d'], 'kind' => ['required', 'in:monthly,final'], 'round' => ['required_if:kind,monthly', 'nullable', 'integer', 'between:1,6'],
+            'first_period' => ['required_if:kind,monthly', 'nullable', 'integer', 'between:1,12'], 'periods_per_exam' => ['required_if:kind,monthly', 'nullable', 'integer', 'between:1,4'],
+            'start_time' => ['required_if:kind,final', 'nullable', 'date_format:H:i'], 'duration_minutes' => ['required_if:kind,final', 'nullable', 'integer', 'between:20,300'], 'gap_minutes' => ['nullable', 'integer', 'between:0,120'], 'invigilators' => ['required_if:kind,final', 'nullable', 'integer', 'between:0,6'],
             'slots_per_day' => ['required', 'integer', 'between:1,4'], 'grade_per_day' => ['required', 'integer', 'between:1,4', 'lte:slots_per_day'], 'fill_missing' => ['sometimes', 'boolean'], 'grade_level_ids' => ['nullable', 'array'], 'grade_level_ids.*' => ['integer'], 'dry_run' => ['sometimes', 'boolean'],
         ]);
         $term = Term::findOrFail($data['term_id']);
@@ -62,6 +65,9 @@ class ExamController extends Controller
         $end = isset($data['ends_at']) ? $data['ends_at'].':00' : $session->ends_at;
         $periods = ['period_from' => $session->period_from, 'period_to' => $session->period_to];
         if (isset($data['period_from'])) {
+            if ($session->kind === 'final') {
+                throw ValidationException::withMessages(['period_from' => [__('exams.final_no_periods')]]);
+            }
             // Moved to other periods: the times are the school's, and the teachers who have the section then watch it.
             $times = $this->scheduler->timesFor($date, $data['period_from'], $data['period_to'] ?? $data['period_from']);
             if ($times === null) {
@@ -145,7 +151,7 @@ class ExamController extends Controller
     private function present(ExamSession $s): array
     {
         return [
-            'id' => $s->id, 'term' => ['id' => $s->term->id, 'name' => $s->term->name], 'date' => $s->exam_date->toDateString(), 'period_from' => $s->period_from, 'period_to' => $s->period_to, 'starts_at' => substr($s->starts_at, 0, 5), 'ends_at' => substr($s->ends_at, 0, 5),
+            'id' => $s->id, 'kind' => $s->kind, 'round' => $s->round, 'term' => ['id' => $s->term->id, 'name' => $s->term->name], 'date' => $s->exam_date->toDateString(), 'period_from' => $s->period_from, 'period_to' => $s->period_to, 'starts_at' => substr($s->starts_at, 0, 5), 'ends_at' => substr($s->ends_at, 0, 5),
             'classroom' => ['id' => $s->classroom->id, 'name' => $s->classroom->name, 'grade' => ['id' => $s->classroom->gradeLevel->id, 'name_ar' => $s->classroom->gradeLevel->name_ar, 'name_en' => $s->classroom->gradeLevel->name_en]],
             'subject' => ['id' => $s->subject->id, 'name_ar' => $s->subject->name_ar, 'name_en' => $s->subject->name_en],
             'invigilators' => $s->invigilators->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])->values(),

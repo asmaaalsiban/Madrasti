@@ -29,15 +29,17 @@ class ExamScheduler
     public function __construct(private readonly PeriodSetup $periods, private readonly Notifier $notifier) {}
 
     /**
-     * @param  array{from: string, to: string, exclude_dates?: list<string>, first_period: int, periods_per_exam: int, slots_per_day: int, grade_per_day: int, fill_missing?: bool, grade_level_ids?: list<int>|null}  $o
+     * @param  array<string, mixed>  $o  kind (monthly|final), round, from, to, exclude_dates, slots_per_day, grade_per_day, grade_level_ids and, for monthly: first_period, periods_per_exam, fill_missing; for final: start_time, duration_minutes, gap_minutes, invigilators
      * @return array{rows: list<array<string, mixed>>, warnings: list<string>, days: int, grades: int, classroom_ids: list<int>}
      */
     public function plan(Term $term, array $o): array
     {
-        if (! Period::exists()) {
+        $final = ($o['kind'] ?? 'monthly') === 'final';
+        $round = $final ? 0 : (int) ($o['round'] ?? 1);
+        if (! $final && ! Period::exists()) {
             throw ValidationException::withMessages(['first_period' => [__('scheduling.no_periods')]]);
         }
-        $slots = $this->slots($o);
+        $slots = $final ? $this->timeSlots($o) : $this->periodSlots($o);
         if ($slots === []) {
             throw ValidationException::withMessages(['from' => [__('exams.no_days')]]);
         }
@@ -63,34 +65,11 @@ class ExamScheduler
             }
         }
 
-        // 2. Who watches: whoever has the section in those periods on the timetable.
         $teachers = User::where('role', Role::Teacher)->where('is_active', true)->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', collect(StaffType::cases())->filter(fn ($t) => $t->category() === 'teaching')->map->value->all()))->orderBy('name')->get(['id', 'name']);
         $duties = $teachers->pluck('id')->mapWithKeys(fn ($id) => [$id => 0])->all();
-        $taken = []; // slot key => teacher ids already used as a stand-in
         $warnings = [];
-        $rows = [];
-        foreach ($placed as $p) {
-            $slot = $p['slot'];
-            $key = $slot['date'].' '.$slot['start'];
-            $watchers = [];
-            $missing = [];
-            foreach (range($slot['period_from'], $slot['period_to']) as $number) {
-                $teacher = $this->teacherOf($p['classroom'], $slot['dow'], $number);
-                $teacher === null ? $missing[] = $number : $watchers[$teacher] = true;
-            }
-            foreach ($missing as $number) {
-                $stand = ($o['fill_missing'] ?? true) ? $this->freeTeacher($teachers, $duties, $taken[$key] ?? [], $slot['dow'], $number) : null;
-                if ($stand === null) {
-                    $warnings[] = __('exams.nobody_for_period', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'period' => $number]);
-
-                    continue;
-                }
-                $watchers[$stand] = true;
-                $taken[$key][] = $stand;
-                $duties[$stand]++;
-            }
-            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => $slot['period_from'], 'period_to' => $slot['period_to'], 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilator_ids' => array_keys($watchers)];
-        }
+        $rows = $final ? $this->finalWatchers($placed, $teachers, $duties, (int) ($o['invigilators'] ?? 1), $warnings) : $this->monthlyWatchers($placed, $teachers, $duties, (bool) ($o['fill_missing'] ?? true), $warnings);
+        $rows = array_map(fn ($r) => $r + ['kind' => $final ? 'final' : 'monthly', 'round' => $round], $rows);
 
         return ['rows' => $rows, 'warnings' => array_values(array_unique($warnings)), 'days' => collect($rows)->pluck('exam_date')->unique()->count(), 'grades' => $grades->count(), 'classroom_ids' => collect($rows)->pluck('classroom_id')->unique()->values()->all()];
     }
@@ -126,6 +105,108 @@ class ExamScheduler
         return array_keys($ids);
     }
 
+    /**
+     * Monthly exams: whoever has the section in those periods on the timetable watches; a period without a teacher gets a free one.
+     *
+     * @param  list<array<string, mixed>>  $placed
+     * @param  Collection<int, User>  $teachers
+     * @param  array<int, int>  $duties
+     * @param  list<string>  $warnings
+     * @return list<array<string, mixed>>
+     */
+    private function monthlyWatchers(array $placed, Collection $teachers, array $duties, bool $fillMissing, array &$warnings): array
+    {
+        $taken = []; // slot key => teacher ids already used as a stand-in
+        $rows = [];
+        foreach ($placed as $p) {
+            $slot = $p['slot'];
+            $key = $slot['date'].' '.$slot['start'];
+            $watchers = [];
+            $missing = [];
+            foreach (range($slot['period_from'], $slot['period_to']) as $number) {
+                $teacher = $this->teacherOf($p['classroom'], $slot['dow'], $number);
+                $teacher === null ? $missing[] = $number : $watchers[$teacher] = true;
+            }
+            foreach ($missing as $number) {
+                $stand = $fillMissing ? $this->freeTeacher($teachers, $duties, $taken[$key] ?? [], $slot['dow'], $number) : null;
+                if ($stand === null) {
+                    $warnings[] = __('exams.nobody_for_period', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'period' => $number]);
+
+                    continue;
+                }
+                $watchers[$stand] = true;
+                $taken[$key][] = $stand;
+                $duties[$stand]++;
+            }
+            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => $slot['period_from'], 'period_to' => $slot['period_to'], 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilator_ids' => array_keys($watchers)];
+        }
+
+
+        return $rows;
+    }
+
+    /**
+     * Final exams: students come only for the exam, so any teacher can watch: free at that time, not the subject's own teacher,
+     * those who know the section first, fewest duties first.
+     *
+     * @param  list<array<string, mixed>>  $placed
+     * @param  Collection<int, User>  $teachers
+     * @param  array<int, int>  $duties
+     * @param  list<string>  $warnings
+     * @return list<array<string, mixed>>
+     */
+    private function finalWatchers(array $placed, Collection $teachers, array $duties, int $needed, array &$warnings): array
+    {
+        $ownTeacher = DB::table('classroom_subject_teacher')->get()->mapWithKeys(fn ($r) => [$r->classroom_id.'-'.$r->subject_id => (int) $r->teacher_id]);
+        $knows = DB::table('classroom_subject_teacher')->get()->groupBy('classroom_id')->map(fn ($g) => $g->pluck('teacher_id')->map(fn ($v) => (int) $v)->flip());
+        $busy = [];
+        $rows = [];
+        foreach ($placed as $p) {
+            $slot = $p['slot'];
+            $key = $slot['date'].' '.$slot['start'];
+            $own = $ownTeacher[$p['classroom']->id.'-'.$p['subject_id']] ?? null;
+            $picked = [];
+            $free = $teachers->filter(fn ($t) => $t->id !== $own && ! isset($busy[$key][$t->id]))->sortBy(fn ($t) => [isset($knows[$p['classroom']->id][$t->id]) ? 0 : 1, $duties[$t->id], $t->id])->values();
+            foreach ($free->take($needed) as $t) {
+                $picked[] = $t->id;
+                $busy[$key][$t->id] = true;
+                $duties[$t->id]++;
+            }
+            if (count($picked) < $needed) {
+                $warnings[] = __('exams.short_of_teachers', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'got' => count($picked), 'needed' => $needed]);
+            }
+            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => null, 'period_to' => null, 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilator_ids' => $picked];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * The exam times of the whole period for final exams: each working day gets `slots_per_day` exams from `start_time`, each as long as `duration_minutes`.
+     *
+     * @param  array<string, mixed>  $o
+     * @return list<array{date: string, dow: int, period_from: null, period_to: null, start: string, end: string}>
+     */
+    private function timeSlots(array $o): array
+    {
+        $days = array_map('intval', $this->periods->current()['days']);
+        $exclude = collect($o['exclude_dates'] ?? [])->flip();
+        $slots = [];
+        for ($d = Carbon::parse($o['from']); $d->lte(Carbon::parse($o['to'])); $d->addDay()) {
+            if (! in_array($d->dayOfWeek, $days, true) || $exclude->has($d->toDateString())) {
+                continue;
+            }
+            $start = Carbon::parse($d->toDateString().' '.$o['start_time']);
+            for ($i = 0; $i < $o['slots_per_day']; $i++) {
+                $end = $start->copy()->addMinutes((int) $o['duration_minutes']);
+                $slots[] = ['date' => $d->toDateString(), 'dow' => $d->dayOfWeek, 'period_from' => null, 'period_to' => null, 'start' => $start->format('H:i:s'), 'end' => $end->format('H:i:s')];
+                $start = $end->copy()->addMinutes((int) ($o['gap_minutes'] ?? 15));
+            }
+        }
+
+        return $slots;
+    }
+
     /** The teacher the timetable gives this section in that period of that weekday. */
     private function teacherOf(Classroom $room, int $dow, int $number): ?int
     {
@@ -158,17 +239,21 @@ class ExamScheduler
     public function apply(Term $term, array $plan): void
     {
         DB::transaction(function () use ($term, $plan): void {
-            ExamSession::where('term_id', $term->id)->whereIn('classroom_id', $plan['classroom_ids'])->delete();
+            $kind = $plan['rows'][0]['kind'] ?? 'monthly';
+            $round = $plan['rows'][0]['round'] ?? 1;
+            ExamSession::where('term_id', $term->id)->where('kind', $kind)->where('round', $round)->whereIn('classroom_id', $plan['classroom_ids'])->delete();
             foreach ($plan['rows'] as $row) {
                 $session = ExamSession::create(['term_id' => $term->id] + collect($row)->except('invigilator_ids')->all());
                 $session->invigilators()->sync($row['invigilator_ids']);
             }
         });
+        $first = $plan['rows'][0] ?? ['kind' => 'monthly', 'round' => 1];
+        $title = $term->name.' — '.($first['kind'] === 'final' ? __('exams.kind_final') : __('exams.kind_monthly', ['n' => $first['round']]));
         foreach ($plan['classroom_ids'] as $classroomId) {
-            $this->notifier->toSection($classroomId, 'exams', 'exam_schedule', ['title' => $term->name]);
+            $this->notifier->toSection($classroomId, 'exams', 'exam_schedule', ['title' => $title]);
         }
         $teachers = collect($plan['rows'])->pluck('invigilator_ids')->flatten()->unique();
-        $this->notifier->toUsers($teachers, 'exam_duty', ['title' => $term->name], '/teacher/exams');
+        $this->notifier->toUsers($teachers, 'exam_duty', ['title' => $title], '/teacher/exams');
     }
 
     /**
@@ -178,7 +263,7 @@ class ExamScheduler
      * @param  array<string, mixed>  $o
      * @return list<array{date: string, dow: int, period_from: int, period_to: int, start: string, end: string}>
      */
-    private function slots(array $o): array
+    private function periodSlots(array $o): array
     {
         $days = array_map('intval', $this->periods->current()['days']);
         $exclude = collect($o['exclude_dates'] ?? [])->flip();

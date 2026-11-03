@@ -13,7 +13,7 @@ const auth = { user: { role: 'admin' } }
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: auth.user }) }))
 const wrap = (ui, path = '/', route = '/') => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter initialEntries={[path]}><Routes><Route path={route} element={ui} /></Routes></MemoryRouter></QueryClientProvider>)
 
-const session = (id, date, subject, extra = {}) => ({ id, date, period_from: 2, period_to: 3, starts_at: '08:35', ends_at: '10:10', term: { id: 1, name: 'Term 1' }, classroom: { id: 1, name: '1-A', grade: { id: 1, name_ar: 'الأول', name_en: 'Grade 1' } }, subject: { id: id, name_ar: subject, name_en: subject }, invigilators: [{ id: 9, name: 'Sara Ali' }], ...extra })
+const session = (id, date, subject, extra = {}) => ({ kind: 'monthly', round: 1, id, date, period_from: 2, period_to: 3, starts_at: '08:35', ends_at: '10:10', term: { id: 1, name: 'Term 1' }, classroom: { id: 1, name: '1-A', grade: { id: 1, name_ar: 'الأول', name_en: 'Grade 1' } }, subject: { id: id, name_ar: subject, name_en: subject }, invigilators: [{ id: 9, name: 'Sara Ali' }], ...extra })
 
 beforeEach(async () => {
   vi.resetAllMocks()
@@ -36,7 +36,7 @@ describe('ExamsAdminPage', () => {
     fireEvent.change(screen.getByLabelText('Periods per exam'), { target: { value: '1' } })
     fireEvent.click(screen.getAllByText('Grade 2')[0]) // only grade 2 (the chip)
     fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/exams/generate', expect.objectContaining({ term_id: 1, from: '2027-01-03', to: '2027-01-14', first_period: '3', periods_per_exam: '1', fill_missing: true, grade_level_ids: [2], dry_run: true })))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/exams/generate', expect.objectContaining({ kind: 'monthly', round: 1, term_id: 1, from: '2027-01-03', to: '2027-01-14', first_period: '3', periods_per_exam: '1', fill_missing: true, grade_level_ids: [2], dry_run: true })))
     expect(await screen.findByText('Preview: 8 exams over 3 days (nothing saved yet).')).toBeInTheDocument()
     expect(screen.getByText(/1-A has too few teachers/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
@@ -68,6 +68,37 @@ describe('ExamsAdminPage', () => {
     fireEvent.click(screen.getByLabelText('Sara Ali')) // untick
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/exams/1', expect.objectContaining({ starts_at: '10:00', invigilator_ids: [] })))
+  })
+})
+
+describe('final exams', () => {
+  beforeEach(() => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { term_id: 1, data: url === '/terms' ? [{ id: 1, name: 'Term 1' }] : url === '/grade-levels' ? [{ id: 1, name_ar: 'الأول', name_en: 'Grade 1' }] : url === '/payroll/staff' ? [] : [session(1, '2027-03-01', 'Maths', { kind: 'final', round: 0, period_from: null, period_to: null, starts_at: '09:00', ends_at: '11:00' })] } }))
+    api.post.mockResolvedValue({ data: { data: { dry_run: false, sessions: 8, days: 8, grades: 1, warnings: [] } } })
+  })
+
+  it('switches to the final exams settings (own times and free teachers) and sends them', async () => {
+    wrap(<ExamsAdminPage />)
+    await screen.findByText('Maths')
+    expect(screen.getAllByText('Final exams').length).toBeGreaterThan(1) // the list chip and the tab
+    fireEvent.click(screen.getByRole('tab', { name: 'Final exams' }))
+    expect(screen.queryByLabelText('First period of the exam')).not.toBeInTheDocument()
+    fireEvent.change(screen.getAllByLabelText('From')[0], { target: { value: '2027-03-01' } })
+    fireEvent.change(screen.getAllByLabelText('To')[0], { target: { value: '2027-03-18' } })
+    fireEvent.change(screen.getByLabelText('First exam starts'), { target: { value: '10:00' } })
+    fireEvent.change(screen.getByLabelText('Teachers per room'), { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/exams/generate', expect.objectContaining({ kind: 'final', start_time: '10:00', duration_minutes: 120, invigilators: '3', dry_run: false })))
+  })
+
+  it('filters the list by exam type and a final exam can only get a custom time', async () => {
+    wrap(<ExamsAdminPage />)
+    await screen.findByText('Maths')
+    fireEvent.change(screen.getByLabelText('Show'), { target: { value: 'final' } })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/exams', { params: { kind: 'final' } }))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Edit' }))[0])
+    expect(await screen.findByLabelText('Starts')).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'By periods (replaces lessons)' })).not.toBeInTheDocument()
   })
 })
 
