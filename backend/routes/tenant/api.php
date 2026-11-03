@@ -20,6 +20,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Auth\Http\Controllers\LayoutController;
+use App\Modules\Auth\Http\Controllers\PrivacyController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
 use App\Modules\Communication\Http\Controllers\BadgesController;
 use App\Modules\Communication\Http\Controllers\ChatController;
@@ -515,4 +516,15 @@ Route::middleware('school-user')->prefix('attachments')->group(function (): void
 Route::middleware(['school-user', 'role:admin'])->prefix('staff-visibility')->group(function (): void {
     Route::get('/', [StaffVisibilityController::class, 'index']);
     Route::put('/', [StaffVisibilityController::class, 'update']);
+});
+
+// "My data": a copy of my data, and requests to delete or correct it (the principal answers).
+Route::middleware('school-user')->prefix('privacy')->group(function (): void {
+    Route::get('export', [PrivacyController::class, 'export']);
+    Route::get('requests', [PrivacyController::class, 'mineList']);
+    Route::post('requests', [PrivacyController::class, 'store'])->middleware('throttle:10,1');
+    Route::middleware('role:admin')->group(function (): void {
+        Route::get('requests/all', [PrivacyController::class, 'index']);
+        Route::put('requests/{dataRequest}', [PrivacyController::class, 'decide']);
+    });
 });

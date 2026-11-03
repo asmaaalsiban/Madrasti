@@ -130,7 +130,8 @@
       "procurement": "Purchase requests",
       "transport": "Transport",
       "tasks": "Tasks",
-      "staffAccess": "What staff see"
+      "staffAccess": "What staff see",
+      "privacyRequests": "Data requests"
     },
     "actions": {
       "add": "Add",
@@ -859,7 +860,9 @@
       "task_reminder": "Task due tomorrow: {{title}}",
       "task_overdue": "Task overdue: {{title}}",
       "transfer_submitted": "{{name}} reported a bank transfer of {{amount}} for {{child_en}}",
-      "transfer_rejected": "Your transfer of {{amount}} for {{child_en}} was not accepted: {{note}}"
+      "transfer_rejected": "Your transfer of {{amount}} for {{child_en}} was not accepted: {{note}}",
+      "data_request": "{{name}} asked to {{type}} personal data",
+      "data_request_answered": "The school answered your data request"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -2412,6 +2415,47 @@
           ]
         }
       ]
+    }
+  },
+  "privacy": {
+    "menu": "Privacy and my data",
+    "title": "Privacy and my data",
+    "help": "You can download a copy of your data and ask the school to delete or correct it.",
+    "download": "Download a copy of my data",
+    "downloadHelp": "A file with the data the school holds about you (and about your children, for a parent). It only contains what you are allowed to see.",
+    "downloadMine": "My data",
+    "downloadChild": "Data of {{name}}",
+    "request": "Ask the school to delete or correct data",
+    "requestHelp": "The school answers your request. Some records, such as payments, must be kept by law, and the school will tell you if that is the case.",
+    "what": "What do you ask for",
+    "types": {
+      "deletion": "Delete data",
+      "correction": "Correct data"
+    },
+    "about": "About",
+    "aboutMe": "Me",
+    "details": "Details (optional)",
+    "send": "Send the request",
+    "asked": "Your request was sent to the school.",
+    "myRequests": "My requests",
+    "none": "No requests.",
+    "status": {
+      "pending": "Waiting",
+      "done": "Done",
+      "refused": "Not possible"
+    },
+    "answer": "The school's answer",
+    "admin": {
+      "title": "Data requests",
+      "help": "Parents, students and staff ask to delete or correct their data. Do what is asked and say what you did, or refuse and say why (for example, payment records must be kept for the period the law requires).",
+      "aboutStudent": "About the student",
+      "markDone": "Done: I did it",
+      "refuse": "Refuse",
+      "doneTitle": "Answer {{name}}: done",
+      "refuseTitle": "Refuse the request of {{name}}",
+      "whatDone": "What was done (the person will read it)",
+      "whyRefused": "Why it is not possible (the person will read it)",
+      "send": "Send the answer"
     }
   }
 }

@@ -27,6 +27,8 @@ return [
     'task_done' => ':name finished the task: :title',
     'task_reminder' => 'Task due tomorrow: :title',
     'task_overdue' => 'Task overdue: :title',
+    'data_request' => ':name asked to :type personal data',
+    'data_request_answered' => 'The school answered your data request',
     'installment' => 'Installment of :amount due :due',
     'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'chat_message' => ':sender sent you a message',
