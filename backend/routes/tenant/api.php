@@ -45,6 +45,7 @@ use App\Modules\People\Http\Controllers\StaffTypeController;
 use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
+use App\Modules\Communication\Http\Controllers\StoryController;
 use App\Modules\Scheduling\Http\Controllers\DutyController;
 use App\Modules\Scheduling\Http\Controllers\ExamController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
@@ -118,6 +119,20 @@ Route::middleware(['school-user', 'role:admin'])->prefix('audit-logs')->group(fu
     Route::get('/', [AuditLogController::class, 'index']);
     Route::get('filters', [AuditLogController::class, 'filters']);
     Route::get('export', [AuditLogController::class, 'export']);
+});
+
+// The class feed (stories): everyone reads their own; teachers and the principal post.
+Route::middleware('school-user')->prefix('stories')->group(function (): void {
+    Route::get('/', [StoryController::class, 'index']);
+    Route::get('targets', [StoryController::class, 'targets']);
+    Route::post('/', [StoryController::class, 'store']);
+    Route::get('media/{media}', [StoryController::class, 'media']);
+    Route::delete('comments/{comment}', [StoryController::class, 'removeComment']);
+    Route::put('{story}', [StoryController::class, 'update']);
+    Route::delete('{story}', [StoryController::class, 'destroy']);
+    Route::post('{story}/react', [StoryController::class, 'react']);
+    Route::get('{story}/comments', [StoryController::class, 'comments']);
+    Route::post('{story}/comments', [StoryController::class, 'comment']);
 });
 
 // Yearly re-registration of students: school management and the accountant.

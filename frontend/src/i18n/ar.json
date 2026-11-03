@@ -125,7 +125,8 @@
       "staffAttendance": "دوام الموظفين",
       "auditLog": "سجل التدقيق",
       "exams": "جدول الامتحانات",
-      "duties": "جدول المناوبات"
+      "duties": "جدول المناوبات",
+      "stories": "أخبار الصف"
     },
     "actions": {
       "add": "إضافة",
@@ -841,7 +842,9 @@
       "exam_schedule": "نُشر جدول امتحانات {{title}}",
       "exam_duty": "{{title}}: لديك مراقبة امتحانات",
       "duty_assigned": "تم توزيع مناوباتك: {{title}}",
-      "duty_reminder": "مناوبتك غدًا: {{title}}"
+      "duty_reminder": "مناوبتك غدًا: {{title}}",
+      "story_new": "نشر {{teacher}} شيئًا لصفّك",
+      "story_comment": "علّق {{name}} على منشورك"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -1829,5 +1832,36 @@
     "selectNone": "إلغاء التحديد",
     "whoSaved": "تم الحفظ.",
     "deletePostTitle": "حذف هذا الموقع؟"
+  },
+  "stories": {
+    "title": "أخبار الصف",
+    "tile": "أخبار وصور من الصف.",
+    "share": "شارك شيئًا",
+    "whatsNew": "ما الجديد في الصف؟",
+    "addPhotos": "إضافة صور",
+    "newPhoto": "صورة جديدة {{number}}",
+    "removePhoto": "حذف الصورة {{number}}",
+    "for": "إلى",
+    "gradeOf": "كل",
+    "wholeSchool": "المدرسة كلها",
+    "allowComments": "السماح بالتعليقات",
+    "post": "نشر",
+    "empty": "لا منشورات بعد. ستظهر هنا أخبار وصور من المدرسة.",
+    "emptyTeacher": "لم يُنشر شيء بعد: شارك أول صورة أو خبر مع صفّك.",
+    "more": "عرض المزيد",
+    "like": "إعجاب",
+    "comments": "التعليقات",
+    "writeComment": "اكتب تعليقًا...",
+    "send": "إرسال",
+    "commentsClosed": "التعليقات مغلقة على هذا المنشور.",
+    "pinned": "مثبّت",
+    "pin": "تثبيت في الأعلى",
+    "unpin": "إلغاء التثبيت",
+    "closeComments": "إغلاق التعليقات",
+    "openComments": "فتح التعليقات",
+    "deleteTitle": "حذف هذا المنشور؟",
+    "deleteHelp": "سيُحذف المنشور وصوره وتعليقاته للجميع.",
+    "photos": "الصور",
+    "openPhoto": "فتح الصورة {{number}}"
   }
 }

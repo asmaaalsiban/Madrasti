@@ -453,3 +453,12 @@ Above the exam list, the buttons act on **what the list shows** (term, the type/
 ### Confirmation dialog
 
 Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash icon, the question, what will be removed, a clear red button and a Cancel that has the focus, so Enter does not delete by accident). The browser's own `confirm()` is no longer used. Chips that hold a number or a class name (`1-A`, "Monthly exam 1") are isolated with `<bdi>` so Arabic text never splits them.
+
+## Class feed (stories)
+
+- **Post** (`/teacher/stories`, `/admin/stories`): text and up to 6 photos (jpg/png/webp, 5 MB each), for a class, a grade or the whole school, with comments on or off. A **teacher posts only to the classes they teach or lead**; the **principal** to any class, grade or the whole school.
+- **Read** (`/student/stories`, `/parent/stories`, and teachers): each person sees only what is for them: their class, their grade, the whole school (a parent sees what is for any of their children's classes). Newest first, pinned posts on top, "show more" pages of 8.
+- **React and comment**: a heart (press again to take it back) and comments (500 characters) for anyone who can read the post; the author is told of comments. The author or the principal can pin, close the comments, delete the post (its photos go with it) and delete any comment; a person can delete their own comment.
+- **Notifications**: students and their parents are told when something is posted for their class (teachers when it is for the whole school).
+- **Photos are private**: they are fetched with the sign-in token and open only for people who may read the post.
+- After pulling: `php artisan tenants:migrate` (replaces the old unused `stories` / `story_media` tables).

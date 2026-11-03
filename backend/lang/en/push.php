@@ -16,6 +16,8 @@ return [
     'exam_duty' => ':title: you have exam duty',
     'duty_assigned' => 'You have duties: :title',
     'duty_reminder' => 'Duty tomorrow: :title',
+    'story_new' => ':teacher shared something with the class',
+    'story_comment' => ':name commented on your post',
     'installment' => 'Installment of :amount due :due',
     'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'chat_message' => ':sender sent you a message',

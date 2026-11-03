@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, Smile, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, Images, FileText, Fingerprint, GraduationCap, ListChecks, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, Smile, Users, Vote, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 
 // [path, title key, hint key, icon]
 const TEACHING = [
+  ['/teacher/stories', 'stories.title', 'stories.tile', Images],
   ['/teacher/timetable', 'timetable.myTimetable', 'timetable.myHint', CalendarClock],
   ['/teacher/attendance', 'attendance.takeTitle', 'attendance.takeHint', CircleCheck],
   ['/teacher/exams', 'exams.myTitle', 'exams.tile', FileCheck2],

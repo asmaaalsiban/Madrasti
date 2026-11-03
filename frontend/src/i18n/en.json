@@ -125,7 +125,8 @@
       "staffAttendance": "Staff attendance",
       "auditLog": "Audit log",
       "exams": "Exam timetable",
-      "duties": "Duty roster"
+      "duties": "Duty roster",
+      "stories": "Class feed"
     },
     "actions": {
       "add": "Add",
@@ -841,7 +842,9 @@
       "exam_schedule": "The {{title}} exam schedule is published",
       "exam_duty": "{{title}}: you have exam duty",
       "duty_assigned": "You have been given duties: {{title}}",
-      "duty_reminder": "Duty tomorrow: {{title}}"
+      "duty_reminder": "Duty tomorrow: {{title}}",
+      "story_new": "{{teacher}} shared something with the class",
+      "story_comment": "{{name}} commented on your post"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1829,5 +1832,36 @@
     "selectNone": "Select none",
     "whoSaved": "Saved.",
     "deletePostTitle": "Delete this post?"
+  },
+  "stories": {
+    "title": "Class feed",
+    "tile": "News and photos from the class.",
+    "share": "Share something",
+    "whatsNew": "What's new in the class?",
+    "addPhotos": "Add photos",
+    "newPhoto": "New photo {{number}}",
+    "removePhoto": "Remove photo {{number}}",
+    "for": "For",
+    "gradeOf": "All of",
+    "wholeSchool": "The whole school",
+    "allowComments": "Allow comments",
+    "post": "Post",
+    "empty": "No posts yet. News and photos from the school will appear here.",
+    "emptyTeacher": "Nothing posted yet: share the first photo or news with your class.",
+    "more": "Show more",
+    "like": "Like",
+    "comments": "Comments",
+    "writeComment": "Write a comment...",
+    "send": "Send",
+    "commentsClosed": "Comments are closed on this post.",
+    "pinned": "Pinned",
+    "pin": "Pin to the top",
+    "unpin": "Unpin",
+    "closeComments": "Close comments",
+    "openComments": "Open comments",
+    "deleteTitle": "Delete this post?",
+    "deleteHelp": "The post, its photos and its comments will be removed for everyone.",
+    "photos": "Photos",
+    "openPhoto": "Open photo {{number}}"
   }
 }

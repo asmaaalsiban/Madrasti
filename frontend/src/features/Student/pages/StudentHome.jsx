@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
+import { Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
 import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -13,6 +13,7 @@ export default function StudentHome() {
   const { user } = useAuth()
   const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000, enabled: Boolean(user?.student_id) })
   const tiles = [
+    { to: '/student/stories', label: t('stories.title'), icon: Images },
     { to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
     { to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },
     { to: '/student/exams', label: t('exams.myTitle'), icon: FileCheck2 },

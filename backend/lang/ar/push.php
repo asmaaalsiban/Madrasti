@@ -16,6 +16,8 @@ return [
     'exam_duty' => 'لديك مراقبة امتحانات :title',
     'duty_assigned' => 'تم توزيع مناوباتك: :title',
     'duty_reminder' => 'مناوبتك غدًا: :title',
+    'story_new' => 'نشر :teacher شيئًا لصفّك',
+    'story_comment' => 'علّق :name على منشورك',
     'installment' => 'قسط بقيمة :amount يستحق :due',
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'chat_message' => 'أرسل لك :sender رسالة',

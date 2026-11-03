@@ -78,6 +78,7 @@ import MyExamsPage from '../features/Exams/MyExamsPage'
 import ChildExamsPage from '../features/Exams/ChildExamsPage'
 import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
+import StoriesPage from '../features/Stories/StoriesPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -101,6 +102,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/grades', element: <ChildGradesPage /> },
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/exams', element: <ChildExamsPage /> },
+    { path: 'stories', element: <StoriesPage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
@@ -119,6 +121,7 @@ const HOME_ROUTES = {
     { path: 'motivation', element: <MyMotivationPage /> },
     { path: 'report-card', element: <MyReportCardPage /> },
     { path: 'exams', element: <MyExamsPage /> },
+    { path: 'stories', element: <StoriesPage /> },
     { path: 'surveys', element: <MySurveysPage /> },
     { path: 'summaries', element: <StudentSummariesPage /> },
     { path: 'lesson-plans', element: <StudentPlansPage /> },
@@ -152,6 +155,7 @@ const HOME_ROUTES = {
     { path: 'payroll/rules', element: <RulesPage base="/teacher" /> },
     { path: 'payroll/templates', element: <TemplatesPage base="/teacher" /> },
     { path: 'duties', element: <MyDutiesPage /> },
+    { path: 'stories', element: <StoriesPage /> },
     { path: 'payroll', element: <PayrollPage base="/teacher" /> },
     { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
     { path: 'payroll/payslips/:id', element: <PayslipPage /> },
@@ -210,6 +214,7 @@ export const routes = [
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/exams', element: <ExamsAdminPage /> },
               { path: '/admin/duties', element: <DutiesAdminPage /> },
+              { path: '/admin/stories', element: <StoriesPage /> },
               { path: '/admin/audit-log', element: <AuditLogPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },
               { path: '/admin/payroll/rules', element: <RulesPage base="/admin" /> },
