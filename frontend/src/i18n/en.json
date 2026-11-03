@@ -129,7 +129,8 @@
       "stories": "Class feed",
       "procurement": "Purchase requests",
       "transport": "Transport",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "staffAccess": "What staff see"
     },
     "actions": {
       "add": "Add",
@@ -2069,5 +2070,58 @@
     "open": "Open {{name}}",
     "hint": "Images, PDF, Word, Excel, PowerPoint or text. Up to {{max}} files, 10 MB each.",
     "uploading": "Uploading…"
+  },
+  "staffAccess": {
+    "title": "What staff see",
+    "help": "Tick what each member of staff sees. A screen you untick disappears from their home page and menus, and its address shows \"not available\". Students and parents are not affected.",
+    "editSelected": "Edit selected ({{count}})",
+    "forOne": "What {{name}} sees",
+    "forMany": "What {{count}} people see",
+    "replaceWarning": "This replaces what these people had before.",
+    "showAll": "Show all",
+    "hideAll": "Hide all",
+    "seesAll": "Sees everything",
+    "hiddenCount_one": "{{count}} screen hidden",
+    "hiddenCount_other": "{{count}} screens hidden",
+    "notAvailable": "This screen is not available for you.",
+    "groups": {
+      "general": "General",
+      "teaching": "Teaching",
+      "followUp": "Follow-up",
+      "mine": "My work",
+      "money": "Money"
+    },
+    "features": {
+      "chat": "Chat",
+      "announcements": "Announcements",
+      "stories": "Class feed",
+      "tasks": "Tasks",
+      "timetable": "My timetable",
+      "attendance": "Take attendance",
+      "attendance_report": "Attendance report",
+      "exams": "Exams",
+      "lesson_plans": "Lesson plans",
+      "daily_summary": "Daily summary",
+      "homework": "Homework",
+      "grades": "Grades",
+      "behavior": "Behavior",
+      "motivation": "Motivation",
+      "surveys": "Surveys and approvals",
+      "signature": "Signature",
+      "lesson_plan_review": "Review lesson plans (head)",
+      "department": "My department (head)",
+      "duties": "Duty roster",
+      "staff_attendance": "Staff attendance",
+      "payslips": "My salary",
+      "procurement": "Purchase requests",
+      "finance": "Finance (accountant)",
+      "renewals": "Student renewal (accountant)",
+      "payroll": "Payroll (accountant)"
+    },
+    "cols": {
+      "name": "Name",
+      "job": "Job",
+      "hidden": "Screens"
+    }
   }
 }

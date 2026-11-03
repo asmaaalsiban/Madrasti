@@ -495,3 +495,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 
 ### Payroll: updating a draft from the attendance
 - The automatic lines (punctuality, summaries, plans, **absence**) are worked out when the month's payroll is prepared. If absences are recorded or fixed afterwards, press **Update from attendance** on the draft payroll: it works them out again (lines added by hand, contract items and assigned rules are kept; it never charges twice). Absence deduction also needs the **absence** rule switched on with an amount in the commitment rules, and days before anybody's attendance was first recorded are not counted.
+
+## What staff see (screen visibility)
+- The principal opens **What staff see** (`/admin/staff-access`) and ticks, per member of staff (or for several people at once, with search and a job filter), which screens they see. A screen that is unticked disappears from the person's home page, the chat/announcement icons, and its address shows "not available". Default: everybody sees what their job allows.
+- Stored in `staff_profiles.hidden_features` (list of keys, see `StaffProfile::FEATURES` and `frontend/src/features/StaffAccess/staffFeatures.js`; keep both lists in sync when adding a screen). Only staff are affected: students and parents are not.
+- This hides the screens (home, menus, addresses); the API itself still follows the job's permissions.
+- API: `GET/PUT /api/staff-visibility` (admin). Needs `php artisan tenants:migrate`.

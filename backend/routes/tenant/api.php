@@ -42,6 +42,7 @@ use App\Modules\People\Http\Controllers\GuardianController;
 use App\Modules\People\Http\Controllers\ImportController;
 use App\Modules\People\Http\Controllers\StaffController;
 use App\Modules\People\Http\Controllers\StaffTypeController;
+use App\Modules\People\Http\Controllers\StaffVisibilityController;
 use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Procurement\Http\Controllers\ProcurementController;
@@ -490,4 +491,10 @@ Route::middleware('school-user')->prefix('attachments')->group(function (): void
     Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey'])->whereNumber('id');
     Route::get('{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment');
     Route::delete('{attachment}', [AttachmentController::class, 'destroy'])->whereNumber('attachment');
+});
+
+// What each member of staff sees: the principal switches screens on or off per person.
+Route::middleware(['school-user', 'role:admin'])->prefix('staff-visibility')->group(function (): void {
+    Route::get('/', [StaffVisibilityController::class, 'index']);
+    Route::put('/', [StaffVisibilityController::class, 'update']);
 });
