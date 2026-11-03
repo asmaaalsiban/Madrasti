@@ -273,6 +273,25 @@ class CommitmentTest extends AcademicTestCase
         $this->assertSame(1, DB::table('payslip_items')->where('auto_code', 'absence')->count());
     }
 
+    public function test_my_commitment_runs_a_few_queries_however_many_days_the_month_has(): void
+    {
+        $year = AcademicYear::factory()->create(['starts_on' => '2026-09-01', 'ends_on' => '2027-06-30', 'is_current' => true]);
+        $room = Classroom::factory()->create(['grade_level_id' => GradeLevel::factory()->create()->id, 'academic_year_id' => $year->id]);
+        $subject = Subject::factory()->create();
+        foreach ([0, 1, 2, 3, 4] as $dow) {
+            $periodId = DB::table('periods')->insertGetId(['day_of_week' => $dow, 'number' => 1, 'starts_at' => '07:45', 'ends_at' => '08:30', 'is_break' => false, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('timetable_entries')->insert(['academic_year_id' => $year->id, 'classroom_id' => $room->id, 'period_id' => $periodId, 'subject_id' => $subject->id, 'teacher_id' => $this->sara->id, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        $this->day($this->sara, '2026-11-01', 'present');
+        Carbon::setTestNow('2026-11-30 12:00:00'); // a whole month of working days
+        Sanctum::actingAs($this->sara);
+        DB::enableQueryLog();
+        $this->getJson('/api/payroll/commitment?month=2026-11')->assertOk();
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+        $this->assertLessThan(30, $queries, "the commitment of a month ran $queries queries (it used to run two or three per working day)");
+    }
+
     public function test_a_day_of_absence_can_cost_a_percent_of_a_days_pay(): void
     {
         $u = $this->userWith(7); // 1 absent day

@@ -510,3 +510,7 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 
 ### My salary: the donut
 - The donut is the first thing on **My salary**. The whole circle is what the person earned (salary + additions); the **red slice is what was taken off it** (absence, lateness, other deductions) and the blue part is what they receive (in the middle). The first chip is **this month so far** (an estimate, so an absence shows up at once); the others are the paid months.
+
+## Load testing
+- `loadtest/` has a load test (virtual users, per-endpoint latency, queries per request) and `php artisan tenants:run loadtest:seed` to grow a school to a realistic size. See `loadtest/README.md` for how to run it, the results and the production advice (OPcache, `artisan optimize`, PHP-FPM, Octane).
+- The header counters (notifications, announcements, chat, surveys) are one request, `GET /api/badges`, every 30 seconds per open tab (`useBadges` on the frontend).

@@ -20,6 +20,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
+use App\Modules\Communication\Http\Controllers\BadgesController;
 use App\Modules\Communication\Http\Controllers\ChatController;
 use App\Modules\Communication\Http\Controllers\NotificationController;
 use App\Modules\Communication\Http\Controllers\PushSubscriptionController;
@@ -317,6 +318,9 @@ Route::middleware('school-user')->prefix('chat')->group(function (): void {
     Route::delete('messages/{id}', [ChatController::class, 'destroy'])->whereNumber('id');
     Route::get('messages/{id}/image', [ChatController::class, 'image'])->whereNumber('id');
 });
+
+// All the header counters in one answer (notifications, announcements, chat, surveys).
+Route::middleware('school-user')->get('badges', BadgesController::class);
 
 // The bell: notifications of the signed-in user.
 Route::middleware('school-user')->prefix('notifications')->group(function (): void {

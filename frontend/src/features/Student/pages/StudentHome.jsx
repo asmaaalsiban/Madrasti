@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Bus, Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
-import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import { useAuth } from '../../Auth/AuthProvider'
 import StudentGrades from '../../Grading/components/StudentGrades'
@@ -11,7 +10,7 @@ import StudentGrades from '../../Grading/components/StudentGrades'
 export default function StudentHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000, enabled: Boolean(user?.student_id) })
+  const pending = { data: useBadges().surveys }
   const tiles = [
     { to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
     { to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },

@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet } from 'lucide-react'
-import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 import { isHidden } from '../../StaffAccess/staffFeatures'
@@ -69,7 +68,7 @@ function Section({ title, tiles, t, user }) {
 export default function TeacherHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000 })
+  const pending = { data: useBadges().surveys }
   const accountant = user?.staff_type === 'accountant'
   const head = user?.staff_type === 'head_of_department'
   return (

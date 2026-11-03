@@ -18,10 +18,10 @@ export default function Thread({ conversation, onBack }) {
   const id = conversation.id
 
   const messages = useQuery({ queryKey: ['chat', 'messages', id], queryFn: async () => (await api.get(`/chat/conversations/${id}/messages`)).data.data, refetchInterval: 4000 })
-  const refresh = () => { client.invalidateQueries({ queryKey: ['chat'] }) }
+  const refresh = () => { client.invalidateQueries({ queryKey: ['chat'] }); client.invalidateQueries({ queryKey: ['badges'] }) }
   const count = messages.data?.length ?? 0
   useEffect(() => { end.current?.scrollIntoView?.({ block: 'end' }) }, [count])
-  useEffect(() => { if (messages.isSuccess) client.invalidateQueries({ queryKey: ['chat', 'conversations'] }) }, [count, messages.isSuccess, client])
+  useEffect(() => { if (messages.isSuccess) { client.invalidateQueries({ queryKey: ['chat', 'conversations'] }); client.invalidateQueries({ queryKey: ['badges'] }) } }, [count, messages.isSuccess, client])
 
   const send = useMutation({
     mutationFn: () => {

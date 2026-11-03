@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
+import useBadges from '../../Badges/useBadges'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Bus, BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
-import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import AddEmailForm from '../../Auth/components/AddEmailForm'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -18,7 +17,7 @@ export default function ParentHome() {
   const children = user?.children ?? []
   const [picked, setPicked] = useState(null)
   const [addingEmail, setAddingEmail] = useState(false)
-  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: async () => (await api.get('/my-surveys/pending')).data.data.count, refetchInterval: 60000 })
+  const pending = { data: useBadges().surveys }
   const nameOf = (c) => c[`name_${i18n.language}`] ?? c.name_ar
   const child = children.find((c) => c.id === picked) ?? children[0]
   const base = child ? `/parent/children/${child.id}` : ''

@@ -114,9 +114,10 @@ class StaffAttendanceController extends Controller
         $contract = $target->staffContracts()->where('status', 'active')->first();
         $base = $contract?->base_salary ?? '0';
 
-        $lines = $this->commitment->lines($target, $month, $base);
+        $scores = $this->commitment->scores($target, $month);
+        $lines = $this->commitment->lines($target, $month, $base, $scores);
 
-        return response()->json(['month' => $month->format('Y-m'), 'scores' => $this->commitment->scores($target, $month), 'lines' => $lines, 'rules' => $this->rules->all(), 'estimate' => $contract === null ? null : $this->estimate($contract, $lines)]);
+        return response()->json(['month' => $month->format('Y-m'), 'scores' => $scores, 'lines' => $lines, 'rules' => $this->rules->all(), 'estimate' => $contract === null ? null : $this->estimate($contract, $lines)]);
     }
 
     /**

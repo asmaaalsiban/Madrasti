@@ -18,7 +18,7 @@ export default function AnnouncementsPage() {
 
   const list = useQuery({ queryKey: ['announcements', 'list'], queryFn: async () => (await api.get('/announcements')).data.data })
   const options = useQuery({ queryKey: ['announcements', 'options'], queryFn: async () => (await api.get('/announcements/options')).data.data, enabled: canPublish })
-  const refresh = () => client.invalidateQueries({ queryKey: ['announcements'] })
+  const refresh = () => { client.invalidateQueries({ queryKey: ['announcements'] }); client.invalidateQueries({ queryKey: ['badges'] }) }
   const markRead = useMutation({ mutationFn: (id) => api.post(`/announcements/${id}/read`), onSuccess: refresh })
   const remove = useMutation({ mutationFn: (id) => api.delete(`/announcements/${id}`), onSuccess: () => { setRemoving(null); refresh() } })
 

@@ -38,14 +38,15 @@ class CommitmentService
     /**
      * The bonus or deduction each enabled rule gives this person for the month.
      *
+     * @param  array<string, array<string, mixed>>|null  $scores  the scores of the month when the caller already has them (saves working them out twice)
      * @return list<array{code: string, kind: string, amount: string, score: int}>
      */
-    public function lines(User $user, Carbon $month, string|float $baseSalary): array
+    public function lines(User $user, Carbon $month, string|float $baseSalary, ?array $scores = null): array
     {
         $rules = $this->rules->all();
         $base = Money::cents($baseSalary);
         $lines = [];
-        $scores = $this->scores($user, $month);
+        $scores ??= $this->scores($user, $month);
         foreach ($scores as $code => $s) {
             $rule = $rules[$code];
             if (! $rule['enabled'] || $s['score'] === null) {
@@ -85,8 +86,9 @@ class CommitmentService
     private function workdays(Carbon $from, Carbon $to): Collection
     {
         $days = collect();
+        $workdays = $this->attendance->workday()['days']; // read once, not for every day of the month
         for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
-            if ($this->attendance->isWorkday($d)) {
+            if (in_array($d->dayOfWeek, $workdays, true)) {
                 $days->push($d->copy());
             }
         }
@@ -127,16 +129,19 @@ class CommitmentService
     /** A published summary for each scheduled lesson (class + subject) on each working day so far. */
     private function dailySummaries(User $user, Collection $days): array
     {
+        if ($days->isEmpty()) {
+            return $this->result(0, 0);
+        }
+        $lessons = $this->lessonsByDay($user, $days);
+        $written = DB::table('daily_summaries')->where('teacher_id', $user->id)->whereNotNull('published_at')
+            ->whereBetween('date', [$days->first()->toDateString(), $days->last()->toDateString()])->get(['date', 'classroom_id', 'subject_id'])
+            ->groupBy(fn ($s) => substr((string) $s->date, 0, 10))->map(fn ($rows) => $rows->map(fn ($s) => $s->classroom_id.'-'.$s->subject_id));
         $expected = 0;
         $done = 0;
         foreach ($days as $day) {
-            $lessons = $this->lessonsOn($user, $day);
-            if ($lessons->isEmpty()) {
-                continue;
-            }
-            $written = DB::table('daily_summaries')->where('teacher_id', $user->id)->whereNotNull('published_at')->whereDate('date', $day->toDateString())->get()->map(fn ($s) => $s->classroom_id.'-'.$s->subject_id);
-            $expected += $lessons->count();
-            $done += $lessons->filter(fn ($l) => $written->contains($l))->count();
+            $day = $day->toDateString();
+            $expected += $lessons[$day]->count();
+            $done += $lessons[$day]->filter(fn ($l) => ($written[$day] ?? collect())->contains($l))->count();
         }
 
         return $this->result($done, $expected);
@@ -145,17 +150,24 @@ class CommitmentService
     /** A submitted or approved lesson plan for each class and subject taught, for each week of the month. */
     private function weeklyPlans(User $user, Carbon $from, Carbon $to): array
     {
+        $allDays = $this->workdays($from, $to);
+        if ($allDays->isEmpty()) {
+            return $this->result(0, 0);
+        }
+        $lessons = $this->lessonsByDay($user, $allDays);
+        $plans = DB::table('lesson_plans')->where('teacher_id', $user->id)->whereIn('status', ['submitted', 'approved'])
+            ->whereBetween('week_starts_on', [$from->copy()->startOfWeek(Carbon::SUNDAY)->toDateString(), $to->toDateString()])->get(['week_starts_on', 'classroom_id', 'subject_id'])
+            ->map(fn ($p) => [substr((string) $p->week_starts_on, 0, 10), $p->classroom_id.'-'.$p->subject_id]);
         $expected = 0;
         $done = 0;
         for ($week = $from->copy()->startOfWeek(Carbon::SUNDAY); $week->lte($to); $week->addWeek()) {
-            $monday = $week->copy();
-            $weekDays = $this->workdays($monday->copy()->max($from), $monday->copy()->addDays(6)->min($to));
-            $pairs = $weekDays->flatMap(fn ($d) => $this->lessonsOn($user, $d))->unique()->values();
+            $start = $week->toDateString();
+            $end = $week->copy()->addDays(6)->toDateString();
+            $pairs = $allDays->filter(fn ($d) => $d->toDateString() >= $start && $d->toDateString() <= $end)->flatMap(fn ($d) => $lessons[$d->toDateString()])->unique()->values();
             if ($pairs->isEmpty()) {
                 continue;
             }
-            $planned = DB::table('lesson_plans')->where('teacher_id', $user->id)->whereIn('status', ['submitted', 'approved'])
-                ->whereBetween('week_starts_on', [$monday->toDateString(), $monday->copy()->addDays(6)->toDateString()])->get()->map(fn ($p) => $p->classroom_id.'-'.$p->subject_id);
+            $planned = $plans->filter(fn ($p) => $p[0] >= $start && $p[0] <= $end)->map(fn ($p) => $p[1]);
             $expected += $pairs->count();
             $done += $pairs->filter(fn ($p) => $planned->contains($p))->count();
         }
@@ -163,17 +175,27 @@ class CommitmentService
         return $this->result($done, $expected);
     }
 
-    /** "classroom-subject" of the lessons the teacher has on that day, from the timetable of the academic year the day falls in. @return Collection<int, string> */
-    private function lessonsOn(User $user, Carbon $day): Collection
+    /**
+     * "classroom-subject" of the lessons the teacher has on each of these days, from the timetable of the academic year each day falls in.
+     * Two queries for the whole range (the years, the timetable), not two per day.
+     *
+     * @param  Collection<int, Carbon>  $days
+     * @return array<string, Collection<int, string>> keyed by date (Y-m-d)
+     */
+    private function lessonsByDay(User $user, Collection $days): array
     {
-        $year = DB::table('academic_years')->whereDate('starts_on', '<=', $day->toDateString())->whereDate('ends_on', '>=', $day->toDateString())->value('id');
-        if ($year === null) {
-            return collect();
+        $years = DB::table('academic_years')->get(['id', 'starts_on', 'ends_on']);
+        $entries = DB::table('timetable_entries')->join('periods', 'periods.id', '=', 'timetable_entries.period_id')->where('timetable_entries.teacher_id', $user->id)
+            ->get(['timetable_entries.academic_year_id', 'timetable_entries.classroom_id', 'timetable_entries.subject_id', 'periods.day_of_week'])
+            ->groupBy(fn ($e) => $e->academic_year_id.'|'.$e->day_of_week);
+        $out = [];
+        foreach ($days as $day) {
+            $date = $day->toDateString();
+            $year = $years->first(fn ($y) => substr((string) $y->starts_on, 0, 10) <= $date && substr((string) $y->ends_on, 0, 10) >= $date)?->id;
+            $out[$date] = $year === null ? collect() : ($entries[$year.'|'.$day->dayOfWeek] ?? collect())->map(fn ($e) => $e->classroom_id.'-'.$e->subject_id)->unique()->values();
         }
 
-        return DB::table('timetable_entries')->join('periods', 'periods.id', '=', 'timetable_entries.period_id')
-            ->where('timetable_entries.academic_year_id', $year)->where('timetable_entries.teacher_id', $user->id)->where('periods.day_of_week', $day->dayOfWeek)
-            ->get(['timetable_entries.classroom_id', 'timetable_entries.subject_id'])->map(fn ($e) => $e->classroom_id.'-'.$e->subject_id)->unique()->values();
+        return $out;
     }
 
     /** @return array{score: int|null, done: int, expected: int} */

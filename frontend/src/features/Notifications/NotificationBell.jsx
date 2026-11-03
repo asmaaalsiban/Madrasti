@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import useBadges from '../Badges/useBadges'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -25,11 +26,12 @@ export default function NotificationBell() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const box = useRef(null)
-  const { data } = useQuery({ queryKey: ['notifications'], queryFn: async () => (await api.get('/notifications')).data.data, refetchInterval: 30000 })
-  const refresh = () => client.invalidateQueries({ queryKey: ['notifications'] })
+  // The counter comes with the shared header counters; the list is only fetched when the bell is opened.
+  const unread = useBadges().notifications
+  const { data } = useQuery({ queryKey: ['notifications'], enabled: open, queryFn: async () => (await api.get('/notifications')).data.data })
+  const refresh = () => { client.invalidateQueries({ queryKey: ['notifications'] }); client.invalidateQueries({ queryKey: ['badges'] }) }
   const markRead = useMutation({ mutationFn: (id) => api.post(`/notifications/${id}/read`), onSuccess: refresh })
   const readAll = useMutation({ mutationFn: () => api.post('/notifications/read-all'), onSuccess: refresh })
-  const unread = data?.unread ?? 0
 
   // Clicking anywhere outside the bell, or pressing Escape, closes the list.
   useEffect(() => {

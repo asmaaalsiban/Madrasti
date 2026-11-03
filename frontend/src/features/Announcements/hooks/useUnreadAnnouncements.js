@@ -1,12 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { api } from '../../../api/client'
+import useBadges from '../../Badges/useBadges'
 
-// How many announcements the signed-in user has not opened; checked again every 30 seconds.
+// How many announcements the signed-in user has not opened (from the shared counters, refreshed every 30 seconds).
 export default function useUnreadAnnouncements() {
-  const { data } = useQuery({
-    queryKey: ['announcements', 'unread'],
-    queryFn: async () => (await api.get('/announcements/unread-count')).data.data.count,
-    refetchInterval: 30000,
-  })
-  return data ?? 0
+  return useBadges().announcements
 }
