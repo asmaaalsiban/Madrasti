@@ -37,8 +37,13 @@ export default function ChildFeesPage() {
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('finance.childTitle', { name })}</h1>
       {params.get('online') && <ReturnNotice reference={params.get('online')} />}
+      {(data?.online?.transfers ?? []).map((tr) => (
+        <p key={tr.reference} role="status" className={`rounded p-3 text-sm ${tr.status === 'pending' ? 'bg-amber-50 text-amber-800' : 'bg-red-50 text-red-700'}`}>
+          {tr.status === 'pending' ? t('finance.transfer.waiting', { amount: tr.amount }) : t('finance.transfer.refused', { amount: tr.amount, note: tr.review_note })}
+        </p>
+      ))}
       {isLoading ? <p>{t('common.loading')}</p> : <Statement data={data} onPayOnline={online ? setPaying : null} />}
-      {paying && <PayOnlineDialog studentId={id} fee={paying} currency={data.currency} payerDefault={user?.name} demo={data.online.mode === 'demo'} onClose={() => setPaying(null)} />}
+      {paying && <PayOnlineDialog studentId={id} fee={paying} currency={data.currency} payerDefault={user?.name} demo={data.online.mode === 'demo'} methods={data.online.methods ?? ['card']} bank={data.online.bank} onClose={() => setPaying(null)} />}
     </section>
   )
 }

@@ -10,7 +10,9 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\OnlinePayment;
 use App\Modules\Finance\Models\StudentFee;
 use App\Modules\Finance\Services\OnlinePayments;
+use App\Modules\Communication\Services\Notifier;
 use App\Shared\Enums\Role;
+use App\Shared\Enums\StaffType;
 use App\Shared\Payments\Checkout;
 use App\Shared\Payments\DemoPaymentGateway;
 use App\Shared\Payments\InvalidWebhook;
@@ -23,7 +25,7 @@ use Illuminate\Support\Facades\Log;
 /** A parent pays a child's fee online. Money moves only when the provider says so (webhook), never on the parent's word. */
 class OnlinePaymentController extends Controller
 {
-    public function __construct(private readonly OnlinePayments $online, private readonly PaymentManager $manager) {}
+    public function __construct(private readonly OnlinePayments $online, private readonly PaymentManager $manager, private readonly Notifier $notifier) {}
 
     /** Starts a payment: returns how to continue (the demo card form, or the provider's page to go to). */
     public function start(Request $request, Student $student): JsonResponse
@@ -32,15 +34,21 @@ class OnlinePaymentController extends Controller
         $user = $request->user();
         abort_unless($user->hasRole(Role::Guardian), 403);
         Gate::authorize('view-student-fees', $student);
-        abort_unless($this->manager->enabled(), 404);
+        $method = $request->input('method', 'card');
+        abort_unless(in_array($method, array_column($this->manager->methods(), 'key'), true), 404);
 
         $data = $request->validate([
+            'method' => ['sometimes', 'in:card,bank_transfer'],
+            'transfer_reference' => [$method === 'bank_transfer' ? 'required' : 'nullable', 'string', 'max:100'],
             'student_fee_id' => ['required', 'integer', 'exists:student_fees,id'],
             'installment_id' => ['nullable', 'integer'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'payer_name' => ['required', 'string', 'max:255'],
             'return_url' => ['nullable', 'url', 'max:500'], // where a provider's page sends the parent back
         ]);
+        if ($method === 'bank_transfer') {
+            return $this->submitTransfer($student, $user, $data);
+        }
         $payment = $this->online->open($student, $user, StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['installment_id'] ?? null, $data['payer_name']);
         try {
             $checkout = $this->manager->gateway()->start($payment, ($data['return_url'] ?? '').(str_contains($data['return_url'] ?? '', '?') ? '&' : '?').'online='.$payment->reference);
@@ -55,6 +63,22 @@ class OnlinePaymentController extends Controller
         }
 
         return response()->json(['data' => ['reference' => $payment->reference, 'mode' => $checkout->mode, 'url' => $checkout->url]], 201);
+    }
+
+    /**
+     * A bank transfer / CliQ: nothing is paid yet. The parent says what they transferred (and sends the proof, an image or PDF, attached to
+     * this payment); the accountant confirms it, and only then the payment is recorded. The finance people are told.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function submitTransfer(Student $student, User $user, array $data): JsonResponse
+    {
+        $payment = $this->online->open($student, $user, StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['installment_id'] ?? null, $data['payer_name'], 'bank_transfer');
+        $payment->update(['transfer_reference' => $data['transfer_reference']]);
+        $finance = User::where('is_active', true)->where(fn ($q) => $q->where('role', Role::Admin)->orWhere(fn ($t) => $t->where('role', Role::Teacher)->whereHas('staffProfile', fn ($p) => $p->where('staff_type', StaffType::Accountant->value))))->pluck('id');
+        $this->notifier->toUsers($finance, 'transfer_submitted', ['name' => $data['payer_name'], 'amount' => $payment->amount, 'child_ar' => $student->name_ar, 'child_en' => $student->name_en], '/teacher/finance/transfers');
+
+        return response()->json(['data' => ['id' => $payment->id, 'reference' => $payment->reference, 'mode' => 'transfer', 'url' => null]], 201);
     }
 
     /** The demo card form: judges the typed card. The card is never stored or logged. */
@@ -108,6 +132,6 @@ class OnlinePaymentController extends Controller
     {
         $p->loadMissing('payment');
 
-        return ['reference' => $p->reference, 'status' => $p->status, 'amount' => $p->amount, 'failure_reason' => $p->failure_reason, 'receipt' => $p->payment?->receiptNumber()];
+        return ['reference' => $p->reference, 'provider' => $p->provider, 'status' => $p->status, 'amount' => $p->amount, 'failure_reason' => $p->failure_reason, 'review_note' => $p->review_note, 'receipt' => $p->payment?->receiptNumber()];
     }
 }

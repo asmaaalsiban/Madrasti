@@ -5,6 +5,8 @@ return [
     'schedule_mismatch' => 'The installments must add up to the fee after the discount.',
     'paytabs_not_saved' => 'Save the PayTabs keys first.',
     'paytabs_ok' => 'Connected: PayTabs accepted the keys.',
+    'transfer_needs_account' => 'The accounts to transfer to are needed to switch this on.',
+    'transfer_decided' => 'This transfer was already decided.',
     'gateway_unreachable' => 'The payment provider could not be reached. Nothing was charged: please try again in a moment.',
     'more_than_owed' => 'The payment is more than what is still owed (:owed).',
     'has_payments' => 'This fee already has payments, so its discount cannot change.',

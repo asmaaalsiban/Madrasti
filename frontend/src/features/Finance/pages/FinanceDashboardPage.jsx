@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Money from '../components/Money'
 import PaymentSettingsCard from '../components/PaymentSettingsCard'
+import BankTransferSettingsCard from '../components/BankTransferSettingsCard'
 
 // The money of the school at a glance: expected, collected, remaining, overdue. The accountant also sets the currency.
 export default function FinanceDashboardPage({ base }) {
@@ -24,6 +25,7 @@ export default function FinanceDashboardPage({ base }) {
         <h1 className="text-xl font-bold">{t('finance.title')}</h1>
         <div className="flex gap-2">
           <Link to={`${base}/finance/accounts`} className="rounded bg-brand px-4 py-1.5 text-white">{t('finance.accounts')}</Link>
+          <Link to={`${base}/finance/transfers`} className="rounded border px-4 py-1.5 text-brand">{t('transfers.title')}</Link>
           <Link to={`${base}/finance/structures`} className="rounded border px-4 py-1.5 text-brand">{t('finance.structures')}</Link>
         </div>
       </div>
@@ -47,6 +49,7 @@ export default function FinanceDashboardPage({ base }) {
         </form>
       )}
       <PaymentSettingsCard />
+      <BankTransferSettingsCard />
     </section>
   )
 }

@@ -98,4 +98,30 @@ describe('paying online', () => {
     wrap('/c/7?online=ref-9')
     expect(await screen.findByText('Payment received. Receipt number: R-000044.')).toBeInTheDocument()
   })
+
+  it('the parent chooses between card and bank transfer, sees the account and sends the reference with a proof', async () => {
+    const bank = { enabled: true, instructions: 'Write the child name', accounts: [{ bank: 'Arab Bank', holder: 'Demo School', iban: 'JO94CBJO0010000000000131000302', cliq: 'DEMOSCHOOL' }] }
+    api.get.mockResolvedValue({ data: { data: statement({ enabled: true, mode: 'demo', methods: ['card', 'bank_transfer'], bank, transfers: [] }) } })
+    api.post.mockImplementation((url) => Promise.resolve({ data: { data: url.endsWith('online-payments') ? { id: 41, reference: 'r-1', mode: 'transfer', url: null } : [] } }))
+    wrap()
+    fireEvent.click(await screen.findByRole('button', { name: 'Pay online' }))
+    fireEvent.click(await screen.findByLabelText('Bank transfer / CliQ'))
+    fireEvent.click(screen.getByRole('button', { name: /Continue/ }))
+    expect(await screen.findByText(/Arab Bank/)).toBeInTheDocument()
+    expect(screen.getByText('DEMOSCHOOL')).toBeInTheDocument()
+    expect(screen.getByText('Write the child name')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Transfer reference number'), { target: { value: 'CLQ-889' } })
+    fireEvent.change(screen.getByLabelText('Choose files'), { target: { files: [new File(['x'], 'proof.jpg', { type: 'image/jpeg' })] } })
+    fireEvent.click(screen.getByRole('button', { name: 'I made the transfer' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/students/7/online-payments', expect.objectContaining({ method: 'bank_transfer', transfer_reference: 'CLQ-889' })))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/attachments/online_payment/41', expect.any(FormData)))
+    expect(await screen.findByText(/The school will confirm the transfer/)).toBeInTheDocument()
+  })
+
+  it('a transfer that waits or was refused is shown on the fees page', async () => {
+    api.get.mockResolvedValue({ data: { data: statement({ enabled: true, mode: null, methods: ['bank_transfer'], bank: { enabled: true, instructions: '', accounts: [] }, transfers: [{ reference: 'a', amount: '250.00', status: 'pending' }, { reference: 'b', amount: '100.00', status: 'failed', review_note: 'Money did not arrive' }] }) } })
+    wrap()
+    expect(await screen.findByText(/A transfer of 250.00 is waiting/)).toBeInTheDocument()
+    expect(screen.getByText(/was not accepted: Money did not arrive/)).toBeInTheDocument()
+  })
 })

@@ -21,7 +21,7 @@ class OnlinePayment extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['reference', 'student_id', 'student_fee_id', 'installment_id', 'user_id', 'amount', 'payer_name', 'provider', 'provider_reference', 'status', 'failure_reason', 'payment_id'];
+    protected $fillable = ['reference', 'student_id', 'student_fee_id', 'installment_id', 'user_id', 'amount', 'payer_name', 'provider', 'provider_reference', 'status', 'failure_reason', 'payment_id', 'transfer_reference', 'reviewed_by', 'reviewed_at', 'review_note'];
 
     /**
      * @return array<string, string>

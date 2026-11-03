@@ -29,6 +29,25 @@ class PaymentManager
         return $name;
     }
 
+    /**
+     * Every way this school lets a parent pay online, so the school and the parent can choose: `card` (the configured gateway) and
+     * `bank_transfer` (transfer / CliQ with a proof that the accountant confirms).
+     *
+     * @return list<array{key: string, provider: string|null}>
+     */
+    public function methods(): array
+    {
+        $out = [];
+        if ($this->driverName() !== null) {
+            $out[] = ['key' => 'card', 'provider' => $this->driverName()];
+        }
+        if (app(BankTransferSettings::class)->enabled()) {
+            $out[] = ['key' => 'bank_transfer', 'provider' => null];
+        }
+
+        return $out;
+    }
+
     public function enabled(): bool
     {
         return $this->driverName() !== null;

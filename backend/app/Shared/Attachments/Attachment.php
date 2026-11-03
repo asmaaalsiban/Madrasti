@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Attachments;
 
 use App\Models\User;
+use App\Modules\Finance\Models\OnlinePayment;
 use App\Modules\Surveys\Models\Survey;
 use App\Modules\Tasks\Models\Task;
 use App\Modules\Tasks\Models\TaskAssignee;
@@ -23,7 +24,7 @@ class Attachment extends Model
     public const MIMES = 'jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv';
 
     /** What each owner type in a URL means. */
-    public const OWNERS = ['task' => Task::class, 'task_part' => TaskAssignee::class, 'survey' => Survey::class];
+    public const OWNERS = ['task' => Task::class, 'task_part' => TaskAssignee::class, 'survey' => Survey::class, 'online_payment' => OnlinePayment::class];
 
     protected $fillable = ['owner_type', 'owner_id', 'uploaded_by', 'path', 'original_name', 'mime', 'size'];
 

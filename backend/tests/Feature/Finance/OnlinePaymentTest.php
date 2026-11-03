@@ -123,7 +123,7 @@ class OnlinePaymentTest extends AcademicTestCase
 
     public function test_the_statement_says_whether_online_payment_is_available(): void
     {
-        $this->getJson("/api/students/{$this->child->id}/fees")->assertOk()->assertJsonPath('data.online', ['enabled' => true, 'mode' => 'demo']);
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertOk()->assertJsonPath('data.online.enabled', true)->assertJsonPath('data.online.mode', 'demo')->assertJsonPath('data.online.methods', ['card']);
 
         config(['payments.driver' => 'none']);
         $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.enabled', false);
@@ -273,6 +273,82 @@ class OnlinePaymentTest extends AcademicTestCase
         \Illuminate\Support\Facades\Http::fake(['secure.paytabs.sa/*' => \Illuminate\Support\Facades\Http::sequence()->push(['redirect_url' => 'https://secure.paytabs.sa/pay/t'], 200)->push(['message' => 'Invalid profile'], 401)]);
         $this->postJson('/api/finance/payment-settings/test')->assertOk()->assertJsonPath('ok', true);
         $this->postJson('/api/finance/payment-settings/test')->assertOk()->assertJsonPath('ok', false)->assertJsonPath('message', 'Invalid profile');
+    }
+
+    private function bank(array $extra = []): void
+    {
+        Sanctum::actingAs(User::factory()->role(Role::Admin)->create());
+        $this->putJson('/api/finance/bank-transfer-settings', ['enabled' => true, 'instructions' => 'Write the child name in the note', 'accounts' => [['bank' => 'Arab Bank', 'holder' => 'Demo School', 'iban' => 'JO94CBJO0010000000000131000302', 'cliq' => 'DEMOSCHOOL'], ...$extra]])->assertOk();
+        Sanctum::actingAs($this->parent);
+    }
+
+    private function transfer(array $extra = [])
+    {
+        return $this->postJson("/api/students/{$this->child->id}/online-payments", ['method' => 'bank_transfer', 'student_fee_id' => $this->fee->id, 'amount' => 250, 'payer_name' => 'Abu Ali', 'transfer_reference' => 'CLQ-889', ...$extra]);
+    }
+
+    public function test_a_school_can_offer_card_and_bank_transfer_together_and_the_parent_chooses(): void
+    {
+        config(['payments.driver' => 'demo']);
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.methods', ['card'])->assertJsonPath('data.online.bank', null);
+        $this->bank();
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.methods', ['card', 'bank_transfer'])->assertJsonPath('data.online.bank.accounts.0.cliq', 'DEMOSCHOOL')->assertJsonPath('data.online.enabled', true);
+        config(['payments.driver' => 'none']); // no card gateway: only the transfer is left, the school is never forced to take cards
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.methods', ['bank_transfer']);
+    }
+
+    public function test_a_transfer_waits_for_the_accountant_who_confirms_it_and_the_payment_is_recorded_as_a_bank_transfer(): void
+    {
+        $this->bank();
+        $accountant = User::factory()->staff(\App\Shared\Enums\StaffType::Accountant)->create();
+        $id = $this->transfer()->assertCreated()->assertJsonPath('data.mode', 'transfer')->json('data.id');
+        $this->assertSame(0, Payment::count());
+        $this->assertSame(1, DB::table('notifications')->where('notifiable_id', $accountant->id)->where('data', 'like', '%transfer_submitted%')->count());
+
+        // The proof is attached by the payer; the finance people see it, a stranger does not.
+        \Illuminate\Support\Facades\Storage::fake();
+        $file = \Illuminate\Http\UploadedFile::fake()->image('proof.jpg');
+        $this->postJson("/api/attachments/online_payment/$id", ['files' => [$file]])->assertCreated();
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.transfers.0.status', 'pending');
+
+        Sanctum::actingAs($accountant);
+        $row = $this->getJson('/api/finance/transfers')->assertOk()->assertJsonPath('pending', 1)->assertJsonPath('data.0.transfer_reference', 'CLQ-889')->assertJsonPath('data.0.attachments.0.name', 'proof.jpg')->json('data.0');
+        $this->get('/api/attachments/'.$row['attachments'][0]['id'])->assertOk();
+        $this->postJson("/api/finance/transfers/$id/approve")->assertOk()->assertJsonPath('data.status', 'paid');
+        $payment = Payment::firstOrFail();
+        $this->assertSame('bank_transfer', $payment->method);
+        $this->assertSame('250.00', $payment->amount);
+        $this->postJson("/api/finance/transfers/$id/approve")->assertStatus(422); // decided once
+        $this->assertSame(1, Payment::count());
+        Sanctum::actingAs($this->parent);
+        $this->postJson("/api/attachments/online_payment/$id", ['files' => [$file]])->assertForbidden(); // too late to add proof
+    }
+
+    public function test_a_refused_transfer_tells_the_parent_why_and_pays_nothing(): void
+    {
+        $this->bank();
+        $id = $this->transfer()->json('data.id');
+        $accountant = User::factory()->staff(\App\Shared\Enums\StaffType::Accountant)->create();
+        Sanctum::actingAs($accountant);
+        $this->postJson("/api/finance/transfers/$id/reject", [])->assertStatus(422); // a reason is needed
+        $this->postJson("/api/finance/transfers/$id/reject", ['note' => 'The money did not arrive'])->assertOk();
+        $this->assertSame(0, Payment::count());
+        $this->assertSame(1, DB::table('notifications')->where('notifiable_id', $this->parent->id)->where('data', 'like', '%transfer_rejected%')->count());
+        Sanctum::actingAs($this->parent);
+        $this->getJson("/api/students/{$this->child->id}/fees")->assertJsonPath('data.online.transfers.0.status', 'failed')->assertJsonPath('data.online.transfers.0.review_note', 'The money did not arrive');
+    }
+
+    public function test_the_transfer_needs_a_reference_a_valid_amount_and_the_way_must_be_switched_on(): void
+    {
+        $this->transfer()->assertNotFound(); // not offered yet
+        $this->bank();
+        $this->transfer(['transfer_reference' => ''])->assertStatus(422)->assertJsonValidationErrors('transfer_reference');
+        $this->transfer(['amount' => 99999])->assertStatus(422);
+        Sanctum::actingAs(User::factory()->role(Role::Admin)->create());
+        $this->putJson('/api/finance/bank-transfer-settings', ['enabled' => true, 'accounts' => []])->assertStatus(422);
+        Sanctum::actingAs($this->parent);
+        $this->getJson('/api/finance/transfers')->assertForbidden();
+        $this->putJson('/api/finance/bank-transfer-settings', ['enabled' => false, 'accounts' => []])->assertForbidden();
     }
 }
 

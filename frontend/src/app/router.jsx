@@ -80,6 +80,7 @@ import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
+import TransfersPage from '../features/Finance/pages/TransfersPage'
 import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
 import TransportPage from '../features/Transport/TransportPage'
@@ -155,6 +156,7 @@ const HOME_ROUTES = {
     { path: 'finance', element: <FinanceDashboardPage base="/teacher" /> },
     { path: 'finance/structures', element: <FeeStructuresPage /> },
     { path: 'finance/accounts', element: <AccountsPage base="/teacher" /> },
+    { path: 'finance/transfers', element: <TransfersPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'renewals', element: <RenewalsPage /> },
     { path: 'exams', element: <MyExamsPage /> },
@@ -219,6 +221,7 @@ export const routes = [
               { path: '/admin/finance', element: <FinanceDashboardPage base="/admin" /> },
               { path: '/admin/finance/structures', element: <FeeStructuresPage /> },
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
+              { path: '/admin/finance/transfers', element: <TransfersPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/exams', element: <ExamsAdminPage /> },
