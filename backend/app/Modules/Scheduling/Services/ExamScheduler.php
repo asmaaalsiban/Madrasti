@@ -406,4 +406,41 @@ class ExamScheduler
             return $this->isBusy($busy, (int) $id, $date, $from, $to);
         })->map(fn ($t) => (int) (is_array($t) ? $t[0] : $t))->values();
     }
+
+    public function isWorkday(string $date): bool
+    {
+        return in_array(Carbon::parse($date)->dayOfWeek, array_map('intval', $this->periods->current()['days']), true);
+    }
+
+    /**
+     * Looks over a set of exams for a clash: a section with two exams at overlapping times, or a teacher in two rooms at once
+     * (only the periods they were given count). Returns a sentence about the first one found, or null.
+     *
+     * @param  Collection<int, ExamSession>  $sessions  with invigilators and classroom loaded
+     */
+    public function findConflict(Collection $sessions): ?string
+    {
+        $classes = [];
+        $teachers = [];
+        foreach ($sessions as $s) {
+            $date = $s->exam_date->toDateString();
+            foreach ($classes[$s->classroom_id.$date] ?? [] as [$a, $b]) {
+                if ($a < $s->ends_at && $b > $s->starts_at) {
+                    return __('exams.class_clash_named', ['class' => $s->classroom->name, 'date' => $date]);
+                }
+            }
+            $classes[$s->classroom_id.$date][] = [$s->starts_at, $s->ends_at];
+            foreach ($s->invigilators as $u) {
+                [$a, $b] = $this->watchWindow($s, $u->pivot->period_from, $u->pivot->period_to);
+                foreach ($teachers[$u->id.$date] ?? [] as [$c, $d]) {
+                    if ($c < $b && $d > $a) {
+                        return __('exams.teacher_double', ['class' => $s->classroom->name, 'date' => $date, 'teacher' => $u->name]);
+                    }
+                }
+                $teachers[$u->id.$date][] = [$a, $b];
+            }
+        }
+
+        return null;
+    }
 }

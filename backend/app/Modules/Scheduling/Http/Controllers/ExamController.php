@@ -15,6 +15,7 @@ use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -114,6 +115,86 @@ class ExamController extends Controller
         }
 
         return response()->json(['data' => $this->present($session->refresh()->load($this->with()))]);
+    }
+
+    /** The exams a bulk action is about: one term, narrowed by type, round and grade. @return \Illuminate\Database\Eloquent\Builder<ExamSession> */
+    private function scope(Request $request)
+    {
+        $f = $request->validate(['term_id' => ['required', 'integer', 'exists:terms,id'], 'kind' => ['nullable', 'in:monthly,final'], 'round' => ['nullable', 'integer', 'between:0,9'], 'grade_level_id' => ['nullable', 'integer']]);
+
+        return ExamSession::where('term_id', $f['term_id'])->when($f['kind'] ?? null, fn ($q, $k) => $q->where('kind', $k))->when(isset($f['round']), fn ($q) => $q->where('round', $f['round']))
+            ->when($f['grade_level_id'] ?? null, fn ($q, $g) => $q->whereHas('classroom', fn ($c) => $c->where('grade_level_id', $g)));
+    }
+
+    /** Deletes every exam of a term that matches (type, round, grade): "delete all the monthly exams" in one go. */
+    public function destroyMany(Request $request): JsonResponse
+    {
+        $deleted = 0;
+        foreach ($this->scope($request)->get() as $session) {
+            $session->delete();
+            $deleted++;
+        }
+
+        return response()->json(['data' => ['deleted' => $deleted]]);
+    }
+
+    /**
+     * Changes all the matching exams at once: move every date by some days, put the monthly ones in other periods (times and watchers
+     * follow the timetable), or start the final ones at another time (their length is kept). Everything is checked together: if any
+     * section or teacher would clash, nothing is changed.
+     */
+    public function updateMany(Request $request): JsonResponse
+    {
+        $c = $request->validate(['shift_days' => ['nullable', 'integer', 'between:-120,120'], 'period_from' => ['nullable', 'integer', 'between:1,12'], 'period_to' => ['nullable', 'integer', 'between:1,12', 'gte:period_from'], 'start_time' => ['nullable', 'date_format:H:i']]);
+        if (empty($c['shift_days']) && empty($c['period_from']) && empty($c['start_time'])) {
+            throw ValidationException::withMessages(['shift_days' => [__('exams.nothing_to_change')]]);
+        }
+        $changed = 0;
+        DB::transaction(function () use ($request, $c, &$changed): void {
+            $sessions = $this->scope($request)->with(['classroom', 'invigilators'])->get();
+            foreach ($sessions as $s) {
+                $date = $s->exam_date->copy()->addDays((int) ($c['shift_days'] ?? 0))->toDateString();
+                if (! $this->scheduler->isWorkday($date)) {
+                    throw ValidationException::withMessages(['shift_days' => [__('exams.not_a_workday', ['date' => $date])]]);
+                }
+                $start = $s->starts_at;
+                $end = $s->ends_at;
+                $periods = ['period_from' => $s->period_from, 'period_to' => $s->period_to];
+                $watch = null;
+                if (! empty($c['period_from']) && $s->kind === 'monthly') {
+                    $to = $c['period_to'] ?? $c['period_from'];
+                    $times = $this->scheduler->timesFor($date, (int) $c['period_from'], (int) $to);
+                    if ($times === null) {
+                        throw ValidationException::withMessages(['period_from' => [__('exams.no_such_period_on', ['date' => $date])]]);
+                    }
+                    [$start, $end] = [$times['start'], $times['end']];
+                    $periods = ['period_from' => (int) $c['period_from'], 'period_to' => (int) $to];
+                    $watch = $this->scheduler->watchersFor($s->classroom, $date, $periods['period_from'], $periods['period_to']);
+                } elseif (! empty($c['start_time']) && $s->kind === 'final') {
+                    $minutes = Carbon::parse($s->starts_at)->diffInMinutes(Carbon::parse($s->ends_at));
+                    $start = $c['start_time'].':00';
+                    $end = Carbon::parse($c['start_time'])->addMinutes((int) $minutes)->format('H:i:s');
+                } elseif ($date === $s->exam_date->toDateString()) {
+                    continue; // nothing applies to this one
+                }
+                $s->update(['exam_date' => $date, 'starts_at' => $start, 'ends_at' => $end] + $periods);
+                if ($watch !== null) {
+                    $s->invigilators()->sync(collect($watch)->all());
+                }
+                $changed++;
+            }
+            $conflict = $this->scheduler->findConflict(ExamSession::whereIn('id', $sessions->pluck('id'))->with(['classroom', 'invigilators'])->get());
+            if ($conflict === null) {
+                // The moved exams against all the others too (another round or grade that was not part of this change).
+                $others = ExamSession::with(['classroom', 'invigilators'])->get();
+                $conflict = $this->scheduler->findConflict($others);
+            }
+            if ($conflict !== null) {
+                throw ValidationException::withMessages(['shift_days' => [__('exams.bulk_clash', ['why' => $conflict])]]);
+            }
+        });
+
+        return response()->json(['data' => ['changed' => $changed]]);
     }
 
     public function destroy(ExamSession $session): Response

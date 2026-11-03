@@ -1759,7 +1759,16 @@
     "finalHelp": "Final exams have their own times: students come only for the exam. Set the first exam time, how long each lasts and the gap; free teachers (not the subject's own teacher) watch the rooms.",
     "gap": "Gap between exams (min)",
     "show": "Show",
-    "allExams": "All exams"
+    "allExams": "All exams",
+    "shownCount": "{{count}} exams shown",
+    "editAll": "Edit all shown",
+    "deleteAll": "Delete all shown",
+    "deleteAllConfirm": "Delete all {{count}} exams shown? This cannot be undone.",
+    "editAllTitle": "Edit {{count}} exams at once",
+    "editAllHelp": "Applies to every exam currently shown (change the filters above to narrow it). Everything is checked together: if any section or teacher would clash, nothing changes.",
+    "shiftDays": "Move all dates by (days, e.g. 7 or -7)",
+    "newStart": "Start the final exams at (their length is kept)",
+    "applyToAll": "Apply to all"
   },
   "duties": {
     "title": "Duty roster",

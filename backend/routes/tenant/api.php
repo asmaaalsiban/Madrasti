@@ -195,6 +195,8 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::put('duties/{duty}', [DutyController::class, 'update']);
     Route::delete('duties/{duty}', [DutyController::class, 'destroy']);
     Route::get('exams', [ExamController::class, 'index']);
+    Route::delete('exams', [ExamController::class, 'destroyMany']);
+    Route::put('exams', [ExamController::class, 'updateMany']);
     Route::post('exams/generate', [ExamController::class, 'generate']);
     Route::put('exams/{session}', [ExamController::class, 'update']);
     Route::delete('exams/{session}', [ExamController::class, 'destroy']);

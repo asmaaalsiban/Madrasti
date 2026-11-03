@@ -102,6 +102,50 @@ describe('final exams', () => {
   })
 })
 
+describe('changing or deleting all exams at once', () => {
+  beforeEach(() => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { term_id: 1, data: url === '/terms' ? [{ id: 1, name: 'Term 1' }] : url === '/grade-levels' ? [{ id: 1, name_ar: 'الأول', name_en: 'Grade 1' }] : url === '/payroll/staff' ? [] : [session(1, '2027-01-03', 'Maths'), session(2, '2027-01-04', 'Arabic')] } }))
+  })
+
+  it('deletes everything shown after a confirmation, for the chosen type', async () => {
+    api.delete.mockResolvedValue({ data: { data: { deleted: 2 } } })
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    wrap(<ExamsAdminPage />)
+    await screen.findByText('2 exams shown')
+    fireEvent.change(screen.getByLabelText('Show'), { target: { value: 'monthly-1' } })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/exams', { params: { kind: 'monthly', round: '1' } }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete all shown' }))
+    expect(window.confirm).toHaveBeenCalledWith('Delete all 2 exams shown? This cannot be undone.')
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/exams', { params: { term_id: 1, kind: 'monthly', round: 1 } }))
+  })
+
+  it('does not delete when the confirmation is refused', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    wrap(<ExamsAdminPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete all shown' }))
+    expect(api.delete).not.toHaveBeenCalled()
+  })
+
+  it('moves all the shown exams by days and by periods in one request', async () => {
+    api.put.mockResolvedValue({ data: { data: { changed: 2 } } })
+    wrap(<ExamsAdminPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit all shown' }))
+    fireEvent.change(await screen.findByLabelText('Move all dates by (days, e.g. 7 or -7)'), { target: { value: '7' } })
+    fireEvent.change(screen.getByLabelText('From period'), { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply to all' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/exams', { shift_days: 7, period_from: 3, period_to: 3 }, { params: { term_id: 1 } }))
+  })
+
+  it('shows why nothing changed when a clash is found', async () => {
+    api.put.mockRejectedValue({ response: { data: { errors: { shift_days: ['Nothing was changed: 1-A has two exams at the same time on 2027-01-10.'] } } } })
+    wrap(<ExamsAdminPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit all shown' }))
+    fireEvent.change(await screen.findByLabelText('Move all dates by (days, e.g. 7 or -7)'), { target: { value: '-7' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply to all' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Nothing was changed: 1-A has two exams')
+  })
+})
+
 describe('a teacher who watches only some periods', () => {
   it('shows the periods next to the name for admins and the own window for the teacher', async () => {
     auth.user = { role: 'teacher', id: 9 }
