@@ -1533,7 +1533,17 @@
     "pickMonth": "اختر الشهر",
     "deleteRuleTitle": "حذف هذه القاعدة؟",
     "rulesNoAccessTitle": "قواعد الالتزام",
-    "rulesNoAccess": "ليس لديك صلاحية لعرض هذه الصفحة."
+    "rulesNoAccess": "ليس لديك صلاحية لعرض هذه الصفحة.",
+    "thisMonth": "هذا الشهر حتى الآن",
+    "estimate": "تقدير",
+    "absenceDeducted_zero": "لا غياب",
+    "absenceDeducted_one": "غياب يوم واحد",
+    "absenceDeducted_two": "غياب يومين",
+    "absenceDeducted_few": "غياب {{count}} أيام",
+    "absenceDeducted_many": "غياب {{count}} يوماً",
+    "absenceDeducted_other": "غياب {{count}} يوم",
+    "absentOn": "أيام الغياب",
+    "estimateNote": "هذا ما سيُدفع عن الشهر لو دُفع الآن. المبلغ النهائي هو كشف الراتب المعتمد."
   },
   "renewals": {
     "title": "تجديد تسجيل الطلاب",

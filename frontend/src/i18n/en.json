@@ -1533,7 +1533,13 @@
     "pickMonth": "Pick a month",
     "deleteRuleTitle": "Delete this rule?",
     "rulesNoAccessTitle": "Commitment rules",
-    "rulesNoAccess": "You do not have access to this page."
+    "rulesNoAccess": "You do not have access to this page.",
+    "thisMonth": "This month so far",
+    "estimate": "Estimate",
+    "absenceDeducted_one": "Absent {{count}} day",
+    "absenceDeducted_other": "Absent {{count}} days",
+    "absentOn": "Days missed",
+    "estimateNote": "This is what the month would pay if it were paid now. The final amount is the approved payroll."
   },
   "renewals": {
     "title": "Student renewal",

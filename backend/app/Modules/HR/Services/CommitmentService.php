@@ -20,7 +20,7 @@ class CommitmentService
     public function __construct(private readonly StaffAttendanceService $attendance, private readonly CommitmentRules $rules) {}
 
     /**
-     * @return array<string, array{score: int|null, done: int, expected: int, absent?: int}>
+     * @return array<string, array{score: int|null, done: int, expected: int, absent?: int, absent_dates?: list<string>}>
      */
     public function scores(User $user, Carbon $month): array
     {
@@ -101,12 +101,13 @@ class CommitmentService
         $started = DB::table('staff_attendances')->min('date');
         $days = $started === null ? collect() : $days->filter(fn (Carbon $d) => $d->toDateString() >= substr((string) $started, 0, 10))->values();
         if ($days->isEmpty()) {
-            return ['score' => null, 'done' => 0, 'expected' => 0, 'absent' => 0];
+            return ['score' => null, 'done' => 0, 'expected' => 0, 'absent' => 0, 'absent_dates' => []];
         }
         $rows = DB::table('staff_attendances')->where('user_id', $user->id)->whereBetween('date', [$days->first()->toDateString(), $days->last()->toDateString()])->get()->keyBy(fn ($r) => substr((string) $r->date, 0, 10));
         $expected = 0;
         $done = 0;
         $absent = 0;
+        $absentDates = [];
         foreach ($days as $day) {
             $status = $rows[$day->toDateString()]->status ?? 'absent';
             if ($status === 'leave') {
@@ -115,9 +116,12 @@ class CommitmentService
             $expected++;
             $done += $status === 'present' ? 1 : 0;
             $absent += $status === 'absent' ? 1 : 0;
+            if ($status === 'absent') {
+                $absentDates[] = $day->toDateString();
+            }
         }
 
-        return $this->result($done, $expected) + ['absent' => $absent];
+        return $this->result($done, $expected) + ['absent' => $absent, 'absent_dates' => $absentDates];
     }
 
     /** A published summary for each scheduled lesson (class + subject) on each working day so far. */

@@ -133,6 +133,19 @@ describe('MyPayslipsPage and notifications', () => {
     expect(screen.getAllByRole('link', { name: 'Payslip' }).at(-1)).toHaveAttribute('href', '/teacher/payslips/3')
   })
 
+  it('shows at once the days missed this month, what they cost and the expected net', async () => {
+    const commitment = { month: '2026-11', scores: { punctuality: { score: 50, done: 3, expected: 6, absent: 2, absent_dates: ['2026-11-05', '2026-11-10'] } }, lines: [{ code: 'absence', kind: 'deduction', amount: '24.00', score: 2 }],
+      estimate: { base: '300.00', additions: '20.00', deductions: '24.00', net: '296.00' } }
+    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', data: url === '/payroll/commitment' ? undefined : url === '/payroll/my-contract' ? null : [], ...(url === '/payroll/commitment' ? commitment : {}) } }))
+    wrap(<MyPayslipsPage base="/teacher" />)
+    const card = await screen.findByLabelText('This month so far')
+    expect(card).toHaveTextContent('296.00 JOD')
+    expect(card).toHaveTextContent('Absent 2 days')
+    expect(card).toHaveTextContent('−24.00 JOD')
+    expect(card).toHaveTextContent('05/11')
+    expect(card).toHaveTextContent('10/11')
+  })
+
   it('writes the payroll notifications', () => {
     const text = (kind, params) => notificationText(i18n.t.bind(i18n), 'en', { kind, params })
     expect(text('payroll_submitted', { month: '2026-11' })).toContain('2026-11')
