@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AttachmentList } from '../../../components/shared/Attachments'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +38,7 @@ export default function SurveyResultsPage({ base }) {
         <p className="text-sm text-slate-600">{t(`surveys.types.${data.type}`)} · {t(`surveys.status.${data.status}`)} · {t('surveys.answered', { done: data.response_count, total: data.recipient_count })}</p>
         <p className="text-sm text-slate-600">{t('surveys.sentTo')}: {audienceText} · {t('surveys.answeredBy')}: {t(`surveys.who.${data.respondents}`)}</p>
         {data.description && <p className="rounded bg-white p-3 text-sm">{data.description}</p>}
+        <AttachmentList items={data.attachments} />
       </div>
 
       <div className="flex flex-wrap gap-2">

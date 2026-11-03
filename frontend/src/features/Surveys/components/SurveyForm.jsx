@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { AttachmentsField } from '../../../components/shared/Attachments'
+import { uploadAttachments } from '../../../api/attachments'
 import StaffPicker from './StaffPicker'
 
 const CHOICE = ['single_choice', 'multiple_choice']
@@ -43,13 +45,14 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
     return { audience: 'all' }
   }
 
+  const [files, setFiles] = useState([])
   const save = useMutation({
-    mutationFn: () => api.post('/surveys', {
+    mutationFn: async () => { const r = await api.post('/surveys', {
       type: form.type, title: form.title, description: form.description, closes_at: form.closes_at || null,
       respondents: form.type === 'approval' ? 'parents' : form.respondents,
       ...who(),
       questions: questions.map((q) => ({ type: q.type, text: q.text, is_required: q.is_required, ...(CHOICE.includes(q.type) ? { options: q.options.split('\n').map((o) => o.trim()).filter(Boolean) } : {}) })),
-    }),
+    }); await uploadAttachments('survey', r.data.data.id, files); return r },
     onSuccess: (r) => { client.invalidateQueries({ queryKey: ['surveys'] }); onCreated(r.data.data) },
     onError: (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || t('admin.actions.error')),
   })
@@ -67,6 +70,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
         <p className="text-xs text-slate-500">{t(`surveys.typeHelp.${form.type}`)}</p>
         <label className="block text-sm">{t('surveys.fieldTitle')}<input required className="mt-1 w-full rounded border p-2" value={form.title} onChange={set('title')} /></label>
         <label className="block text-sm">{t('surveys.description')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={form.description} onChange={set('description')} /></label>
+        <AttachmentsField files={files} onChange={setFiles} label={t('surveys.attachments')} />
         <fieldset className="space-y-1 rounded border p-3">
           <legend className="px-1 text-sm font-medium">{t('surveys.respondents')}</legend>
           {form.type === 'approval' ? (

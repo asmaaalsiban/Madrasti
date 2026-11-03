@@ -1289,7 +1289,8 @@
     "staffChosen": "{{count}} chosen",
     "noStaff": "No staff match.",
     "staffCount": "{{count}} staff members",
-    "forMe": "Surveys for me"
+    "forMe": "Surveys for me",
+    "attachments": "Image or files (optional)"
   },
   "signatures": {
     "title_page": "Signatures for the report card",
@@ -2055,6 +2056,16 @@
     "filterByJob": "Filter by job",
     "allJobs": "All jobs",
     "noMatch": "Nobody matches.",
-    "chosenCount": "{{count}} chosen"
+    "chosenCount": "{{count}} chosen",
+    "handIn": "Hand in (files or photos)"
+  },
+  "attachments": {
+    "title": "Attachments",
+    "add": "Attach files",
+    "choose": "Choose files",
+    "remove": "Remove {{name}}",
+    "open": "Open {{name}}",
+    "hint": "Images, PDF, Word, Excel, PowerPoint or text. Up to {{max}} files, 10 MB each.",
+    "uploading": "Uploading…"
   }
 }

@@ -7,6 +7,7 @@ namespace App\Modules\Surveys\Models;
 use App\Models\User;
 use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\GradeLevel;
+use App\Shared\Attachments\Attachment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -30,6 +31,11 @@ class Survey extends Model
     protected function casts(): array
     {
         return ['opens_at' => 'datetime', 'closes_at' => 'datetime', 'closed_at' => 'datetime', 'reminded_at' => 'datetime'];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn (Survey $survey) => Attachment::purge('survey', $survey->id));
     }
 
     public function questions(): HasMany

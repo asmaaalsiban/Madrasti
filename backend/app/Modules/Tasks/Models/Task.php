@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Tasks\Models;
 
 use App\Models\User;
+use App\Shared\Attachments\Attachment;
 use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,15 @@ class Task extends Model
     protected function casts(): array
     {
         return ['due_on' => 'date:Y-m-d'];
+    }
+
+    protected static function booted(): void
+    {
+        // The files of a task and of its hand-ins go with it.
+        static::deleting(function (Task $task): void {
+            $task->assignees()->get()->each->delete();
+            Attachment::purge('task', $task->id);
+        });
     }
 
     /** @return BelongsTo<User, $this> */
