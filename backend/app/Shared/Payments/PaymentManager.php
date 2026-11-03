@@ -14,6 +14,10 @@ class PaymentManager
     /** The configured provider's key, or null when online payment is off (no provider, or the demo in production). */
     public function driverName(): ?string
     {
+        // A school with its own PayTabs account switched on pays through it, whatever .env says.
+        if (app(PayTabsSettings::class)->ownEnabled() && isset(config('payments.drivers')['paytabs'])) {
+            return 'paytabs';
+        }
         $name = config('payments.driver');
         if (! $name || ! isset(config('payments.drivers')[$name])) {
             return null;

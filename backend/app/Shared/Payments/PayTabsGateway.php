@@ -53,6 +53,9 @@ class PayTabsGateway implements PaymentGateway
      */
     public function parseWebhook(Request $request): GatewayEvent
     {
+        if (app(PayTabsSettings::class)->effective() === null) {
+            throw new InvalidWebhook('PayTabs is not set up for this school.');
+        }
         $body = $request->getContent();
         $given = (string) $request->header('Signature', '');
         if ($given === '' || ! hash_equals(hash_hmac('sha256', $body, $this->serverKey()), strtolower($given))) {
@@ -73,18 +76,24 @@ class PayTabsGateway implements PaymentGateway
         return new GatewayEvent($reference, $paid, isset($data['tran_ref']) ? (string) $data['tran_ref'] : null, $paid ? null : (string) ($result['response_message'] ?? $result['response_code'] ?? 'declined'));
     }
 
+    /** This school's own account (or the platform's from .env). */
+    private function account(): array
+    {
+        return app(PayTabsSettings::class)->effective() ?? throw new RuntimeException('PayTabs is not set up for this school.');
+    }
+
     private function serverKey(): string
     {
-        return (string) config('payments.providers.paytabs.server_key');
+        return $this->account()['server_key'];
     }
 
     private function profileId(): string
     {
-        return (string) config('payments.providers.paytabs.profile_id');
+        return $this->account()['profile_id'];
     }
 
     private function baseUrl(): string
     {
-        return rtrim((string) config('payments.providers.paytabs.base_url'), '/');
+        return rtrim($this->account()['base_url'], '/');
     }
 }

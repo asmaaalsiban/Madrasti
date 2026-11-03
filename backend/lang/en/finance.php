@@ -3,6 +3,8 @@
 return [
     'bad_amounts' => 'The amounts are not valid.',
     'schedule_mismatch' => 'The installments must add up to the fee after the discount.',
+    'paytabs_not_saved' => 'Save the PayTabs keys first.',
+    'paytabs_ok' => 'Connected: PayTabs accepted the keys.',
     'gateway_unreachable' => 'The payment provider could not be reached. Nothing was charged: please try again in a moment.',
     'more_than_owed' => 'The payment is more than what is still owed (:owed).',
     'has_payments' => 'This fee already has payments, so its discount cannot change.',
