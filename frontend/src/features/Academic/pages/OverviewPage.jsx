@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
@@ -12,7 +13,7 @@ const CARDS = [
 
 export default function OverviewPage() {
   const { t } = useTranslation()
-  const pending = useQuery({ queryKey: ['my-surveys', 'pending'], queryFn: () => api.get('/my-surveys/pending').then((r) => r.data.data.count), refetchInterval: 60000 })
+  const pending = { data: useBadges().surveys }
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.get('/admin/overview').then((r) => r.data.data) })
   return (
     <section className="space-y-4">

@@ -14,7 +14,8 @@ const renderBell = () => render(
     <MemoryRouter><NotificationBell /><Routes><Route path="*" element={<Where />} /></Routes></MemoryRouter>
   </QueryClientProvider>,
 )
-const feed = (items, unread) => api.get.mockResolvedValue({ data: { data: { unread, items } } })
+// The counter comes from /badges, the list from /notifications (fetched when the bell opens).
+const feed = (items, unread) => api.get.mockImplementation(async (url) => ({ data: { data: url === '/badges' ? { notifications: unread, announcements: 0, chat: 0, surveys: 0 } : { unread, items } } }))
 const n = (id, kind, params, extra = {}) => ({ id, kind, params, link: '/student/homework', read: false, created_at: '2026-10-24T10:30:00+00:00', ...extra })
 
 beforeEach(async () => {
@@ -28,8 +29,8 @@ describe('NotificationBell', () => {
     renderBell()
     expect(await screen.findByLabelText('1 unread')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Notifications' }))
-    expect(screen.getByText('New homework in Math: Page 10 (Lina)')).toBeInTheDocument()
-    expect(screen.getByText('Your lesson plan was rejected: Fractions — Add objectives')).toBeInTheDocument()
+    expect(await screen.findByText('New homework in Math: Page 10 (Lina)')).toBeInTheDocument()
+    expect(await screen.findByText('Your lesson plan was rejected: Fractions — Add objectives')).toBeInTheDocument()
   })
 
   it('closes when you click anywhere else or press Escape, but not when you click inside', async () => {
@@ -52,7 +53,7 @@ describe('NotificationBell', () => {
     feed([n('1', 'grades', { subject_ar: 'رياضيات', subject_en: 'Math', title: 'اختبار 1' })], 1)
     renderBell()
     fireEvent.click(await screen.findByRole('button', { name: 'الإشعارات' }))
-    expect(screen.getByText('نُشرت علامات: رياضيات — اختبار 1')).toBeInTheDocument()
+    expect(await screen.findByText('نُشرت علامات: رياضيات — اختبار 1')).toBeInTheDocument()
   })
 
   it('opens the page of a notification and marks it read', async () => {
@@ -60,7 +61,7 @@ describe('NotificationBell', () => {
     api.post.mockResolvedValue({ data: { data: { read: true } } })
     renderBell()
     fireEvent.click(await screen.findByRole('button', { name: 'Notifications' }))
-    fireEvent.click(screen.getByText(/New homework in Math/))
+    fireEvent.click(await screen.findByText(/New homework in Math/))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/notifications/abc/read'))
     expect(screen.getByTestId('where')).toHaveTextContent('/student/homework')
   })
@@ -78,13 +79,13 @@ describe('NotificationBell', () => {
     feed([], 0)
     renderBell()
     fireEvent.click(await screen.findByRole('button', { name: 'Notifications' }))
-    expect(screen.getByText('No notifications yet.')).toBeInTheDocument()
+    expect(await screen.findByText('No notifications yet.')).toBeInTheDocument()
   })
 
   it('shows a generic sentence for a kind it does not know', async () => {
     feed([n('1', 'something_new', {})], 1)
     renderBell()
     fireEvent.click(await screen.findByRole('button', { name: 'Notifications' }))
-    expect(screen.getByText('New notification')).toBeInTheDocument()
+    expect(await screen.findByText('New notification')).toBeInTheDocument()
   })
 })

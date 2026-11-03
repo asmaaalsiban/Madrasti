@@ -41,6 +41,9 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    // Load testing aid (see loadtest/README.md): adds X-Queries / X-Query-Ms to API answers. Never in production.
+    'query_stats' => env('APP_ENV') !== 'production' && (bool) env('QUERY_STATS', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

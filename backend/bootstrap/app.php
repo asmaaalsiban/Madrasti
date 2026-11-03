@@ -4,6 +4,7 @@ use App\Central\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\QueryStats;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -54,6 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
         }
         $middleware->api(append: [
             SetLocale::class,
+            QueryStats::class,
         ]);
         // Laravel runs authentication first; the language must be set before it so a 401 is in the right language too.
         $middleware->prependToPriorityList(before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class, prepend: SetLocale::class);

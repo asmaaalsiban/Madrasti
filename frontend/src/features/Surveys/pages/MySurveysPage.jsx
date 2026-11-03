@@ -38,7 +38,7 @@ function SurveyCard({ s }) {
 
   const send = useMutation({
     mutationFn: (d) => api.post(`/my-surveys/${s.id}/respond`, { decision: d || null, answers }),
-    onSuccess: () => { setErrors({}); setMessage(t('surveys.thanks')); setEditing(false); client.invalidateQueries({ queryKey: ['my-surveys'] }) },
+    onSuccess: () => { setErrors({}); setMessage(t('surveys.thanks')); setEditing(false); client.invalidateQueries({ queryKey: ['my-surveys'] }); client.invalidateQueries({ queryKey: ['badges'] }) },
     onError: (err) => { setErrors(err.response?.data?.errors ?? {}); setMessage(err.response?.data?.errors ? '' : t('admin.actions.error')) },
   })
   const submit = (d) => send.mutate(d)

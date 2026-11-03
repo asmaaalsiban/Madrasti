@@ -94,7 +94,7 @@ describe('StudentHome (grades)', () => {
     auth.user = { id: 1, role: 'student', name: 'Ahmad' }
     renderAt('/student', <StudentHome />, '/student')
     expect(await screen.findByText('No student record is linked to your account.')).toBeInTheDocument()
-    expect(api.get).not.toHaveBeenCalled()
+    expect(api.get).not.toHaveBeenCalledWith(expect.stringContaining('/grades'))
   })
 })
 
