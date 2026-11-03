@@ -15,6 +15,7 @@ use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Services\PeriodSetup;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Academic\AcademicTestCase;
@@ -330,5 +331,65 @@ class ExamTest extends AcademicTestCase
         // Monthly for grade 2 (period 3 has no timetable teacher): the stand-in must not be someone watching a final exam at that time.
         $this->postJson('/api/exams/generate', $this->body(['from' => '2027-01-03', 'to' => '2027-01-04', 'grade_level_ids' => [$this->g2->id], 'periods_per_exam' => 1, 'first_period' => 3, 'slots_per_day' => 1, 'round' => 1]))->assertOk();
         $this->assertFalse($this->doubleBooked());
+    }
+
+    public function test_all_the_exams_of_a_type_can_be_deleted_in_one_go(): void
+    {
+        $this->postJson('/api/exams/generate', $this->body(['round' => 1]))->assertOk();
+        $this->postJson('/api/exams/generate', $this->body(['round' => 2, 'from' => '2027-02-01', 'to' => '2027-02-18']))->assertOk();
+        $this->postJson('/api/exams/generate', $this->finalBody(['from' => '2027-03-01', 'to' => '2027-03-18']))->assertOk();
+        $q = fn (array $extra) => '/api/exams?'.http_build_query(['term_id' => $this->term->id] + $extra);
+        $this->deleteJson($q(['kind' => 'monthly', 'round' => 2, 'grade_level_id' => $this->g2->id]))->assertOk()->assertJsonPath('data.deleted', 2);
+        $this->assertSame(22, ExamSession::count());
+        $this->deleteJson($q(['kind' => 'monthly']))->assertOk()->assertJsonPath('data.deleted', 14); // both monthly rounds, the finals stay
+        $this->assertSame(8, ExamSession::count());
+        $this->assertSame(8, ExamSession::where('kind', 'final')->count());
+        $this->deleteJson($q([]))->assertOk()->assertJsonPath('data.deleted', 8);
+        $this->assertSame(0, ExamSession::count());
+        $this->deleteJson('/api/exams')->assertUnprocessable(); // a term is required
+    }
+
+    public function test_all_the_exams_move_together_by_days_by_periods_or_by_start_time(): void
+    {
+        $this->postJson('/api/exams/generate', $this->body())->assertOk();
+        $first = ExamSession::orderBy('exam_date')->first()->exam_date->toDateString();
+        $q = '/api/exams?'.http_build_query(['term_id' => $this->term->id, 'kind' => 'monthly', 'round' => 1]);
+        $this->putJson($q, ['shift_days' => 7])->assertOk()->assertJsonPath('data.changed', 8);
+        $this->assertSame(Carbon::parse($first)->addDays(7)->toDateString(), ExamSession::orderBy('exam_date')->first()->exam_date->toDateString());
+        $this->assertEmpty(ExamSession::all()->filter(fn ($s) => in_array($s->exam_date->dayOfWeek, [5, 6]))->all()); // still only working days
+
+        // To periods 3 only: times follow the school day and the watchers become the period-3 teachers.
+        $this->putJson($q, ['period_from' => 3, 'period_to' => 3])->assertOk();
+        $a = ExamSession::where('classroom_id', $this->a->id)->first()->load('invigilators');
+        $this->assertSame([3, 3], [$a->period_from, $a->period_to]);
+        $this->assertSame('09:25:00', $a->starts_at);
+        $this->assertSame([$this->teachers[2]->id], $a->invigilators->pluck('id')->all());
+
+        $this->postJson('/api/exams/generate', $this->finalBody(['from' => '2027-03-01', 'to' => '2027-03-18']))->assertOk();
+        $f = '/api/exams?'.http_build_query(['term_id' => $this->term->id, 'kind' => 'final']);
+        $this->putJson($f, ['start_time' => '10:30'])->assertOk()->assertJsonPath('data.changed', 8);
+        $final = ExamSession::where('kind', 'final')->first();
+        $this->assertSame(['10:30:00', '12:30:00'], [$final->starts_at, $final->ends_at]); // the 2 hours are kept
+    }
+
+    public function test_a_bulk_change_that_would_clash_or_land_on_a_day_off_changes_nothing(): void
+    {
+        $this->postJson('/api/exams/generate', $this->body(['round' => 1]))->assertOk();
+        $this->postJson('/api/exams/generate', $this->body(['round' => 2, 'from' => '2027-01-17', 'to' => '2027-01-28']))->assertOk();
+        $before = ExamSession::orderBy('id')->get()->map(fn ($s) => $s->id.$s->exam_date->toDateString().$s->starts_at)->all();
+        $q = fn (int $round) => '/api/exams?'.http_build_query(['term_id' => $this->term->id, 'kind' => 'monthly', 'round' => $round]);
+        $this->putJson($q(2), ['shift_days' => -14])->assertUnprocessable()->assertJsonValidationErrors('shift_days'); // onto round 1's days: the same sections twice at the same time
+        $this->putJson($q(2), ['shift_days' => 5])->assertUnprocessable()->assertJsonValidationErrors('shift_days'); // lands on a Friday
+        $this->putJson($q(2), [])->assertUnprocessable();
+        $this->assertSame($before, ExamSession::orderBy('id')->get()->map(fn ($s) => $s->id.$s->exam_date->toDateString().$s->starts_at)->all());
+    }
+
+    public function test_only_the_principal_deletes_or_changes_exams_in_bulk(): void
+    {
+        $this->postJson('/api/exams/generate', $this->body())->assertOk();
+        Sanctum::actingAs($this->teachers[0]);
+        $this->deleteJson('/api/exams?term_id='.$this->term->id)->assertForbidden();
+        $this->putJson('/api/exams?term_id='.$this->term->id, ['shift_days' => 1])->assertForbidden();
+        $this->assertSame(8, ExamSession::count());
     }
 }

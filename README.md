@@ -445,3 +445,7 @@ On `/admin/duties` the section **Who does duty** lists the teachers with a check
 ### No teacher in two exam rooms at once
 
 When exams are generated, teachers already watching other exams (other grades, rounds or kinds that the run does not replace) are not used again at that time, and a teacher who has two sections in consecutive periods (1-A in period 2, 1-B in period 3) watches each **in its own period** (the lists show "Sara (Period 3)" and a teacher's own list shows only her window). Moving an exam or changing its watchers by hand is refused when a teacher would be in two rooms at the same moment. After pulling: `php artisan tenants:migrate` (adds the periods to exam watchers); regenerate the exams to apply it to existing ones.
+
+### Editing or deleting all exams at once
+
+Above the exam list, the buttons act on **what the list shows** (term, the type/round chosen in "Show", and the grade): **Delete all shown** (asks first) and **Edit all shown**: move every date by some days (e.g. `7` or `-7`), put the monthly exams in other periods (times and watchers follow the timetable), or start the final exams at another time (their length is kept). Everything is checked together and nothing changes if a section or teacher would clash or a date lands on a day off. To redo a whole round from scratch, "Publish" again replaces that round.

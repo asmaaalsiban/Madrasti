@@ -71,6 +71,40 @@ function EditDialog({ session, onClose }) {
   )
 }
 
+// Change every exam that is shown at once: move the dates, put the monthly ones in other periods, start the final ones at another time.
+function BulkDialog({ scope, count, onClose }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [form, setForm] = useState({ shift_days: '', period_from: '', period_to: '', start_time: '' })
+  const [error, setError] = useState('')
+  const save = useMutation({
+    mutationFn: () => api.put('/exams', { ...(form.shift_days ? { shift_days: Number(form.shift_days) } : {}), ...(form.period_from ? { period_from: Number(form.period_from), period_to: Number(form.period_to || form.period_from) } : {}), ...(form.start_time ? { start_time: form.start_time } : {}) }, { params: scope }),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ['exams'] }); onClose() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+  return (
+    <Modal open title={t('exams.editAllTitle', { count })} onClose={onClose}>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
+        {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        <p className="text-sm text-slate-600">{t('exams.editAllHelp')}</p>
+        <label className="block text-sm">{t('exams.shiftDays')}<input type="number" min="-120" max="120" dir="ltr" className="mt-1 w-full rounded border p-2" placeholder="7" value={form.shift_days} onChange={set('shift_days')} /></label>
+        {scope.kind !== 'final' && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm">{t('exams.periodFrom')}<input type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.period_from} onChange={set('period_from')} /></label>
+            <label className="block text-sm">{t('exams.periodTo')}<input type="number" min="1" max="12" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.period_to} onChange={set('period_to')} /></label>
+          </div>
+        )}
+        {scope.kind !== 'monthly' && <label className="block text-sm">{t('exams.newStart')}<input type="time" className="mt-1 w-full rounded border p-2" value={form.start_time} onChange={set('start_time')} /></label>}
+        <div className="flex justify-end gap-2">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <button type="submit" disabled={save.isPending || !(form.shift_days || form.period_from || form.start_time)} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('exams.applyToAll')}</button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
 // The exam timetable: set the period and the rules, preview, publish; then fix single exams by hand.
 export default function ExamsAdminPage() {
   const { t, i18n } = useTranslation()
@@ -85,6 +119,7 @@ export default function ExamsAdminPage() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [edit, setEdit] = useState(null)
+  const [bulk, setBulk] = useState(false)
   const [gradeFilter, setGradeFilter] = useState('')
   const [view, setView] = useState('') // '' = all, 'monthly-1', 'final'...
   // Until a term is chosen the server says which one is meant (the running or the next one).
@@ -100,6 +135,10 @@ export default function ExamsAdminPage() {
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
   const gradeName = (g) => g[`name_${i18n.language}`] || g.name_ar
   const ready = termId && form.from && form.to
+  // What the list shows is what the bulk buttons act on.
+  const scope = { term_id: Number(termId), ...(view ? { kind: view.split('-')[0] } : {}), ...(view.includes('-') ? { round: Number(view.split('-')[1]) } : {}), ...(gradeFilter ? { grade_level_id: Number(gradeFilter) } : {}) }
+  const shown = list.data?.data.length ?? 0
+  const dropAll = useMutation({ mutationFn: () => api.delete('/exams', { params: scope }), onSuccess: () => client.invalidateQueries({ queryKey: ['exams'] }) })
 
   return (
     <section className="space-y-6">
@@ -192,8 +231,16 @@ export default function ExamsAdminPage() {
             {(grades.data ?? []).map((g) => <option key={g.id} value={g.id}>{gradeName(g)}</option>)}
           </select>
         </div>
+        {shown > 0 && (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm">
+            <span className="font-semibold text-deep-harbor">{t('exams.shownCount', { count: shown })}</span>
+            <button type="button" className="rounded border bg-snow px-3 py-1 text-brand" onClick={() => setBulk(true)}>{t('exams.editAll')}</button>
+            <button type="button" disabled={dropAll.isPending} className="rounded border border-red-300 bg-snow px-3 py-1 text-red-700 disabled:opacity-50" onClick={() => window.confirm(t('exams.deleteAllConfirm', { count: shown })) && dropAll.mutate()}>{t('exams.deleteAll')}</button>
+          </div>
+        )}
         {list.data ? <AdminList sessions={list.data.data} onEdit={setEdit} /> : <p className="text-slate-500">{t('common.loading')}</p>}
       </div>
+      {bulk && <BulkDialog scope={scope} count={shown} onClose={() => setBulk(false)} />}
       {edit && <EditDialog session={edit} onClose={() => setEdit(null)} />}
     </section>
   )
