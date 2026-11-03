@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -32,5 +32,18 @@ describe('AdminLayout', () => {
     await i18n.changeLanguage('en')
     render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><AdminLayout /></MemoryRouter></QueryClientProvider>)
     expect(await screen.findByText('3')).toBeInTheDocument()
+  })
+
+  it('puts chat, announcements, class feed and notifications as icons at the top, not in the menu', async () => {
+    await i18n.changeLanguage('en')
+    render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><AdminLayout /></MemoryRouter></QueryClientProvider>)
+    const header = screen.getByRole('banner')
+    for (const [name, href] of [[/^Chat/, '/admin/chat'], [/^Announcements/, '/admin/announcements'], [/^Class feed/, '/admin/stories']]) {
+      const link = within(header).getByRole('link', { name })
+      expect(link).toHaveAttribute('href', href)
+    }
+    expect(within(header).getByRole('button', { name: /Notifications/ })).toBeInTheDocument()
+    expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /Class feed/ })).not.toBeInTheDocument()
+    expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /Chat/ })).not.toBeInTheDocument()
   })
 })

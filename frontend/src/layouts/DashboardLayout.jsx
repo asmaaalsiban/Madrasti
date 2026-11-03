@@ -1,14 +1,10 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
-import IconButton from '../components/shared/IconButton'
 import UserMenu from '../components/shared/UserMenu'
-import { Megaphone, MessageCircle } from 'lucide-react'
-import useUnreadChat from '../features/Chat/hooks/useUnreadChat'
-import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
+import HeaderIcons from '../components/shared/HeaderIcons'
 import { useAuth } from '../features/Auth/AuthProvider'
 import { isHidden } from '../features/StaffAccess/staffFeatures'
-import NotificationBell from '../features/Notifications/NotificationBell'
 import { useSchool } from '../tenant/useSchool'
 
 // Mobile-first shell shared by all four roles.
@@ -17,8 +13,6 @@ export default function DashboardLayout() {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const { data: school } = useSchool()
-  const unread = useUnreadAnnouncements()
-  const unreadChat = useUnreadChat()
   const subject = user.subject ? user.subject[`name_${i18n.language}`] || user.subject.name_ar : null
   const isHead = user.staff_type === 'head_of_department'
   // "Student: Ahmad Khaled · 5-A", "Teacher: Sara · Math", "Head of department Math: Omar", "Parent: Mohammad".
@@ -32,10 +26,8 @@ export default function DashboardLayout() {
           {school?.logo && <img src={school.logo} alt="" className="h-9 w-9 rounded-xl object-cover" />}
           <span className="truncate text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
         </Link>
-        <div className="flex items-center gap-2">
-          {!isHidden(user, '/teacher/chat') && <IconButton to={`/${user.role}/chat`} icon={MessageCircle} label={t('chat.title')} count={unreadChat} />}
-          {!isHidden(user, '/teacher/announcements') && <IconButton to={`/${user.role}/announcements`} icon={Megaphone} label={t('announcements.title')} count={unread} />}
-          <NotificationBell />
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <HeaderIcons />
           <UserMenu detail={[label, detail].filter(Boolean).join(' · ')} />
         </div>
       </header>

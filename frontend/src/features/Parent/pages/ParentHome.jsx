@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Bus, BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
+import { Bus, BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import AddEmailForm from '../../Auth/components/AddEmailForm'
@@ -23,7 +23,6 @@ export default function ParentHome() {
   const child = children.find((c) => c.id === picked) ?? children[0]
   const base = child ? `/parent/children/${child.id}` : ''
   const tiles = child ? [
-    { to: '/parent/stories', label: t('stories.title'), icon: Images },
     { to: `${base}/report-card`, label: t('reportCard.title'), icon: FileBadge },
     { to: `${base}/grades`, label: t('studentGrades.linkLabel'), icon: ClipboardList },
     { to: `${base}/timetable`, label: t('timetable.linkLabel'), icon: CalendarClock },

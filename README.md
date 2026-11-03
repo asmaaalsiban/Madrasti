@@ -504,3 +504,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 
 ### My salary: "This month so far"
 - The top card of **My salary** shows, at once and without waiting for the payroll: the salary, the contract's monthly items, the automatic deductions/bonuses so far (e.g. **"Absent 2 days: −24.00"** with the dates missed) and the expected net. It is an estimate; the real amount is the approved payroll. `GET /api/payroll/commitment` returns it as `estimate` (and `scores.punctuality.absent_dates`). The absence deduction still needs the absence rule switched on in the commitment rules.
+
+## Header icons (communication)
+- Every account (principal, staff, students, parents) has the communication tools as round icons at the top, next to the user menu: **chat, announcements, class feed, notifications**. They are no longer tiles on the home pages or links in the principal's side menu. A member of staff does not see an icon the principal switched off (see "What staff see"). Shared component: `components/shared/HeaderIcons.jsx`.
