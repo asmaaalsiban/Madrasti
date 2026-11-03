@@ -82,7 +82,8 @@ class Notifier
                 $add($student->user_id, $params, "/student/{$path}");
             }
             foreach ($student->guardians as $guardian) {
-                $add($guardian->id, $params + ['child_ar' => $student->name_ar, 'child_en' => $student->name_en ?: $student->name_ar], "/parent/children/{$student->id}/{$path}");
+                // The class feed is one page for the whole family; the other sections belong to one child.
+                $add($guardian->id, $params + ['child_ar' => $student->name_ar, 'child_en' => $student->name_en ?: $student->name_ar], $path === 'stories' ? '/parent/stories' : "/parent/children/{$student->id}/{$path}");
             }
         }
         $this->insert($rows);
