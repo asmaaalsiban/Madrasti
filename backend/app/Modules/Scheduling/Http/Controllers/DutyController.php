@@ -46,6 +46,34 @@ class DutyController extends Controller
         return response()->noContent();
     }
 
+    // ---- who does duty ---------------------------------------------------------------------------------------------
+
+    /** The teachers, each with whether they take part in the duty roster. */
+    public function staff(): JsonResponse
+    {
+        return response()->json(['data' => $this->teachers()->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name, 'does_duty' => (bool) $u->staffProfile->does_duty])->values()]);
+    }
+
+    /** Sets who does duty: the people listed do, every other teacher does not. */
+    public function saveStaff(Request $request): JsonResponse
+    {
+        $data = $request->validate(['user_ids' => ['present', 'array'], 'user_ids.*' => ['integer']]);
+        $chosen = collect($data['user_ids'])->map(fn ($id) => (int) $id);
+        foreach ($this->teachers() as $teacher) {
+            $teacher->staffProfile->update(['does_duty' => $chosen->contains($teacher->id)]);
+        }
+
+        return $this->staff();
+    }
+
+    /** @return \Illuminate\Support\Collection<int, User> */
+    private function teachers(): \Illuminate\Support\Collection
+    {
+        $types = collect(\App\Shared\Enums\StaffType::cases())->filter(fn ($t) => $t->category() === 'teaching')->map->value->all();
+
+        return User::where('role', Role::Teacher)->where('is_active', true)->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', $types))->with('staffProfile')->orderBy('name')->get();
+    }
+
     // ---- the roster ------------------------------------------------------------------------------------------------
 
     public function index(Request $request): JsonResponse

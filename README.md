@@ -437,3 +437,7 @@ An exam has a **type**: *monthly exam 1, 2, 3...* (in lesson periods; the sectio
 - **By hand**: add a duty (a post or a custom time and place), change the person or time, delete. A hand-made change is **locked**: regenerating keeps it and counts it. A person cannot have two overlapping duties.
 - **Teachers** (`/teacher/duties`): coming duties (the next one highlighted), the last 30 days, and a **reminder the afternoon before** (`duties:remind`, scheduled daily at 15:30 for every school).
 - After pulling: `php artisan tenants:migrate`.
+
+### Who does duty
+
+On `/admin/duties` the section **Who does duty** lists the teachers with a checkbox each (search, select all / none, "12 of 32 teachers"). Only the ticked teachers are put on the generated roster; everyone is ticked by default. Duties can still be added by hand for anyone. After pulling: `php artisan tenants:migrate` (adds `does_duty` to staff profiles).

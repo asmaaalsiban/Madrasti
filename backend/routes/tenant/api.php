@@ -187,6 +187,8 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::post('duties/posts', [DutyController::class, 'storePost']);
     Route::put('duties/posts/{post}', [DutyController::class, 'updatePost']);
     Route::delete('duties/posts/{post}', [DutyController::class, 'destroyPost']);
+    Route::get('duties/staff', [DutyController::class, 'staff']);
+    Route::put('duties/staff', [DutyController::class, 'saveStaff']);
     Route::post('duties/generate', [DutyController::class, 'generate']);
     Route::get('duties', [DutyController::class, 'index']);
     Route::post('duties', [DutyController::class, 'store']);

@@ -103,6 +103,52 @@ function DutyDialog({ duty, posts, onClose }) {
   )
 }
 
+// Who takes part in the duty roster: tick the teachers who do duty; the others are never put on it.
+function WhoDoesDuty() {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const { data } = useQuery({ queryKey: ['duties', 'staff'], queryFn: async () => (await api.get('/duties/staff')).data.data })
+  if (!data) return null
+  return <WhoForm key={data.map((x) => `${x.id}${x.does_duty ? 1 : 0}`).join('')} teachers={data} onSaved={() => client.invalidateQueries({ queryKey: ['duties', 'staff'] })} t={t} />
+}
+
+function WhoForm({ teachers, onSaved, t }) {
+  const [picked, setPicked] = useState(teachers.filter((x) => x.does_duty).map((x) => x.id))
+  const [search, setSearch] = useState('')
+  const [saved, setSaved] = useState(false)
+  const save = useMutation({ mutationFn: () => api.put('/duties/staff', { user_ids: picked }), onSuccess: () => { setSaved(true); onSaved() } })
+  const q = search.trim().toLowerCase()
+  const shown = teachers.filter((x) => !q || x.name.toLowerCase().includes(q))
+  const change = (ids) => { setSaved(false); setPicked(ids) }
+  return (
+    <div className="space-y-3 rounded-lg border bg-snow p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg">{t('duties.who')}</h2>
+        <span className="text-sm text-slate-600">{t('duties.whoCount', { chosen: picked.length, total: teachers.length })}</span>
+      </div>
+      <p className="text-sm text-slate-600">{t('duties.whoHelp')}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <input type="search" aria-label={t('admin.actions.search')} placeholder={t('admin.actions.search')} className="rounded border p-1.5 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button type="button" className="rounded border px-3 py-1 text-sm text-brand" onClick={() => change(teachers.map((x) => x.id))}>{t('duties.selectAll')}</button>
+        <button type="button" className="rounded border px-3 py-1 text-sm text-brand" onClick={() => change([])}>{t('duties.selectNone')}</button>
+      </div>
+      <ul className="grid max-h-60 gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((x) => (
+          <li key={x.id}>
+            <label className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm ${picked.includes(x.id) ? 'border-brand bg-sky-tint/40 font-bold text-deep-harbor' : 'bg-snow'}`}>
+              <input type="checkbox" checked={picked.includes(x.id)} onChange={() => change(picked.includes(x.id) ? picked.filter((id) => id !== x.id) : [...picked, x.id])} />{x.name}
+            </label>
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-center gap-3">
+        <button type="button" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+        {saved && <span role="status" className="text-sm text-green-800">{t('duties.whoSaved')}</span>}
+      </div>
+    </div>
+  )
+}
+
 // The duty roster: the posts, build the roster of a period (preview, then publish) and fix single duties by hand.
 export default function DutiesAdminPage() {
   const { t } = useTranslation()
@@ -127,6 +173,8 @@ export default function DutiesAdminPage() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2"><h1>{t('duties.title')}</h1><button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'duty' })}>{t('duties.addDuty')}</button></div>
       <p className="text-sm text-slate-600">{t('duties.help')}</p>
+
+      <WhoDoesDuty />
 
       <div className="space-y-3 rounded-lg border bg-snow p-5">
         <div className="flex items-center justify-between gap-2"><h2 className="text-lg">{t('duties.posts')}</h2><button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({ type: 'post' })}>{t('duties.newPost')}</button></div>

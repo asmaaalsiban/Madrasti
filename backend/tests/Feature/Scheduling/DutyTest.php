@@ -161,4 +161,27 @@ class DutyTest extends AcademicTestCase
         Sanctum::actingAs(User::factory()->create(['role' => Role::Guardian]));
         $this->getJson('/api/duties/me')->assertForbidden();
     }
+
+    public function test_the_principal_chooses_which_teachers_do_duty_and_only_they_are_put_on_the_roster(): void
+    {
+        $all = $this->getJson('/api/duties/staff')->assertOk()->assertJsonCount(5, 'data')->json('data');
+        $this->assertTrue(collect($all)->every(fn ($t) => $t['does_duty'])); // everyone does by default
+        $chosen = [$this->teachers[0]->id, $this->teachers[1]->id, $this->teachers[2]->id];
+        $saved = $this->putJson('/api/duties/staff', ['user_ids' => $chosen])->assertOk()->json('data');
+        $this->assertSame($chosen, collect($saved)->where('does_duty', true)->pluck('id')->all());
+        $this->assertSame(2, collect($saved)->where('does_duty', false)->count());
+
+        $this->postJson('/api/duties/generate', $this->body())->assertOk();
+        $this->assertSame([], array_values(array_diff(DutyAssignment::pluck('user_id')->unique()->all(), $chosen))); // nobody else
+        $counts = DutyAssignment::all()->countBy('user_id');
+        $this->assertLessThanOrEqual(1, $counts->max() - $counts->min()); // still shared fairly among the three
+        // Duty by hand is still possible for someone who is not on the roster.
+        $this->postJson('/api/duties', ['user_id' => $this->teachers[4]->id, 'duty_post_id' => $this->yard->id, 'date' => '2027-01-20'])->assertCreated();
+        // Nobody chosen: nothing to build.
+        $this->putJson('/api/duties/staff', ['user_ids' => []])->assertOk();
+        $this->postJson('/api/duties/generate', $this->body())->assertUnprocessable()->assertJsonValidationErrors('from');
+        Sanctum::actingAs($this->teachers[0]);
+        $this->getJson('/api/duties/staff')->assertForbidden();
+        $this->putJson('/api/duties/staff', ['user_ids' => []])->assertForbidden();
+    }
 }
