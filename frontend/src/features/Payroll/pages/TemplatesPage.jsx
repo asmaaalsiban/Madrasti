@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { MonthInput } from '../../../components/shared/DateInput'
 
@@ -99,6 +100,7 @@ export default function TemplatesPage({ base }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const [dialog, setDialog] = useState(null)
+  const [dropping, setDropping] = useState(null)
   const { data } = useQuery({ queryKey: ['payroll', 'templates'], queryFn: async () => (await api.get('/payroll/templates')).data })
   const drop = useMutation({ mutationFn: (id) => api.delete(`/payroll/templates/${id}`), onSuccess: () => client.invalidateQueries({ queryKey: ['payroll'] }) })
   if (!data) return <p className="text-slate-500">{t('common.loading')}</p>
@@ -119,13 +121,14 @@ export default function TemplatesPage({ base }) {
                 <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-xs ${r.kind === 'deduction' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-800'}`}>{t(`payroll.kinds.${r.kind}`)}</span></td>
                 <td className="p-2" dir="ltr">{r.type === 'percent' ? `${Number(r.value)}%` : `${r.value} ${data.currency}`}</td>
                 <td className="p-2 text-slate-600">{r.category ? t(`payroll.categories.${r.category}`) : '—'}</td>
-                <td className="p-2"><span className="flex justify-end gap-2"><button type="button" className="rounded bg-brand px-2 py-1 text-white" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</button><button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</button><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => window.confirm(t('payroll.deleteRuleConfirm')) && drop.mutate(r.id)}>{t('admin.actions.delete')}</button></span></td>
+                <td className="p-2"><span className="flex justify-end gap-2"><button type="button" className="rounded bg-brand px-2 py-1 text-white" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</button><button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</button><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => setDropping(r)}>{t('admin.actions.delete')}</button></span></td>
               </tr>
             ))}
             {data.data.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('payroll.noTemplates')}</td></tr>}
           </tbody>
         </table>
       </div>
+      <ConfirmDialog open={Boolean(dropping)} message={t('payroll.deleteRuleTitle')} description={dropping ? `${dropping.name} — ${t('payroll.deleteRuleConfirm')}` : ''} onConfirm={() => { drop.mutate(dropping.id); setDropping(null) }} onCancel={() => setDropping(null)} />
       {dialog?.assign && <AssignDialog template={dialog.assign} onClose={() => setDialog(null)} />}
       {dialog && !dialog.assign && <TemplateDialog template={dialog.id ? dialog : null} onClose={() => setDialog(null)} />}
     </section>

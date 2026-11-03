@@ -1513,7 +1513,8 @@
     "assignAction": "Assign ({{count}})",
     "assignedNow": "Already assigned",
     "noAssigned": "Nobody yet.",
-    "pickMonth": "Pick a month"
+    "pickMonth": "Pick a month",
+    "deleteRuleTitle": "Delete this rule?"
   },
   "renewals": {
     "title": "Student renewal",
@@ -1768,7 +1769,8 @@
     "editAllHelp": "Applies to every exam currently shown (change the filters above to narrow it). Everything is checked together: if any section or teacher would clash, nothing changes.",
     "shiftDays": "Move all dates by (days, e.g. 7 or -7)",
     "newStart": "Start the final exams at (their length is kept)",
-    "applyToAll": "Apply to all"
+    "applyToAll": "Apply to all",
+    "deleteAllWhat": "{{what}}: every exam shown will be removed with its watchers. This cannot be undone."
   },
   "duties": {
     "title": "Duty roster",
@@ -1825,6 +1827,7 @@
     "whoHelp": "Tick the teachers who take part in the duty roster. The others are never put on it (you can still add a duty for them by hand).",
     "selectAll": "Select all",
     "selectNone": "Select none",
-    "whoSaved": "Saved."
+    "whoSaved": "Saved.",
+    "deletePostTitle": "Delete this post?"
   }
 }

@@ -449,3 +449,7 @@ When exams are generated, teachers already watching other exams (other grades, r
 ### Editing or deleting all exams at once
 
 Above the exam list, the buttons act on **what the list shows** (term, the type/round chosen in "Show", and the grade): **Delete all shown** (asks first) and **Edit all shown**: move every date by some days (e.g. `7` or `-7`), put the monthly exams in other periods (times and watchers follow the timetable), or start the final exams at another time (their length is kept). Everything is checked together and nothing changes if a section or teacher would clash or a date lands on a day off. To redo a whole round from scratch, "Publish" again replaces that round.
+
+### Confirmation dialog
+
+Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash icon, the question, what will be removed, a clear red button and a Cancel that has the focus, so Enter does not delete by accident). The browser's own `confirm()` is no longer used. Chips that hold a number or a class name (`1-A`, "Monthly exam 1") are isolated with `<bdi>` so Arabic text never splits them.

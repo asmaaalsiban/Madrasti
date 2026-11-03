@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -107,23 +107,27 @@ describe('changing or deleting all exams at once', () => {
     api.get.mockImplementation((url) => Promise.resolve({ data: { term_id: 1, data: url === '/terms' ? [{ id: 1, name: 'Term 1' }] : url === '/grade-levels' ? [{ id: 1, name_ar: 'الأول', name_en: 'Grade 1' }] : url === '/payroll/staff' ? [] : [session(1, '2027-01-03', 'Maths'), session(2, '2027-01-04', 'Arabic')] } }))
   })
 
-  it('deletes everything shown after a confirmation, for the chosen type', async () => {
+  it('asks in a proper dialog before deleting everything shown, then deletes the chosen type', async () => {
     api.delete.mockResolvedValue({ data: { data: { deleted: 2 } } })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     wrap(<ExamsAdminPage />)
     await screen.findByText('2 exams shown')
     fireEvent.change(screen.getByLabelText('Show'), { target: { value: 'monthly-1' } })
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/exams', { params: { kind: 'monthly', round: '1' } }))
     fireEvent.click(await screen.findByRole('button', { name: 'Delete all shown' }))
-    expect(window.confirm).toHaveBeenCalledWith('Delete all 2 exams shown? This cannot be undone.')
+    const dialog = await screen.findByRole('dialog', { name: 'Delete all 2 exams shown? This cannot be undone.' })
+    expect(dialog).toHaveTextContent('Monthly exam 1: every exam shown will be removed')
+    expect(api.delete).not.toHaveBeenCalled() // nothing until confirmed
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete all shown' }))
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/exams', { params: { term_id: 1, kind: 'monthly', round: 1 } }))
   })
 
-  it('does not delete when the confirmation is refused', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
+  it('does not delete when the dialog is cancelled', async () => {
     wrap(<ExamsAdminPage />)
     fireEvent.click(await screen.findByRole('button', { name: 'Delete all shown' }))
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
     expect(api.delete).not.toHaveBeenCalled()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
   it('moves all the shown exams by days and by periods in one request', async () => {
@@ -185,5 +189,21 @@ describe('what students, parents and teachers see', () => {
     wrap(<ChildExamsPage />, '/parent/children/5/exams', '/parent/children/:id/exams')
     expect(await screen.findByRole('heading', { name: 'Exams of Ali' })).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/students/5/exams')
+  })
+})
+
+describe('deleting one exam', () => {
+  it('asks first with the exam named, then deletes', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { term_id: 1, data: url === '/terms' ? [{ id: 1, name: 'Term 1' }] : url === '/grade-levels' ? [] : url === '/payroll/staff' ? [] : [session(1, '2027-01-03', 'Maths')] } }))
+    api.delete.mockResolvedValue({ data: {} })
+    wrap(<ExamsAdminPage />)
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Edit' }))[0])
+    const edit = await screen.findByRole('dialog', { name: /Maths/ })
+    fireEvent.click(within(edit).getAllByRole('button', { name: 'Delete' })[0])
+    const ask = await screen.findByRole('dialog', { name: 'Delete this exam?' })
+    expect(ask).toHaveTextContent('Maths · 1-A · 2027-01-03')
+    expect(api.delete).not.toHaveBeenCalled()
+    fireEvent.click(within(ask).getByRole('button', { name: 'Delete' }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/exams/1'))
   })
 })
