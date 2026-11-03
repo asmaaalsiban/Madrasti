@@ -15,7 +15,7 @@ const wrap = (ui, path = '/', route = '/') => render(
 )
 
 const overview = {
-  max_rounds: 3, riders: 1,
+  riders: 1,
   rounds: [{ id: 1, name_ar: 'الجولة الأولى', name_en: 'First round', starts_at: '07:30', ends_at: '13:00', riders: 1 }, { id: 2, name_ar: 'الجولة الثانية', name_en: 'Second round', starts_at: null, ends_at: null, riders: 0 }],
   buses: [{ id: 9, number: '1', driver_name: 'Abu Ali', driver_phone: '0790000000', capacity: 30, area_from: 'Downtown', area_to: 'School', notes: null, is_active: true, round_ids: [1], load: { 1: { pickup: 1, dropoff: 0 } } }],
 }
@@ -42,11 +42,11 @@ describe('transport', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/transport/buses', expect.objectContaining({ number: '2', driver_name: 'Abu Omar', round_ids: [2], capacity: 30 })))
   })
 
-  it('rounds tab lets you add a round until the maximum', async () => {
-    api.get.mockResolvedValue({ data: { ...overview, max_rounds: 2 } })
+  it('rounds tab has no limit on the number of rounds', async () => {
+    api.get.mockResolvedValue({ data: overview })
     wrap(<TransportPage />)
     fireEvent.click(await screen.findByRole('tab', { name: 'Rounds' }))
-    expect(screen.getByRole('button', { name: 'Add a round' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Add a round' })).toBeEnabled()
     expect(screen.getByText('First round')).toBeInTheDocument()
   })
 

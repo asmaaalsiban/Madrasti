@@ -1976,7 +1976,7 @@
     "nameEn": "Name (English)",
     "startsAt": "Starts",
     "endsAt": "Ends",
-    "roundsHelp": "A round is a shift of the school day (first, second, third). Up to {{max}}.",
+    "roundsHelp": "A round is a shift of the school day (first, second, third…). Add as many as the school has.",
     "noTimes": "No times set",
     "studentsCount_one": "{{count}} student",
     "studentsCount_other": "{{count}} students",
@@ -2000,6 +2000,8 @@
       "round": "Round",
       "pickup": "To school",
       "dropoff": "Home"
-    }
+    },
+    "willJoinRound": "will be added to this round",
+    "noBusesYet": "No buses yet: add buses in the Buses tab first."
   }
 }
