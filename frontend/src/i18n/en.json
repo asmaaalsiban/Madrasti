@@ -2216,5 +2216,202 @@
     "instructions": "Instructions for parents (optional)",
     "instructionsHint": "e.g. write the student name in the transfer note",
     "enabled": "Offer bank transfer to parents"
+  },
+  "legal": {
+    "home": "Home",
+    "docs": "Legal",
+    "updated": "Last updated: {{date}}",
+    "draft": "This text is a draft prepared for the platform and has not yet been reviewed by a lawyer. It will be reviewed before the service is offered to schools.",
+    "company": {
+      "title": "Business details",
+      "name": "Business",
+      "registration": "Registration / tax number",
+      "address": "Address",
+      "email": "Privacy contact",
+      "phone": "Phone"
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "updated": "November 2026",
+      "sections": [
+        {
+          "h": "1. Who is responsible for your data",
+          "p": [
+            "Each school that uses {{company}} decides why and how the data of its students, parents and staff is used: the school is the \"controller\" of that data. {{company}} provides the platform and processes the data only on the school's behalf and on its instructions (the \"processor\").",
+            "For anything about your or your child's data, contact your school first. You can also write to us at the privacy contact below."
+          ]
+        },
+        {
+          "h": "2. What data is processed",
+          "p": [
+            "Only what a school needs to run its work:"
+          ],
+          "list": [
+            "Accounts: name, email or phone, role, language and the arrangement of your own screens.",
+            "Students: name, student number, date of birth, gender, section and grade, guardians' contact details.",
+            "School records: attendance, grades, behavior notes, homework, lesson summaries, exams, school bus and fee accounts.",
+            "Staff: job, contract and salary, attendance and tasks.",
+            "Messages, announcements, surveys and approvals, and the photos or files that people attach.",
+            "Payments: what was paid, when, by whom, and the reference of the payment. Card numbers are typed on the payment provider's own page and never reach us."
+          ]
+        },
+        {
+          "h": "3. Children's data",
+          "p": [
+            "Most of the data is about children. It is entered by the school and seen only by the people who need it: the student, their parents or guardians, the teachers of their sections and the school's management. A parent sees only their own children.",
+            "Photos of students in the class feed are published by teachers for the section only. The school is responsible for obtaining the consent of parents or guardians before publishing photos or other personal data of a child, and for telling them how to withdraw it."
+          ]
+        },
+        {
+          "h": "4. Why the data is used",
+          "p": [
+            "To run the school: attendance, grades, timetables, communication between the school and families, fees and payments, staff payroll and school transport. The data is not sold and is not used for advertising or profiling."
+          ]
+        },
+        {
+          "h": "5. Who else receives data",
+          "list": [
+            "The payment provider chosen by the school (for example PayTabs), only the data needed to take a payment.",
+            "Our hosting and email providers, who store or send data on our behalf.",
+            "Push-notification services of your device's browser, if you switch notifications on.",
+            "Authorities, only when the law requires it."
+          ]
+        },
+        {
+          "h": "6. How the data is protected",
+          "p": [
+            "Each school's data is kept in its own separate database. Connections are encrypted, passwords are stored hashed, payment keys are stored encrypted, access depends on the role, changes to grades, attendance and fees are recorded in an audit log, and backups are kept."
+          ]
+        },
+        {
+          "h": "7. How long data is kept",
+          "p": [
+            "While the school uses the service, and afterwards for the period the school and the law require (for example financial records). When a school ends its subscription its data is returned or deleted as agreed with it."
+          ]
+        },
+        {
+          "h": "8. Your rights",
+          "p": [
+            "You may ask to see, correct, receive a copy of, or delete your data, or object to how it is used, subject to what the law requires the school to keep (for example payment records). Ask your school, or write to the privacy contact below; we will pass the request to the school and help it answer."
+          ]
+        },
+        {
+          "h": "9. Cookies and similar storage",
+          "p": [
+            "We only store what the service needs to work. See the cookies notice."
+          ]
+        },
+        {
+          "h": "10. Changes",
+          "p": [
+            "If this policy changes in an important way, schools and users will be told in the app."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of use",
+      "updated": "November 2026",
+      "sections": [
+        {
+          "h": "1. The service",
+          "p": [
+            "{{company}} is a platform that schools use to manage academic work, communication with families, fees and staff. These terms apply to everyone who uses it: schools, staff, students and parents. A school may add its own rules."
+          ]
+        },
+        {
+          "h": "2. Accounts",
+          "p": [
+            "Accounts are created by the school. Keep your password private, do not share your account, and tell the school if you think someone else used it. The school may deactivate an account."
+          ]
+        },
+        {
+          "h": "3. What the school is responsible for",
+          "list": [
+            "The accuracy of the data it enters and the lawfulness of using it.",
+            "Obtaining the consent of parents or guardians where it is needed, in particular for photos and other personal data of children.",
+            "Giving the right roles to the right people."
+          ]
+        },
+        {
+          "h": "4. Acceptable use",
+          "p": [
+            "Do not use the service to harass or harm anyone, to share unlawful or offensive content, to try to reach data you are not allowed to see, or to disturb the service."
+          ]
+        },
+        {
+          "h": "5. Payments",
+          "p": [
+            "Fees are owed to the school, and online payments go to the school's own payment account. {{company}} does not take a share of what parents pay the school. Refunds of school fees are decided by the school under its own policy; contact the school."
+          ]
+        },
+        {
+          "h": "6. Content",
+          "p": [
+            "You remain responsible for what you post (messages, photos, files). By posting it you allow the service to store it and show it to the people it is meant for."
+          ]
+        },
+        {
+          "h": "7. Availability",
+          "p": [
+            "We work to keep the service available and to protect the data, but we cannot promise it will never be interrupted or free of errors."
+          ]
+        },
+        {
+          "h": "8. Liability",
+          "p": [
+            "To the extent the law allows, {{company}} is not liable for indirect losses, or for the school's decisions and the content it enters. Nothing in these terms limits a liability that the law does not allow to be limited."
+          ]
+        },
+        {
+          "h": "9. Changes and ending",
+          "p": [
+            "We may change these terms and will tell users in the app when we do. A school or a user may stop using the service at any time."
+          ]
+        },
+        {
+          "h": "10. Law",
+          "p": [
+            "These terms follow the law of the country where the company is established, shown in the business details below."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookies and local storage",
+      "updated": "November 2026",
+      "sections": [
+        {
+          "h": "What we store on your device",
+          "p": [
+            "Only what is needed for the service to work. We do not use advertising or tracking cookies, and we do not use analytics that follow you."
+          ],
+          "list": [
+            "Your sign-in (so you stay signed in).",
+            "The code of your school.",
+            "Your language and the arrangement of your screens.",
+            "A copy of the app's files so it opens quickly and can be installed on your phone."
+          ]
+        },
+        {
+          "h": "Fonts and other files",
+          "p": [
+            "Fonts and images are served from our own server, not from third parties, so your address is not sent to anyone else when a page opens."
+          ]
+        },
+        {
+          "h": "Payment pages",
+          "p": [
+            "When you pay by card you are taken to the payment provider's own page, which has its own cookie rules."
+          ]
+        },
+        {
+          "h": "Your choice",
+          "p": [
+            "Because we only use what is strictly necessary, there is nothing to accept. You can clear this storage in your browser or by signing out, but you will have to sign in again. If we ever add anything that is not strictly necessary, we will ask for your consent first."
+          ]
+        }
+      ]
+    }
   }
 }
