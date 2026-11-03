@@ -27,6 +27,8 @@ return [
     'task_done' => 'أنجز :name المهمة: :title',
     'task_reminder' => 'مهمة موعدها غداً: :title',
     'task_overdue' => 'مهمة متأخرة: :title',
+    'data_request' => 'طلب :name تعديل أو حذف بيانات شخصية',
+    'data_request_answered' => 'ردّت المدرسة على طلبك بخصوص البيانات',
     'installment' => 'قسط بقيمة :amount يستحق :due',
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'chat_message' => 'أرسل لك :sender رسالة',

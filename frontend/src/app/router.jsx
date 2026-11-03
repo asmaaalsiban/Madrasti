@@ -80,6 +80,8 @@ import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
+import PrivacyPage from '../features/Privacy/PrivacyPage'
+import PrivacyRequestsPage from '../features/Privacy/PrivacyRequestsPage'
 import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
 import TransfersPage from '../features/Finance/pages/TransfersPage'
@@ -110,6 +112,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/grades', element: <ChildGradesPage /> },
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/exams', element: <ChildExamsPage /> },
+    { path: 'privacy', element: <PrivacyPage /> },
     { path: 'children/:id/transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
@@ -124,6 +127,7 @@ const HOME_ROUTES = {
   student: [
     { index: true, element: <StudentHome /> },
     { path: 'timetable', element: <StudentTimetablePage /> },
+    { path: 'privacy', element: <PrivacyPage /> },
     { path: 'grades', element: <StudentHome /> },
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
@@ -168,6 +172,7 @@ const HOME_ROUTES = {
     { path: 'duties', element: <MyDutiesPage /> },
     { path: 'procurement', element: <ProcurementPage /> },
     { path: 'tasks', element: <TasksPage /> },
+    { path: 'privacy', element: <PrivacyPage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'payroll', element: <PayrollPage base="/teacher" /> },
     { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
@@ -230,6 +235,8 @@ export const routes = [
               { path: '/admin/duties', element: <DutiesAdminPage /> },
               { path: '/admin/procurement', element: <ProcurementPage /> },
               { path: '/admin/tasks', element: <TasksPage /> },
+              { path: '/admin/privacy', element: <PrivacyPage /> },
+              { path: '/admin/privacy-requests', element: <PrivacyRequestsPage /> },
               { path: '/admin/staff-access', element: <StaffAccessPage /> },
               { path: '/admin/transport', element: <TransportPage /> },
               { path: '/admin/stories', element: <StoriesPage /> },

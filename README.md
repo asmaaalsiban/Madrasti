@@ -542,3 +542,8 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - The privacy policy states the school is the data controller and the platform the processor (a data-processing agreement with each school is still needed), and that the school is responsible for parents' consent for photos of children.
 - **Fonts are self-hosted** (`@fontsource`, SIL OFL): no visitor's address goes to Google. **Run `npm install` after pulling.** The app uses no analytics, advertising or tracking, so there is no cookie-consent banner: only strictly necessary storage (the cookies page explains it; add consent before adding anything that is not necessary).
 - `THIRD_PARTY.md` lists every outside service, font, icon set and licence: keep it up to date.
+
+## My data: a copy, deletion and correction requests
+- Every account (parent, student, staff, principal) has **Privacy and my data** in its user menu: **download a copy of my data** (a parent also of each child's) as a file, and **ask the school to delete or correct data**. The copy only holds what the person may see (e.g. behavior notes the school did not show to families are not included).
+- The principal answers in **System → Data requests**: *done* (and what was done) or *refused with a reason*, for example payment records the law makes the school keep. The person is notified and reads the answer. A request is recorded in the audit log. Deleting is a decision of the school (nothing is deleted automatically).
+- API: `GET /api/privacy/export[?student_id=]`, `GET|POST /api/privacy/requests`, `GET /api/privacy/requests/all`, `PUT /api/privacy/requests/{id}` (principal). Needs `php artisan tenants:migrate`.

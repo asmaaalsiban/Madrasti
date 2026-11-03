@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, KeyRound, Languages, LogOut, Repeat } from 'lucide-react'
+import { ChevronDown, KeyRound, Languages, LockKeyhole, LogOut, Repeat } from 'lucide-react'
 import { useAuth } from '../../features/Auth/AuthProvider'
 import { clearSchool, goTo } from '../../tenant/school'
 
@@ -43,6 +43,7 @@ export default function UserMenu({ detail }) {
           <hr className="mb-1" />
           <button type="button" role="menuitem" className={item} onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}><Languages aria-hidden size={18} />{t('common.language')}</button>
           <Link role="menuitem" to="/change-password" className={item} onClick={() => setOpen(false)}><KeyRound aria-hidden size={18} />{t('auth.changePassword.link')}</Link>
+          <Link role="menuitem" to={`/${user?.role}/privacy`} className={item} onClick={() => setOpen(false)}><LockKeyhole aria-hidden size={18} />{t('privacy.menu')}</Link>
           <button type="button" role="menuitem" className={item} onClick={() => { clearSchool(); goTo('/find-school') }}><Repeat aria-hidden size={18} />{t('central.switchSchool')}</button>
           <hr className="my-1" />
           <button type="button" role="menuitem" className={`${item} text-red-700`} onClick={logout}><LogOut aria-hidden size={18} />{t('common.logout')}</button>
