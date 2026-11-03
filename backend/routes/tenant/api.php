@@ -85,10 +85,12 @@ Route::prefix('auth')->group(function (): void {
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
-        Route::put('layout', [LayoutController::class, 'update']);
         Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('throttle:change-password');
     });
 });
+
+// How a person arranged their own screens (a signed-in, active account that has chosen its own password).
+Route::middleware('school-user')->put('auth/layout', [LayoutController::class, 'update']);
 
 // A parent signed in by phone number puts a verified email on the account (after choosing their own password).
 Route::middleware(['school-user', 'throttle:email-code'])->prefix('auth')->group(function (): void {
