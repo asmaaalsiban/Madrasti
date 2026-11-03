@@ -2051,6 +2051,10 @@
     "progress": "{{done}} of {{total}} done",
     "noneMine": "You have no tasks.",
     "noneGiven": "You have not given any task yet.",
-    "deleteQuestion": "Delete the task \"{{title}}\"?"
+    "deleteQuestion": "Delete the task \"{{title}}\"?",
+    "filterByJob": "Filter by job",
+    "allJobs": "All jobs",
+    "noMatch": "Nobody matches.",
+    "chosenCount": "{{count}} chosen"
   }
 }

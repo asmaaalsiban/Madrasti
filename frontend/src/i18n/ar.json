@@ -2055,6 +2055,10 @@
     "progress": "أُنجزت {{done}} من {{total}}",
     "noneMine": "لا توجد مهام لديك.",
     "noneGiven": "لم توزّع أي مهمة بعد.",
-    "deleteQuestion": "حذف المهمة \"{{title}}\"؟"
+    "deleteQuestion": "حذف المهمة \"{{title}}\"؟",
+    "filterByJob": "تصفية حسب الوظيفة",
+    "allJobs": "كل الوظائف",
+    "noMatch": "لا يوجد من يطابق.",
+    "chosenCount": "تم اختيار {{count}}"
   }
 }
