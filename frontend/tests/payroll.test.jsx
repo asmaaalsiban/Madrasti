@@ -154,6 +154,23 @@ describe('MyPayslipsPage and notifications', () => {
     expect(card).toHaveTextContent('10/11')
   })
 
+  it('draws the deductions as a slice taken out of what was earned, for this month first, and the chart sits at the top of the page', async () => {
+    const commitment = { month: '2026-11', scores: {}, lines: [{ code: 'absence', kind: 'deduction', amount: '24.00', score: 2 }], estimate: { base: '300.00', additions: '20.00', deductions: '24.00', net: '296.00' } }
+    api.get.mockImplementation((url) => Promise.resolve({ data: { currency: 'JOD', ...(url === '/payroll/commitment' ? commitment : { data: url === '/payroll/my-contract' ? null : paid }) } }))
+    wrap(<MyPayslipsPage base="/teacher" />)
+    const chart = await screen.findByLabelText('Salary breakdown', { selector: 'figure' })
+    await waitFor(() => expect(chart).toHaveTextContent('296.00')) // this month so far (estimate) is the first one shown
+    expect(chart).toHaveTextContent('−24.00')
+    expect(chart).toHaveTextContent('8%') // 24 of the 320 earned
+    expect(chart).toHaveTextContent('93%') // what is left to receive
+    expect(screen.getByRole('tab', { name: '2026-11 ~' })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(screen.getByRole('tab', { name: '2026-10' }))
+    expect(chart).toHaveTextContent('950.00')
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(chart.compareDocumentPosition(screen.getByLabelText('This month so far')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy() // the chart comes before everything else
+  })
+
   it('writes the payroll notifications', () => {
     const text = (kind, params) => notificationText(i18n.t.bind(i18n), 'en', { kind, params })
     expect(text('payroll_submitted', { month: '2026-11' })).toContain('2026-11')

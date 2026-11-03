@@ -507,3 +507,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 
 ## Header icons (communication)
 - Every account (principal, staff, students, parents) has the communication tools as round icons at the top, next to the user menu: **chat, announcements, class feed, notifications**. They are no longer tiles on the home pages or links in the principal's side menu. A member of staff does not see an icon the principal switched off (see "What staff see"). Shared component: `components/shared/HeaderIcons.jsx`.
+
+### My salary: the donut
+- The donut is the first thing on **My salary**. The whole circle is what the person earned (salary + additions); the **red slice is what was taken off it** (absence, lateness, other deductions) and the blue part is what they receive (in the middle). The first chip is **this month so far** (an estimate, so an absence shows up at once); the others are the paid months.

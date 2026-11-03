@@ -1541,7 +1541,8 @@
     "absentOn": "Days missed",
     "estimateNote": "This is what the month would pay if it were paid now. The final amount is the approved payroll.",
     "refreshFromAttendance": "Update from attendance",
-    "refreshHint": "Works the automatic deductions and bonuses (absence, punctuality, summaries, plans) out again from the attendance recorded so far. Lines you added by hand are kept."
+    "refreshHint": "Works the automatic deductions and bonuses (absence, punctuality, summaries, plans) out again from the attendance recorded so far. Lines you added by hand are kept.",
+    "chartNote": "The whole circle is what you earned (salary + additions). Red is what was taken off it; blue is what you receive."
   },
   "renewals": {
     "title": "Student renewal",
