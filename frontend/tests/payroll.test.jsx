@@ -72,6 +72,14 @@ describe('PayrollRunPage', () => {
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
   })
 
+  it('updates the automatic deductions of a draft from the attendance recorded so far', async () => {
+    api.get.mockResolvedValue(run('draft'))
+    api.post.mockResolvedValue({ data: {} })
+    wrap(<PayrollRunPage base="/teacher" />, '/payroll/9', '/payroll/:id')
+    fireEvent.click(await screen.findByRole('button', { name: 'Update from attendance' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/payroll/runs/9/refresh-commitment'))
+  })
+
   it('lets the principal approve or send back, but not edit', async () => {
     auth.user = { role: 'admin' }
     api.get.mockResolvedValue(run('submitted'))

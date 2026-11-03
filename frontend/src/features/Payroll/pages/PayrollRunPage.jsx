@@ -182,6 +182,7 @@ export default function PayrollRunPage({ base }) {
       <div className="flex flex-wrap gap-2">
         {manage && draft && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'submit' })}>{t('payroll.submit')}</button>}
         {manage && draft && <button type="button" className="rounded border px-4 py-1.5" onClick={() => api.post('/payroll/runs', { month: run.month }).then(refresh)}>{t('payroll.addNewcomers')}</button>}
+        {manage && draft && <button type="button" className="rounded border px-4 py-1.5 text-brand" title={t('payroll.refreshHint')} onClick={() => api.post(`/payroll/runs/${run.id}/refresh-commitment`).then(refresh).catch((err) => setError(errorOf(err, t('admin.actions.error'))))}>{t('payroll.refreshFromAttendance')}</button>}
         {manage && draft && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'rule' })}>{t('payroll.applyRuleAll')}</button>}
         {manage && draft && <button type="button" className="rounded border border-red-300 px-4 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('payroll.deleteRun')}</button>}
         {approve && run.status === 'submitted' && <button type="button" className="rounded bg-green-700 px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'approve' })}>{t('payroll.approve')}</button>}

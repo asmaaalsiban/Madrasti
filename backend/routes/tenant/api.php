@@ -177,6 +177,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
     Route::get('runs/{run}', [PayrollController::class, 'show']);
     Route::delete('runs/{run}', [PayrollController::class, 'destroy']);
     Route::post('runs/{run}/submit', [PayrollController::class, 'submit']);
+    Route::post('runs/{run}/refresh-commitment', [PayrollController::class, 'refreshCommitment']);
     Route::post('runs/{run}/approve', [PayrollController::class, 'approve']);
     Route::post('runs/{run}/send-back', [PayrollController::class, 'sendBack']);
     Route::post('runs/{run}/pay', [PayrollController::class, 'pay']);
