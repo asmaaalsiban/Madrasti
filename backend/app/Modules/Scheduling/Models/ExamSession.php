@@ -48,6 +48,6 @@ class ExamSession extends Model
 
     public function invigilators(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'exam_invigilators', 'exam_session_id', 'user_id')->withTimestamps();
+        return $this->belongsToMany(User::class, 'exam_invigilators', 'exam_session_id', 'user_id')->withPivot(['period_from', 'period_to'])->withTimestamps();
     }
 }

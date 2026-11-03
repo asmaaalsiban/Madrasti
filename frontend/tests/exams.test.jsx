@@ -102,6 +102,18 @@ describe('final exams', () => {
   })
 })
 
+describe('a teacher who watches only some periods', () => {
+  it('shows the periods next to the name for admins and the own window for the teacher', async () => {
+    auth.user = { role: 'teacher', id: 9 }
+    const exam = session(1, '2027-01-03', 'Maths', { invigilators: [{ id: 9, name: 'Sara Ali', period_from: 3, period_to: 3, starts_at: '09:25', ends_at: '10:10' }, { id: 10, name: 'Omar', period_from: 2, period_to: 2, starts_at: '08:35', ends_at: '09:20' }] })
+    api.get.mockResolvedValue({ data: { data: { watching: [exam], teaching: [] } } })
+    wrap(<MyExamsPage />)
+    expect(await screen.findByText('09:25 – 10:10')).toBeInTheDocument() // her own period, not the whole exam
+    expect(screen.queryByText('08:35 – 10:10')).not.toBeInTheDocument()
+    expect(screen.getByText('Period 3')).toBeInTheDocument()
+  })
+})
+
 describe('what students, parents and teachers see', () => {
   it('lists a student\'s exams by day', async () => {
     auth.user = { role: 'student' }

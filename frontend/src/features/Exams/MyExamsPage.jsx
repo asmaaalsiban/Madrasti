@@ -16,7 +16,7 @@ export default function MyExamsPage() {
   return (
     <section className="space-y-6">
       <h1>{t('exams.myTitle')}</h1>
-      <div className="space-y-3"><h2 className="text-lg">{t('exams.watching')}</h2><ExamList sessions={data.watching} empty={t('exams.noneWatching')} /></div>
+      <div className="space-y-3"><h2 className="text-lg">{t('exams.watching')}</h2><ExamList sessions={data.watching} empty={t('exams.noneWatching')} meId={user?.id} /></div>
       <div className="space-y-3"><h2 className="text-lg">{t('exams.teaching')}</h2><ExamList sessions={data.teaching} empty={t('exams.noneTeaching')} /></div>
     </section>
   )

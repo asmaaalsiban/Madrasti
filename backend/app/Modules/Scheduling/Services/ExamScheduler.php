@@ -68,7 +68,9 @@ class ExamScheduler
         $teachers = User::where('role', Role::Teacher)->where('is_active', true)->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', collect(StaffType::cases())->filter(fn ($t) => $t->category() === 'teaching')->map->value->all()))->orderBy('name')->get(['id', 'name']);
         $duties = $teachers->pluck('id')->mapWithKeys(fn ($id) => [$id => 0])->all();
         $warnings = [];
-        $rows = $final ? $this->finalWatchers($placed, $teachers, $duties, (int) ($o['invigilators'] ?? 1), $warnings) : $this->monthlyWatchers($placed, $teachers, $duties, (bool) ($o['fill_missing'] ?? true), $warnings);
+        // Teachers already watching other exams (other grades, rounds or kinds that this run does not replace) are not free then.
+        $busy = $this->existingBusy($term, $final ? 'final' : 'monthly', $round, $rooms->flatten()->pluck('id')->all());
+        $rows = $final ? $this->finalWatchers($placed, $teachers, $duties, (int) ($o['invigilators'] ?? 1), $busy, $warnings) : $this->monthlyWatchers($placed, $teachers, $duties, (bool) ($o['fill_missing'] ?? true), $busy, $warnings);
         $rows = array_map(fn ($r) => $r + ['kind' => $final ? 'final' : 'monthly', 'round' => $round], $rows);
 
         return ['rows' => $rows, 'warnings' => array_values(array_unique($warnings)), 'days' => collect($rows)->pluck('exam_date')->unique()->count(), 'grades' => $grades->count(), 'classroom_ids' => collect($rows)->pluck('classroom_id')->unique()->values()->all()];
@@ -89,96 +91,162 @@ class ExamScheduler
     /**
      * The teachers the timetable gives this section in those periods of that day.
      *
-     * @return list<int>
+     * @return array<int, array{period_from: int, period_to: int}> teacher id => the periods they have the section
      */
     public function watchersFor(Classroom $room, string $date, int $from, int $to): array
     {
         $dow = Carbon::parse($date)->dayOfWeek;
-        $ids = [];
+        $periods = [];
         foreach (range($from, $to) as $number) {
             $id = $this->teacherOf($room, $dow, $number);
             if ($id !== null) {
-                $ids[$id] = true;
+                $periods[$id][] = $number;
             }
         }
 
-        return array_keys($ids);
+        return array_map(fn ($numbers) => ['period_from' => min($numbers), 'period_to' => max($numbers)], $periods);
     }
 
     /**
-     * Monthly exams: whoever has the section in those periods on the timetable watches; a period without a teacher gets a free one.
+     * Monthly exams: whoever has the section in those periods on the timetable watches it, during the periods they have it (a
+     * teacher with 1-A in period 2 and 1-B in period 3 watches each in its own period); a period without a teacher gets a free one.
      *
      * @param  list<array<string, mixed>>  $placed
      * @param  Collection<int, User>  $teachers
      * @param  array<int, int>  $duties
+     * @param  array<int, list<array{string, string, string}>>  $busy
      * @param  list<string>  $warnings
      * @return list<array<string, mixed>>
      */
-    private function monthlyWatchers(array $placed, Collection $teachers, array $duties, bool $fillMissing, array &$warnings): array
+    private function monthlyWatchers(array $placed, Collection $teachers, array $duties, bool $fillMissing, array &$busy, array &$warnings): array
     {
-        $taken = []; // slot key => teacher ids already used as a stand-in
         $rows = [];
         foreach ($placed as $p) {
             $slot = $p['slot'];
-            $key = $slot['date'].' '.$slot['start'];
-            $watchers = [];
+            $periods = []; // teacher => period numbers
             $missing = [];
             foreach (range($slot['period_from'], $slot['period_to']) as $number) {
                 $teacher = $this->teacherOf($p['classroom'], $slot['dow'], $number);
-                $teacher === null ? $missing[] = $number : $watchers[$teacher] = true;
+                $teacher === null ? $missing[] = $number : $periods[$teacher][] = $number;
             }
             foreach ($missing as $number) {
-                $stand = $fillMissing ? $this->freeTeacher($teachers, $duties, $taken[$key] ?? [], $slot['dow'], $number) : null;
+                $when = $this->timesFor($slot['date'], $number, $number) ?? ['start' => $slot['start'], 'end' => $slot['end']];
+                $stand = $fillMissing ? $this->freeTeacher($teachers, $duties, $busy, $slot['date'], $when, $slot['dow'], $number) : null;
                 if ($stand === null) {
                     $warnings[] = __('exams.nobody_for_period', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'period' => $number]);
 
                     continue;
                 }
-                $watchers[$stand] = true;
-                $taken[$key][] = $stand;
+                $periods[$stand][] = $number;
                 $duties[$stand]++;
             }
-            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => $slot['period_from'], 'period_to' => $slot['period_to'], 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilator_ids' => array_keys($watchers)];
+            $watchers = [];
+            foreach ($periods as $teacher => $numbers) {
+                $from = min($numbers);
+                $to = max($numbers);
+                $when = $this->timesFor($slot['date'], $from, $to) ?? ['start' => $slot['start'], 'end' => $slot['end']];
+                if ($this->isBusy($busy, (int) $teacher, $slot['date'], $when['start'], $when['end'])) {
+                    $warnings[] = __('exams.teacher_double', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'teacher' => User::whereKey($teacher)->value('name')]);
+                }
+                $this->book($busy, (int) $teacher, $slot['date'], $when['start'], $when['end']);
+                $watchers[] = ['id' => (int) $teacher, 'period_from' => $from, 'period_to' => $to];
+            }
+            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => $slot['period_from'], 'period_to' => $slot['period_to'], 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilators' => $watchers, 'invigilator_ids' => array_column($watchers, 'id')];
         }
-
 
         return $rows;
     }
 
     /**
-     * Final exams: students come only for the exam, so any teacher can watch: free at that time, not the subject's own teacher,
-     * those who know the section first, fewest duties first.
+     * Final exams: students come only for the exam, so any teacher can watch: free at that time (not in another room, not the
+     * subject's own teacher), those who know the section first, fewest duties first.
      *
      * @param  list<array<string, mixed>>  $placed
      * @param  Collection<int, User>  $teachers
      * @param  array<int, int>  $duties
+     * @param  array<int, list<array{string, string, string}>>  $busy
      * @param  list<string>  $warnings
      * @return list<array<string, mixed>>
      */
-    private function finalWatchers(array $placed, Collection $teachers, array $duties, int $needed, array &$warnings): array
+    private function finalWatchers(array $placed, Collection $teachers, array $duties, int $needed, array &$busy, array &$warnings): array
     {
         $ownTeacher = DB::table('classroom_subject_teacher')->get()->mapWithKeys(fn ($r) => [$r->classroom_id.'-'.$r->subject_id => (int) $r->teacher_id]);
         $knows = DB::table('classroom_subject_teacher')->get()->groupBy('classroom_id')->map(fn ($g) => $g->pluck('teacher_id')->map(fn ($v) => (int) $v)->flip());
-        $busy = [];
         $rows = [];
         foreach ($placed as $p) {
             $slot = $p['slot'];
-            $key = $slot['date'].' '.$slot['start'];
             $own = $ownTeacher[$p['classroom']->id.'-'.$p['subject_id']] ?? null;
             $picked = [];
-            $free = $teachers->filter(fn ($t) => $t->id !== $own && ! isset($busy[$key][$t->id]))->sortBy(fn ($t) => [isset($knows[$p['classroom']->id][$t->id]) ? 0 : 1, $duties[$t->id], $t->id])->values();
+            $free = $teachers->filter(fn ($t) => $t->id !== $own && ! $this->isBusy($busy, $t->id, $slot['date'], $slot['start'], $slot['end']))
+                ->sortBy(fn ($t) => [isset($knows[$p['classroom']->id][$t->id]) ? 0 : 1, $duties[$t->id], $t->id])->values();
             foreach ($free->take($needed) as $t) {
                 $picked[] = $t->id;
-                $busy[$key][$t->id] = true;
+                $this->book($busy, $t->id, $slot['date'], $slot['start'], $slot['end']);
                 $duties[$t->id]++;
             }
             if (count($picked) < $needed) {
                 $warnings[] = __('exams.short_of_teachers', ['class' => $p['classroom']->name, 'date' => $slot['date'], 'got' => count($picked), 'needed' => $needed]);
             }
-            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => null, 'period_to' => null, 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilator_ids' => $picked];
+            $rows[] = ['classroom_id' => $p['classroom']->id, 'subject_id' => $p['subject_id'], 'exam_date' => $slot['date'], 'period_from' => null, 'period_to' => null, 'starts_at' => $slot['start'], 'ends_at' => $slot['end'], 'invigilators' => array_map(fn ($id) => ['id' => $id, 'period_from' => null, 'period_to' => null], $picked), 'invigilator_ids' => $picked];
         }
 
         return $rows;
+    }
+
+    /**
+     * When each teacher is already watching an exam this run does not replace: teacher => list of [date, start, end]. A watcher with
+     * periods is busy only during those periods, the others during the whole exam.
+     *
+     * @param  list<int>  $roomIds
+     * @return array<int, list<array{string, string, string}>>
+     */
+    private function existingBusy(Term $term, string $kind, int $round, array $roomIds): array
+    {
+        $busy = [];
+        $sessions = ExamSession::with('invigilators')->get()->reject(fn ($s) => $s->term_id === $term->id && $s->kind === $kind && (int) $s->round === $round && in_array($s->classroom_id, $roomIds, true));
+        foreach ($sessions as $s) {
+            foreach ($s->invigilators as $u) {
+                [$start, $end] = $this->watchWindow($s, $u->pivot->period_from, $u->pivot->period_to);
+                $busy[$u->id][] = [$s->exam_date->toDateString(), $start, $end];
+            }
+        }
+
+        return $busy;
+    }
+
+    /**
+     * The moments one watcher of a session is busy: the periods they were given, else the whole exam.
+     *
+     * @return array{string, string}
+     */
+    public function watchWindow(ExamSession $s, ?int $from, ?int $to): array
+    {
+        if ($s->period_from !== null && $from !== null) {
+            $times = $this->timesFor($s->exam_date->toDateString(), $from, $to ?? $from);
+            if ($times !== null) {
+                return [$times['start'], $times['end']];
+            }
+        }
+
+        return [(string) $s->starts_at, (string) $s->ends_at];
+    }
+
+    /** @param  array<int, list<array{string, string, string}>>  $busy */
+    private function isBusy(array $busy, int $user, string $date, string $start, string $end): bool
+    {
+        foreach ($busy[$user] ?? [] as [$d, $s, $e]) {
+            if ($d === $date && $s < $end && $e > $start) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @param  array<int, list<array{string, string, string}>>  $busy */
+    private function book(array &$busy, int $user, string $date, string $start, string $end): void
+    {
+        $busy[$user][] = [$date, $start, $end];
     }
 
     /**
@@ -217,18 +285,19 @@ class ExamScheduler
     }
 
     /**
-     * A teacher with no lesson in that period and not already standing in elsewhere then: the one with the fewest duties.
+     * A teacher with no lesson in that period and not watching another exam then: the one with the fewest duties.
      *
      * @param  Collection<int, User>  $teachers
      * @param  array<int, int>  $duties
-     * @param  list<int>  $taken
+     * @param  array<int, list<array{string, string, string}>>  $busy
+     * @param  array{start: string, end: string}  $when
      */
-    private function freeTeacher(Collection $teachers, array $duties, array $taken, int $dow, int $number): ?int
+    private function freeTeacher(Collection $teachers, array $duties, array &$busy, string $date, array $when, int $dow, int $number): ?int
     {
         $teaching = DB::table('timetable_entries')->join('periods', 'periods.id', '=', 'timetable_entries.period_id')->where('periods.day_of_week', $dow)->where('periods.number', $number)->pluck('timetable_entries.teacher_id')->map(fn ($v) => (int) $v)->flip();
-        $free = $teachers->filter(fn ($t) => ! $teaching->has($t->id) && ! in_array($t->id, $taken, true))->sortBy(fn ($t) => [$duties[$t->id], $t->id])->first();
+        $free = $teachers->filter(fn ($t) => ! $teaching->has($t->id) && ! $this->isBusy($busy, $t->id, $date, $when['start'], $when['end']))->sortBy(fn ($t) => [$duties[$t->id], $t->id])->first();
 
-        return $free?->id;
+        return $free?->id; // it is booked by the caller together with the rest of that exam's watchers
     }
 
     /**
@@ -243,8 +312,8 @@ class ExamScheduler
             $round = $plan['rows'][0]['round'] ?? 1;
             ExamSession::where('term_id', $term->id)->where('kind', $kind)->where('round', $round)->whereIn('classroom_id', $plan['classroom_ids'])->delete();
             foreach ($plan['rows'] as $row) {
-                $session = ExamSession::create(['term_id' => $term->id] + collect($row)->except('invigilator_ids')->all());
-                $session->invigilators()->sync($row['invigilator_ids']);
+                $session = ExamSession::create(['term_id' => $term->id] + collect($row)->except(['invigilator_ids', 'invigilators'])->all());
+                $session->invigilators()->sync(collect($row['invigilators'])->mapWithKeys(fn ($w) => [$w['id'] => ['period_from' => $w['period_from'], 'period_to' => $w['period_to']]])->all());
             }
         });
         $first = $plan['rows'][0] ?? ['kind' => 'monthly', 'round' => 1];
@@ -314,10 +383,27 @@ class ExamScheduler
             ->where('starts_at', '<', $end)->where('ends_at', '>', $start)->first();
     }
 
-    /** @param  Collection<int, int>  $userIds  teachers already watching another room at this time. */
-    public function busyInvigilators(ExamSession $session, string $date, string $start, string $end): Collection
+    /**
+     * The teachers among `$teachers` who are already watching another exam at that time (only the periods they were given count).
+     *
+     * @param  array<int, array{0: int, 1: string, 2: string}>|list<int>  $teachers  ids, or [id, start, end] when they watch only part of the exam
+     * @return Collection<int, int>
+     */
+    public function busyInvigilators(ExamSession $session, string $date, string $start, string $end, array $teachers): Collection
     {
-        return DB::table('exam_invigilators')->join('exam_sessions', 'exam_sessions.id', '=', 'exam_invigilators.exam_session_id')
-            ->where('exam_sessions.id', '!=', $session->id)->whereDate('exam_sessions.exam_date', $date)->where('exam_sessions.starts_at', '<', $end)->where('exam_sessions.ends_at', '>', $start)->pluck('exam_invigilators.user_id');
+        // The session being edited is not a clash with itself.
+        $busy = [];
+        foreach (ExamSession::with('invigilators')->where('id', '!=', $session->id)->get() as $s) {
+            foreach ($s->invigilators as $u) {
+                [$a, $b] = $this->watchWindow($s, $u->pivot->period_from, $u->pivot->period_to);
+                $busy[$u->id][] = [$s->exam_date->toDateString(), $a, $b];
+            }
+        }
+
+        return collect($teachers)->filter(function ($t) use ($busy, $date, $start, $end) {
+            [$id, $from, $to] = is_array($t) ? $t : [$t, $start, $end];
+
+            return $this->isBusy($busy, (int) $id, $date, $from, $to);
+        })->map(fn ($t) => (int) (is_array($t) ? $t[0] : $t))->values();
     }
 }
