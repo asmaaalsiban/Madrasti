@@ -10,6 +10,7 @@ use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Enrollment;
 use App\Modules\Communication\Services\AnnouncementAudience;
 use App\Modules\Surveys\Models\Survey;
+use App\Shared\Attachments\Attachment;
 use App\Modules\Surveys\Models\SurveyQuestion;
 use App\Modules\Surveys\Services\SurveyService;
 use App\Shared\Enums\Role;
@@ -241,6 +242,7 @@ class SurveyController extends Controller
             },
             'status' => $status, 'closes_at' => $s->closes_at?->toIso8601String(), 'created_at' => $s->created_at?->toIso8601String(), 'author' => $s->author?->name,
             'recipient_count' => (int) ($s->recipients_count ?? 0), 'response_count' => (int) ($s->responses_count ?? 0),
+            'attachments' => Attachment::list(Attachment::groupedFor('survey', [$s->id])->get($s->id)),
         ];
     }
 

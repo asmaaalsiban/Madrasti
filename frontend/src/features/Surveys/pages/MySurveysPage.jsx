@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AttachmentList } from '../../../components/shared/Attachments'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
@@ -53,6 +54,7 @@ function SurveyCard({ s }) {
         <span className={`rounded-full px-2 py-0.5 text-xs ${STATE_STYLE[s.state]}`}>{t(`surveys.state.${s.state}`)}{!s.open && s.state === 'pending' ? ` · ${t('surveys.status.closed')}` : ''}</span>
       </div>
       {s.description && <p className="text-sm text-slate-700">{s.description}</p>}
+      <AttachmentList items={s.attachments} />
 
       {(canAnswer || s.state !== 'pending') && s.questions.map((q) => (
         <div key={q.id}>

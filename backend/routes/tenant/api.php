@@ -63,6 +63,7 @@ use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
 use App\Modules\TeacherTools\Http\Controllers\LessonPlanController;
 use App\Modules\Transport\Http\Controllers\TransportController;
+use App\Shared\Attachments\AttachmentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -481,4 +482,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group
     Route::put('{task}', [TaskController::class, 'update']);
     Route::delete('{task}', [TaskController::class, 'destroy']);
     Route::put('{task}/status', [TaskController::class, 'status']);
+});
+
+// Files attached to tasks, a task's hand-in and surveys: the checks are by owner (see AttachmentAccess).
+Route::middleware('school-user')->prefix('attachments')->group(function (): void {
+    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey'])->whereNumber('id');
+    Route::get('{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment');
+    Route::delete('{attachment}', [AttachmentController::class, 'destroy'])->whereNumber('attachment');
 });

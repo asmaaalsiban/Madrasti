@@ -1289,7 +1289,8 @@
     "staffChosen": "تم اختيار {{count}}",
     "noStaff": "لا يوجد موظفون مطابقون.",
     "staffCount": "{{count}} موظف",
-    "forMe": "الاستطلاعات الموجهة لي"
+    "forMe": "الاستطلاعات الموجهة لي",
+    "attachments": "صورة أو ملفات (اختياري)"
   },
   "signatures": {
     "title_page": "توقيعات شهادة الطالب",
@@ -2059,6 +2060,16 @@
     "filterByJob": "تصفية حسب الوظيفة",
     "allJobs": "كل الوظائف",
     "noMatch": "لا يوجد من يطابق.",
-    "chosenCount": "تم اختيار {{count}}"
+    "chosenCount": "تم اختيار {{count}}",
+    "handIn": "التسليم (ملفات أو صور)"
+  },
+  "attachments": {
+    "title": "المرفقات",
+    "add": "إرفاق ملفات",
+    "choose": "اختيار ملفات",
+    "remove": "إزالة {{name}}",
+    "open": "فتح {{name}}",
+    "hint": "صور أو PDF أو Word أو Excel أو PowerPoint أو نص. حتى {{max}} ملفات، 10 ميغابايت لكل ملف.",
+    "uploading": "جارٍ الرفع…"
   }
 }

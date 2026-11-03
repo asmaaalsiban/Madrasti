@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Tasks\Models;
 
 use App\Models\User;
+use App\Shared\Attachments\Attachment;
 use App\Shared\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,11 @@ class TaskAssignee extends Model
     protected function casts(): array
     {
         return ['done_at' => 'datetime'];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn (TaskAssignee $part) => Attachment::purge('task_part', $part->id));
     }
 
     /** @return BelongsTo<Task, $this> */

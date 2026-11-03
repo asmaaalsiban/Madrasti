@@ -7,6 +7,8 @@ import { DateInput } from '../../components/shared/DateInput'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 import { useAuth } from '../Auth/AuthProvider'
+import { uploadAttachments } from '../../api/attachments'
+import { AttachmentList, AttachmentsField, LiveAttachments } from '../../components/shared/Attachments'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const STATUSES = ['todo', 'doing', 'done']
@@ -43,7 +45,9 @@ function MyTask({ task }) {
         <Badges task={task} />
       </header>
       {task.description && <p className="whitespace-pre-line text-sm">{task.description}</p>}
+      <AttachmentList items={task.attachments} />
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+      <LiveAttachments ownerType="task_part" ownerId={task.my_part_id} items={task.assignees.find((a) => a.id === task.my_part_id)?.attachments ?? []} label={t('tasks.handIn')} />
       <label className="block text-sm">{t('tasks.note')}<input className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
       <div className="flex flex-wrap gap-2" role="group" aria-label={t('tasks.status')}>
         {STATUSES.map((s) => (
@@ -61,8 +65,16 @@ function TaskDialog({ task, onClose }) {
   const people = useQuery({ queryKey: ['tasks', 'people'], queryFn: async () => (await api.get('/tasks/people')).data.data })
   const [form, setForm] = useState({ title: task?.title ?? '', description: task?.description ?? '', due_on: task?.due_on ?? '', priority: task?.priority ?? 'normal', user_ids: task?.assignees.map((a) => a.user_id) ?? [] })
   const [error, setError] = useState('')
+  const [files, setFiles] = useState([])
+  const [dropped, setDropped] = useState([])
   const save = useMutation({
-    mutationFn: () => { const body = { ...form, due_on: form.due_on || null, description: form.description || null }; return task ? api.put(`/tasks/${task.id}`, body) : api.post('/tasks', body) },
+    mutationFn: async () => {
+      const body = { ...form, due_on: form.due_on || null, description: form.description || null }
+      const r = task ? await api.put(`/tasks/${task.id}`, body) : await api.post('/tasks', body)
+      await Promise.all(dropped.map((id) => api.delete(`/attachments/${id}`)))
+      await uploadAttachments('task', r.data.data.id, files)
+      return r
+    },
     onSuccess: () => { client.invalidateQueries({ queryKey: ['tasks'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -87,6 +99,7 @@ function TaskDialog({ task, onClose }) {
           <label className="block text-sm">{t('tasks.dueOn')}<DateInput className="mt-1 w-full rounded border p-2" value={form.due_on} onChange={set('due_on')} /></label>
           <label className="block text-sm">{t('tasks.priority')}<select className="mt-1 w-full rounded border p-2" value={form.priority} onChange={set('priority')}>{['low', 'normal', 'high'].map((p) => <option key={p} value={p}>{t(`tasks.priorities.${p}`)}</option>)}</select></label>
         </div>
+        <AttachmentsField files={files} onChange={setFiles} saved={(task?.attachments ?? []).filter((a) => !dropped.includes(a.id))} onRemoveSaved={(a) => setDropped([...dropped, a.id])} />
         <fieldset className="text-sm">
           <legend className="mb-1 flex w-full items-center justify-between">{t('tasks.assignTo')}
             <button type="button" className="text-brand" onClick={toggleShown}>{everyone ? t('tasks.clearAll') : t('tasks.selectAll')}</button>
@@ -131,6 +144,7 @@ function GivenTask({ task, onEdit, onDelete }) {
         <Badges task={task} />
       </header>
       {task.description && <p className="whitespace-pre-line text-sm">{task.description}</p>}
+      <AttachmentList items={task.attachments} />
       <div>
         <p className="mb-1 text-sm">{t('tasks.progress', { done: task.done_count, total: task.total })}</p>
         <div className="h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-brand" style={{ width: `${pct}%` }} /></div>
@@ -140,6 +154,12 @@ function GivenTask({ task, onEdit, onDelete }) {
           <li key={a.user_id} title={a.note ?? ''} className={`rounded-full px-3 py-1 ${STATUS_STYLE[a.status]}`}><bdi>{a.name}</bdi> · {t(`tasks.statuses.${a.status}`)}{a.note ? ` — ${a.note}` : ''}</li>
         ))}
       </ul>
+      {task.assignees.filter((a) => a.attachments?.length > 0).map((a) => (
+        <div key={a.user_id} className="space-y-1 rounded border bg-slate-50 p-2">
+          <p className="text-xs font-bold"><bdi>{a.name}</bdi> — {t('tasks.handIn')}</p>
+          <AttachmentList items={a.attachments} />
+        </div>
+      ))}
       {task.can_edit && (
         <span className="flex gap-1">
           <button type="button" aria-label={t('admin.actions.edit')} className="rounded border p-1.5" onClick={() => onEdit(task)}><Pencil size={16} aria-hidden /></button>

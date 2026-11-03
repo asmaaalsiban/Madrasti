@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Communication\Services\Notifier;
 use App\Modules\Tasks\Models\Task;
 use App\Modules\Tasks\Models\TaskAssignee;
+use App\Shared\Attachments\Attachment;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
 use Illuminate\Http\JsonResponse;
@@ -30,8 +31,9 @@ class TaskController extends Controller
     {
         $me = $this->user($request);
         $tasks = Task::with(['creator:id,name', 'assignees.user:id,name'])->whereHas('assignees', fn ($q) => $q->where('user_id', $me->id))->orderByRaw('due_on is null, due_on')->orderByDesc('id')->get();
+        $files = $this->files($tasks);
 
-        return response()->json(['data' => $tasks->map(fn ($t) => $this->present($t, $me))->values(), 'open' => $tasks->filter(fn ($t) => $t->assignees->firstWhere('user_id', $me->id)?->status !== 'done')->count()]);
+        return response()->json(['data' => $tasks->map(fn ($t) => $this->present($t, $me, $files))->values(), 'open' => $tasks->filter(fn ($t) => $t->assignees->firstWhere('user_id', $me->id)?->status !== 'done')->count()]);
     }
 
     /** Tasks I gave (management sees every task). */
@@ -41,7 +43,9 @@ class TaskController extends Controller
         abort_unless($this->canGive($me), 403, __('tasks.not_allowed'));
         $tasks = Task::with(['creator:id,name', 'assignees.user:id,name'])->when(! $me->hasRole(Role::Admin), fn ($q) => $q->where('created_by', $me->id))->orderByRaw('due_on is null, due_on')->orderByDesc('id')->get();
 
-        return response()->json(['data' => $tasks->map(fn ($t) => $this->present($t, $me))->values()]);
+        $files = $this->files($tasks);
+
+        return response()->json(['data' => $tasks->map(fn ($t) => $this->present($t, $me, $files))->values()]);
     }
 
     /** The people I may give a task to. */
@@ -65,7 +69,7 @@ class TaskController extends Controller
         }
         $this->tell($ids, $me, $task);
 
-        return response()->json(['data' => $this->present($task->load(['creator:id,name', 'assignees.user:id,name']), $me)], 201);
+        return response()->json(['data' => $this->present($task->load(['creator:id,name', 'assignees.user:id,name']), $me, $this->files(collect([$task])))], 201);
     }
 
     /** The giver (or management) changes the task and who has it: people who already started keep their progress. */
@@ -77,14 +81,16 @@ class TaskController extends Controller
         $task->update(collect($data)->except('user_ids')->all());
         $current = $task->assignees()->pluck('user_id');
         $wanted = $this->checkPeople($task->creator, $data['user_ids'], $current->all());
-        $task->assignees()->whereNotIn('user_id', $wanted)->delete();
+        $task->assignees()->whereNotIn('user_id', $wanted)->get()->each->delete();
         $added = collect($wanted)->diff($current)->values();
         foreach ($added as $id) {
             TaskAssignee::create(['task_id' => $task->id, 'user_id' => $id]);
         }
         $this->tell($added->all(), $me, $task);
 
-        return response()->json(['data' => $this->present($task->refresh()->load(['creator:id,name', 'assignees.user:id,name']), $me)]);
+        $task->refresh()->load(['creator:id,name', 'assignees.user:id,name']);
+
+        return response()->json(['data' => $this->present($task, $me, $this->files(collect([$task])))]);
     }
 
     public function destroy(Request $request, Task $task): Response
@@ -109,7 +115,9 @@ class TaskController extends Controller
             $this->notifier->toUsers([$task->created_by], 'task_done', ['name' => $me->name, 'title' => $task->title], $this->link($task->creator));
         }
 
-        return response()->json(['data' => $this->present($task->load(['creator:id,name', 'assignees.user:id,name']), $me)]);
+        $task->load(['creator:id,name', 'assignees.user:id,name']);
+
+        return response()->json(['data' => $this->present($task, $me, $this->files(collect([$task])))]);
     }
 
     private function user(Request $request): User
@@ -182,8 +190,22 @@ class TaskController extends Controller
         return $user?->hasRole(Role::Admin) ? '/admin/tasks' : '/teacher/tasks';
     }
 
-    /** @return array<string, mixed> */
-    private function present(Task $t, User $me): array
+    /**
+     * The files of these tasks and of their hand-ins, grouped by owner.
+     *
+     * @param  Collection<int, Task>  $tasks
+     * @return array{task: Collection, part: Collection}
+     */
+    private function files(Collection $tasks): array
+    {
+        return ['task' => Attachment::groupedFor('task', $tasks->pluck('id')), 'part' => Attachment::groupedFor('task_part', $tasks->flatMap->assignees->pluck('id'))];
+    }
+
+    /**
+     * @param  array{task: Collection, part: Collection}  $files
+     * @return array<string, mixed>
+     */
+    private function present(Task $t, User $me, array $files): array
     {
         $today = now()->toDateString();
         $mine = $t->assignees->firstWhere('user_id', $me->id);
@@ -194,9 +216,12 @@ class TaskController extends Controller
             'created_by' => ['id' => $t->creator?->id, 'name' => $t->creator?->name], 'created_at' => $t->created_at?->toIso8601String(),
             'can_edit' => $t->created_by === $me->id || $me->hasRole(Role::Admin),
             'overdue' => $t->due_on !== null && $t->due_on->toDateString() < $today && $open > 0,
-            'my_status' => $mine?->status, 'my_note' => $mine?->note,
+            'my_status' => $mine?->status, 'my_note' => $mine?->note, 'my_part_id' => $mine?->id,
+            'attachments' => Attachment::list($files['task']->get($t->id)),
             'done_count' => $t->assignees->count() - $open, 'total' => $t->assignees->count(),
-            'assignees' => $t->assignees->map(fn ($a) => ['user_id' => $a->user_id, 'name' => $a->user?->name, 'status' => $a->status, 'note' => $a->note, 'done_at' => $a->done_at?->toIso8601String()])->values(),
+            // A hand-in is seen by the person who made it, the giver and management.
+            'assignees' => $t->assignees->map(fn ($a) => ['id' => $a->id, 'user_id' => $a->user_id, 'name' => $a->user?->name, 'status' => $a->status, 'note' => $a->note, 'done_at' => $a->done_at?->toIso8601String(),
+                'attachments' => $a->user_id === $me->id || $t->created_by === $me->id || $me->hasRole(Role::Admin) ? Attachment::list($files['part']->get($a->id)) : []])->values(),
         ];
     }
 }

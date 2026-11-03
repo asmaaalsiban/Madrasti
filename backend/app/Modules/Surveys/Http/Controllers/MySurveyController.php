@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Surveys\Models\SurveyRecipient;
 use App\Modules\Surveys\Models\SurveyResponse;
 use App\Modules\Surveys\Services\SurveyService;
+use App\Shared\Attachments\Attachment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,13 +22,14 @@ class MySurveyController extends Controller
         $user = $request->user();
         $rows = SurveyRecipient::with(['survey.questions', 'student:id,name_ar,name_en'])->where('user_id', $user->id)->latest('id')->get();
         $responses = SurveyResponse::with('answers')->where('user_id', $user->id)->get()->keyBy(fn ($r) => $r->survey_id.'-'.($r->student_id ?? 0));
+        $files = Attachment::groupedFor('survey', $rows->pluck('survey_id')->unique());
 
-        return response()->json(['data' => $rows->map(function (SurveyRecipient $r) use ($responses): array {
+        return response()->json(['data' => $rows->map(function (SurveyRecipient $r) use ($responses, $files): array {
             $s = $r->survey;
             $response = $responses->get($s->id.'-'.($r->student_id ?? 0));
 
             return [
-                'id' => $r->id, 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'open' => $s->isOpen(),
+                'id' => $r->id, 'attachments' => Attachment::list($files->get($s->id)), 'type' => $s->type, 'title' => $s->title, 'description' => $s->description, 'open' => $s->isOpen(),
                 'closes_at' => $s->closes_at?->toIso8601String(), 'student' => $r->student?->only(['id', 'name_ar', 'name_en']),
                 'state' => $response === null ? 'pending' : ($response->decision ?? 'answered'),
                 'decision' => $response?->decision,

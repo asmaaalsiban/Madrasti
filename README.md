@@ -486,3 +486,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - A task has a title, details, due date, priority and one or more people (the people list has a name search and a job filter; "select all" takes only who is shown). Each person has **their own status** (To do / In progress / Done) and a note; the giver follows the progress (done count + bar) and can edit, add or remove people (progress is kept) or delete.
 - Notifications: new task, task finished (to the giver), and a daily `tasks:remind` (07:30, per school) for tasks due tomorrow or overdue since yesterday.
 - Screens: `/teacher/tasks` (tile "Tasks"), `/admin/tasks` (People group). API: `GET /api/tasks/mine|given|people`, `POST /api/tasks`, `PUT|DELETE /api/tasks/{id}`, `PUT /api/tasks/{id}/status`. Needs `php artisan tenants:migrate`.
+
+## Attachments (files and photos)
+- One reusable system (`attachments` table, private storage, `/api/attachments/...`) for anything that needs files. For now: **tasks** (the giver attaches files to the task; each assignee hands in files/photos), and **surveys, polls and parent approvals** (the author attaches an image or files that the recipients see).
+- Allowed: images, PDF, Word, Excel, PowerPoint, text/CSV; up to 10 files of 10 MB each per owner. Files open only for people who may see the owner (task people, the giver and management; a survey's author and recipients; a hand-in only by its author, the giver and management). Deleting the owner deletes its files.
+- Frontend: `AttachmentsField` (choose files in a form, uploaded after saving), `LiveAttachments` (add/remove at once), `AttachmentList` (show) in `components/shared/Attachments.jsx`: reuse them for any new screen that needs files.
+- Needs `php artisan tenants:migrate`.
