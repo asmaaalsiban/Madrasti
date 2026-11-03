@@ -113,7 +113,7 @@ export default function TemplatesPage({ base }) {
       <p className="text-sm text-slate-600">{t('payroll.templatesHelp')}</p>
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['ruleName', 'kind', 'value', 'category'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.${c}`)}</th>)}<th /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['ruleName', 'kind', 'value', 'category'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
           <tbody>
             {data.data.map((r) => (
               <tr key={r.id} className="border-t">

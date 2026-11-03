@@ -21,7 +21,7 @@ export default function HomeworkList({ endpoint, canAnswer = false }) {
         <li key={h.id} className="space-y-1 rounded-lg border bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-bold">{h.title}</span>
-            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">{subject(h.subject)}</span>
+            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-deep-harbor">{subject(h.subject)}</span>
           </div>
           {h.description && <p className="whitespace-pre-line text-sm text-slate-700">{h.description}</p>}
           <HomeworkPhotos ids={h.images} />

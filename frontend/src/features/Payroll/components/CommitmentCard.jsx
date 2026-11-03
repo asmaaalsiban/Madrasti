@@ -18,7 +18,7 @@ export default function CommitmentCard({ currency }) {
         return (
           <div key={code} className="space-y-1">
             <div className="flex items-center justify-between text-sm"><span>{t(`payroll.rulesCodes.${code}`)} <span className="text-xs text-slate-500">({s.done}/{s.expected})</span></span><b dir="ltr">{s.score}%</b></div>
-            <div className="h-2 overflow-hidden rounded bg-slate-100"><div className={`h-full ${s.score >= 90 ? 'bg-green-600' : s.score >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${s.score}%` }} /></div>
+            <div className="h-2 overflow-hidden rounded bg-slate-100"><div className={`h-full ${s.score >= 90 ? 'bg-green-700' : s.score >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${s.score}%` }} /></div>
             {l && <p className={`text-xs ${l.kind === 'bonus' ? 'text-green-700' : 'text-red-700'}`}>{t(`payroll.auto.${code}.${l.kind}`, { score: l.score })}: <span dir="ltr">{l.kind === 'bonus' ? '+' : '−'}{l.amount} {currency}</span></p>}
           </div>
         )

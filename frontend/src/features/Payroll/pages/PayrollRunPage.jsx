@@ -200,7 +200,7 @@ export default function PayrollRunPage({ base }) {
 
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['name', 'base', 'additions', 'deductions', 'net', 'pay'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['name', 'base', 'additions', 'deductions', 'net', 'pay'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
           <tbody>
             {run.payslips.map((s) => (
               <tr key={s.id} className="border-t align-top">

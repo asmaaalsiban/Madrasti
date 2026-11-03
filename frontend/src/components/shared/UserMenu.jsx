@@ -26,9 +26,10 @@ export default function UserMenu({ detail }) {
   const initial = (user?.name ?? '?').trim().charAt(0)
   return (
     <div className="relative" ref={box}>
-      <button type="button" aria-expanded={open} aria-haspopup="menu" aria-label={t('common.account')} className="flex items-center gap-2 rounded-full border bg-snow py-1 ps-1 pe-3" onClick={() => setOpen((v) => !v)}>
+      <button type="button" aria-expanded={open} aria-haspopup="menu" className="flex items-center gap-2 rounded-full border bg-snow py-1 ps-1 pe-3" onClick={() => setOpen((v) => !v)}>
         <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-deep-harbor text-sm font-bold text-white">{initial}</span>
-        <span className="hidden min-w-0 text-start leading-tight sm:block">
+        <span className="sr-only">{t('common.account')}: {user?.name}</span>
+        <span aria-hidden className="hidden min-w-0 text-start leading-tight sm:block">
           <span className="block max-w-40 truncate text-sm font-bold text-deep-harbor">{user?.name}</span>
           {detail && <span className="block max-w-40 truncate text-xs text-slate-500">{detail}</span>}
         </span>

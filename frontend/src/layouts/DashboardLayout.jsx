@@ -31,7 +31,7 @@ export default function DashboardLayout() {
           <UserMenu detail={[label, detail].filter(Boolean).join(' · ')} />
         </div>
       </header>
-      <main className="mx-auto max-w-5xl p-4">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none">
         <BackButton />
         {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Outlet />}
       </main>

@@ -124,7 +124,7 @@ describe('TimetablePage', () => {
     renderPage(<TimetablePage />)
     expect(await screen.findByText('Math')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/timetable', { params: { classroom_id: 3 } })
-    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['', 'Sunday', 'Monday'])
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['Periods and days', 'Sunday', 'Monday'])
     const first = screen.getByRole('row', { name: /Period 1/ })
     expect(within(first).getByText('07:45 - 08:30')).toBeInTheDocument()
     expect(within(first).getByText('Math')).toBeInTheDocument()
@@ -177,7 +177,7 @@ describe('TimetablePage', () => {
     serve()
     renderPage(<TimetablePage />)
     expect(await screen.findByText('Math-ar')).toBeInTheDocument()
-    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['', 'الأحد', 'الإثنين'])
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['الحصص والأيام', 'الأحد', 'الإثنين'])
   })
 })
 

@@ -103,33 +103,35 @@ export default function ScoreSheetPage() {
           const result = resultOf(s)
           const first = s.first_score ?? (v.status === 'retake' && s.status !== 'retake' && s.score !== null ? s.score : null)
           return (
-            <li key={s.id} role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center gap-3 p-3">
-              <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
-              <span className="min-w-32 flex-1">
-                {nameOf(s)}
-                {first !== null && <span className="block text-xs text-slate-500">{t('studentGrades.firstAttempt', { score: first })}</span>}
-                {s.was_absent && v.status === '' && v.score === '' && (
-                  <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-amber-700">
-                    {t('grading.absentThatDay')}
-                    <button type="button" className="rounded border border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</button>
-                  </span>
-                )}
-              </span>
-              <select aria-label={t('grading.statusLabel')} className="rounded border p-2 text-sm" value={v.status} onChange={(e) => setStatus(s.id, e.target.value)}>
-                <option value="">{t('grading.statusNormal')}</option>
-                <option value="absent">{t('grading.statusAbsent')}</option>
-                <option value="makeup">{t('grading.statusMakeup')}</option>
-                <option value="retake">{t('grading.statusRetake')}</option>
-              </select>
-              <input
-                type="number" min="0" max={assessment.max_score} step="any" dir="ltr" aria-label={t('grading.score')} disabled={v.status === 'absent'}
-                className="w-24 rounded border p-2 disabled:bg-slate-100" value={v.score ?? ''} onChange={edit(s.id, 'score')}
-              />
-              <span className="w-28 text-center">{result && <ResultBadge kind={result} />}</span>
-              <input
-                aria-label={t('grading.remark')} placeholder={t('grading.remark')}
-                className="min-w-32 flex-1 rounded border p-2" value={v.remark ?? ''} onChange={edit(s.id, 'remark')}
-              />
+            <li key={s.id}>
+              <div role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center gap-3 p-3">
+                <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
+                <span className="min-w-32 flex-1">
+                  {nameOf(s)}
+                  {first !== null && <span className="block text-xs text-slate-500">{t('studentGrades.firstAttempt', { score: first })}</span>}
+                  {s.was_absent && v.status === '' && v.score === '' && (
+                    <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-amber-700">
+                      {t('grading.absentThatDay')}
+                      <button type="button" className="rounded border border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</button>
+                    </span>
+                  )}
+                </span>
+                <select aria-label={t('grading.statusLabel')} className="rounded border p-2 text-sm" value={v.status} onChange={(e) => setStatus(s.id, e.target.value)}>
+                  <option value="">{t('grading.statusNormal')}</option>
+                  <option value="absent">{t('grading.statusAbsent')}</option>
+                  <option value="makeup">{t('grading.statusMakeup')}</option>
+                  <option value="retake">{t('grading.statusRetake')}</option>
+                </select>
+                <input
+                  type="number" min="0" max={assessment.max_score} step="any" dir="ltr" aria-label={t('grading.score')} disabled={v.status === 'absent'}
+                  className="w-24 rounded border p-2 disabled:bg-slate-100" value={v.score ?? ''} onChange={edit(s.id, 'score')}
+                />
+                <span className="w-28 text-center">{result && <ResultBadge kind={result} />}</span>
+                <input
+                  aria-label={t('grading.remark')} placeholder={t('grading.remark')}
+                  className="min-w-32 flex-1 rounded border p-2" value={v.remark ?? ''} onChange={edit(s.id, 'remark')}
+                />
+              </div>
             </li>
           )
         })}

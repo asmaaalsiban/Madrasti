@@ -57,7 +57,7 @@ export default function AdminLayout() {
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
               {group.key && (
-                <p className="flex items-center justify-between px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/55">
+                <p className="flex items-center justify-between px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/80">
                   {t(`admin.groups.${group.key}`)}
                   {editing && <MoveButtons vertical label={t(`admin.groups.${group.key}`)} canEarlier={gi > 1} canLater={gi < groups.length - 1} onEarlier={() => moveGroup(group.key, -1)} onLater={() => moveGroup(group.key, 1)} />}
                 </p>
@@ -92,7 +92,7 @@ export default function AdminLayout() {
             <UserMenu detail={t('roles.admin')} />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl p-4"><BackButton /><Outlet /></main>
+        <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none"><BackButton /><Outlet /></main>
       </div>
     </div>
   )

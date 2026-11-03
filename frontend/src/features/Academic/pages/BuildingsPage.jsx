@@ -103,7 +103,7 @@ export default function BuildingsPage() {
                 <thead className="bg-slate-100">
                   <tr>
                     {['floor', 'studentsCol', 'grades', 'classrooms', 'scienceLabs', 'computerLabs'].map((k) => <th key={k} className="p-2 text-start font-medium">{t(`buildings.${k}`)}</th>)}
-                    <th className="p-2" />
+                    <th><span className="sr-only">{t('a11y.actions')}</span></th>
                   </tr>
                 </thead>
                 <tbody>

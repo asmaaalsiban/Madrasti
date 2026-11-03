@@ -28,7 +28,7 @@ export default function ReviewPlansPage() {
         {(list.data ?? []).map((p) => (
           <PlanCard key={p.id} plan={p}>
             <div className="flex gap-2 pt-1">
-              <button type="button" className="rounded bg-green-600 px-3 py-1 text-sm text-white" onClick={() => decide.mutate({ id: p.id, decision: 'approve' })}>{t('lessonPlans.approve')}</button>
+              <button type="button" className="rounded bg-green-700 px-3 py-1 text-sm text-white" onClick={() => decide.mutate({ id: p.id, decision: 'approve' })}>{t('lessonPlans.approve')}</button>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => { setError(''); setRejecting(p) }}>{t('lessonPlans.reject')}</button>
             </div>
           </PlanCard>

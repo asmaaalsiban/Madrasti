@@ -548,6 +548,12 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - The principal answers in **System → Data requests**: *done* (and what was done) or *refused with a reason*, for example payment records the law makes the school keep. The person is notified and reads the answer. A request is recorded in the audit log. Deleting is a decision of the school (nothing is deleted automatically).
 - API: `GET /api/privacy/export[?student_id=]`, `GET|POST /api/privacy/requests`, `GET /api/privacy/requests/all`, `PUT /api/privacy/requests/{id}` (principal). Needs `php artisan tenants:migrate`.
 
+## Accessibility
+- Checked with **axe-core** (WCAG 2.1 A/AA + best practice) on the main screens of every role, in Arabic and English: `a11y/axe-check.js` (instructions at its top; run it before a release; it exits with an error when anything is found).
+- **Contrast**: the school's accent colour is darkened automatically just enough that text and white-on-colour buttons reach 4.5:1 (`frontend/src/tenant/color.js`); the default is `#006ddb`. Sidebar labels, status chips and the attendance buttons were fixed too. (A colour a person picks for their own icons in "Arrange" is their choice.)
+- **Keyboard**: a "Skip to the main content" link is the first Tab stop on every page, every control shows a focus ring, dialogs close with Escape. Each page has one `<main>`, one `<h1>`, ordered headings and unique landmarks.
+- **Names for screen readers**: icon buttons (chat, announcements, notifications, like, account menu) are named by their text plus the visible counter; tables have no empty header cells; images that carry meaning have alt text (photos opened from a labelled button are decorative).
+
 ## Parents' consent for photos of their child
 - A parent says **Allow / Do not allow** for each child in **Privacy and my data** (can change it any time); the principal can record a paper answer in **People → Photo consent**. Stored on the student (`photo_consent`: yes / no / no answer, with who and when).
 - The principal chooses what happens when a teacher posts **photos** to the class feed: **Only with consent** (recommended: photos go only to a group where every child's parents said yes; a "no" or no answer blocks), **Warn the teacher** (default for now: posts are allowed and the composer lists who has not said yes), or **No check**. Posts without photos are never blocked.

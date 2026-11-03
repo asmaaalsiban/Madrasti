@@ -281,7 +281,7 @@ function StudentsTab({ overview }) {
       </div>
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['student', 'classroom', 'pickup', 'dropoff'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`transport.cols.${c}`)}</th>)}<th /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['student', 'classroom', 'pickup', 'dropoff'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`transport.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
           <tbody>
             {(data ?? []).map((s) => (
               <tr key={s.id} className="border-t">

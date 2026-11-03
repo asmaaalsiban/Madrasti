@@ -45,7 +45,7 @@ describe('StoriesPage as a reader', () => {
     api.post.mockResolvedValue({ data: { data: {} } })
     wrap()
     await screen.findByText('Post 1')
-    fireEvent.click(screen.getByRole('button', { name: 'Like' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Like/ }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/stories/1/react'))
     fireEvent.click(screen.getByRole('button', { name: /Comments/ }))
     expect(await screen.findByText('Lovely!')).toBeInTheDocument()

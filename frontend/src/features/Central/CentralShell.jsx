@@ -11,7 +11,7 @@ export default function CentralShell({ children }) {
         <Link to="/" className="text-lg font-bold text-brand">{t('common.appName')}</Link>
         <LanguageSwitcher />
       </header>
-      <main className="mx-auto max-w-md px-4 py-8">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-md px-4 py-8 outline-none">{children}</main>
     </div>
   )
 }

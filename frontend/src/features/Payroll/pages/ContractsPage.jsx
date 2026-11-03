@@ -47,7 +47,7 @@ export default function ContractsPage({ base, canManage }) {
 
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['name', 'position', 'salary', 'period', 'state'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th className="p-2" /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['name', 'position', 'salary', 'period', 'state'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`payroll.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
           <tbody>
             {shown.map((r) => {
               const s = stateOf(r)

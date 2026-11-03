@@ -2420,7 +2420,8 @@
           ]
         }
       ]
-    }
+    },
+    "other": "Other legal documents"
   },
   "privacy": {
     "menu": "Privacy and my data",
@@ -2476,6 +2477,11 @@
       "denyFor": "Do not allow photos of {{name}}",
       "saved": "Saved."
     }
+  },
+  "a11y": {
+    "actions": "Actions",
+    "skip": "Skip to the main content",
+    "corner": "Periods and days"
   },
   "photoConsent": {
     "title": "Photo consent",

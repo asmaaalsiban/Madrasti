@@ -22,7 +22,7 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
       {data.fees.map((fee) => (
         <section key={fee.id} className="space-y-2 rounded-lg border bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-bold">{fee.description}</h3>
+            <h2 className="font-bold">{fee.description}</h2>
             <span className="text-sm text-slate-600">
               <Money value={fee.total} currency={c} />{Number(fee.discount) > 0 && <> − <Money value={fee.discount} currency={c} /> ({t('finance.discount')})</>}
             </span>
@@ -59,7 +59,7 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
           </div>
           {fee.payments.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium">{t('finance.payments')}</h4>
+              <h3 className="text-sm font-medium">{t('finance.payments')}</h3>
               <ul className="divide-y text-sm">
                 {fee.payments.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">

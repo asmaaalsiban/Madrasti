@@ -133,7 +133,7 @@ export default function RenewalsPage() {
           </div>
           <div className="overflow-x-auto rounded-lg border bg-white">
             <table className="w-full text-start text-sm">
-              <thead className="bg-slate-50"><tr>{['student', 'from', 'to', 'state'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`renewals.cols.${c}`)}</th>)}<th /></tr></thead>
+              <thead className="bg-slate-50"><tr>{['student', 'from', 'to', 'state'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`renewals.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
               <tbody>
                 {shown.map((r) => (
                   <tr key={r.id} className="border-t align-top">
