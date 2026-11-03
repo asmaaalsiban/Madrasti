@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -13,6 +14,7 @@ function PostDialog({ post, onClose }) {
   const client = useQueryClient()
   const [form, setForm] = useState({ name: post?.name ?? '', starts_at: post?.starts_at ?? '07:15', ends_at: post?.ends_at ?? '07:40', staff_count: post?.staff_count ?? 1, days: post?.days ?? [], is_active: post?.is_active ?? true })
   const [error, setError] = useState('')
+  const [confirming, setConfirming] = useState(false)
   const save = useMutation({
     mutationFn: () => (post ? api.put(`/duties/posts/${post.id}`, form) : api.post('/duties/posts', form)),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['duties'] }); onClose() },
@@ -42,13 +44,14 @@ function PostDialog({ post, onClose }) {
         </div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />{t('duties.active')}</label>
         <div className="flex justify-between gap-2">
-          {post ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => window.confirm(t('duties.deletePostConfirm')) && drop.mutate()}>{t('admin.actions.delete')}</button> : <span />}
+          {post ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button> : <span />}
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
             <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
           </span>
         </div>
       </form>
+      <ConfirmDialog open={confirming} message={t('duties.deletePostTitle')} description={`${post?.name} — ${t('duties.deletePostConfirm')}`} onConfirm={() => drop.mutate()} onCancel={() => setConfirming(false)} busy={drop.isPending} />
     </Modal>
   )
 }

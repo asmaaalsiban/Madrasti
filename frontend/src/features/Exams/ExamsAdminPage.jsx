@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -16,6 +17,7 @@ function EditDialog({ session, onClose }) {
   const [mode, setMode] = useState(byPeriods ? 'periods' : 'time')
   const [watchers, setWatchers] = useState(session.invigilators.map((u) => u.id))
   const [touched, setTouched] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState('')
   const save = useMutation({
     mutationFn: () => api.put(`/exams/${session.id}`, mode === 'periods'
@@ -60,13 +62,14 @@ function EditDialog({ session, onClose }) {
           </ul>
         </div>
         <div className="flex justify-between gap-2">
-          <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => window.confirm(t('exams.deleteConfirm')) && drop.mutate()}>{t('admin.actions.delete')}</button>
+          <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button>
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
             <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
           </span>
         </div>
       </form>
+      <ConfirmDialog open={confirming} message={t('exams.deleteConfirm')} description={`${subject} · ${session.classroom.name} · ${session.date}`} onConfirm={() => drop.mutate()} onCancel={() => setConfirming(false)} busy={drop.isPending} />
     </Modal>
   )
 }
@@ -120,6 +123,7 @@ export default function ExamsAdminPage() {
   const [error, setError] = useState('')
   const [edit, setEdit] = useState(null)
   const [bulk, setBulk] = useState(false)
+  const [confirmAll, setConfirmAll] = useState(false)
   const [gradeFilter, setGradeFilter] = useState('')
   const [view, setView] = useState('') // '' = all, 'monthly-1', 'final'...
   // Until a term is chosen the server says which one is meant (the running or the next one).
@@ -235,11 +239,12 @@ export default function ExamsAdminPage() {
           <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm">
             <span className="font-semibold text-deep-harbor">{t('exams.shownCount', { count: shown })}</span>
             <button type="button" className="rounded border bg-snow px-3 py-1 text-brand" onClick={() => setBulk(true)}>{t('exams.editAll')}</button>
-            <button type="button" disabled={dropAll.isPending} className="rounded border border-red-300 bg-snow px-3 py-1 text-red-700 disabled:opacity-50" onClick={() => window.confirm(t('exams.deleteAllConfirm', { count: shown })) && dropAll.mutate()}>{t('exams.deleteAll')}</button>
+            <button type="button" disabled={dropAll.isPending} className="rounded border border-red-300 bg-snow px-3 py-1 text-red-700 disabled:opacity-50" onClick={() => setConfirmAll(true)}>{t('exams.deleteAll')}</button>
           </div>
         )}
         {list.data ? <AdminList sessions={list.data.data} onEdit={setEdit} /> : <p className="text-slate-500">{t('common.loading')}</p>}
       </div>
+      <ConfirmDialog open={confirmAll} message={t('exams.deleteAllConfirm', { count: shown })} description={t('exams.deleteAllWhat', { what: view ? (view === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: view.split('-')[1] })) : t('exams.allExams') })} confirmLabel={t('exams.deleteAll')} busy={dropAll.isPending} onConfirm={() => { dropAll.mutate(); setConfirmAll(false) }} onCancel={() => setConfirmAll(false)} />
       {bulk && <BulkDialog scope={scope} count={shown} onClose={() => setBulk(false)} />}
       {edit && <EditDialog session={edit} onClose={() => setEdit(null)} />}
     </section>
@@ -262,8 +267,8 @@ function AdminList({ sessions, onEdit }) {
               <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-2 text-sm">
                 <span className="w-44 text-slate-600"><span dir="ltr">{s.starts_at} – {s.ends_at}</span>{s.period_from !== null && <span className="ms-2 text-xs text-slate-400">{s.period_from === s.period_to ? t('exams.periodOne', { n: s.period_from }) : t('exams.periodsRange', { from: s.period_from, to: s.period_to })}</span>}</span>
                 <span className="font-bold text-deep-harbor">{subject(s)}</span>
-                <span className="rounded-full bg-deep-harbor px-2 py-0.5 text-[11px] font-semibold text-white">{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</span>
-                <span className="rounded-full bg-sky-tint px-3 py-0.5 text-xs">{s.classroom.name}</span>
+                <span className="inline-block whitespace-nowrap rounded-full bg-deep-harbor px-2.5 py-0.5 text-[11px] font-semibold text-white"><bdi>{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</bdi></span>
+                <span className="inline-block whitespace-nowrap rounded-full bg-sky-tint px-3 py-0.5 text-xs"><bdi dir="ltr">{s.classroom.name}</bdi></span>
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => (u.period_from !== null && s.period_from !== null && (u.period_from !== s.period_from || u.period_to !== s.period_to) ? `${u.name} (${u.period_from === u.period_to ? t('exams.periodOne', { n: u.period_from }) : t('exams.periodsRange', { from: u.period_from, to: u.period_to })})` : u.name)).join('، ')}</span>
                 <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => onEdit(s)}>{t('admin.actions.edit')}</button>
               </li>
