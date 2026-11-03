@@ -14,6 +14,8 @@ return [
     'student_renewed' => ':student is registered for :title',
     'exam_schedule' => ':title exam schedule is published',
     'exam_duty' => ':title: you have exam duty',
+    'duty_assigned' => 'You have duties: :title',
+    'duty_reminder' => 'Duty tomorrow: :title',
     'installment' => 'Installment of :amount due :due',
     'installment_overdue' => 'Overdue installment of :amount (due :due)',
     'chat_message' => ':sender sent you a message',

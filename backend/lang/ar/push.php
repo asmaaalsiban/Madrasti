@@ -14,6 +14,8 @@ return [
     'student_renewed' => 'تم تجديد تسجيل :student للعام :title',
     'exam_schedule' => 'نُشر جدول امتحانات :title',
     'exam_duty' => 'لديك مراقبة امتحانات :title',
+    'duty_assigned' => 'تم توزيع مناوباتك: :title',
+    'duty_reminder' => 'مناوبتك غدًا: :title',
     'installment' => 'قسط بقيمة :amount يستحق :due',
     'installment_overdue' => 'قسط متأخر بقيمة :amount (استحقاقه :due)',
     'chat_message' => 'أرسل لك :sender رسالة',

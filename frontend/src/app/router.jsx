@@ -76,6 +76,8 @@ import AuditLogPage from '../features/Audit/AuditLogPage'
 import ExamsAdminPage from '../features/Exams/ExamsAdminPage'
 import MyExamsPage from '../features/Exams/MyExamsPage'
 import ChildExamsPage from '../features/Exams/ChildExamsPage'
+import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
+import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -149,6 +151,7 @@ const HOME_ROUTES = {
     { path: 'staff-attendance', element: <StaffAttendancePage /> },
     { path: 'payroll/rules', element: <RulesPage base="/teacher" /> },
     { path: 'payroll/templates', element: <TemplatesPage base="/teacher" /> },
+    { path: 'duties', element: <MyDutiesPage /> },
     { path: 'payroll', element: <PayrollPage base="/teacher" /> },
     { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
     { path: 'payroll/payslips/:id', element: <PayslipPage /> },
@@ -206,6 +209,7 @@ export const routes = [
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/exams', element: <ExamsAdminPage /> },
+              { path: '/admin/duties', element: <DutiesAdminPage /> },
               { path: '/admin/audit-log', element: <AuditLogPage /> },
               { path: '/admin/staff-attendance', element: <StaffAttendancePage /> },
               { path: '/admin/payroll/rules', element: <RulesPage base="/admin" /> },
