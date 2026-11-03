@@ -14,6 +14,7 @@ export default function MyPayslipsPage({ base }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(null)
   const { data, isLoading } = useQuery({ queryKey: ['payroll', 'mine'], queryFn: async () => (await api.get('/payroll/payslips/mine')).data })
+  const commitment = useQuery({ queryKey: ['payroll', 'commitment'], queryFn: async () => (await api.get('/payroll/commitment')).data })
   const mine = useQuery({ queryKey: ['payroll', 'my-contract'], queryFn: async () => (await api.get('/payroll/my-contract')).data })
   if (isLoading || !data) return <p className="text-slate-500">{t('common.loading')}</p>
   const [latest, ...older] = data.data
@@ -21,6 +22,8 @@ export default function MyPayslipsPage({ base }) {
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('payroll.mineTitle')}</h1>
+
+      <SalaryDonut rows={data.data} estimate={commitment.data?.estimate ? { month: commitment.data.month, ...commitment.data.estimate } : null} currency={data.currency} />
 
       <ThisMonthCard currency={data.currency} />
 
@@ -50,8 +53,6 @@ export default function MyPayslipsPage({ base }) {
       )}
 
       <CommitmentCard currency={data.currency} />
-      <SalaryDonut rows={data.data} currency={data.currency} />
-
       {older.length > 0 && <h2 className="font-bold">{t('payroll.previousMonths')}</h2>}
       <ul className="space-y-2">
         {older.map((p) => (
