@@ -1,6 +1,7 @@
 <?php
 
 use App\Shared\Payments\DemoPaymentGateway;
+use App\Shared\Payments\PayTabsGateway;
 
 return [
     /*
@@ -14,8 +15,15 @@ return [
 
     'drivers' => [
         'demo' => DemoPaymentGateway::class,
+        'paytabs' => PayTabsGateway::class,
     ],
 
     // Credentials of real providers, e.g. 'tap' => ['secret_key' => env('TAP_SECRET_KEY'), 'webhook_secret' => env('TAP_WEBHOOK_SECRET')].
-    'providers' => [],
+    'providers' => [
+        'paytabs' => [
+            'profile_id' => env('PAYTABS_PROFILE_ID'),
+            'server_key' => env('PAYTABS_SERVER_KEY'),
+            'base_url' => env('PAYTABS_BASE_URL', 'https://secure-jordan.paytabs.com'),
+        ],
+    ],
 ];

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Central\Http\Controllers\CentralAuthController;
+use App\Central\Http\Controllers\PaymentWebhookController;
 use App\Central\Http\Controllers\RegisterSchoolController;
 use App\Central\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 // Public self-service school registration (throttled, can be switched off).
 Route::post('register', RegisterSchoolController::class)->middleware('throttle:register');
+
+// The payment provider's callback: the school code is in the URL (a provider cannot send our X-School header); its signature is what is trusted.
+Route::post('payments/webhook/{school}/{provider}', PaymentWebhookController::class)->middleware('throttle:120,1');
 
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [CentralAuthController::class, 'login'])->middleware('throttle:login');

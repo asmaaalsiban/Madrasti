@@ -42,7 +42,14 @@ class OnlinePaymentController extends Controller
             'return_url' => ['nullable', 'url', 'max:500'], // where a provider's page sends the parent back
         ]);
         $payment = $this->online->open($student, $user, StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['installment_id'] ?? null, $data['payer_name']);
-        $checkout = $this->manager->gateway()->start($payment, ($data['return_url'] ?? '').(str_contains($data['return_url'] ?? '', '?') ? '&' : '?').'online='.$payment->reference);
+        try {
+            $checkout = $this->manager->gateway()->start($payment, ($data['return_url'] ?? '').(str_contains($data['return_url'] ?? '', '?') ? '&' : '?').'online='.$payment->reference);
+        } catch (\Throwable $e) {
+            // The provider could not open the payment (down, wrong keys): nothing was charged, and the parent is told to try again.
+            Log::error('The payment provider could not open a payment: '.$e->getMessage());
+            $payment->update(['status' => OnlinePayment::FAILED, 'failure_reason' => 'provider_unreachable']);
+            abort(502, __('finance.gateway_unreachable'));
+        }
         if ($checkout->providerReference) {
             $payment->update(['provider_reference' => $checkout->providerReference]);
         }

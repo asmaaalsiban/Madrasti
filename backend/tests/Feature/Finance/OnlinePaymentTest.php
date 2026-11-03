@@ -183,4 +183,63 @@ class FakeProvider implements PaymentGateway
 
         return new GatewayEvent((string) $request->input('reference'), (bool) $request->input('paid'), $request->input('id'));
     }
+
+    private function paytabs(): void
+    {
+        config(['payments.driver' => 'paytabs', 'payments.providers.paytabs' => ['profile_id' => '1234', 'server_key' => 'SECRET-KEY', 'base_url' => 'https://secure-jordan.paytabs.com']]);
+    }
+
+    private function callback(string $reference, array $over = [], ?string $key = 'SECRET-KEY')
+    {
+        $body = json_encode(['tran_ref' => 'TST2611', 'cart_id' => $reference, 'cart_amount' => '250.00', 'cart_currency' => 'JOD', 'payment_result' => ['response_status' => 'A', 'response_message' => 'Authorised'], ...$over]);
+
+        return $this->call('POST', '/api/payments/webhook/paytabs', [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_SIGNATURE' => $key === null ? '' : hash_hmac('sha256', $body, $key)], $body);
+    }
+
+    public function test_paytabs_opens_its_hosted_page_and_only_the_signed_callback_records_the_payment(): void
+    {
+        $this->paytabs();
+        \Illuminate\Support\Facades\Http::fake(['secure-jordan.paytabs.com/payment/request' => \Illuminate\Support\Facades\Http::response(['tran_ref' => 'TST2611', 'redirect_url' => 'https://secure-jordan.paytabs.com/payment/wr/abc'], 200)]);
+        $data = $this->start(['return_url' => 'https://school.test/parent/fees'])->assertCreated()->assertJsonPath('data.mode', 'redirect')->assertJsonPath('data.url', 'https://secure-jordan.paytabs.com/payment/wr/abc')->json('data');
+
+        \Illuminate\Support\Facades\Http::assertSent(function ($r) use ($data) {
+            return $r->hasHeader('authorization', 'SECRET-KEY') && $r['profile_id'] === '1234' && $r['cart_id'] === $data['reference'] && $r['cart_amount'] == 250.0 && $r['cart_currency'] === 'JOD'
+                && str_contains($r['callback'], '/api/central/payments/webhook/') && str_ends_with($r['callback'], '/paytabs') && str_contains($r['return'], 'online='.$data['reference']);
+        });
+        $this->assertSame(0, Payment::count()); // the parent coming back changes nothing
+
+        $this->callback($data['reference'], [], 'WRONG-KEY')->assertStatus(400);
+        $this->callback($data['reference'], [], null)->assertStatus(400);
+        $this->assertSame(0, Payment::count());
+        $this->callback($data['reference'], ['cart_amount' => '10.00'])->assertStatus(400); // signed, but for less than was asked
+        $this->assertSame(0, Payment::count());
+
+        $this->callback($data['reference'])->assertOk();
+        $this->assertSame(1, Payment::count());
+        $this->callback($data['reference'])->assertOk(); // PayTabs retries: still one payment
+        $this->assertSame(1, Payment::count());
+        $this->assertSame('paid', OnlinePayment::where('reference', $data['reference'])->value('status'));
+        $this->assertSame('TST2611', OnlinePayment::where('reference', $data['reference'])->value('provider_reference'));
+    }
+
+    public function test_a_declined_paytabs_payment_is_marked_failed_and_nothing_is_recorded(): void
+    {
+        $this->paytabs();
+        \Illuminate\Support\Facades\Http::fake(['*' => \Illuminate\Support\Facades\Http::response(['tran_ref' => 'T1', 'redirect_url' => 'https://secure-jordan.paytabs.com/x'], 200)]);
+        $ref = $this->start()->assertCreated()->json('data.reference');
+        $this->callback($ref, ['payment_result' => ['response_status' => 'D', 'response_message' => 'Declined by the bank']])->assertOk();
+        $online = OnlinePayment::where('reference', $ref)->first();
+        $this->assertSame('failed', $online->status);
+        $this->assertSame('Declined by the bank', $online->failure_reason);
+        $this->assertSame(0, Payment::count());
+    }
+
+    public function test_when_paytabs_cannot_be_reached_the_parent_is_told_and_nothing_is_charged(): void
+    {
+        $this->paytabs();
+        \Illuminate\Support\Facades\Http::fake(['*' => \Illuminate\Support\Facades\Http::response(['message' => 'Invalid profile'], 401)]);
+        $this->start()->assertStatus(502);
+        $this->assertSame('failed', OnlinePayment::query()->latest('id')->value('status'));
+        $this->assertSame(0, Payment::count());
+    }
 }
