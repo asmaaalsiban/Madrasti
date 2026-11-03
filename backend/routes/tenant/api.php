@@ -46,6 +46,7 @@ use App\Modules\People\Http\Controllers\StudentController;
 use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
 use App\Modules\Communication\Http\Controllers\StoryController;
+use App\Modules\Procurement\Http\Controllers\ProcurementController;
 use App\Modules\Scheduling\Http\Controllers\DutyController;
 use App\Modules\Scheduling\Http\Controllers\ExamController;
 use App\Modules\Scheduling\Http\Controllers\TimetableController;
@@ -119,6 +120,18 @@ Route::middleware(['school-user', 'role:admin'])->prefix('audit-logs')->group(fu
     Route::get('/', [AuditLogController::class, 'index']);
     Route::get('filters', [AuditLogController::class, 'filters']);
     Route::get('export', [AuditLogController::class, 'export']);
+});
+
+// The purchase board: staff ask, the principal approves, the accountant records the purchase.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('procurement')->group(function (): void {
+    Route::get('/', [ProcurementController::class, 'index']);
+    Route::post('/', [ProcurementController::class, 'store']);
+    Route::put('{procurement}', [ProcurementController::class, 'update']);
+    Route::delete('{procurement}', [ProcurementController::class, 'destroy']);
+    Route::post('{procurement}/approve', [ProcurementController::class, 'approve']);
+    Route::post('{procurement}/reject', [ProcurementController::class, 'reject']);
+    Route::post('{procurement}/purchase', [ProcurementController::class, 'purchase']);
+    Route::post('{procurement}/receive', [ProcurementController::class, 'receive']);
 });
 
 // The class feed (stories): everyone reads their own; teachers and the principal post.

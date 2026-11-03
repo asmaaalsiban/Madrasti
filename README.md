@@ -462,3 +462,12 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Notifications**: students and their parents are told when something is posted for their class (teachers when it is for the whole school).
 - **Photos are private**: they are fetched with the sign-in token and open only for people who may read the post.
 - After pulling: `php artisan tenants:migrate` (replaces the old unused `stories` / `story_media` tables).
+
+## Purchase requests (procurement board)
+
+- **Ask** (`/teacher/procurement`, `/admin/procurement`): any member of staff files a request: what, details, quantity, category, priority (low / normal / high / urgent), estimated cost, needed by. They edit or delete it while it waits.
+- **Decide**: the **principal** approves (the accountant is told to buy) or declines **with a reason** (the requester reads it).
+- **Buy**: the **accountant** records the purchase of an approved request: where from, what it really cost, the invoice number and date. The requester is told.
+- **Receive**: the requester (or the principal / accountant) presses "It arrived".
+- **Board**: columns Waiting → Approved → Bought → Received (and Declined when there is one), urgent first; tabs on a phone. The principal and the accountant see everything with "waiting for a decision", "approved, to spend" and "spent so far"; everyone else sees only their own requests. Every change is in the audit log.
+- After pulling: `php artisan tenants:migrate` (replaces the old unused `procurement_requests` table).
