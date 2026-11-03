@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
+import { Bus, BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, Images, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import AddEmailForm from '../../Auth/components/AddEmailForm'
@@ -33,6 +33,7 @@ export default function ParentHome() {
     { to: `${base}/lesson-plans`, label: t('lessonPlans.title'), icon: NotebookPen },
     { to: `${base}/behavior`, label: t('behavior.title'), icon: Smile },
     { to: `${base}/motivation`, label: t('motivation.title'), icon: Star },
+    { to: `${base}/transport`, label: t('transport.myTitle'), icon: Bus },
     { to: `${base}/fees`, label: t('finance.feesLink'), icon: Wallet },
   ] : []
 
