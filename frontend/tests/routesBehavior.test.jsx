@@ -91,3 +91,12 @@ describe('who is signed in, shown in the header', () => {
   it('shows a head of department which department', () => header({ role: 'teacher', name: 'Omar', staff_type: 'head_of_department', subject: { name_en: 'Math', name_ar: 'رياضيات' } }, 'Head of department Math'))
   it('shows a parent only the name', () => header({ role: 'parent', name: 'Mohammad', children: [] }, 'Parent'))
 })
+
+describe('class feed addresses', () => {
+  it('an old notification that points at /parent/children/:id/stories still opens the class feed', () => {
+    auth.user = { role: 'parent', name: 'Parent', children: [{ id: 18, name_en: 'Lina', name_ar: 'لينا' }] }
+    at('/parent/children/18/stories')
+    expect(screen.queryByText(/404/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Unexpected Application Error/)).not.toBeInTheDocument()
+  })
+})

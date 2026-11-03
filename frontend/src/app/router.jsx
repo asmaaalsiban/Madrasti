@@ -115,6 +115,7 @@ const HOME_ROUTES = {
     { path: 'privacy', element: <PrivacyPage /> },
     { path: 'children/:id/transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
+    { path: 'children/:id/stories', element: <Navigate to="/parent/stories" replace /> }, // old notifications pointed here
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
