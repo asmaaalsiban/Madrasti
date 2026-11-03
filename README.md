@@ -514,3 +514,8 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 ## Load testing
 - `loadtest/` has a load test (virtual users, per-endpoint latency, queries per request) and `php artisan tenants:run loadtest:seed` to grow a school to a realistic size. See `loadtest/README.md` for how to run it, the results and the production advice (OPcache, `artisan optimize`, PHP-FPM, Octane).
 - The header counters (notifications, announcements, chat, surveys) are one request, `GET /api/badges`, every 30 seconds per open tab (`useBadges` on the frontend).
+
+## Arrange your own screens
+- Every person arranges their own icons and menus with an **Arrange** button: the principal's side menu (groups and entries), the staff home (groups and tiles), and the parent and student home tiles. Press **Arrange**, move things with the arrows (they follow the language direction), press **Done**. **Back to the default order** restores it.
+- Saved on the account (`users.layout`, `PUT /api/auth/layout` with `{surface, order: {groups, items}}`; `null` resets), so it follows the person to any device. Surfaces: `admin_nav`, `teacher_home`, `parent_home`, `student_home`. New screens added later appear after the ones the person arranged. Helpers: `features/Layout/useLayout.js`, `arrange.js`, `components/shared/Arrange.jsx`.
+- Needs `php artisan tenants:migrate`.

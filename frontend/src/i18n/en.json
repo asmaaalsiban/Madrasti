@@ -2130,5 +2130,13 @@
       "job": "Job",
       "hidden": "Screens"
     }
+  },
+  "arrange": {
+    "start": "Arrange",
+    "done": "Done",
+    "reset": "Back to the default order",
+    "help": "Move things with the arrows. It is saved on your account.",
+    "earlier": "Move {{name}} earlier",
+    "later": "Move {{name}} later"
   }
 }

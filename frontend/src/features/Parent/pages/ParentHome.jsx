@@ -22,17 +22,17 @@ export default function ParentHome() {
   const child = children.find((c) => c.id === picked) ?? children[0]
   const base = child ? `/parent/children/${child.id}` : ''
   const tiles = child ? [
-    { to: `${base}/report-card`, label: t('reportCard.title'), icon: FileBadge },
-    { to: `${base}/grades`, label: t('studentGrades.linkLabel'), icon: ClipboardList },
-    { to: `${base}/timetable`, label: t('timetable.linkLabel'), icon: CalendarClock },
-    { to: `${base}/homework`, label: t('homework.title'), icon: BookOpenCheck },
-    { to: `${base}/exams`, label: t('exams.myTitle'), icon: FileCheck2 },
-    { to: `${base}/summaries`, label: t('dailySummary.title'), icon: FileText },
-    { to: `${base}/lesson-plans`, label: t('lessonPlans.title'), icon: NotebookPen },
-    { to: `${base}/behavior`, label: t('behavior.title'), icon: Smile },
-    { to: `${base}/motivation`, label: t('motivation.title'), icon: Star },
-    { to: `${base}/transport`, label: t('transport.myTitle'), icon: Bus },
-    { to: `${base}/fees`, label: t('finance.feesLink'), icon: Wallet },
+    { key: 'report-card', to: `${base}/report-card`, label: t('reportCard.title'), icon: FileBadge },
+    { key: 'grades', to: `${base}/grades`, label: t('studentGrades.linkLabel'), icon: ClipboardList },
+    { key: 'timetable', to: `${base}/timetable`, label: t('timetable.linkLabel'), icon: CalendarClock },
+    { key: 'homework', to: `${base}/homework`, label: t('homework.title'), icon: BookOpenCheck },
+    { key: 'exams', to: `${base}/exams`, label: t('exams.myTitle'), icon: FileCheck2 },
+    { key: 'summaries', to: `${base}/summaries`, label: t('dailySummary.title'), icon: FileText },
+    { key: 'lesson-plans', to: `${base}/lesson-plans`, label: t('lessonPlans.title'), icon: NotebookPen },
+    { key: 'behavior', to: `${base}/behavior`, label: t('behavior.title'), icon: Smile },
+    { key: 'motivation', to: `${base}/motivation`, label: t('motivation.title'), icon: Star },
+    { key: 'transport', to: `${base}/transport`, label: t('transport.myTitle'), icon: Bus },
+    { key: 'fees', to: `${base}/fees`, label: t('finance.feesLink'), icon: Wallet },
   ] : []
 
   return (
@@ -85,7 +85,7 @@ export default function ParentHome() {
 
           <section className="space-y-3">
             <h2 className="text-lg">{t('parent.home.follow', { name: nameOf(child) })}</h2>
-            <SectionTiles tiles={tiles} />
+            <SectionTiles tiles={tiles} surface="parent_home" />
           </section>
 
           <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">

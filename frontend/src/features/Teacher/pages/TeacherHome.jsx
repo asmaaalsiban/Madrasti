@@ -1,10 +1,14 @@
 import useBadges from '../../Badges/useBadges'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet } from 'lucide-react'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 import { isHidden } from '../../StaffAccess/staffFeatures'
+import { ArrangeBar, MoveButtons } from '../../../components/shared/Arrange'
+import useLayout from '../../Layout/useLayout'
+import { orderBy, swap } from '../../Layout/arrange'
 
 // [path, title key, hint key, icon]
 const TEACHING = [
@@ -43,22 +47,30 @@ const MINE = [
   ['/teacher/payslips', 'payroll.mineTitle', 'payroll.mineHint', Banknote],
 ]
 
-function Section({ title, tiles, t, user }) {
+// One group of tiles. While arranging, the group has up/down buttons and each tile has earlier/later buttons.
+function Section({ id, title, tiles, t, user, editing, first, last, onMoveGroup, onMoveTile }) {
   const shown = tiles.filter(([to]) => !isHidden(user, to))
   if (shown.length === 0) return null
   return (
     <section className="space-y-3">
-      {title && <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">{title}</h2>}
+      <div className="flex items-center justify-between gap-2">
+        {title && <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">{title}</h2>}
+        {editing && <MoveButtons vertical label={title} canEarlier={!first} canLater={!last} onEarlier={() => onMoveGroup(id, -1)} onLater={() => onMoveGroup(id, 1)} />}
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {shown.map(([to, name, hint, Icon]) => (
-          <Link key={to} to={to} className="feature-card flex items-start gap-4">
-            <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15"><Icon size={22} /></span>
-            <span className="min-w-0">
-              <span className="title block">{t(name)}</span>
-              <span className="hint block">{t(hint)}</span>
-            </span>
-          </Link>
-        ))}
+        {shown.map(([to, name, hint, Icon], i) => {
+          const Wrapper = editing ? 'div' : Link
+          return (
+            <Wrapper key={to} {...(editing ? {} : { to })} className={`feature-card flex items-start gap-4 ${editing ? 'outline-dashed outline-2 outline-white/70' : ''}`}>
+              <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15"><Icon size={22} /></span>
+              <span className="min-w-0 flex-1">
+                <span className="title block">{t(name)}</span>
+                <span className="hint block">{t(hint)}</span>
+                {editing && <MoveButtons className="mt-2" label={t(name)} canEarlier={i > 0} canLater={i < shown.length - 1} onEarlier={() => onMoveTile(to, -1)} onLater={() => onMoveTile(to, 1)} />}
+              </span>
+            </Wrapper>
+          )
+        })}
       </div>
     </section>
   )
@@ -71,6 +83,18 @@ export default function TeacherHome() {
   const pending = { data: useBadges().surveys }
   const accountant = user?.staff_type === 'accountant'
   const head = user?.staff_type === 'head_of_department'
+  const layout = useLayout('teacher_home')
+  const [editing, setEditing] = useState(false)
+  // The groups of this person's home (an accountant's home is the school's money), in the order they chose.
+  const base = accountant ? [['money', MONEY]] : [['teaching', TEACHING], ['followUp', FOLLOW_UP], ...(head ? [['department', HEAD]] : [])]
+  const sections = orderBy([...base, ['mine', MINE]], (x) => x[0], layout.groups)
+  const flat = () => sections.flatMap(([, tiles]) => orderBy(tiles, (x) => x[0], layout.items).map((x) => x[0]))
+  const moveGroup = (id, delta) => layout.save({ groups: swap(sections.map((x) => x[0]), id, delta), items: flat() })
+  const moveTile = (path, delta) => {
+    const section = sections.find(([, tiles]) => tiles.some((x) => x[0] === path))
+    const within = swap(orderBy(section[1], (x) => x[0], layout.items).map((x) => x[0]), path, delta)
+    layout.save({ groups: sections.map((x) => x[0]), items: [...flat().filter((k) => !within.includes(k)), ...within] })
+  }
   return (
     <div className="space-y-6">
       <h1>{t('dashboard.welcome', { name: user?.name })}</h1>
@@ -78,16 +102,11 @@ export default function TeacherHome() {
       {pending.data > 0 && (
         <Link to="/teacher/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>
       )}
-      {accountant ? (
-        <Section title={t('teacherHome.money')} tiles={MONEY} t={t} user={user} />
-      ) : (
-        <>
-          <Section title={t('teacherHome.teaching')} tiles={TEACHING} t={t} user={user} />
-          <Section title={t('teacherHome.followUp')} tiles={FOLLOW_UP} t={t} user={user} />
-          {head && <Section title={t('teacherHome.department')} tiles={HEAD} t={t} user={user} />}
-        </>
-      )}
-      <Section title={t('teacherHome.mine')} tiles={MINE} t={t} user={user} />
+      <ArrangeBar editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} />
+      {sections.map(([id, tiles], i) => (
+        <Section key={id} id={id} title={t(`teacherHome.${id}`)} tiles={orderBy(tiles, (x) => x[0], layout.items)} t={t} user={user} editing={editing}
+          first={i === 0} last={i === sections.length - 1} onMoveGroup={moveGroup} onMoveTile={moveTile} />
+      ))}
     </div>
   )
 }

@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
 import HeaderIcons from '../components/shared/HeaderIcons'
+import { ArrangeBar, MoveButtons } from '../components/shared/Arrange'
+import useLayout from '../features/Layout/useLayout'
+import { orderBy, swap } from '../features/Layout/arrange'
 import { useSchool } from '../tenant/useSchool'
 
 // The menu in groups, each item with its icon: what the principal reaches for most is at the top.
@@ -22,6 +25,17 @@ export default function AdminLayout() {
   const { t } = useTranslation()
   const { data: school } = useSchool()
   const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const layout = useLayout('admin_nav')
+  // The principal's own order: the top entry stays first; the groups and the entries inside them follow what they arranged.
+  const groups = [GROUPS[0], ...orderBy(GROUPS.slice(1), (g) => g.key, layout.groups)].map((g) => ({ ...g, items: g.key === null ? g.items : orderBy(g.items, (i) => i[0], layout.items) }))
+  const groupKeys = groups.filter((g) => g.key).map((g) => g.key)
+  const flat = () => groups.flatMap((g) => g.items.map((i) => i[0]))
+  const moveGroup = (key, delta) => layout.save({ groups: swap(groupKeys, key, delta), items: flat() })
+  const moveItem = (group, path, delta) => {
+    const within = swap(group.items.map((i) => i[0]), path, delta)
+    layout.save({ groups: groupKeys, items: [...flat().filter((k) => !within.includes(k)), ...within] })
+  }
 
   return (
     <div className="min-h-screen md:flex">
@@ -36,10 +50,22 @@ export default function AdminLayout() {
           </button>
         </div>
         <nav className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
-          {GROUPS.map((group) => (
+          <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} /></div>
+          {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
-              {group.key && <p className="px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/55">{t(`admin.groups.${group.key}`)}</p>}
-              {group.items.map(([to, key, Icon, end]) => (
+              {group.key && (
+                <p className="flex items-center justify-between px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/55">
+                  {t(`admin.groups.${group.key}`)}
+                  {editing && <MoveButtons vertical label={t(`admin.groups.${group.key}`)} canEarlier={gi > 1} canLater={gi < groups.length - 1} onEarlier={() => moveGroup(group.key, -1)} onLater={() => moveGroup(group.key, 1)} />}
+                </p>
+              )}
+              {group.items.map(([to, key, Icon, end], ii) => editing ? (
+                <div key={to} className="flex items-center gap-3 rounded-full border border-dashed border-white/30 px-3 py-1.5 text-sm text-white/90">
+                  <Icon aria-hidden size={18} className="shrink-0" />
+                  <span className="min-w-0 flex-1 truncate">{t(`admin.nav.${key}`)}</span>
+                  {group.key && <MoveButtons vertical label={t(`admin.nav.${key}`)} canEarlier={ii > 0} canLater={ii < group.items.length - 1} onEarlier={() => moveItem(group, to, -1)} onLater={() => moveItem(group, to, 1)} />}
+                </div>
+              ) : (
                 <NavLink
                   key={to}
                   to={to}
