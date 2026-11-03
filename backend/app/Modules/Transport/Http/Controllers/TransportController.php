@@ -26,10 +26,10 @@ class TransportController extends Controller
     {
         $rounds = TransportRound::orderBy('sort_order')->orderBy('id')->get();
         $buses = Bus::with('rounds:id')->orderByRaw('cast(number as unsigned), number')->get();
-        $rides = StudentTransport::all(['transport_round_id', 'pickup_bus_id', 'dropoff_bus_id']);
+        $rides = StudentTransport::all(['pickup_round_id', 'pickup_bus_id', 'dropoff_round_id', 'dropoff_bus_id']);
 
         return response()->json([
-            'rounds' => $rounds->map(fn ($r) => $this->round($r, $rides->where('transport_round_id', $r->id)->count()))->values(),
+            'rounds' => $rounds->map(fn ($r) => $this->round($r, $this->roundRiders($r->id)))->values(),
             'buses' => $buses->map(fn ($b) => $this->bus($b, $rides))->values(),
             'riders' => $rides->count(),
         ]);
@@ -44,14 +44,18 @@ class TransportController extends Controller
 
     public function updateRound(Request $request, TransportRound $round): JsonResponse
     {
-        $round->update($this->roundData($request));
+        $data = $this->roundData($request);
+        if ($data['period'] !== $round->period && $this->roundRiders($round->id) > 0) {
+            throw ValidationException::withMessages(['period' => [__('transport.round_in_use')]]);
+        }
+        $round->update($data);
 
-        return response()->json(['data' => $this->round($round, StudentTransport::where('transport_round_id', $round->id)->count())]);
+        return response()->json(['data' => $this->round($round, $this->roundRiders($round->id))]);
     }
 
     public function destroyRound(TransportRound $round): Response
     {
-        if (StudentTransport::where('transport_round_id', $round->id)->exists()) {
+        if ($this->roundRiders($round->id) > 0) {
             throw ValidationException::withMessages(['round' => [__('transport.round_in_use')]]);
         }
         $round->delete();
@@ -71,11 +75,11 @@ class TransportController extends Controller
     public function updateBus(Request $request, Bus $bus): JsonResponse
     {
         $data = $this->busData($request, $bus);
-        $rides = StudentTransport::all(['transport_round_id', 'pickup_bus_id', 'dropoff_bus_id']);
+        $rides = StudentTransport::all(['pickup_round_id', 'pickup_bus_id', 'dropoff_round_id', 'dropoff_bus_id']);
         if (array_key_exists('round_ids', $data)) {
             // A round cannot be taken away from a bus that still carries students in it.
             $dropped = $bus->rounds()->pluck('transport_rounds.id')->diff($data['round_ids']);
-            if ($rides->filter(fn ($s) => $dropped->contains($s->transport_round_id) && ($s->pickup_bus_id === $bus->id || $s->dropoff_bus_id === $bus->id))->isNotEmpty()) {
+            if ($rides->filter(fn ($s) => ($s->pickup_bus_id === $bus->id && $dropped->contains($s->pickup_round_id)) || ($s->dropoff_bus_id === $bus->id && $dropped->contains($s->dropoff_round_id)))->isNotEmpty()) {
                 throw ValidationException::withMessages(['round_ids' => [__('transport.bus_round_in_use')]]);
             }
         }
@@ -100,22 +104,23 @@ class TransportController extends Controller
         return response()->noContent();
     }
 
-    /** Who rides a bus, per round, going and coming back. */
+    /** Who rides a bus, per round: one entry per student and way (to school / home). */
     public function riders(Bus $bus): JsonResponse
     {
         $rows = StudentTransport::with(['student:id,name_ar,name_en,student_number'])->where(fn ($q) => $q->where('pickup_bus_id', $bus->id)->orWhere('dropoff_bus_id', $bus->id))->get();
+        $entries = $rows->flatMap(fn ($r) => array_values(array_filter([
+            $r->pickup_bus_id === $bus->id ? ['student' => $this->student($r->student), 'round_id' => $r->pickup_round_id, 'direction' => 'pickup'] : null,
+            $r->dropoff_bus_id === $bus->id ? ['student' => $this->student($r->student), 'round_id' => $r->dropoff_round_id, 'direction' => 'dropoff'] : null,
+        ])));
 
-        return response()->json(['data' => $rows->map(fn ($r) => [
-            'student' => $this->student($r->student), 'round_id' => $r->transport_round_id,
-            'pickup' => $r->pickup_bus_id === $bus->id, 'dropoff' => $r->dropoff_bus_id === $bus->id,
-        ])->values()]);
+        return response()->json(['data' => $entries->values()]);
     }
 
     /** Every student with a ride (and a search over all students, to give one a ride). */
     public function assignments(Request $request): JsonResponse
     {
         $q = trim((string) $request->query('search', ''));
-        $students = Student::query()->with(['transport.round', 'transport.pickupBus', 'transport.dropoffBus', 'enrollments' => fn ($e) => $e->whereHas('classroom.academicYear', fn ($y) => $y->where('is_current', true))->with('classroom:id,name')])
+        $students = Student::query()->with(['transport.pickupRound', 'transport.dropoffRound', 'transport.pickupBus', 'transport.dropoffBus', 'enrollments' => fn ($e) => $e->whereHas('classroom.academicYear', fn ($y) => $y->where('is_current', true))->with('classroom:id,name')])
             ->when($q !== '', fn ($s) => $s->where(fn ($w) => $w->where('name_ar', 'like', "%$q%")->orWhere('name_en', 'like', "%$q%")->orWhere('student_number', 'like', "%$q%")))
             ->when($request->query('only') === 'riding', fn ($s) => $s->whereHas('transport'))
             ->when($request->query('only') === 'none', fn ($s) => $s->whereDoesntHave('transport'))
@@ -124,26 +129,29 @@ class TransportController extends Controller
         return response()->json(['data' => $students->map(fn ($s) => $this->student($s) + ['classroom' => $s->enrollments->first()?->classroom?->name, 'ride' => $this->ride($s->transport)])->values()]);
     }
 
+    /** A ride has two ways, each with its own round and bus: to school in a morning round, home in an evening round. */
     public function assign(Request $request, Student $student): JsonResponse
     {
         $data = $request->validate([
-            'round_id' => ['required', 'integer', 'exists:transport_rounds,id'],
-            'pickup_bus_id' => ['nullable', 'integer', 'exists:buses,id'],
-            'dropoff_bus_id' => ['nullable', 'integer', 'exists:buses,id'],
+            'pickup_round_id' => ['nullable', 'integer', 'required_with:pickup_bus_id', 'exists:transport_rounds,id'],
+            'pickup_bus_id' => ['nullable', 'integer', 'required_with:pickup_round_id', 'exists:buses,id'],
+            'dropoff_round_id' => ['nullable', 'integer', 'required_with:dropoff_bus_id', 'exists:transport_rounds,id'],
+            'dropoff_bus_id' => ['nullable', 'integer', 'required_with:dropoff_round_id', 'exists:buses,id'],
         ]);
-        $pickup = $data['pickup_bus_id'] ?? null;
-        $dropoff = $data['dropoff_bus_id'] ?? null;
-        if ($pickup === null && $dropoff === null) {
+        if (empty($data['pickup_bus_id']) && empty($data['dropoff_bus_id'])) {
             throw ValidationException::withMessages(['pickup_bus_id' => [__('transport.need_a_bus')]]);
         }
-        foreach (['pickup_bus_id' => $pickup, 'dropoff_bus_id' => $dropoff] as $field => $busId) {
-            if ($busId !== null) {
-                $this->checkSeat((int) $busId, (int) $data['round_id'], $student->id, $field === 'pickup_bus_id' ? 'pickup_bus_id' : 'dropoff_bus_id', $field);
+        foreach (['pickup' => 'morning', 'dropoff' => 'evening'] as $way => $period) {
+            if (! empty($data["{$way}_bus_id"])) {
+                $this->checkSeat((int) $data["{$way}_bus_id"], (int) $data["{$way}_round_id"], $period, $student->id, $way);
             }
         }
-        $ride = StudentTransport::updateOrCreate(['student_id' => $student->id], ['transport_round_id' => $data['round_id'], 'pickup_bus_id' => $pickup, 'dropoff_bus_id' => $dropoff]);
+        $ride = StudentTransport::updateOrCreate(['student_id' => $student->id], [
+            'pickup_round_id' => $data['pickup_bus_id'] ?? null ? $data['pickup_round_id'] : null, 'pickup_bus_id' => $data['pickup_bus_id'] ?? null,
+            'dropoff_round_id' => $data['dropoff_bus_id'] ?? null ? $data['dropoff_round_id'] : null, 'dropoff_bus_id' => $data['dropoff_bus_id'] ?? null,
+        ]);
 
-        return response()->json(['data' => $this->ride($ride->load(['round', 'pickupBus', 'dropoffBus']))]);
+        return response()->json(['data' => $this->ride($ride->load(['pickupRound', 'dropoffRound', 'pickupBus', 'dropoffBus']))]);
     }
 
     public function unassign(Student $student): Response
@@ -158,38 +166,48 @@ class TransportController extends Controller
     {
         Gate::authorize('view-student-transport', $student);
 
-        return response()->json(['data' => $this->ride(StudentTransport::with(['round', 'pickupBus', 'dropoffBus'])->where('student_id', $student->id)->first())]);
+        return response()->json(['data' => $this->ride(StudentTransport::with(['pickupRound', 'dropoffRound', 'pickupBus', 'dropoffBus'])->where('student_id', $student->id)->first())]);
     }
 
-    /** The bus must exist for the round, be active and have a free seat (the student's own seat does not count). */
-    private function checkSeat(int $busId, int $roundId, int $studentId, string $column, string $field): void
+    /** The round must be of the right period (morning going, evening coming back); the bus must be active and have a free seat (the student's own seat does not count). */
+    private function checkSeat(int $busId, int $roundId, string $period, int $studentId, string $way): void
     {
-        $bus = Bus::with('rounds:id')->findOrFail($busId);
+        $field = "{$way}_bus_id";
+        $bus = Bus::findOrFail($busId);
+        if (TransportRound::findOrFail($roundId)->period !== $period) {
+            throw ValidationException::withMessages(["{$way}_round_id" => [__("transport.wrong_period_$period")]]);
+        }
         if (! $bus->is_active) {
             throw ValidationException::withMessages([$field => [__('transport.bus_inactive')]]);
         }
         // A bus that did not serve the round yet starts serving it (the principal chose it for this student).
         $bus->rounds()->syncWithoutDetaching([$roundId]);
-        $taken = StudentTransport::where('transport_round_id', $roundId)->where($column, $busId)->where('student_id', '!=', $studentId)->count();
+        $taken = StudentTransport::where("{$way}_round_id", $roundId)->where($field, $busId)->where('student_id', '!=', $studentId)->count();
         if ($taken >= $bus->capacity) {
             throw ValidationException::withMessages([$field => [__('transport.bus_full')]]);
         }
     }
 
-    /** The most students the bus carries at once (in one round, one direction). */
+    /** The most students the bus carries at once (in one round, one way). */
     private function busiest(int $busId, $rides): int
     {
         return (int) $rides->flatMap(fn ($s) => array_filter([
-            $s->pickup_bus_id === $busId ? "p{$s->transport_round_id}" : null,
-            $s->dropoff_bus_id === $busId ? "d{$s->transport_round_id}" : null,
+            $s->pickup_bus_id === $busId ? "p{$s->pickup_round_id}" : null,
+            $s->dropoff_bus_id === $busId ? "d{$s->dropoff_round_id}" : null,
         ]))->countBy()->max();
+    }
+
+    /** Rides that use a round, going or coming back. */
+    private function roundRiders(int $roundId): int
+    {
+        return StudentTransport::where('pickup_round_id', $roundId)->count() + StudentTransport::where('dropoff_round_id', $roundId)->count();
     }
 
     /** @return array<string, mixed> */
     private function roundData(Request $request): array
     {
         return $request->validate([
-            'name_ar' => ['required', 'string', 'max:60'], 'name_en' => ['required', 'string', 'max:60'],
+            'name_ar' => ['required', 'string', 'max:60'], 'name_en' => ['required', 'string', 'max:60'], 'period' => ['required', 'in:morning,evening'],
             'starts_at' => ['nullable', 'date_format:H:i'], 'ends_at' => ['nullable', 'date_format:H:i', 'after:starts_at'],
         ]);
     }
@@ -215,7 +233,7 @@ class TransportController extends Controller
     /** @return array<string, mixed> */
     private function round(TransportRound $r, int $riders): array
     {
-        return ['id' => $r->id, 'name_ar' => $r->name_ar, 'name_en' => $r->name_en, 'starts_at' => $r->starts_at ? substr((string) $r->starts_at, 0, 5) : null, 'ends_at' => $r->ends_at ? substr((string) $r->ends_at, 0, 5) : null, 'riders' => $riders];
+        return ['id' => $r->id, 'name_ar' => $r->name_ar, 'name_en' => $r->name_en, 'period' => $r->period, 'starts_at' => $r->starts_at ? substr((string) $r->starts_at, 0, 5) : null, 'ends_at' => $r->ends_at ? substr((string) $r->ends_at, 0, 5) : null, 'riders' => $riders];
     }
 
     /** @return array<string, mixed> */
@@ -226,11 +244,8 @@ class TransportController extends Controller
         return [
             'id' => $b->id, 'number' => $b->number, 'driver_name' => $b->driver_name, 'driver_phone' => $b->driver_phone, 'capacity' => $b->capacity,
             'area_from' => $b->area_from, 'area_to' => $b->area_to, 'notes' => $b->notes, 'is_active' => $b->is_active, 'round_ids' => $roundIds,
-            // Seats taken, per round, going (pickup) and coming back (dropoff).
-            'load' => $roundIds->mapWithKeys(fn ($id) => [$id => [
-                'pickup' => $rides->where('transport_round_id', $id)->where('pickup_bus_id', $b->id)->count(),
-                'dropoff' => $rides->where('transport_round_id', $id)->where('dropoff_bus_id', $b->id)->count(),
-            ]]),
+            // Seats taken in each round the bus serves (a round is either morning or evening, so one number).
+            'load' => $roundIds->mapWithKeys(fn ($id) => [$id => $rides->where('pickup_round_id', $id)->where('pickup_bus_id', $b->id)->count() + $rides->where('dropoff_round_id', $id)->where('dropoff_bus_id', $b->id)->count()]),
         ];
     }
 
@@ -249,8 +264,8 @@ class TransportController extends Controller
         $bus = fn (?Bus $b) => $b ? ['id' => $b->id, 'number' => $b->number, 'driver_name' => $b->driver_name, 'driver_phone' => $b->driver_phone, 'area_from' => $b->area_from, 'area_to' => $b->area_to] : null;
 
         return [
-            'round' => $r->round ? $this->round($r->round, 0) : null,
-            'pickup_bus' => $bus($r->pickupBus), 'dropoff_bus' => $bus($r->dropoffBus),
+            'pickup_round' => $r->pickupRound ? $this->round($r->pickupRound, 0) : null, 'pickup_bus' => $bus($r->pickupBus),
+            'dropoff_round' => $r->dropoffRound ? $this->round($r->dropoffRound, 0) : null, 'dropoff_bus' => $bus($r->dropoffBus),
         ];
     }
 }

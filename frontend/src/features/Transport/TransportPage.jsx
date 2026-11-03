@@ -8,11 +8,12 @@ import Modal from '../../components/shared/Modal'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const nameOf = (o, lang) => o?.[`name_${lang}`] || o?.name_ar || ''
+const PERIODS = ['morning', 'evening']
 
 function RoundDialog({ round, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ name_ar: round?.name_ar ?? '', name_en: round?.name_en ?? '', starts_at: round?.starts_at ?? '', ends_at: round?.ends_at ?? '' })
+  const [form, setForm] = useState({ name_ar: round?.name_ar ?? '', name_en: round?.name_en ?? '', period: round?.period ?? 'morning', starts_at: round?.starts_at ?? '', ends_at: round?.ends_at ?? '' })
   const [error, setError] = useState('')
   const save = useMutation({
     mutationFn: () => { const body = { ...form, starts_at: form.starts_at || null, ends_at: form.ends_at || null }; return round ? api.put(`/transport/rounds/${round.id}`, body) : api.post('/transport/rounds', body) },
@@ -24,6 +25,9 @@ function RoundDialog({ round, onClose }) {
     <Modal open title={round ? t('transport.editRound') : t('transport.newRound')} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        <label className="block text-sm">{t('transport.period')}
+          <select className="mt-1 w-full rounded border p-2" value={form.period} onChange={set('period')}>{['morning', 'evening'].map((p) => <option key={p} value={p}>{t(`transport.periods.${p}`)}</option>)}</select>
+        </label>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm">{t('transport.nameAr')}<input required className="mt-1 w-full rounded border p-2" placeholder="الجولة الأولى" value={form.name_ar} onChange={set('name_ar')} /></label>
           <label className="block text-sm">{t('transport.nameEn')}<input required dir="ltr" className="mt-1 w-full rounded border p-2" placeholder="First round" value={form.name_en} onChange={set('name_en')} /></label>
@@ -63,16 +67,19 @@ function BusDialog({ bus, rounds, onClose }) {
           <label className="block text-sm">{t('transport.areaTo')}<input required className="mt-1 w-full rounded border p-2" value={form.area_to} onChange={set('area_to')} /></label>
           <label className="block text-sm">{t('transport.capacity')}<input required type="number" min="1" max="100" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.capacity} onChange={set('capacity')} /></label>
         </div>
-        <fieldset className="text-sm">
+        <fieldset className="space-y-2 text-sm">
           <legend className="mb-1">{t('transport.servesRounds')}</legend>
-          <div className="flex flex-wrap gap-2">
-            {rounds.length === 0 && <span className="text-slate-500">{t('transport.addRoundsFirst')}</span>}
-            {rounds.map((r) => (
-              <label key={r.id} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 ${form.round_ids.includes(r.id) ? 'border-brand bg-sky-tint font-bold' : ''}`}>
-                <input type="checkbox" className="sr-only" checked={form.round_ids.includes(r.id)} onChange={() => toggle(r.id)} />{nameOf(r, i18n.language)}
-              </label>
-            ))}
-          </div>
+          {rounds.length === 0 && <span className="text-slate-500">{t('transport.addRoundsFirst')}</span>}
+          {PERIODS.map((p) => rounds.some((r) => r.period === p) && (
+            <div key={p} className="flex flex-wrap items-center gap-2">
+              <span className="w-20 text-slate-500">{t(`transport.periods.${p}`)}</span>
+              {rounds.filter((r) => r.period === p).map((r) => (
+                <label key={r.id} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 ${form.round_ids.includes(r.id) ? 'border-brand bg-sky-tint font-bold' : ''}`}>
+                  <input type="checkbox" className="sr-only" checked={form.round_ids.includes(r.id)} onChange={() => toggle(r.id)} />{nameOf(r, i18n.language)}
+                </label>
+              ))}
+            </div>
+          ))}
         </fieldset>
         <label className="block text-sm">{t('transport.notes')}<input className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />{t('transport.active')}</label>
@@ -97,12 +104,9 @@ function RidersDialog({ bus, rounds, onClose }) {
               <h3 className="mb-1 font-bold">{nameOf(r, i18n.language)}</h3>
               <ul className="divide-y rounded border">
                 {data.filter((d) => d.round_id === r.id).map((d) => (
-                  <li key={d.student.id} className="flex items-center justify-between gap-2 p-2 text-sm">
+                  <li key={`${d.student.id}-${d.direction}`} className="flex items-center justify-between gap-2 p-2 text-sm">
                     <bdi>{nameOf(d.student, i18n.language)}</bdi>
-                    <span className="flex gap-1">
-                      {d.pickup && <span className="rounded-full bg-sky-tint px-2 py-0.5 text-xs">{t('transport.pickupShort')}</span>}
-                      {d.dropoff && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{t('transport.dropoffShort')}</span>}
-                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${d.direction === 'pickup' ? 'bg-sky-tint' : 'bg-amber-100 text-amber-800'}`}>{d.direction === 'pickup' ? t('transport.pickupShort') : t('transport.dropoffShort')}</span>
                   </li>
                 ))}
               </ul>
@@ -115,50 +119,59 @@ function RidersDialog({ bus, rounds, onClose }) {
   )
 }
 
+// One way of the ride: the round (morning going, evening coming back) and the bus. Any active bus can be chosen: it starts serving the round.
+function Leg({ way, period, overview, value, onChange }) {
+  const { t, i18n } = useTranslation()
+  const rounds = overview.rounds.filter((r) => r.period === period)
+  const busLabel = (b) => {
+    const seats = b.load[value.round_id] ?? 0
+    return `${t('transport.busNo', { number: b.number })} · ${b.area_from} → ${b.area_to} (${seats}/${b.capacity})${b.round_ids.includes(Number(value.round_id)) ? '' : ` — ${t('transport.willJoinRound')}`}`
+  }
+  return (
+    <fieldset className="space-y-2 rounded-lg border p-3">
+      <legend className="px-1 text-sm font-bold">{t(`transport.${way}`)}</legend>
+      <label className="block text-sm">{t(`transport.${period}Round`)}
+        <select className="mt-1 w-full rounded border p-2" value={value.round_id} onChange={(e) => onChange({ round_id: e.target.value, bus_id: e.target.value ? value.bus_id : '' })}>
+          <option value="">{t('transport.noBus')}</option>
+          {rounds.map((r) => <option key={r.id} value={r.id}>{nameOf(r, i18n.language)}{r.starts_at ? ` (${r.starts_at})` : ''}</option>)}
+        </select>
+      </label>
+      <label className="block text-sm">{t('transport.bus')}
+        <select disabled={!value.round_id} className="mt-1 w-full rounded border p-2" value={value.bus_id} onChange={(e) => onChange({ ...value, bus_id: e.target.value })}>
+          <option value="">{t('transport.noBus')}</option>
+          {overview.buses.filter((b) => b.is_active).map((b) => <option key={b.id} value={b.id}>{busLabel(b)}</option>)}
+        </select>
+      </label>
+    </fieldset>
+  )
+}
+
 function AssignDialog({ student, overview, onClose }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const ride = student.ride
-  const [form, setForm] = useState({ round_id: ride?.round?.id ?? '', pickup_bus_id: ride?.pickup_bus?.id ?? '', dropoff_bus_id: ride?.dropoff_bus?.id ?? '' })
+  const [pickup, setPickup] = useState({ round_id: ride?.pickup_round?.id ?? '', bus_id: ride?.pickup_bus?.id ?? '' })
+  const [dropoff, setDropoff] = useState({ round_id: ride?.dropoff_round?.id ?? '', bus_id: ride?.dropoff_bus?.id ?? '' })
   const [error, setError] = useState('')
+  const num = (v) => (v ? Number(v) : null)
   const save = useMutation({
-    mutationFn: () => api.put(`/transport/students/${student.id}`, { round_id: Number(form.round_id), pickup_bus_id: form.pickup_bus_id ? Number(form.pickup_bus_id) : null, dropoff_bus_id: form.dropoff_bus_id ? Number(form.dropoff_bus_id) : null }),
+    mutationFn: () => api.put(`/transport/students/${student.id}`, { pickup_round_id: num(pickup.round_id), pickup_bus_id: num(pickup.bus_id), dropoff_round_id: num(dropoff.round_id), dropoff_bus_id: num(dropoff.bus_id) }),
     onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
-  const buses = overview.buses.filter((b) => b.is_active)
-  const busLabel = (b) => {
-    const l = b.load[form.round_id] ?? { pickup: 0, dropoff: 0 }
-    return `${t('transport.busNo', { number: b.number })} · ${b.area_from} → ${b.area_to} (${l.pickup}/${b.capacity} · ${l.dropoff}/${b.capacity})${b.round_ids.includes(Number(form.round_id)) ? '' : ` — ${t('transport.willJoinRound')}`}`
-  }
-  const pickRound = (e) => setForm({ round_id: e.target.value, pickup_bus_id: '', dropoff_bus_id: '' })
-  const pickPickup = (e) => setForm({ ...form, pickup_bus_id: e.target.value, dropoff_bus_id: form.dropoff_bus_id || (ride ? '' : e.target.value) })
+  const ready = (pickup.round_id && pickup.bus_id) || (dropoff.round_id && dropoff.bus_id)
   return (
     <Modal open size="lg" title={t('transport.rideOf', { name: nameOf(student, i18n.language) })} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-        <label className="block text-sm">{t('transport.round')}
-          <select required className="mt-1 w-full rounded border p-2" value={form.round_id} onChange={pickRound}>
-            <option value="">—</option>
-            {overview.rounds.map((r) => <option key={r.id} value={r.id}>{nameOf(r, i18n.language)}</option>)}
-          </select>
-        </label>
-        <label className="block text-sm">{t('transport.pickup')}
-          <select disabled={!form.round_id} className="mt-1 w-full rounded border p-2" value={form.pickup_bus_id} onChange={pickPickup}>
-            <option value="">{t('transport.noBus')}</option>
-            {buses.map((b) => <option key={b.id} value={b.id}>{busLabel(b)}</option>)}
-          </select>
-        </label>
-        <label className="block text-sm">{t('transport.dropoff')}
-          <select disabled={!form.round_id} className="mt-1 w-full rounded border p-2" value={form.dropoff_bus_id} onChange={(e) => setForm({ ...form, dropoff_bus_id: e.target.value })}>
-            <option value="">{t('transport.noBus')}</option>
-            {buses.map((b) => <option key={b.id} value={b.id}>{busLabel(b)}</option>)}
-          </select>
-        </label>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Leg way="pickup" period="morning" overview={overview} value={pickup} onChange={setPickup} />
+          <Leg way="dropoff" period="evening" overview={overview} value={dropoff} onChange={setDropoff} />
+        </div>
         <p className="text-xs text-slate-500">{t('transport.seatsHint')}</p>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || !form.round_id} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <button type="submit" disabled={save.isPending || !ready} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
         </div>
       </form>
     </Modal>
@@ -194,8 +207,8 @@ function BusesTab({ overview }) {
             <ul className="space-y-1 text-sm">
               {overview.rounds.filter((r) => b.round_ids.includes(r.id)).map((r) => (
                 <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-slate-50 px-3 py-1.5">
-                  <span className="font-bold">{nameOf(r, i18n.language)}</span>
-                  <span>{t('transport.loadLine', { go: b.load[r.id]?.pickup ?? 0, back: b.load[r.id]?.dropoff ?? 0, seats: b.capacity })}</span>
+                  <span className="font-bold">{nameOf(r, i18n.language)} <span className="font-normal text-slate-500">· {t(`transport.periods.${r.period}`)}</span></span>
+                  <span>{t('transport.loadLine', { count: b.load[r.id] ?? 0, seats: b.capacity })}</span>
                 </li>
               ))}
               {b.round_ids.length === 0 && <li className="text-slate-500">{t('transport.noRoundsForBus')}</li>}
@@ -223,19 +236,25 @@ function RoundsTab({ overview }) {
       <p className="text-sm text-slate-600">{t('transport.roundsHelp')}</p>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('transport.newRound')}</button>
-      <ul className="grid gap-3 sm:grid-cols-3">
-        {overview.rounds.map((r) => (
-          <li key={r.id} className="space-y-2 rounded-lg border bg-white p-4">
-            <h3 className="text-lg font-extrabold">{nameOf(r, i18n.language)}</h3>
-            <p className="text-sm text-slate-600">{r.starts_at ? <bdi dir="ltr">{r.starts_at}{r.ends_at ? ` – ${r.ends_at}` : ''}</bdi> : t('transport.noTimes')}</p>
-            <p className="text-sm">{t('transport.studentsCount', { count: r.riders })}</p>
-            <span className="flex gap-1">
-              <button type="button" aria-label={t('admin.actions.edit')} className="rounded border p-1.5" onClick={() => setDialog({ round: r })}><Pencil size={16} aria-hidden /></button>
-              <button type="button" aria-label={t('admin.actions.delete')} className="rounded border border-red-300 p-1.5 text-red-700" onClick={() => setDel(r)}><Trash2 size={16} aria-hidden /></button>
-            </span>
-          </li>
-        ))}
-      </ul>
+      {PERIODS.map((p) => (
+        <div key={p} className="space-y-2">
+          <h2 className="text-lg font-bold">{t(`transport.periods.${p}`)}</h2>
+          {overview.rounds.filter((r) => r.period === p).length === 0 && <p className="text-sm text-slate-500">{t('transport.noRoundsInPeriod')}</p>}
+          <ul className="grid gap-3 sm:grid-cols-3">
+            {overview.rounds.filter((r) => r.period === p).map((r) => (
+              <li key={r.id} className="space-y-2 rounded-lg border bg-white p-4">
+                <h3 className="text-lg font-extrabold">{nameOf(r, i18n.language)}</h3>
+                <p className="text-sm text-slate-600">{r.starts_at ? <bdi dir="ltr">{r.starts_at}{r.ends_at ? ` – ${r.ends_at}` : ''}</bdi> : t('transport.noTimes')}</p>
+                <p className="text-sm">{t('transport.studentsCount', { count: r.riders })}</p>
+                <span className="flex gap-1">
+                  <button type="button" aria-label={t('admin.actions.edit')} className="rounded border p-1.5" onClick={() => setDialog({ round: r })}><Pencil size={16} aria-hidden /></button>
+                  <button type="button" aria-label={t('admin.actions.delete')} className="rounded border border-red-300 p-1.5 text-red-700" onClick={() => setDel(r)}><Trash2 size={16} aria-hidden /></button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
       {dialog && <RoundDialog round={dialog.round} onClose={() => setDialog(null)} />}
       <ConfirmDialog open={Boolean(del)} message={t('transport.deleteRound', { name: nameOf(del, i18n.language) })} onConfirm={() => remove.mutate(del)} onCancel={() => setDel(null)} busy={remove.isPending} />
     </div>
@@ -251,7 +270,7 @@ function StudentsTab({ overview }) {
   const [del, setDel] = useState(null)
   const { data } = useQuery({ queryKey: ['transport', 'assignments', search, only], queryFn: async () => (await api.get('/transport/assignments', { params: { search, only } })).data.data })
   const remove = useMutation({ mutationFn: (s) => api.delete(`/transport/students/${s.id}`), onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); setDel(null) } })
-  const busText = (b) => (b ? t('transport.busNo', { number: b.number }) : '—')
+  const leg = (round, bus) => (bus ? `${t('transport.busNo', { number: bus.number })} · ${nameOf(round, i18n.language)}` : '—')
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -262,22 +281,21 @@ function StudentsTab({ overview }) {
       </div>
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
-          <thead className="bg-slate-50"><tr>{['student', 'classroom', 'round', 'pickup', 'dropoff'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`transport.cols.${c}`)}</th>)}<th /></tr></thead>
+          <thead className="bg-slate-50"><tr>{['student', 'classroom', 'pickup', 'dropoff'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`transport.cols.${c}`)}</th>)}<th /></tr></thead>
           <tbody>
             {(data ?? []).map((s) => (
               <tr key={s.id} className="border-t">
                 <td className="p-2 font-medium"><bdi>{nameOf(s, i18n.language)}</bdi></td>
                 <td className="p-2 text-slate-600">{s.classroom ?? '—'}</td>
-                <td className="p-2">{s.ride?.round ? nameOf(s.ride.round, i18n.language) : '—'}</td>
-                <td className="p-2">{busText(s.ride?.pickup_bus)}</td>
-                <td className="p-2">{busText(s.ride?.dropoff_bus)}</td>
+                <td className="p-2">{leg(s.ride?.pickup_round, s.ride?.pickup_bus)}</td>
+                <td className="p-2">{leg(s.ride?.dropoff_round, s.ride?.dropoff_bus)}</td>
                 <td className="p-2"><span className="flex justify-end gap-2">
                   <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setEdit(s)}>{s.ride ? t('admin.actions.edit') : t('transport.assign')}</button>
                   {s.ride && <button type="button" aria-label={t('admin.actions.delete')} className="rounded border border-red-300 p-1.5 text-red-700" onClick={() => setDel(s)}><Trash2 size={16} aria-hidden /></button>}
                 </span></td>
               </tr>
             ))}
-            {data?.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-slate-500">{t('transport.noStudents')}</td></tr>}
+            {data?.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('transport.noStudents')}</td></tr>}
           </tbody>
         </table>
       </div>

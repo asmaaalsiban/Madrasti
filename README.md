@@ -473,10 +473,10 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - After pulling: `php artisan tenants:migrate` (replaces the old unused `procurement_requests` table).
 
 ## School transport (المواصلات)
-- **Rounds** (any number): the shifts of the school day (first, second, third), each with an optional start/end time.
+- **Rounds** (any number) belong to the **morning** (going to school) or the **evening** (going home), each with an optional start/end time.
 - **Buses**: number, driver name and phone, seats, the area it covers (from → to), the rounds it serves, active or not.
-- **Rides**: each student has one round plus a bus *to school* and a bus *home*; they can be different buses, or only one of them can be set. A bus is added to the student's round automatically and must have a free seat (counted per round and per direction).
-- A round or a bus that still carries students cannot be deleted, and a round cannot be removed from a bus that carries students in it.
+- **Rides**: each student has two ways, each with its own round and bus: e.g. morning round 1 on bus 11 and evening round 2 on bus 11 (or on another bus). Either way can be left empty.
+- Any active bus can be chosen for a round: it is added to that round automatically. Seats are counted per bus and per round; a round or bus that still carries students cannot be deleted.
 - Transport fees already live in the student's fee account (`transport` line) and are unchanged.
 - Principal: `/admin/transport` (tabs Buses / Rounds / Students). Student and parent: a "School bus" tile (`/student/transport`, `/parent/children/:id/transport`).
-- API: `GET /api/transport`, rounds and buses CRUD under `/api/transport/...`, `PUT/DELETE /api/transport/students/{student}`, `GET /api/students/{student}/transport` (gate `view-student-transport`). Needs `php artisan tenants:migrate`.
+- API: `GET /api/transport`, rounds and buses CRUD under `/api/transport/...`, `PUT/DELETE /api/transport/students/{student}` (`pickup_round_id`, `pickup_bus_id`, `dropoff_round_id`, `dropoff_bus_id`), `GET /api/students/{student}/transport`. Needs `php artisan tenants:migrate`.

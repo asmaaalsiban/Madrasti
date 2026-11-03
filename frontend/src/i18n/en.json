@@ -1943,8 +1943,8 @@
     "busNo": "Bus {{number}}",
     "driver": "Driver",
     "areaFromTo": "From {{from}} to {{to}}",
-    "pickup": "Bus to school",
-    "dropoff": "Bus home",
+    "pickup": "To school (morning)",
+    "dropoff": "Back home (evening)",
     "pickupShort": "To school",
     "dropoffShort": "Home",
     "noBusLeg": "No bus for this way.",
@@ -1965,7 +1965,7 @@
     "inactive": "Inactive",
     "noBuses": "No buses yet.",
     "noRoundsForBus": "This bus serves no round yet.",
-    "loadLine": "To school {{go}} · Home {{back}} (of {{seats}} seats)",
+    "loadLine": "{{count}} of {{seats}} seats",
     "riders": "Students",
     "ridersOf": "Students of bus {{number}}",
     "noRiders": "No students ride this bus.",
@@ -1976,18 +1976,17 @@
     "nameEn": "Name (English)",
     "startsAt": "Starts",
     "endsAt": "Ends",
-    "roundsHelp": "A round is a shift of the school day (first, second, third…). Add as many as the school has.",
+    "roundsHelp": "A round is a shift of the school day. Morning rounds are for going to school, evening rounds for going home. Add as many as the school has.",
     "noTimes": "No times set",
     "studentsCount_one": "{{count}} student",
     "studentsCount_other": "{{count}} students",
     "deleteRound": "Delete {{name}}?",
-    "round": "Round",
     "noBus": "No bus",
     "rideOf": "Bus of {{name}}",
     "assign": "Assign",
     "remove": "Remove",
     "removeRide": "Remove the bus of {{name}}?",
-    "seatsHint": "Next to each bus: taken seats going / coming back, out of its seats. The bus to school and the bus home can be different.",
+    "seatsHint": "Next to each bus: seats taken in that round, out of its seats. A student can ride a different bus (or a different round) coming back.",
     "noStudents": "No students.",
     "filter": {
       "all": "All",
@@ -1997,11 +1996,19 @@
     "cols": {
       "student": "Student",
       "classroom": "Class",
-      "round": "Round",
       "pickup": "To school",
-      "dropoff": "Home"
+      "dropoff": "Back home"
     },
     "willJoinRound": "will be added to this round",
-    "noBusesYet": "No buses yet: add buses in the Buses tab first."
+    "noBusesYet": "No buses yet: add buses in the Buses tab first.",
+    "period": "Period",
+    "periods": {
+      "morning": "Morning rounds",
+      "evening": "Evening rounds"
+    },
+    "morningRound": "Morning round",
+    "eveningRound": "Evening round",
+    "bus": "Bus",
+    "noRoundsInPeriod": "No rounds yet."
   }
 }

@@ -16,8 +16,8 @@ const wrap = (ui, path = '/', route = '/') => render(
 
 const overview = {
   riders: 1,
-  rounds: [{ id: 1, name_ar: 'الجولة الأولى', name_en: 'First round', starts_at: '07:30', ends_at: '13:00', riders: 1 }, { id: 2, name_ar: 'الجولة الثانية', name_en: 'Second round', starts_at: null, ends_at: null, riders: 0 }],
-  buses: [{ id: 9, number: '1', driver_name: 'Abu Ali', driver_phone: '0790000000', capacity: 30, area_from: 'Downtown', area_to: 'School', notes: null, is_active: true, round_ids: [1], load: { 1: { pickup: 1, dropoff: 0 } } }],
+  rounds: [{ id: 1, name_ar: 'صباحية 1', name_en: 'Morning 1', period: 'morning', starts_at: '07:30', ends_at: '13:00', riders: 1 }, { id: 2, name_ar: 'مسائية 2', name_en: 'Evening 2', period: 'evening', starts_at: null, ends_at: null, riders: 0 }],
+  buses: [{ id: 9, number: '1', driver_name: 'Abu Ali', driver_phone: '0790000000', capacity: 30, area_from: 'Downtown', area_to: 'School', notes: null, is_active: true, round_ids: [1], load: { 1: 1 } }],
 }
 
 beforeEach(async () => { vi.resetAllMocks(); await i18n.changeLanguage('en') })
@@ -30,14 +30,14 @@ describe('transport', () => {
     expect(await screen.findByText('Bus 1')).toBeInTheDocument()
     expect(screen.getByText('Abu Ali')).toBeInTheDocument()
     expect(screen.getByText('From Downtown to School')).toBeInTheDocument()
-    expect(screen.getByText('To school 1 · Home 0 (of 30 seats)')).toBeInTheDocument()
+    expect(screen.getByText('1 of 30 seats')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Add a bus' }))
     fireEvent.change(screen.getByLabelText('Bus number'), { target: { value: '2' } })
     fireEvent.change(screen.getByLabelText('Driver name'), { target: { value: 'Abu Omar' } })
     fireEvent.change(screen.getByLabelText('Area from'), { target: { value: 'North' } })
     fireEvent.change(screen.getByLabelText('Area to'), { target: { value: 'School' } })
-    fireEvent.click(screen.getByLabelText('Second round'))
+    fireEvent.click(screen.getByLabelText('Evening 2'))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/transport/buses', expect.objectContaining({ number: '2', driver_name: 'Abu Omar', round_ids: [2], capacity: 30 })))
   })
@@ -47,14 +47,18 @@ describe('transport', () => {
     wrap(<TransportPage />)
     fireEvent.click(await screen.findByRole('tab', { name: 'Rounds' }))
     expect(screen.getByRole('button', { name: 'Add a round' })).toBeEnabled()
-    expect(screen.getByText('First round')).toBeInTheDocument()
+    expect(screen.getByText('Morning 1')).toBeInTheDocument()
+    expect(screen.getByText('Morning rounds')).toBeInTheDocument()
+    expect(screen.getByText('Evening rounds')).toBeInTheDocument()
   })
 
   it('a parent sees the bus to school and a different bus home', async () => {
-    api.get.mockResolvedValue({ data: { data: { round: { name_ar: 'الأولى', name_en: 'First round', starts_at: '07:30', ends_at: null }, pickup_bus: { number: '1', driver_name: 'Abu Ali', driver_phone: null, area_from: 'A', area_to: 'B' }, dropoff_bus: { number: '4', driver_name: 'Abu Saad', driver_phone: null, area_from: 'C', area_to: 'D' } } } })
+    api.get.mockResolvedValue({ data: { data: { pickup_round: { name_ar: 'صباحية', name_en: 'Morning 1', starts_at: '07:30', ends_at: null }, dropoff_round: { name_ar: 'مسائية', name_en: 'Evening 2', starts_at: null, ends_at: null }, pickup_bus: { number: '1', driver_name: 'Abu Ali', driver_phone: null, area_from: 'A', area_to: 'B' }, dropoff_bus: { number: '4', driver_name: 'Abu Saad', driver_phone: null, area_from: 'C', area_to: 'D' } } } })
     wrap(<MyTransportPage />, '/parent/children/5/transport', '/parent/children/:id/transport')
     expect(await screen.findByText('Bus 1')).toBeInTheDocument()
     expect(screen.getByText('Bus 4')).toBeInTheDocument()
+    expect(screen.getByText(/Morning 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Evening 2/)).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent("Sara's bus")
     expect(api.get).toHaveBeenCalledWith('/students/5/transport')
   })
@@ -63,5 +67,19 @@ describe('transport', () => {
     api.get.mockResolvedValue({ data: { data: null } })
     wrap(<MyTransportPage />, '/parent/children/5/transport', '/parent/children/:id/transport')
     expect(await screen.findByText('No school bus is set for this student.')).toBeInTheDocument()
+  })
+
+  it('assigning a student sets a morning round and bus and an evening round and bus', async () => {
+    api.get.mockImplementation(async (url) => (url === '/transport' ? { data: overview } : { data: { data: [{ id: 7, name_ar: 'سارة', name_en: 'Sara', classroom: '5-A', ride: null }] } }))
+    api.put.mockResolvedValue({ data: {} })
+    wrap(<TransportPage />)
+    fireEvent.click(await screen.findByRole('tab', { name: 'Students' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Assign' }))
+    fireEvent.change(screen.getByLabelText('Morning round'), { target: { value: '1' } })
+    fireEvent.change(screen.getAllByLabelText('Bus')[0], { target: { value: '9' } })
+    fireEvent.change(screen.getByLabelText('Evening round'), { target: { value: '2' } })
+    fireEvent.change(screen.getAllByLabelText('Bus')[1], { target: { value: '9' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/transport/students/7', { pickup_round_id: 1, pickup_bus_id: 9, dropoff_round_id: 2, dropoff_bus_id: 9 }))
   })
 })
