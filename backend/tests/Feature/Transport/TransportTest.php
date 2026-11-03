@@ -37,13 +37,12 @@ class TransportTest extends AcademicTestCase
         Sanctum::actingAs($this->admin);
     }
 
-    public function test_a_school_has_at_most_three_rounds(): void
+    public function test_a_school_can_have_as_many_rounds_as_it_needs(): void
     {
-        foreach (['1', '2', '3'] as $n) {
+        foreach (['1', '2', '3', '4', '5'] as $n) {
             $this->round("جولة $n", "Round $n");
         }
-        $this->postJson('/api/transport/rounds', ['name_ar' => 'رابعة', 'name_en' => 'Fourth'])->assertStatus(422);
-        $this->getJson('/api/transport')->assertOk()->assertJsonCount(3, 'rounds');
+        $this->getJson('/api/transport')->assertOk()->assertJsonCount(5, 'rounds');
     }
 
     public function test_a_student_can_have_a_different_bus_to_school_and_home_or_just_one(): void
@@ -59,13 +58,16 @@ class TransportTest extends AcademicTestCase
         $this->assertSame(1, StudentTransport::count());
     }
 
-    public function test_a_bus_only_takes_students_of_the_rounds_it_serves_and_only_up_to_its_seats(): void
+    public function test_choosing_a_bus_for_a_round_it_did_not_serve_adds_the_round_to_the_bus_and_seats_are_limited(): void
     {
         $r1 = $this->round();
         $r2 = $this->round('الثانية', 'Second');
         $bus = $this->bus('1', [$r1]);
         $x = $this->student('x');
-        $this->putJson("/api/transport/students/{$x->id}", ['round_id' => $r2, 'pickup_bus_id' => $bus])->assertStatus(422)->assertJsonValidationErrors('pickup_bus_id');
+        $this->putJson("/api/transport/students/{$x->id}", ['round_id' => $r2, 'pickup_bus_id' => $bus])->assertOk();
+        $this->getJson('/api/transport')->assertJsonPath('buses.0.round_ids', [$r1, $r2]);
+        $this->putJson("/api/transport/students/{$x->id}", ['round_id' => $r1, 'dropoff_bus_id' => $bus])->assertOk();
+        $this->deleteJson("/api/transport/students/{$x->id}")->assertNoContent();
         foreach (['a', 'b'] as $n) {
             $this->putJson('/api/transport/students/'.$this->student($n)->id, ['round_id' => $r1, 'pickup_bus_id' => $bus])->assertOk();
         }

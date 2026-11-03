@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
- * School transport. The principal sets the rounds (up to 3), the buses (driver, area, seats, rounds) and where each student rides:
+ * School transport. The principal sets the rounds (as many as the school has), the buses (driver, area, seats, rounds) and where each student rides:
  * a round, a bus that picks them up and a bus that takes them home (they may differ, or only one may be set). Parents and students
  * read their own.
  */
@@ -32,15 +32,11 @@ class TransportController extends Controller
             'rounds' => $rounds->map(fn ($r) => $this->round($r, $rides->where('transport_round_id', $r->id)->count()))->values(),
             'buses' => $buses->map(fn ($b) => $this->bus($b, $rides))->values(),
             'riders' => $rides->count(),
-            'max_rounds' => TransportRound::MAX,
         ]);
     }
 
     public function storeRound(Request $request): JsonResponse
     {
-        if (TransportRound::count() >= TransportRound::MAX) {
-            throw ValidationException::withMessages(['name_ar' => [__('transport.max_rounds')]]);
-        }
         $round = TransportRound::create($this->roundData($request) + ['sort_order' => (int) TransportRound::max('sort_order') + 1]);
 
         return response()->json(['data' => $this->round($round, 0)], 201);
@@ -169,12 +165,11 @@ class TransportController extends Controller
     private function checkSeat(int $busId, int $roundId, int $studentId, string $column, string $field): void
     {
         $bus = Bus::with('rounds:id')->findOrFail($busId);
-        if (! $bus->rounds->contains('id', $roundId)) {
-            throw ValidationException::withMessages([$field => [__('transport.bus_not_in_round')]]);
-        }
         if (! $bus->is_active) {
             throw ValidationException::withMessages([$field => [__('transport.bus_inactive')]]);
         }
+        // A bus that did not serve the round yet starts serving it (the principal chose it for this student).
+        $bus->rounds()->syncWithoutDetaching([$roundId]);
         $taken = StudentTransport::where('transport_round_id', $roundId)->where($column, $busId)->where('student_id', '!=', $studentId)->count();
         if ($taken >= $bus->capacity) {
             throw ValidationException::withMessages([$field => [__('transport.bus_full')]]);
