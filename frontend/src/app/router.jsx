@@ -80,6 +80,7 @@ import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
+import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
 import TransportPage from '../features/Transport/TransportPage'
 import MyTransportPage from '../features/Transport/MyTransportPage'
@@ -224,6 +225,7 @@ export const routes = [
               { path: '/admin/duties', element: <DutiesAdminPage /> },
               { path: '/admin/procurement', element: <ProcurementPage /> },
               { path: '/admin/tasks', element: <TasksPage /> },
+              { path: '/admin/staff-access', element: <StaffAccessPage /> },
               { path: '/admin/transport', element: <TransportPage /> },
               { path: '/admin/stories', element: <StoriesPage /> },
               { path: '/admin/audit-log', element: <AuditLogPage /> },

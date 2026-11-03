@@ -492,3 +492,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - Allowed: images, PDF, Word, Excel, PowerPoint, text/CSV; up to 10 files of 10 MB each per owner. Files open only for people who may see the owner (task people, the giver and management; a survey's author and recipients; a hand-in only by its author, the giver and management). Deleting the owner deletes its files.
 - Frontend: `AttachmentsField` (choose files in a form, uploaded after saving), `LiveAttachments` (add/remove at once), `AttachmentList` (show) in `components/shared/Attachments.jsx`: reuse them for any new screen that needs files.
 - Needs `php artisan tenants:migrate`.
+
+## What staff see (screen visibility)
+- The principal opens **What staff see** (`/admin/staff-access`) and ticks, per member of staff (or for several people at once, with search and a job filter), which screens they see. A screen that is unticked disappears from the person's home page, the chat/announcement icons, and its address shows "not available". Default: everybody sees what their job allows.
+- Stored in `staff_profiles.hidden_features` (list of keys, see `StaffProfile::FEATURES` and `frontend/src/features/StaffAccess/staffFeatures.js`; keep both lists in sync when adding a screen). Only staff are affected: students and parents are not.
+- This hides the screens (home, menus, addresses); the API itself still follows the job's permissions.
+- API: `GET/PUT /api/staff-visibility` (admin). Needs `php artisan tenants:migrate`.
