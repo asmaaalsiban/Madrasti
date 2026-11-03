@@ -3,6 +3,7 @@
 return [
     'bad_amounts' => 'The amounts are not valid.',
     'schedule_mismatch' => 'The installments must add up to the fee after the discount.',
+    'gateway_unreachable' => 'The payment provider could not be reached. Nothing was charged: please try again in a moment.',
     'more_than_owed' => 'The payment is more than what is still owed (:owed).',
     'has_payments' => 'This fee already has payments, so its discount cannot change.',
     'not_allowed' => 'You are not allowed to manage the school fees.',
