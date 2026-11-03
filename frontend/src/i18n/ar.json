@@ -126,7 +126,8 @@
       "auditLog": "سجل التدقيق",
       "exams": "جدول الامتحانات",
       "duties": "جدول المناوبات",
-      "stories": "أخبار الصف"
+      "stories": "أخبار الصف",
+      "procurement": "طلبات الشراء"
     },
     "actions": {
       "add": "إضافة",
@@ -844,7 +845,12 @@
       "duty_assigned": "تم توزيع مناوباتك: {{title}}",
       "duty_reminder": "مناوبتك غدًا: {{title}}",
       "story_new": "نشر {{teacher}} شيئًا لصفّك",
-      "story_comment": "علّق {{name}} على منشورك"
+      "story_comment": "علّق {{name}} على منشورك",
+      "procurement_new": "طلب {{name}} شراء: {{title}}",
+      "procurement_approved": "تمت الموافقة على طلبك: {{title}}",
+      "procurement_rejected": "رُفض طلبك: {{title}} — {{note}}",
+      "procurement_to_buy": "تمت الموافقة، يرجى الشراء: {{title}}",
+      "procurement_purchased": "تم شراء: {{title}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -1863,5 +1869,61 @@
     "deleteHelp": "سيُحذف المنشور وصوره وتعليقاته للجميع.",
     "photos": "الصور",
     "openPhoto": "فتح الصورة {{number}}"
+  },
+  "procurement": {
+    "title": "طلبات الشراء",
+    "tile": "اطلب من المدرسة شراء شيء وتابعه.",
+    "newRequest": "طلب جديد",
+    "editRequest": "تعديل الطلب",
+    "what": "ماذا تحتاج؟",
+    "whatHint": "مثال: أقلام سبورة",
+    "details": "تفاصيل (اختياري)",
+    "quantity": "الكمية",
+    "category": "التصنيف",
+    "priority": "الأولوية",
+    "estimated": "التكلفة التقديرية",
+    "neededBy": "مطلوب قبل",
+    "send": "إرسال",
+    "categories": {
+      "stationery": "قرطاسية",
+      "teaching_aids": "وسائل تعليمية",
+      "equipment": "معدات",
+      "maintenance": "صيانة",
+      "cleaning": "نظافة",
+      "it": "تقنية معلومات",
+      "other": "أخرى"
+    },
+    "priorities": {
+      "low": "منخفضة",
+      "normal": "عادية",
+      "high": "عالية",
+      "urgent": "عاجلة"
+    },
+    "status": {
+      "pending": "بالانتظار",
+      "approved": "معتمد",
+      "purchased": "تم الشراء",
+      "received": "تم الاستلام",
+      "rejected": "مرفوض"
+    },
+    "noneHere": "لا شيء هنا",
+    "waitingDecision": "بانتظار قرار",
+    "toSpend": "معتمد وللصرف",
+    "spent": "المصروف حتى الآن",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "rejectTitle": "رفض: {{title}}",
+    "reason": "السبب (سيقرأه مقدّم الطلب)",
+    "recordPurchase": "تسجيل الشراء",
+    "purchaseTitle": "شراء: {{title}}",
+    "supplier": "اشتُري من",
+    "actual": "كم كلّف",
+    "invoice": "رقم الفاتورة",
+    "boughtOn": "تاريخ الشراء",
+    "markReceived": "وصل",
+    "approvedBy": "اعتمده",
+    "declinedBy": "رفضه",
+    "boughtFrom": "اشتُري من {{supplier}}",
+    "deleteTitle": "حذف هذا الطلب؟"
   }
 }

@@ -126,7 +126,8 @@
       "auditLog": "Audit log",
       "exams": "Exam timetable",
       "duties": "Duty roster",
-      "stories": "Class feed"
+      "stories": "Class feed",
+      "procurement": "Purchase requests"
     },
     "actions": {
       "add": "Add",
@@ -844,7 +845,12 @@
       "duty_assigned": "You have been given duties: {{title}}",
       "duty_reminder": "Duty tomorrow: {{title}}",
       "story_new": "{{teacher}} shared something with the class",
-      "story_comment": "{{name}} commented on your post"
+      "story_comment": "{{name}} commented on your post",
+      "procurement_new": "{{name}} asked to buy: {{title}}",
+      "procurement_approved": "Your request was approved: {{title}}",
+      "procurement_rejected": "Your request was declined: {{title}} — {{note}}",
+      "procurement_to_buy": "Approved, please buy: {{title}}",
+      "procurement_purchased": "Bought: {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -1863,5 +1869,61 @@
     "deleteHelp": "The post, its photos and its comments will be removed for everyone.",
     "photos": "Photos",
     "openPhoto": "Open photo {{number}}"
+  },
+  "procurement": {
+    "title": "Purchase requests",
+    "tile": "Ask the school to buy something, and follow it.",
+    "newRequest": "New request",
+    "editRequest": "Edit request",
+    "what": "What do you need?",
+    "whatHint": "e.g. Whiteboard markers",
+    "details": "Details (optional)",
+    "quantity": "Quantity",
+    "category": "Category",
+    "priority": "Priority",
+    "estimated": "Estimated cost",
+    "neededBy": "Needed by",
+    "send": "Send",
+    "categories": {
+      "stationery": "Stationery",
+      "teaching_aids": "Teaching aids",
+      "equipment": "Equipment",
+      "maintenance": "Maintenance",
+      "cleaning": "Cleaning",
+      "it": "IT",
+      "other": "Other"
+    },
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "pending": "Waiting",
+      "approved": "Approved",
+      "purchased": "Bought",
+      "received": "Received",
+      "rejected": "Declined"
+    },
+    "noneHere": "Nothing here",
+    "waitingDecision": "Waiting for a decision",
+    "toSpend": "Approved, to spend",
+    "spent": "Spent so far",
+    "approve": "Approve",
+    "reject": "Decline",
+    "rejectTitle": "Decline: {{title}}",
+    "reason": "Reason (the requester will read it)",
+    "recordPurchase": "Record purchase",
+    "purchaseTitle": "Purchase: {{title}}",
+    "supplier": "Bought from",
+    "actual": "What it cost",
+    "invoice": "Invoice number",
+    "boughtOn": "Date of purchase",
+    "markReceived": "It arrived",
+    "approvedBy": "approved by",
+    "declinedBy": "declined by",
+    "boughtFrom": "Bought from {{supplier}}",
+    "deleteTitle": "Delete this request?"
   }
 }
