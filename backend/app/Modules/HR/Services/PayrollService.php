@@ -158,6 +158,25 @@ class PayrollService
         return $run->refresh();
     }
 
+    /**
+     * Works the automatic lines (punctuality, summaries, plans, absence) out again for every payslip of a draft payroll, from the attendance
+     * and rules as they are now. Lines the accountant added by hand, contract items and assigned rules are not touched.
+     */
+    public function refreshCommitment(PayrollRun $run, User $by): int
+    {
+        $this->assertDraft($run);
+        $start = $run->month->copy()->startOfMonth();
+        DB::transaction(function () use ($run, $start, $by): void {
+            foreach ($run->payslips()->with('user')->get() as $slip) {
+                $slip->items()->whereNotNull('auto_code')->delete();
+                $this->addCommitmentLines($slip->refresh(), $slip->user, $start, $by);
+                $this->recalculate($slip->refresh());
+            }
+        });
+
+        return $run->payslips()->count();
+    }
+
     /** The school's own rules this person was assigned for this month (a summer club, private lessons...). A deduction that would take the net below zero is skipped. */
     private function addAssignedRules(Payslip $slip, User $staff, Carbon $month, User $by): void
     {

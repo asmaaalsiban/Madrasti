@@ -229,6 +229,30 @@ class CommitmentTest extends AcademicTestCase
         $this->assertSame('288.00', $this->net($off)); // 1 absence only
     }
 
+    public function test_absences_recorded_after_the_payroll_was_prepared_are_deducted_when_it_is_refreshed_from_attendance(): void
+    {
+        $this->rule('absence', ['type' => 'amount', 'value' => 12]);
+        $u = User::factory()->staff(StaffType::Teacher)->create(['name' => 'Late records']);
+        Sanctum::actingAs($this->accountant);
+        $this->postJson('/api/payroll/contracts', ['user_id' => $u->id, 'starts_on' => '2026-09-01', 'ends_on' => '2027-08-31', 'base_salary' => 300])->assertCreated();
+        $this->day($this->sara, '2026-11-01', 'present'); // recording has started, but nothing about $u yet
+        foreach (self::DAYS as $d) {
+            $this->day($u, $d, 'present');
+        }
+        $runId = $this->postJson('/api/payroll/runs', ['month' => '2026-11'])->json('data.id');
+        $slip = fn () => collect($this->getJson("/api/payroll/runs/$runId")->json('data.payslips'))->firstWhere('user.id', $u->id);
+        $this->assertSame('300.00', $slip()['net']);
+
+        // The principal fixes two days to absent afterwards: the slip does not know until it is refreshed.
+        StaffAttendance::where('user_id', $u->id)->whereIn('date', ['2026-11-02', '2026-11-03'])->update(['status' => 'absent', 'check_in' => null]);
+        $this->assertSame('300.00', $slip()['net']);
+        $this->postJson("/api/payroll/runs/$runId/refresh-commitment")->assertOk()->assertJsonPath('refreshed', 1);
+        $this->assertSame('276.00', $slip()['net']); // 300 - 2 x 12
+        $this->postJson("/api/payroll/runs/$runId/refresh-commitment")->assertOk();
+        $this->assertSame('276.00', $slip()['net']); // refreshing again does not charge twice
+        $this->assertSame(1, DB::table('payslip_items')->where('auto_code', 'absence')->count());
+    }
+
     public function test_a_day_of_absence_can_cost_a_percent_of_a_days_pay(): void
     {
         $u = $this->userWith(7); // 1 absent day
