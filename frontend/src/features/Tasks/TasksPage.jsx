@@ -68,8 +68,15 @@ function TaskDialog({ task, onClose }) {
   })
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
   const toggle = (id) => setForm({ ...form, user_ids: form.user_ids.includes(id) ? form.user_ids.filter((x) => x !== id) : [...form.user_ids, id] })
-  const all = people.data ?? []
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState('')
+  const everybody = people.data ?? []
+  const types = [...new Set(everybody.map((p) => p.staff_type).filter(Boolean))]
+  const q = search.trim().toLowerCase()
+  // Search and the job filter narrow the list; "select all" then means everybody who is shown.
+  const all = everybody.filter((p) => (!type || p.staff_type === type) && (!q || p.name.toLowerCase().includes(q)))
   const everyone = all.length > 0 && all.every((p) => form.user_ids.includes(p.id))
+  const toggleShown = () => setForm({ ...form, user_ids: everyone ? form.user_ids.filter((id) => !all.some((p) => p.id === id)) : [...new Set([...form.user_ids, ...all.map((p) => p.id)])] })
   return (
     <Modal open size="lg" title={task ? t('tasks.edit') : t('tasks.new')} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
@@ -82,13 +89,21 @@ function TaskDialog({ task, onClose }) {
         </div>
         <fieldset className="text-sm">
           <legend className="mb-1 flex w-full items-center justify-between">{t('tasks.assignTo')}
-            <button type="button" className="text-brand" onClick={() => setForm({ ...form, user_ids: everyone ? [] : all.map((p) => p.id) })}>{everyone ? t('tasks.clearAll') : t('tasks.selectAll')}</button>
+            <button type="button" className="text-brand" onClick={toggleShown}>{everyone ? t('tasks.clearAll') : t('tasks.selectAll')}</button>
           </legend>
-          {people.isLoading ? <p className="text-slate-500">{t('common.loading')}</p> : all.length === 0 ? <p className="text-slate-500">{t('tasks.noPeople')}</p> : (
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <input type="search" aria-label={t('admin.actions.search')} placeholder={t('admin.actions.search')} className="min-w-0 flex-1 rounded border p-1.5" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <select aria-label={t('tasks.filterByJob')} className="rounded border p-1.5" value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="">{t('tasks.allJobs')}</option>
+              {types.map((k) => <option key={k} value={k}>{t(`staff.types.${k}`)}</option>)}
+            </select>
+            <span className="text-xs text-slate-500">{t('tasks.chosenCount', { count: form.user_ids.length })}</span>
+          </div>
+          {people.isLoading ? <p className="text-slate-500">{t('common.loading')}</p> : everybody.length === 0 ? <p className="text-slate-500">{t('tasks.noPeople')}</p> : all.length === 0 ? <p className="text-slate-500">{t('tasks.noMatch')}</p> : (
             <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">
               {all.map((p) => (
                 <label key={p.id} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 ${form.user_ids.includes(p.id) ? 'border-brand bg-sky-tint font-bold' : ''}`}>
-                  <input type="checkbox" className="sr-only" checked={form.user_ids.includes(p.id)} onChange={() => toggle(p.id)} /><bdi>{p.name}</bdi>
+                  <input type="checkbox" className="sr-only" checked={form.user_ids.includes(p.id)} onChange={() => toggle(p.id)} /><bdi>{p.name}</bdi>{p.staff_type && <span className="text-xs font-normal text-slate-500">{t(`staff.types.${p.staff_type}`)}</span>}
                 </label>
               ))}
             </div>

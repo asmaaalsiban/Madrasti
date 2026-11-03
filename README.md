@@ -483,6 +483,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 
 ## Tasks (المهام)
 - Management (admin role) gives a task to **any teacher**; a **head of department** gives one to the teachers of **their own department** (same subject). Other teachers only receive tasks.
-- A task has a title, details, due date, priority and one or more people. Each person has **their own status** (To do / In progress / Done) and a note; the giver follows the progress (done count + bar) and can edit, add or remove people (progress is kept) or delete.
+- A task has a title, details, due date, priority and one or more people (the people list has a name search and a job filter; "select all" takes only who is shown). Each person has **their own status** (To do / In progress / Done) and a note; the giver follows the progress (done count + bar) and can edit, add or remove people (progress is kept) or delete.
 - Notifications: new task, task finished (to the giver), and a daily `tasks:remind` (07:30, per school) for tasks due tomorrow or overdue since yesterday.
 - Screens: `/teacher/tasks` (tile "Tasks"), `/admin/tasks` (People group). API: `GET /api/tasks/mine|given|people`, `POST /api/tasks`, `PUT|DELETE /api/tasks/{id}`, `PUT /api/tasks/{id}/status`. Needs `php artisan tenants:migrate`.
