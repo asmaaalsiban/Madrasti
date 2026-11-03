@@ -80,6 +80,8 @@ import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
 import MyDutiesPage from '../features/Duties/MyDutiesPage'
 import StoriesPage from '../features/Stories/StoriesPage'
 import ProcurementPage from '../features/Procurement/ProcurementPage'
+import LegalPage from '../features/Legal/LegalPage'
+import LegalShell from '../features/Legal/LegalFooter'
 import TransfersPage from '../features/Finance/pages/TransfersPage'
 import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
@@ -276,6 +278,14 @@ export const centralRoutes = [
   { path: '*', element: <Navigate to="/" replace /> },
 ]
 
-export const routesFor = (school) => (school ? routes : centralRoutes)
+// The legal pages are public (also before a school is chosen), and every page ends with a footer that links to them.
+const legalRoutes = [
+  { path: '/privacy', element: <LegalPage doc="privacy" /> },
+  { path: '/terms', element: <LegalPage doc="terms" /> },
+  { path: '/cookies', element: <LegalPage doc="cookies" /> },
+]
+const withLegal = (list) => [{ element: <LegalShell />, children: [...legalRoutes, ...list] }]
+
+export const routesFor = (school) => withLegal(school ? routes : centralRoutes)
 
 export const createRouter = () => createBrowserRouter(routesFor(getSchool()))
