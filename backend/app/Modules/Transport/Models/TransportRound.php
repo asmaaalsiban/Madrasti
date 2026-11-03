@@ -13,8 +13,6 @@ class TransportRound extends Model
 {
     use Auditable;
 
-    public const MAX = 3;
-
     protected $fillable = ['name_ar', 'name_en', 'starts_at', 'ends_at', 'sort_order'];
 
     /** @return BelongsToMany<Bus, $this> */

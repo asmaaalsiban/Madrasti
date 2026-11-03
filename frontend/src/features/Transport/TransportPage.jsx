@@ -126,10 +126,10 @@ function AssignDialog({ student, overview, onClose }) {
     onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
-  const buses = overview.buses.filter((b) => b.is_active && b.round_ids.includes(Number(form.round_id)))
+  const buses = overview.buses.filter((b) => b.is_active)
   const busLabel = (b) => {
     const l = b.load[form.round_id] ?? { pickup: 0, dropoff: 0 }
-    return `${t('transport.busNo', { number: b.number })} · ${b.area_from} → ${b.area_to} (${l.pickup}/${b.capacity} · ${l.dropoff}/${b.capacity})`
+    return `${t('transport.busNo', { number: b.number })} · ${b.area_from} → ${b.area_to} (${l.pickup}/${b.capacity} · ${l.dropoff}/${b.capacity})${b.round_ids.includes(Number(form.round_id)) ? '' : ` — ${t('transport.willJoinRound')}`}`
   }
   const pickRound = (e) => setForm({ round_id: e.target.value, pickup_bus_id: '', dropoff_bus_id: '' })
   const pickPickup = (e) => setForm({ ...form, pickup_bus_id: e.target.value, dropoff_bus_id: form.dropoff_bus_id || (ride ? '' : e.target.value) })
@@ -218,12 +218,11 @@ function RoundsTab({ overview }) {
   const [del, setDel] = useState(null)
   const [error, setError] = useState('')
   const remove = useMutation({ mutationFn: (r) => api.delete(`/transport/rounds/${r.id}`), onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); setDel(null) }, onError: (err) => { setDel(null); setError(errorOf(err, t('admin.actions.error'))) } })
-  const full = overview.rounds.length >= overview.max_rounds
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">{t('transport.roundsHelp', { max: overview.max_rounds })}</p>
+      <p className="text-sm text-slate-600">{t('transport.roundsHelp')}</p>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-      <button type="button" disabled={full} className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white disabled:opacity-50" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('transport.newRound')}</button>
+      <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('transport.newRound')}</button>
       <ul className="grid gap-3 sm:grid-cols-3">
         {overview.rounds.map((r) => (
           <li key={r.id} className="space-y-2 rounded-lg border bg-white p-4">

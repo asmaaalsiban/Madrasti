@@ -473,9 +473,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - After pulling: `php artisan tenants:migrate` (replaces the old unused `procurement_requests` table).
 
 ## School transport (المواصلات)
-- **Rounds** (up to 3): the shifts of the school day (first, second, third), each with an optional start/end time.
+- **Rounds** (any number): the shifts of the school day (first, second, third), each with an optional start/end time.
 - **Buses**: number, driver name and phone, seats, the area it covers (from → to), the rounds it serves, active or not.
-- **Rides**: each student has one round plus a bus *to school* and a bus *home*; they can be different buses, or only one of them can be set. A bus must serve the student's round and have a free seat (counted per round and per direction).
+- **Rides**: each student has one round plus a bus *to school* and a bus *home*; they can be different buses, or only one of them can be set. A bus is added to the student's round automatically and must have a free seat (counted per round and per direction).
 - A round or a bus that still carries students cannot be deleted, and a round cannot be removed from a bus that carries students in it.
 - Transport fees already live in the student's fee account (`transport` line) and are unchanged.
 - Principal: `/admin/transport` (tabs Buses / Rounds / Students). Student and parent: a "School bus" tile (`/student/transport`, `/parent/children/:id/transport`).
