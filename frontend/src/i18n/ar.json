@@ -1523,7 +1523,9 @@
     "assignedNow": "المعيَّنون حاليًا",
     "noAssigned": "لا أحد بعد.",
     "pickMonth": "اختر الشهر",
-    "deleteRuleTitle": "حذف هذه القاعدة؟"
+    "deleteRuleTitle": "حذف هذه القاعدة؟",
+    "rulesNoAccessTitle": "قواعد الالتزام",
+    "rulesNoAccess": "ليس لديك صلاحية لعرض هذه الصفحة."
   },
   "renewals": {
     "title": "تجديد تسجيل الطلاب",
