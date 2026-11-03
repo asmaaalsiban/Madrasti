@@ -129,7 +129,8 @@
       "stories": "أخبار الصف",
       "procurement": "طلبات الشراء",
       "transport": "المواصلات",
-      "tasks": "المهام"
+      "tasks": "المهام",
+      "staffAccess": "ماذا يرى الموظفون"
     },
     "actions": {
       "add": "إضافة",
@@ -2071,5 +2072,62 @@
     "open": "فتح {{name}}",
     "hint": "صور أو PDF أو Word أو Excel أو PowerPoint أو نص. حتى {{max}} ملفات، 10 ميغابايت لكل ملف.",
     "uploading": "جارٍ الرفع…"
+  },
+  "staffAccess": {
+    "title": "ماذا يرى الموظفون",
+    "help": "حدّد ما يراه كل موظف. الشاشة التي تلغي تحديدها تختفي من صفحته الرئيسية وقوائمه، ويظهر في عنوانها \"غير متاحة\". الطلاب وأولياء الأمور لا يتأثرون.",
+    "editSelected": "تعديل المحددين ({{count}})",
+    "forOne": "ماذا يرى {{name}}",
+    "forMany": "ماذا يرى {{count}} أشخاص",
+    "replaceWarning": "هذا يستبدل ما كان لدى هؤلاء الأشخاص سابقاً.",
+    "showAll": "إظهار الكل",
+    "hideAll": "إخفاء الكل",
+    "seesAll": "يرى كل شيء",
+    "hiddenCount_zero": "لا شاشات مخفية",
+    "hiddenCount_one": "شاشة واحدة مخفية",
+    "hiddenCount_two": "شاشتان مخفيتان",
+    "hiddenCount_few": "{{count}} شاشات مخفية",
+    "hiddenCount_many": "{{count}} شاشة مخفية",
+    "hiddenCount_other": "{{count}} شاشة مخفية",
+    "notAvailable": "هذه الشاشة غير متاحة لك.",
+    "groups": {
+      "general": "عام",
+      "teaching": "التدريس",
+      "followUp": "المتابعة",
+      "mine": "عملي",
+      "money": "المال"
+    },
+    "features": {
+      "chat": "المحادثات",
+      "announcements": "الإعلانات",
+      "stories": "أخبار الصف",
+      "tasks": "المهام",
+      "timetable": "جدولي",
+      "attendance": "تحضير الطلاب",
+      "attendance_report": "تقرير الغياب",
+      "exams": "الامتحانات",
+      "lesson_plans": "خطط الدروس",
+      "daily_summary": "ملخص اليوم",
+      "homework": "الواجبات",
+      "grades": "العلامات",
+      "behavior": "السلوك",
+      "motivation": "التحفيز",
+      "surveys": "الاستطلاعات والموافقات",
+      "signature": "التوقيع",
+      "lesson_plan_review": "مراجعة الخطط (رئيس القسم)",
+      "department": "قسمي (رئيس القسم)",
+      "duties": "المناوبات",
+      "staff_attendance": "حضور الموظفين",
+      "payslips": "راتبي",
+      "procurement": "طلبات الشراء",
+      "finance": "المالية (المحاسب)",
+      "renewals": "تجديد تسجيل الطلاب (المحاسب)",
+      "payroll": "الرواتب (المحاسب)"
+    },
+    "cols": {
+      "name": "الاسم",
+      "job": "الوظيفة",
+      "hidden": "الشاشات"
+    }
   }
 }

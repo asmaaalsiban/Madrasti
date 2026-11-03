@@ -21,17 +21,26 @@ class StaffProfile extends Model
 {
     use Auditable;
 
+    /** The screens of a member of staff that the principal can switch off (the same keys the app uses). */
+    public const FEATURES = [
+        'chat', 'announcements', 'stories', 'tasks',
+        'timetable', 'attendance', 'attendance_report', 'exams', 'lesson_plans', 'daily_summary', 'homework', 'grades',
+        'behavior', 'motivation', 'surveys', 'signature', 'lesson_plan_review', 'department',
+        'duties', 'staff_attendance', 'payslips', 'procurement',
+        'finance', 'renewals', 'payroll',
+    ];
+
     /**
      * @var list<string>
      */
-    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty'];
+    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty', 'hidden_features'];
 
     /**
      * @return array<string, mixed>
      */
     protected function casts(): array
     {
-        return ['staff_type' => StaffType::class, 'hired_on' => 'date', 'does_duty' => 'boolean'];
+        return ['staff_type' => StaffType::class, 'hired_on' => 'date', 'does_duty' => 'boolean', 'hidden_features' => 'array'];
     }
 
     public function user(): BelongsTo

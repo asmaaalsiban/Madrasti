@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import IconButton from '../components/shared/IconButton'
@@ -7,6 +7,7 @@ import { Megaphone, MessageCircle } from 'lucide-react'
 import useUnreadChat from '../features/Chat/hooks/useUnreadChat'
 import useUnreadAnnouncements from '../features/Announcements/hooks/useUnreadAnnouncements'
 import { useAuth } from '../features/Auth/AuthProvider'
+import { isHidden } from '../features/StaffAccess/staffFeatures'
 import NotificationBell from '../features/Notifications/NotificationBell'
 import { useSchool } from '../tenant/useSchool'
 
@@ -14,6 +15,7 @@ import { useSchool } from '../tenant/useSchool'
 export default function DashboardLayout() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
+  const { pathname } = useLocation()
   const { data: school } = useSchool()
   const unread = useUnreadAnnouncements()
   const unreadChat = useUnreadChat()
@@ -31,15 +33,15 @@ export default function DashboardLayout() {
           <span className="truncate text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
         </Link>
         <div className="flex items-center gap-2">
-          <IconButton to={`/${user.role}/chat`} icon={MessageCircle} label={t('chat.title')} count={unreadChat} />
-          <IconButton to={`/${user.role}/announcements`} icon={Megaphone} label={t('announcements.title')} count={unread} />
+          {!isHidden(user, '/teacher/chat') && <IconButton to={`/${user.role}/chat`} icon={MessageCircle} label={t('chat.title')} count={unreadChat} />}
+          {!isHidden(user, '/teacher/announcements') && <IconButton to={`/${user.role}/announcements`} icon={Megaphone} label={t('announcements.title')} count={unread} />}
           <NotificationBell />
           <UserMenu detail={[label, detail].filter(Boolean).join(' · ')} />
         </div>
       </header>
       <main className="mx-auto max-w-5xl p-4">
         <BackButton />
-        <Outlet />
+        {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Outlet />}
       </main>
     </div>
   )
