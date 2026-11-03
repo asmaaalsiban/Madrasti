@@ -23,7 +23,8 @@ function Amount({ type, value, onType, onValue, disabled, label }) {
 // The commitment rules: a score per measure, a bonus above it and a deduction below it. The principal sets them.
 export default function RulesPage({ base }) {
   const { t } = useTranslation()
-  const { data } = useQuery({ queryKey: ['payroll', 'rules'], queryFn: async () => (await api.get('/payroll/rules')).data.data })
+  const { data, isError } = useQuery({ queryKey: ['payroll', 'rules'], retry: false, queryFn: async () => (await api.get('/payroll/rules')).data.data })
+  if (isError) return <section><h1 className="text-xl font-bold">{t('payroll.rulesNoAccessTitle')}</h1><p className="mt-2 text-slate-600">{t('payroll.rulesNoAccess')}</p></section>
   if (!data) return <p className="text-slate-500">{t('common.loading')}</p>
   return <RulesForm base={base} initial={data} />
 }

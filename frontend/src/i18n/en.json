@@ -1523,7 +1523,9 @@
     "assignedNow": "Already assigned",
     "noAssigned": "Nobody yet.",
     "pickMonth": "Pick a month",
-    "deleteRuleTitle": "Delete this rule?"
+    "deleteRuleTitle": "Delete this rule?",
+    "rulesNoAccessTitle": "Commitment rules",
+    "rulesNoAccess": "You do not have access to this page."
   },
   "renewals": {
     "title": "Student renewal",

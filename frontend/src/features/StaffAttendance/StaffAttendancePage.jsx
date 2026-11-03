@@ -50,14 +50,16 @@ export default function StaffAttendancePage() {
   const { user } = useAuth()
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [edit, setEdit] = useState(null)
-  const { data, isLoading } = useQuery({ queryKey: ['staff-attendance', 'day', date], queryFn: async () => (await api.get('/staff-attendance/day', { params: { date } })).data })
   const canEdit = user?.role === 'admin'
+  // The day table is for the principal and the accountant; other staff only check in and out.
+  const canView = canEdit || user?.staff_type === 'accountant'
+  const { data, isLoading } = useQuery({ queryKey: ['staff-attendance', 'day', date], enabled: canView, queryFn: async () => (await api.get('/staff-attendance/day', { params: { date } })).data })
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('staffAttendance.title')}</h1>
       <CheckInCard />
-      <label className="block text-sm">{t('staffAttendance.date')}<DateInput className="ms-2 rounded border p-1.5" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} /></label>
-      {isLoading || !data ? <p className="text-slate-500">{t('common.loading')}</p> : (
+      {canView && <label className="block text-sm">{t('staffAttendance.date')}<DateInput className="ms-2 rounded border p-1.5" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} /></label>}
+      {!canView ? null : isLoading || !data ? <p className="text-slate-500">{t('common.loading')}</p> : (
         <>
           {!data.workday && <p className="rounded border bg-white p-3 text-sm text-slate-600">{t('staffAttendance.dayOff')}</p>}
           <div className="overflow-x-auto rounded-lg border bg-white">
