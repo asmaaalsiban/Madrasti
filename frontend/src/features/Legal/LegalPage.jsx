@@ -11,7 +11,7 @@ export default function LegalPage({ doc }) {
   const sections = t(`legal.${doc}.sections`, { returnObjects: true, company: company.name })
   const details = [[t('legal.company.name'), company.legalName || company.name], [t('legal.company.registration'), company.registration], [t('legal.company.address'), company.address], [t('legal.company.email'), company.privacyEmail], [t('legal.company.phone'), company.phone]].filter(([, v]) => v)
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-4 sm:p-8">
+    <main id="main" tabIndex={-1} className="mx-auto max-w-3xl space-y-6 p-4 outline-none sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link to="/" className="text-sm text-brand underline">{t('legal.home')}</Link>
         <LanguageSwitcher />
@@ -32,7 +32,7 @@ export default function LegalPage({ doc }) {
           {details.map(([k, v]) => <div key={k} className="flex flex-wrap gap-2"><dt className="font-bold">{k}:</dt><dd><bdi>{v}</bdi></dd></div>)}
         </dl>
       </section>
-      <nav aria-label={t('legal.docs')} className="flex flex-wrap gap-4 border-t pt-4 text-sm">
+      <nav aria-label={t('legal.other')} className="flex flex-wrap gap-4 border-t pt-4 text-sm">
         {DOCS.filter((d) => d !== doc).map((d) => <Link key={d} to={`/${d}`} className="text-brand underline">{t(`legal.${d}.title`)}</Link>)}
       </nav>
     </main>

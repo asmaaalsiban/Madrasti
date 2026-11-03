@@ -56,9 +56,11 @@ export default function NotificationBell() {
 
   return (
     <div className="relative" ref={box}>
-      <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border bg-snow text-deep-harbor" aria-expanded={open} aria-label={t('notifications.title')} title={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full border bg-snow text-deep-harbor" aria-expanded={open} title={t('notifications.title')} onClick={() => setOpen((v) => !v)}>
         <Bell aria-hidden size={20} />
-        {unread > 0 && <span className="absolute -end-1 -top-1 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold leading-5 text-white" aria-label={t('notifications.unread', { count: unread })}>{unread}</span>}
+        {/* The name a screen reader says includes the visible number, so the two match. */}
+        <span className="sr-only">{unread > 0 ? `${t('notifications.title')} (${unread})` : t('notifications.title')}</span>
+        {unread > 0 && <span aria-hidden className="absolute -end-1 -top-1 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold leading-5 text-white">{unread}</span>}
       </button>
       {open && (
         <div role="dialog" aria-label={t('notifications.title')} className="absolute end-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg">

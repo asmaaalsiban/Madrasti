@@ -41,9 +41,9 @@ describe('DashboardLayout header icons', () => {
     api.get.mockClear()
     auth.user = { role: 'parent', name: 'P', children: [] }
     show()
-    expect(await screen.findByLabelText('Announcements (2)')).toBeInTheDocument()
-    expect(screen.getByLabelText('Chat (1)')).toBeInTheDocument()
-    expect(screen.getByLabelText('4 unread')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Announcements (2)' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Chat (1)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Notifications (4)' })).toBeInTheDocument()
     const urls = api.get.mock.calls.map((c) => c[0])
     expect(urls).toEqual(['/badges'])
   })

@@ -93,8 +93,8 @@ export default function StoryCard({ story }) {
       {story.body && <p className="whitespace-pre-wrap break-words text-ink">{story.body}</p>}
       <Photos ids={story.media} onOpen={setViewer} />
       <footer className="flex flex-wrap items-center gap-2 text-sm">
-        <button type="button" aria-pressed={story.liked} aria-label={t('stories.like')} disabled={heart.isPending} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 ${story.liked ? 'border-red-200 bg-red-50 text-red-600' : ''}`} onClick={() => heart.mutate()}>
-          <Heart size={17} className={story.liked ? 'fill-red-500' : ''} aria-hidden /><b>{story.reactions_count}</b>
+        <button type="button" aria-pressed={story.liked} disabled={heart.isPending} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 ${story.liked ? 'border-red-200 bg-red-50 text-red-600' : ''}`} onClick={() => heart.mutate()}>
+          <Heart size={17} className={story.liked ? 'fill-red-500' : ''} aria-hidden /><span className="sr-only">{t('stories.like')}</span><b>{story.reactions_count}</b>
         </button>
         <button type="button" aria-expanded={open} className="flex items-center gap-1.5 rounded-full border px-3 py-1" onClick={() => setOpen(!open)}>
           <MessageCircle size={17} aria-hidden />{t('stories.comments')} <b>{story.comments_count}</b>

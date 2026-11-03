@@ -7,7 +7,7 @@ import { useStudentName } from '../components/useStudentName'
 import { DateInput } from '../../../components/shared/DateInput'
 
 const STATUSES = ['present', 'late', 'absent']
-const ACTIVE = { present: 'bg-green-600 text-white', late: 'bg-yellow-400 text-black', absent: 'bg-red-600 text-white' }
+const ACTIVE = { present: 'bg-green-700 text-white', late: 'bg-yellow-400 text-black', absent: 'bg-red-600 text-white' }
 
 // The homeroom teacher (or admin) records the day: everybody starts present, only the exceptions are touched.
 export default function TakeAttendancePage() {
@@ -82,27 +82,29 @@ export default function TakeAttendancePage() {
 
       <ul className="divide-y rounded-lg bg-white shadow-sm">
         {students.map((s, i) => (
-          <li key={s.id} role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center justify-between gap-2 p-3">
-            <span className="flex items-center gap-3">
-              <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
-              <span>{nameOf(s)}</span>
-            </span>
-            <span className="flex gap-1">
-              {STATUSES.map((status) => {
-                const on = (statuses[s.id] ?? 'present') === status
-                return (
-                  <button
-                    key={status}
-                    type="button"
-                    aria-pressed={on}
-                    className={`rounded border px-3 py-1.5 text-sm ${on ? ACTIVE[status] : 'bg-white'}`}
-                    onClick={() => { dirty.current = true; setSaved(false); setStatuses({ ...statuses, [s.id]: status }) }}
-                  >
-                    {t(`attendance.${status}`)}
-                  </button>
-                )
-              })}
-            </span>
+          <li key={s.id}>
+            <div role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center justify-between gap-2 p-3">
+              <span className="flex items-center gap-3">
+                <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
+                <span>{nameOf(s)}</span>
+              </span>
+              <span className="flex gap-1">
+                {STATUSES.map((status) => {
+                  const on = (statuses[s.id] ?? 'present') === status
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      aria-pressed={on}
+                      className={`rounded border px-3 py-1.5 text-sm ${on ? ACTIVE[status] : 'bg-white'}`}
+                      onClick={() => { dirty.current = true; setSaved(false); setStatuses({ ...statuses, [s.id]: status }) }}
+                    >
+                      {t(`attendance.${status}`)}
+                    </button>
+                  )
+                })}
+              </span>
+            </div>
           </li>
         ))}
       </ul>

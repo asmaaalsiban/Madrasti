@@ -24,8 +24,8 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
       <table className="w-full border-collapse text-start text-sm">
         <thead className="bg-slate-100">
           <tr>
-            <th className="p-2" />
-            {days.map((d) => <th key={d} className={`p-2 text-center font-medium ${d === today ? 'bg-brand/10 text-brand' : ''}`}>{t(`days.${d}`)}</th>)}
+            <th><span className="sr-only">{t('a11y.corner')}</span></th>
+            {days.map((d) => <th key={d} className={`p-2 text-center font-medium ${d === today ? 'bg-brand/10 text-deep-harbor' : ''}`}>{t(`days.${d}`)}</th>)}
           </tr>
         </thead>
         <tbody>

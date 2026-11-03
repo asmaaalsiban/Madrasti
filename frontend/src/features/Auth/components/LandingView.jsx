@@ -56,6 +56,7 @@ export default function LandingView({ name, logo, title, text, header, actions, 
         </div>
         <div className="flex items-center gap-2">{header}</div>
       </header>
+      <main id="main" tabIndex={-1} className="outline-none">
       <section className="relative isolate overflow-hidden bg-sky-wash">
         <Cloud className="-z-10 start-[-2%] top-8 w-40 opacity-90 motion-safe:animate-[drift_14s_ease-in-out_infinite]" />
         <Cloud className="-z-10 end-[4%] top-24 w-28 opacity-80 motion-safe:animate-[drift_18s_ease-in-out_infinite_reverse]" />
@@ -84,7 +85,6 @@ export default function LandingView({ name, logo, title, text, header, actions, 
         </div>
       </section>
 
-      <main>
         <section className="mx-auto max-w-6xl px-4 py-16">
           <h2 className="mb-8 text-center text-3xl font-extrabold">{t('landing.rolesTitle')}</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -35,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sky-wash p-4">
+    <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-sky-wash p-4 outline-none">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl bg-snow p-7 shadow">
         <div className="flex items-center justify-between gap-2">
           <ChangeSchoolCodeButton />
@@ -70,6 +70,6 @@ export default function LoginPage() {
           {t('auth.submit')}
         </button>
       </form>
-    </div>
+    </main>
   )
 }

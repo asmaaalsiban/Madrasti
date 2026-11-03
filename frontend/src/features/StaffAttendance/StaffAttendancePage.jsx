@@ -64,7 +64,7 @@ export default function StaffAttendancePage() {
           {!data.workday && <p className="rounded border bg-white p-3 text-sm text-slate-600">{t('staffAttendance.dayOff')}</p>}
           <div className="overflow-x-auto rounded-lg border bg-white">
             <table className="w-full text-start text-sm">
-              <thead className="bg-slate-50"><tr>{['name', 'state', 'in', 'out'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`staffAttendance.cols.${c}`)}</th>)}<th /></tr></thead>
+              <thead className="bg-slate-50"><tr>{['name', 'state', 'in', 'out'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`staffAttendance.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th></tr></thead>
               <tbody>
                 {data.data.map((r) => (
                   <tr key={r.user.id} className="border-t">

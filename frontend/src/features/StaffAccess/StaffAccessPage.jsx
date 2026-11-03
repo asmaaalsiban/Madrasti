@@ -81,7 +81,7 @@ export default function StaffAccessPage() {
         <table className="w-full text-start text-sm">
           <thead className="bg-slate-50"><tr>
             <th className="p-2"><input type="checkbox" aria-label={t('tasks.selectAll')} checked={everyone} onChange={() => setPicked(everyone ? picked.filter((id) => !shown.some((p) => p.id === id)) : [...new Set([...picked, ...shown.map((p) => p.id)])])} /></th>
-            {['name', 'job', 'hidden'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`staffAccess.cols.${c}`)}</th>)}<th />
+            {['name', 'job', 'hidden'].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`staffAccess.cols.${c}`)}</th>)}<th><span className="sr-only">{t('a11y.actions')}</span></th>
           </tr></thead>
           <tbody>
             {shown.map((p) => (

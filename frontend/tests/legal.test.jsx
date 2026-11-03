@@ -36,7 +36,7 @@ describe('legal pages', () => {
   it('every page ends with a footer linking to the three documents', () => {
     const router = createMemoryRouter([{ element: <LegalShell />, children: [{ path: '/', element: <p>Hello</p> }] }], { initialEntries: ['/'] })
     render(<RouterProvider router={router} />)
-    const footer = screen.getByRole('contentinfo')
+    const footer = screen.getByRole('navigation', { name: 'Legal' })
     expect(within(footer).getByRole('link', { name: 'Privacy policy' })).toHaveAttribute('href', '/privacy')
     expect(within(footer).getByRole('link', { name: 'Terms of use' })).toHaveAttribute('href', '/terms')
     expect(within(footer).getByRole('link', { name: 'Cookies and local storage' })).toHaveAttribute('href', '/cookies')

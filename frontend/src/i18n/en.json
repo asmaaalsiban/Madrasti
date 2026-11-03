@@ -2415,7 +2415,8 @@
           ]
         }
       ]
-    }
+    },
+    "other": "Other legal documents"
   },
   "privacy": {
     "menu": "Privacy and my data",
@@ -2457,5 +2458,10 @@
       "whyRefused": "Why it is not possible (the person will read it)",
       "send": "Send the answer"
     }
+  },
+  "a11y": {
+    "actions": "Actions",
+    "skip": "Skip to the main content",
+    "corner": "Periods and days"
   }
 }

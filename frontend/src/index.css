@@ -6,7 +6,7 @@
  * branding); everything tinted (pop shadow, soft washes) is derived from it.
  */
 @theme {
-  --color-brand: #2e96ff;
+  --color-brand: #006ddb; /* 4.6:1 on the cream paper and 5:1 on white, so text and white-on-blue buttons are readable */
   --color-warm-cream: #f9f7f0;
   --color-snow: #ffffff;
   --color-ink: #333333;
