@@ -61,7 +61,47 @@
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
-    "soon": "{{role}} tools will appear here soon."
+    "soon": "{{role}} tools will appear here soon.",
+    "excused": "Excused",
+    "noData": "No data yet.",
+    "notTaken": "No attendance taken today.",
+    "noMarks": "No published marks yet.",
+    "total": "Total students: {{count}}",
+    "teachers": "Teachers: {{count}}",
+    "trend": "Student attendance rate (last 14 days)",
+    "byLevel": "Students per level",
+    "marks": "Average mark per subject",
+    "students": {
+      "title": "Student attendance today"
+    },
+    "staff": {
+      "title": "Staff attendance today"
+    },
+    "waiting": {
+      "title": "Waiting for your decision",
+      "none": "Nothing is waiting. 👍",
+      "procurement": "Purchase requests",
+      "privacy": "Data privacy requests"
+    },
+    "money": {
+      "title": "Finance",
+      "billed": "Billed",
+      "collected": "Collected",
+      "overdue": "Overdue",
+      "collectedOf": "Collection rate",
+      "monthly": "Collected per month"
+    },
+    "absences": {
+      "title": "Frequent absences (7 days)",
+      "none": "No student is absent often.",
+      "days": "{{count}} days"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "student": "Manage students",
+      "announce": "Send an announcement",
+      "import": "Import from Excel"
+    }
   },
   "errors": {
     "forbidden": "You are not allowed to view this page.",
