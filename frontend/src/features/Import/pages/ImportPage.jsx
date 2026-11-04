@@ -4,8 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 
-const KINDS = ['students', 'staff']
-const CREATED_COLUMNS = { students: ['student_number', 'name', 'email', 'parent_login'], staff: ['name', 'email', 'staff_type'] }
+// In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
+const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students']
+// For these a file may have one name only (Arabic or English), so "some name column" is what is needed.
+const NAME_KINDS = ['students', 'subjects', 'grade_levels']
+const WITH_ACCOUNTS = ['students', 'staff']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
 // Admin: add many students or staff from the school's own Excel/CSV file.
@@ -55,13 +58,16 @@ export default function ImportPage() {
   const mapped = Object.values(mapping).filter(Boolean)
   const missing = analysis ? analysis.fields.filter((f) => f.required && !mapped.includes(f.key)) : []
   const anyName = mapped.includes('name_ar') || mapped.includes('name_en') || mapped.includes('name')
+  const ready = NAME_KINDS.includes(kind) ? anyName : missing.length === 0
+  const createdColumns = report?.created_columns ?? []
 
   return (
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{t('import.title')}</h1>
       <p className="text-sm text-slate-600">{t('import.help')}</p>
+      <p className="text-xs text-slate-500">{t('import.order')}</p>
 
-      <div className="flex gap-2" role="tablist">
+      <div className="flex flex-wrap gap-2" role="tablist">
         {KINDS.map((k) => (
           <button key={k} type="button" role="tab" aria-selected={kind === k} className={`rounded border px-4 py-1.5 ${kind === k ? 'bg-brand text-white' : 'bg-white'}`} onClick={() => restart(k)}>{t(`import.kinds.${k}`)}</button>
         ))}
@@ -114,12 +120,12 @@ export default function ImportPage() {
               </select>
             </label>
           )}
-          {kind === 'students' && !anyName && <p role="alert" className="text-sm text-red-700">{t('import.needName')}</p>}
-          {kind === 'staff' && missing.some((f) => f.key === 'name') && <p role="alert" className="text-sm text-red-700">{t('import.needName')}</p>}
+          {!ready && NAME_KINDS.includes(kind) && <p role="alert" className="text-sm text-red-700">{t('import.needName')}</p>}
+          {!ready && !NAME_KINDS.includes(kind) && <p role="alert" className="text-sm text-red-700">{t('import.needColumns', { columns: missing.map((f) => f.label).join(', ') })}</p>}
 
           <div className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => restart()}>{t('import.otherFile')}</button>
-            <button type="button" disabled={send.isPending || (kind === 'students' ? !anyName : !mapped.includes('name'))} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => send.mutate(false)}>{t('import.check')}</button>
+            <button type="button" disabled={send.isPending || !ready} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => send.mutate(false)}>{t('import.check')}</button>
           </div>
         </div>
       )}
@@ -151,13 +157,13 @@ export default function ImportPage() {
 
           {done && report.created.length > 0 && (
             <div className="space-y-2">
-              <p className="rounded bg-amber-50 p-3 text-sm text-amber-800">{t('import.passwordNote')}</p>
+              {WITH_ACCOUNTS.includes(kind) && <p className="rounded bg-amber-50 p-3 text-sm text-amber-800">{t('import.passwordNote')}</p>}
               <div className="overflow-x-auto rounded border bg-white">
                 <table className="w-full text-start text-sm">
-                  <thead className="bg-slate-50"><tr>{CREATED_COLUMNS[kind].map((c) => <th key={c} className="p-2 text-start font-medium">{t(`import.cols.${c}`)}</th>)}</tr></thead>
+                  <thead className="bg-slate-50"><tr>{createdColumns.map((c) => <th key={c} className="p-2 text-start font-medium">{t(`import.cols.${c}`, { defaultValue: c })}</th>)}</tr></thead>
                   <tbody>
                     {report.created.map((row, i) => (
-                      <tr key={i} className="border-t">{CREATED_COLUMNS[kind].map((c) => <td key={c} className="p-2" dir={c === 'email' || c === 'parent_login' ? 'ltr' : undefined}>{row[c]}</td>)}</tr>
+                      <tr key={i} className="border-t">{createdColumns.map((c) => <td key={c} className="p-2" dir={c === 'email' || c === 'parent_login' ? 'ltr' : undefined}>{row[c]}</td>)}</tr>
                     ))}
                   </tbody>
                 </table>

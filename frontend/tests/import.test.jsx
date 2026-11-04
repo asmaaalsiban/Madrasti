@@ -26,7 +26,7 @@ describe('ImportPage', () => {
     api.post
       .mockResolvedValueOnce(analysis())
       .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: null, problem_count: 1, problems: [{ line: 3, errors: ['There is no section named "9-Z" this year.'] }] } } })
-      .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: [{ student_number: '1', name: 'ليلى', email: 'layla.1@school.edu', parent_login: '0790000001' }], problem_count: 1, problems: [{ line: 3, errors: ['No section'] }] } } })
+      .mockResolvedValueOnce({ data: { data: { total: 2, valid: 1, created: [{ student_number: '1', name: 'ليلى', email: 'layla.1@school.edu', parent_login: '0790000001' }], created_columns: ['student_number', 'name', 'email', 'parent_login'], problem_count: 1, problems: [{ line: 3, errors: ['No section'] }] } } })
     renderPage()
     expect(screen.getByRole('button', { name: 'Read the file' })).toBeDisabled()
     pick()
@@ -105,5 +105,25 @@ describe('ImportPage', () => {
     renderPage()
     fireEvent.click(screen.getByRole('button', { name: 'Download the template' }))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/import/students/template', { params: {}, responseType: 'blob' }))
+  })
+
+  it('offers every kind in a sensible order, and a section file needs its grade and name before it can be checked', async () => {
+    api.post.mockResolvedValueOnce(analysis({
+      headers: ['Section', 'Grade'], sample: [['5-A', 'Grade 5']], row_count: 1, suggested: { 0: 'name', 1: null },
+      fields: [{ key: 'name', label: 'Section', required: true }, { key: 'grade_level', label: 'Grade', required: true }],
+    })).mockResolvedValueOnce({ data: { data: { total: 1, valid: 1, created: [{ name: '5-A', grade: 'الصف الخامس', teacher: null }], created_columns: ['name', 'grade', 'teacher'], problem_count: 0, problems: [] } } })
+    renderPage()
+    const tabs = screen.getAllByRole('tab').map((b) => b.textContent)
+    expect(tabs).toEqual(['Grades', 'Subjects', 'Staff', 'Sections', 'Teaching', 'Students'])
+    fireEvent.click(screen.getByRole('tab', { name: 'Sections' }))
+    expect(screen.getByText(/import grades first/)).toBeInTheDocument()
+    pick()
+    fireEvent.click(screen.getByRole('button', { name: 'Read the file' }))
+    await screen.findByText(/We found 1 rows/)
+    expect(screen.getByRole('button', { name: 'Check the file' })).toBeDisabled()
+    expect(screen.getByRole('alert')).toHaveTextContent('Choose the column for: Grade.')
+    fireEvent.change(screen.getByLabelText('Grade'), { target: { value: 'grade_level' } })
+    expect(screen.getByRole('button', { name: 'Check the file' })).toBeEnabled()
+    expect(api.post.mock.calls[0][0]).toBe('/import/classrooms/analyze')
   })
 })
