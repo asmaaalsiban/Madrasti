@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\People\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Academic\Import\ClassroomImporter;
+use App\Modules\Academic\Import\GradeLevelImporter;
+use App\Modules\Academic\Import\SubjectImporter;
+use App\Modules\Academic\Import\TeachingAssignmentImporter;
 use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
@@ -24,13 +28,19 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class ImportController extends Controller
 {
+    /** Every kind of file the school can bring, in the order they depend on each other (people last needs the structure first). */
+    public const KINDS = [
+        'grade_levels' => GradeLevelImporter::class,
+        'subjects' => SubjectImporter::class,
+        'staff' => StaffImporter::class,
+        'classrooms' => ClassroomImporter::class,
+        'teaching' => TeachingAssignmentImporter::class,
+        'students' => StudentImporter::class,
+    ];
+
     private function importer(string $kind): Importer
     {
-        return match ($kind) {
-            'students' => app(StudentImporter::class),
-            'staff' => app(StaffImporter::class),
-            default => abort(404),
-        };
+        return isset(self::KINDS[$kind]) ? app(self::KINDS[$kind]) : abort(404);
     }
 
     /** An empty file with the right columns (in the interface language) and one example row. */
@@ -105,6 +115,7 @@ class ImportController extends Controller
             'total' => count($sheet['rows']),
             'valid' => count($valid),
             'created' => $confirm ? $created : null,
+            'created_columns' => $confirm && $created !== [] ? array_keys($created[0]) : [],
             'problems' => array_slice($problems, 0, 200),
             'problem_count' => count($problems),
         ]]);

@@ -281,7 +281,7 @@ The accountant has the same in **Finance > Students' accounts > the student**: *
 - Built on `openspout/openspout` v4 (it runs on PHP 8.2; v5 needs 8.3) through `App\Shared\Export\XlsxExport`; a new export is a controller method that passes headers and rows to it.
 - Excel import is the next step.
 
-## Excel import (students and staff)
+## Excel import (structure, staff and students)
 Upload the **school's own file** as it is — no template needed.
 1. Admin: **Import** in the side menu, choose Students or Staff, pick the file, **Read the file**.
 2. The columns are recognised automatically from the header words (Arabic or English, e.g. "اسم الطالب", "الصف", "جوال ولي الأمر", "Phone") and, for a plain "Name" column, from the script of the values (Arabic letters → Arabic name, Latin → English). The first rows are shown so the admin can fix any wrong guess or ignore columns.
@@ -290,8 +290,10 @@ Upload the **school's own file** as it is — no template needed.
 - Generated for the school: student numbers when the file has none (after the highest existing one), student login emails (as when adding a student), staff login emails from the name (`sara.khaled@<domain>`, `STAFF_EMAIL_DOMAIN`; Arabic names are transliterated), the parent account from the parent email (siblings share it), and the grade's yearly fee.
 - Sections match however they are written ("5-A", "الصف 5 أ"); gender accepts male/female/ذكر/أنثى; staff positions accept codes, English words and the usual Arabic job titles (معلمة, محاسب, مديرة...) or one default position for the whole file.
 - `.xlsx` and `.csv`, up to 1000 rows / 2 MB. A template is still offered for schools that start from scratch.
-- Endpoints (admin): `POST /api/import/{students|staff}/analyze`, `POST /api/import/{students|staff}` (`file`, `mapping`, `confirm`, `default_staff_type`), `GET /api/import/{kind}/template`.
-- A new kind of import = one `Importer` class (`columns()` with aliases, `check()`, `create()`).
+- Kinds, in the order a new school needs them (`ImportController::KINDS`): `grade_levels`, `subjects`, `staff`, `classrooms`, `teaching`, `students`. A later kind points to earlier ones: a section names its grade (and optional homeroom teacher), a teaching row names a section, a subject and a teacher (by email, phone or full name), and the form's own rule "the teacher must teach this subject" applies. Rows that already exist (same grade name, subject code, section in the same grade and year, section+subject) are reported, never duplicated.
+- Endpoints (admin): `POST /api/import/{kind}/analyze`, `POST /api/import/{kind}` (`file`, `mapping`, `confirm`, `default_staff_type`), `GET /api/import/{kind}/template`.
+- A new kind of import = one `Importer` class (`columns()` with aliases, `check()`, `create()`) added to `ImportController::KINDS`; the lookups (`Lookups` trait) find sections, grades, subjects and staff by the words a school writes.
+- Still to come: marks, fees and balances, attendance history, extra guardians.
 
 ## Parents without an email (sign in with the phone number)
 - A parent does not need an email. If a student's parent has only a phone number, the parent account is created with that number (no email is invented) and the parent signs in with it and the default password, then must choose a new one.

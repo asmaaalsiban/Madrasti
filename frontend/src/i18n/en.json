@@ -1125,13 +1125,21 @@
     "help": "Upload your school's own Excel or CSV file as it is. The columns are recognised for you, the file is checked row by row, and login emails are generated. Nothing is added until you confirm.",
     "kinds": {
       "students": "Students",
-      "staff": "Staff"
+      "staff": "Staff",
+      "grade_levels": "Grades",
+      "subjects": "Subjects",
+      "classrooms": "Sections",
+      "teaching": "Teaching"
     },
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
     "note": {
       "students": "Needed: a name. Student numbers are generated if the file has none. The section is matched by name (e.g. \"5-A\", \"Grade 5 A\"). A parent email creates or reuses the parent account (siblings share one). The login email of each student is generated, and the grade's yearly fee is applied automatically.",
-      "staff": "Needed: a name. If there is no email, one is generated from the name. The position can be written as \"teacher\", \"معلمة\", \"محاسب\"... or you pick one for everyone. Subject is matched by name."
+      "staff": "Needed: a name. If there is no email, one is generated from the name. The position can be written as \"teacher\", \"معلمة\", \"محاسب\"... or you pick one for everyone. Subject is matched by name.",
+      "grade_levels": "Needed: a name (Arabic or English). The order is numbered for you if the file has none. Grades that already exist are skipped.",
+      "subjects": "Needed: a name. A missing code is made from the English name. Subjects that already exist are skipped.",
+      "classrooms": "Needed: the section name and its grade (the grade must exist: import grades first). The homeroom teacher is matched by email, phone or full name. Sections go to the current academic year unless the file says otherwise.",
+      "teaching": "Needed: section, subject and teacher (by email, phone or full name), with the periods per week. The teacher must be a teacher of that subject, the same rule as the form. Import grades, subjects, staff and sections first."
     },
     "step2": "Choose the file and check it.",
     "file": "File",
@@ -1148,7 +1156,13 @@
       "name": "Name",
       "email": "Sign-in email",
       "staff_type": "Position",
-      "parent_login": "Parent sign-in"
+      "parent_login": "Parent sign-in",
+      "code": "Code",
+      "name_en": "Name (English)",
+      "grade": "Grade",
+      "teacher": "Teacher",
+      "classroom": "Section",
+      "subject": "Subject"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",
@@ -1164,7 +1178,9 @@
     "needName": "Choose which column holds the name.",
     "autoNumbers": "No student number column: numbers are generated (after the highest one you already have).",
     "autoEmails": "No email column: login emails are generated from the names.",
-    "defaultPosition": "Position of everyone in this file (it has no position column)"
+    "defaultPosition": "Position of everyone in this file (it has no position column)",
+    "order": "Suggested order for a new school: Grades, Subjects, Staff, Sections, Teaching, then Students.",
+    "needColumns": "Choose the column for: {{columns}}."
   },
   "reportCard": {
     "title": "Report card",

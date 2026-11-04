@@ -70,7 +70,7 @@ class StaffImporter extends Importer
             $data['staff_type'] = $type ?? $data['staff_type'];
         }
         if (isset($row['subject'])) {
-            $subject = Subject::where('name_ar', trim($row['subject']))->orWhere('name_en', trim($row['subject']))->first();
+            $subject = Subject::where('name_ar', trim($row['subject']))->orWhere('name_en', trim($row['subject']))->orWhere('code', trim($row['subject']))->first();
             if ($subject === null) {
                 $errors[] = __('import.unknown_subject', ['name' => $row['subject']]);
             }
