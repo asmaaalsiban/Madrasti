@@ -567,3 +567,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Phones**: safe areas (notch / home bar), 16px fields (no iPhone zoom), 40px touch targets, no tap delay; the installments table is a list of cards on a phone.
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
+
+## Student files (documents of each student)
+- Each student can have a file of documents (birth certificate, records, ID copies...). It uses the shared attachments system (`student` owner, up to 10 files of 10 MB: images, PDF, Office, txt, csv).
+- **Only the principal** can add, see and remove them (students, teachers and parents get 403/404). Deleting a student deletes their files.
+- Two ways to add: the **Add / Edit student** form has a "Student file" field (files are uploaded right after the student is saved), and the screen **Student files** (`/admin/student-files`, linked from the Import page): find the student by name or number, then upload their files.
+- The students list (admin only) returns each student's `files`.

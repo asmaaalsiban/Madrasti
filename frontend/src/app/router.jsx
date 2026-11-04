@@ -36,6 +36,7 @@ import StudentTimetablePage from '../features/Student/pages/StudentTimetablePage
 import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage'
 import ChildTimetablePage from '../features/Parent/pages/ChildTimetablePage'
 import StudentsPage from '../features/People/pages/StudentsPage'
+import StudentFilesPage from '../features/StudentFiles/StudentFilesPage'
 import StaffPage from '../features/People/pages/StaffPage'
 import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
@@ -226,6 +227,7 @@ export const routes = [
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },
               { path: '/admin/staff', element: <StaffPage /> },
               { path: '/admin/students', element: <StudentsPage /> },
+              { path: '/admin/student-files', element: <StudentFilesPage /> },
               { path: '/admin/announcements', element: <AnnouncementsPage /> },
               { path: '/admin/finance', element: <FinanceDashboardPage base="/admin" /> },
               { path: '/admin/finance/structures', element: <FeeStructuresPage /> },
