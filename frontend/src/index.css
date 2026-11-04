@@ -123,3 +123,20 @@ div.rounded, li.rounded, p.rounded, ul.rounded, fieldset.rounded, article.rounde
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; inset: 0; border: 0; }
 }
+
+/* ---- Phones and installed app ------------------------------------------------------------------------------------------------------ */
+html { -webkit-text-size-adjust: 100%; }
+a, button, select, summary, label, input[type="checkbox"], input[type="radio"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* The sticky header and the bottom of the page keep clear of the notch and the home bar when the app is installed full screen. */
+header.sticky { padding-top: max(0.625rem, env(safe-area-inset-top)); }
+main { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+@media (max-width: 640px) {
+  /* 16px inputs: iPhone zooms the page into a field smaller than that. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea { font-size: 16px; }
+  /* Fingers need about 40px: buttons and fields grow unless they have a size of their own (the small round icon buttons keep theirs). */
+  button:not([class*="h-"]):not(.sr-only), select, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]) { min-height: 40px; }
+}
+@media (display-mode: standalone) {
+  /* No pull-down-to-refresh bounce that looks like a crash; scrolling inside panels stays normal. */
+  body { overscroll-behavior-y: none; }
+}

@@ -1079,7 +1079,8 @@
       "sent": "Thank you. The school will confirm the transfer and you will get a notification.",
       "waiting": "A transfer of {{amount}} is waiting for the school to confirm it.",
       "refused": "The transfer of {{amount}} was not accepted: {{note}}"
-    }
+    },
+    "installments": "Installments"
   },
   "motivation": {
     "title": "Points & badges",
@@ -2502,5 +2503,15 @@
     "missing": "{{count}} without a yes",
     "student": "Student",
     "answer": "Answer"
+  },
+  "pwa": {
+    "install": "Install the app",
+    "iosTitle": "Install on iPhone",
+    "iosStep1": "Tap the Share button at the bottom of Safari.",
+    "iosStep2": "Choose \"Add to Home Screen\".",
+    "iosStep3": "Tap Add: the app opens full screen from your home screen.",
+    "offline": "No connection. What you see may be old and nothing will be sent.",
+    "update": "A new version is ready.",
+    "reload": "Update"
   }
 }
