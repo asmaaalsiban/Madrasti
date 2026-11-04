@@ -1,14 +1,23 @@
 {
-  "name": "Madrasati - مدرستي",
+  "id": "/",
+  "name": "مدرستي - Madrasati",
   "short_name": "مدرستي",
-  "description": "School platform: grades, homework, attendance and communication.",
-  "start_url": "/",
+  "description": "منصة المدرسة: العلامات والواجبات والحضور والتواصل والرسوم. School platform: grades, homework, attendance, communication and fees.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#f9f7f0",
-  "theme_color": "#f9f7f0",
+  "theme_color": "#ffffff",
+  "categories": ["education"],
   "icons": [
     { "src": "/pwa-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "المحادثات / Chat", "url": "/chat", "icons": [{ "src": "/pwa-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }

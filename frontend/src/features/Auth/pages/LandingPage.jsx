@@ -23,7 +23,7 @@ export default function LandingPage() {
       logo={school?.logo}
       title={t('landing.heroTitle')}
       text={t('landing.heroText')}
-      header={<><LanguageSwitcher /><SwitchSchoolButton /><Link to="/login" className="rounded bg-brand px-5 py-2 text-sm text-white">{t('landing.login')}</Link></>}
+      header={<><LanguageSwitcher /><SwitchSchoolButton />{/* On a phone the big button below says the same, and this one would not fit next to the language and school buttons. */}<Link to="/login" className="hidden rounded bg-brand px-5 py-2 text-sm text-white sm:inline-block">{t('landing.login')}</Link></>}
       actions={login}
       ctaActions={login}
     />

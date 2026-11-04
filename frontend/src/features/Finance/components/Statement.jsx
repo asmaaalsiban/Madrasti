@@ -40,7 +40,18 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
               ))}
             </ul>
           )}
-          <div className="overflow-x-auto">
+          {/* On a phone each installment is a small card (a six-column table does not fit); from a tablet up it is a table. */}
+          <ul className="space-y-2 sm:hidden" aria-label={t('finance.installments')}>
+            {fee.installments.map((i) => (
+              <li key={i.id} className="space-y-1 rounded-lg border p-3 text-sm">
+                <div className="flex items-center justify-between gap-2"><b>#{i.number} · <span dir="ltr">{i.due_date}</span></b><StatusBadge status={i.status} /></div>
+                <div className="flex items-center justify-between gap-2"><span className="text-slate-600">{t('finance.cols.amount')}</span><Money value={i.amount} currency={c} /></div>
+                <div className="flex items-center justify-between gap-2"><span className="text-slate-600">{t('finance.cols.paid')}</span><Money value={i.paid} currency={c} /></div>
+                <div className="flex items-center justify-between gap-2"><span className="text-slate-600">{t('finance.cols.remaining')}</span><b><Money value={i.remaining} currency={c} /></b></div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full text-start text-sm">
               <thead className="bg-slate-50"><tr>{['no', 'dueDate', 'amount', 'paid', 'remaining', 'status'].map((k) => <th key={k} className="p-2 text-start font-medium">{t(`finance.cols.${k}`)}</th>)}</tr></thead>
               <tbody>

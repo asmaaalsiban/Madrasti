@@ -131,7 +131,7 @@ describe('StudentAccountPage', () => {
     open()
     expect(await screen.findByText('Layla')).toBeInTheDocument()
     expect(screen.getAllByText('1,000.00 JOD').length).toBeGreaterThan(0)
-    expect(screen.getByText('Overdue', { selector: 'span' })).toBeInTheDocument()
+    expect(screen.getAllByText('Overdue', { selector: 'span' }).length).toBeGreaterThan(0)
     fireEvent.click(screen.getByRole('button', { name: 'Record a payment' }))
     fireEvent.change(await screen.findByLabelText('Amount'), { target: { value: '250' } })
     fireEvent.change(screen.getByLabelText('Reference (cheque / transfer number)'), { target: { value: 'CH-9' } })
