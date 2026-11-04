@@ -43,9 +43,9 @@ const fields = [
     options: ['cash', 'bank_transfer', 'card', 'cheque', 'online'].map((m) => ({ value: m, label: `finance.methods.${m}` })),
   },
   { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
-  { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', hint: 'people.guardianHint', getValue: (row) => row.guardians?.[0]?.email },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
-  { name: 'guardian_phone', label: 'people.fields.guardianPhone', getValue: (row) => row.guardians?.[0]?.phone },
+  { name: 'guardian_phone', label: 'people.fields.guardianPhone', type: 'tel', hint: 'people.guardianPhoneHint', requiredWhen: (f) => Boolean(f.guardian_name || f.guardian_email), getValue: (row) => row.guardians?.[0]?.phone },
+  { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', hint: 'people.guardianHint', getValue: (row) => row.guardians?.[0]?.email },
 ]
 
 function ReportCardLink({ id }) {

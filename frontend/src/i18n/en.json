@@ -282,7 +282,8 @@
     "feesHeading": "Fees",
     "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student.",
     "firstPaymentPayerHint": "Who paid. The receipt is written in this name; if empty, the parent's name is used.",
-    "guardianHint": "Optional. A parent with no email signs in with the phone number below (the default password at first)."
+    "guardianHint": "Optional. A parent without an email signs in with the phone number (with the default password the first time).",
+    "guardianPhoneHint": "Required when a parent is added: it is their sign-in name."
   },
   "staff": {
     "title": "Staff",
