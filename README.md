@@ -567,3 +567,6 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Phones**: safe areas (notch / home bar), 16px fields (no iPhone zoom), 40px touch targets, no tap delay; the installments table is a list of cards on a phone.
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
+
+## Excel import: parents
+A new kind in the import screen (after Students): **Parents**. One row per parent: name, phone (required, it is the login), email (optional) and the student numbers of their children (several separated by a comma). A parent who already exists is only linked; a student with two parents has two rows. A phone or email that belongs to a staff or student account is refused, and unknown student numbers are reported. The preview creates nothing.

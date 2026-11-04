@@ -1129,7 +1129,8 @@
       "grade_levels": "الصفوف",
       "subjects": "المواد",
       "classrooms": "الشعب",
-      "teaching": "توزيع المعلمين"
+      "teaching": "توزيع المعلمين",
+      "guardians": "أولياء الأمور"
     },
     "step1": "نزّل القالب واملأه (صف لكل شخص).",
     "downloadTemplate": "تنزيل القالب",
@@ -1162,7 +1163,9 @@
       "grade": "الصف",
       "teacher": "المعلم",
       "classroom": "الشعبة",
-      "subject": "المادة"
+      "subject": "المادة",
+      "login": "اسم الدخول",
+      "children": "الأبناء"
     },
     "chooseFile": "اختر ملفك.",
     "read": "اقرأ الملف",
