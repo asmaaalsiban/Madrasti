@@ -5,8 +5,8 @@ Goal: a full accounting application inside the platform (double entry), built in
 | Phase | What | State |
 |---|---|---|
 | 1 | **Year-end carry-over**: unpaid balances move to the next year in installments; the old year closes; undo until a payment is taken | done |
-| 2 | Cash boxes and bank accounts (balances, transfers between them, bank reconciliation); every payment lands in one | next |
-| 3 | Expenses and suppliers: bills, payments, links to purchase requests and payroll | |
+| 2 | **Cash boxes and bank accounts**: balances, transfers between them, corrections, the book of each, bank reconciliation; every payment lands in one | done |
+| 3 | Expenses and suppliers: bills, payments out of an account, links to purchase requests and payroll | next |
 | 4 | Chart of accounts and journal: every money event posts a balanced entry (debit = credit), manual entries, locked periods | |
 | 5 | Reports: trial balance, income statement, balance sheet, account ledger, receivables ageing, export to Excel/PDF | |
 | 6 | Budgets per year/department and variance; tax (VAT) if the country needs it | |

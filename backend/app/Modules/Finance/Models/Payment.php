@@ -22,7 +22,7 @@ class Payment extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['student_fee_id', 'installment_id', 'amount', 'method', 'reference', 'payer_name', 'paid_on', 'received_by', 'note'];
+    protected $fillable = ['student_fee_id', 'installment_id', 'amount', 'method', 'reference', 'payer_name', 'paid_on', 'received_by', 'note', 'money_account_id'];
 
     /**
      * @return array<string, string>

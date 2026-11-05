@@ -244,9 +244,10 @@ class FinanceController extends Controller
             'student_fee_id' => ['required', 'integer', 'exists:student_fees,id'], 'amount' => ['required', 'numeric', 'gt:0'],
             'method' => ['required', Rule::in(Payment::METHODS)], 'paid_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'reference' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:255'], 'installment_id' => ['nullable', 'integer'], 'payer_name' => ['nullable', 'string', 'max:255'],
+            'money_account_id' => ['nullable', 'integer'],
         ]);
 
-        $payment = $this->billing->recordPayment(StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['method'], $data['paid_on'] ?? now()->toDateString(), $user, $data['reference'] ?? null, $data['note'] ?? null, $data['installment_id'] ?? null, $data['payer_name'] ?? null);
+        $payment = $this->billing->recordPayment(StudentFee::findOrFail($data['student_fee_id']), $data['amount'], $data['method'], $data['paid_on'] ?? now()->toDateString(), $user, $data['reference'] ?? null, $data['note'] ?? null, $data['installment_id'] ?? null, $data['payer_name'] ?? null, $data['money_account_id'] ?? null);
 
         return response()->json(['data' => $this->reader->payment($payment->load('receiver'))], 201);
     }

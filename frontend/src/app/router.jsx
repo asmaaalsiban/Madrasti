@@ -88,6 +88,8 @@ import PrivacyRequestsPage from '../features/Privacy/PrivacyRequestsPage'
 import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
 import YearEndPage from '../features/Finance/pages/YearEndPage'
+import MoneyAccountsPage from '../features/Finance/pages/MoneyAccountsPage'
+import MoneyLedgerPage from '../features/Finance/pages/MoneyLedgerPage'
 import TransfersPage from '../features/Finance/pages/TransfersPage'
 import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
@@ -171,6 +173,8 @@ const HOME_ROUTES = {
     { path: 'finance/transfers', element: <TransfersPage base="/teacher" /> },
     { path: 'my-bus', element: <MyBusPage /> },
     { path: 'finance/year-end', element: <YearEndPage base="/teacher" /> },
+    { path: 'finance/money', element: <MoneyAccountsPage base="/teacher" /> },
+    { path: 'finance/money/:id', element: <MoneyLedgerPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'renewals', element: <RenewalsPage /> },
     { path: 'exams', element: <MyExamsPage /> },
@@ -239,6 +243,8 @@ export const routes = [
               { path: '/admin/finance/accounts', element: <AccountsPage base="/admin" /> },
               { path: '/admin/finance/transfers', element: <TransfersPage base="/admin" /> },
               { path: '/admin/finance/year-end', element: <YearEndPage base="/admin" /> },
+              { path: '/admin/finance/money', element: <MoneyAccountsPage base="/admin" /> },
+              { path: '/admin/finance/money/:id', element: <MoneyLedgerPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/exams', element: <ExamsAdminPage /> },

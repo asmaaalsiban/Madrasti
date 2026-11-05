@@ -345,9 +345,12 @@ class FeeBilling
      * Records a payment and spreads it over the installments, the oldest unpaid first (or the chosen one first).
      * It can never be more than what is still owed. `$payerName` is who paid: the receipt is written in their name.
      */
-    public function recordPayment(StudentFee $fee, float|string $amount, string $method, string $paidOn, User $by, ?string $reference = null, ?string $note = null, ?int $installmentId = null, ?string $payerName = null): Payment
+    public function recordPayment(StudentFee $fee, float|string $amount, string $method, string $paidOn, User $by, ?string $reference = null, ?string $note = null, ?int $installmentId = null, ?string $payerName = null, ?int $accountId = null): Payment
     {
-        return DB::transaction(function () use ($fee, $amount, $method, $paidOn, $by, $reference, $note, $installmentId, $payerName): Payment {
+        // The account is checked first: a payment never half-succeeds because the chosen account cannot be used.
+        $account = $method === Payment::CARRY ? null : app(MoneyBook::class)->accountFor($method, $accountId);
+
+        return DB::transaction(function () use ($fee, $amount, $method, $paidOn, $by, $reference, $note, $installmentId, $payerName, $account): Payment {
             $fee = StudentFee::whereKey($fee->id)->lockForUpdate()->firstOrFail();
             $cents = Money::cents($amount);
             if ($cents <= 0) {
@@ -367,6 +370,9 @@ class FeeBilling
                 'student_fee_id' => $fee->id, 'installment_id' => $installmentId, 'amount' => $amount, 'method' => $method, 'reference' => $reference, 'payer_name' => $payerName,
                 'paid_on' => $paidOn, 'received_by' => $by->id, 'note' => $note,
             ]);
+            if ($account !== null) {
+                app(MoneyBook::class)->receive($payment, $account); // the money goes into the cash box or the bank account
+            }
 
             $left = $cents;
             foreach ($installments as $installment) {
@@ -389,6 +395,7 @@ class FeeBilling
     public function voidPayment(Payment $payment): void
     {
         DB::transaction(function () use ($payment): void {
+            app(MoneyBook::class)->release($payment); // leaves the account's book too (not once it was matched with the bank's statement)
             foreach ($payment->allocations()->get() as $allocation) {
                 $installment = Installment::whereKey($allocation->installment_id)->lockForUpdate()->first();
                 if ($installment !== null) {
