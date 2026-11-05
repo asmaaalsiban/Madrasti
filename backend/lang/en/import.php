@@ -64,4 +64,7 @@ return [
     'payment_note' => 'Imported from the school\'s old records',
     'template_file_fees' => 'Fees_template',
     'template_sheet_fees' => 'Fees',
+    'allowance_label' => 'Allowances',
+    'template_file_contracts' => 'Contracts_template',
+    'template_sheet_contracts' => 'Contracts',
 ];

@@ -1175,7 +1175,8 @@
       "marks": "Marks",
       "guardians": "Parents",
       "fees": "Fees",
-      "attendance": "Attendance"
+      "attendance": "Attendance",
+      "contracts": "Staff contracts"
     },
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
@@ -1216,7 +1217,10 @@
       "total": "Net fee",
       "paid": "Paid",
       "date": "Date",
-      "status": "Status"
+      "status": "Status",
+      "base_salary": "Base salary",
+      "starts_on": "Contract start",
+      "ends_on": "Contract end"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",

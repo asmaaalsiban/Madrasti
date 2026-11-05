@@ -11,6 +11,7 @@ use App\Modules\Academic\Import\SubjectImporter;
 use App\Modules\Academic\Import\TeachingAssignmentImporter;
 use App\Modules\Attendance\Import\AttendanceImporter;
 use App\Modules\Grading\Import\MarksImporter;
+use App\Modules\HR\Import\ContractImporter;
 use App\Modules\People\Import\GuardianImporter;
 use App\Modules\Finance\Import\FeesImporter;
 use App\Modules\People\Import\Importer;
@@ -44,6 +45,7 @@ class ImportController extends Controller
         'guardians' => GuardianImporter::class,
         'fees' => FeesImporter::class,
         'attendance' => AttendanceImporter::class,
+        'contracts' => ContractImporter::class,
     ];
 
     private function importer(string $kind): Importer

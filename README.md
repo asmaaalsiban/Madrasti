@@ -601,3 +601,6 @@ A new kind in the import screen: **Attendance**. One row = one student on one da
 
 ### Import: what real school files taught us
 Tried with messy Arabic files (Arabic digits, `1,200`, `غ` / `ح` for absent / present, "1001 و 1002"). The importers now read: numbers with thousands commas, decimal commas and Arabic digits (`App\Shared\Import\Numbers`); a single letter in the mark column (`غ` = absent); single letters in the attendance status (`ح` present, `غ` absent, `ت` late, `ع` excused); the parents' children column called "أبناؤه" / "الأولاد", with the word "و" between numbers; and a zero-weight assessment is no longer refused when the subject's weights already pass 100.
+
+## Excel import: staff contracts and salaries
+A new kind in the import screen: **Staff contracts**. One row = one running contract: the staff member (email, phone or full name), base salary, contract start, and optionally end, payment method (cash / bank transfer / cheque), account details, one monthly allowance and notes. Someone who already has a running contract is refused (renew or end it from the Contracts screen), so importing a file twice never doubles anything. It uses the same service as the Contracts screen. Admin only.
