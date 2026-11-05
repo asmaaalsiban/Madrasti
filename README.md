@@ -568,6 +568,10 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
 
+## Excel import: fees and what was already paid
+A new kind in the import screen (after Students): **Fees**, for the opening balances when a school moves to the system. One row = one fee of one student: student number, total fee, and optionally description, discount, number of installments (1 by default, up to 24), first due date, months between installments, paid so far, payment date, payment method (cash by default) and academic year (the current one by default).
+- The fee is split into equal installments (the last takes the remainder) and what was paid is recorded as ONE payment spread over the oldest installments, with a note that it was imported.
+- A student who already has a fee with the same description that year is refused, so importing a file twice never charges anybody twice.
 ## Excel import: marks
 A new kind in the import screen (after Students): **Marks**. One row = one student's mark in one assessment: student number, subject (code or name), term (name, or 1/2/3), assessment name, out of, mark (or a status: absent / makeup / retake), and optionally type (exam, quiz, assignment, project, participation; empty = exam), weight %, date, academic year (empty = the current year) and "visible to parents" (yes by default; no keeps the assessment unpublished).
 - The section is the one the student sat in that year, so past years work if their sections and teaching were imported.
