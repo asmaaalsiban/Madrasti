@@ -64,4 +64,7 @@ return [
     'payment_note' => 'مستورد من سجلات المدرسة القديمة',
     'template_file_fees' => 'قالب_الرسوم',
     'template_sheet_fees' => 'الرسوم',
+    'allowance_label' => 'بدلات',
+    'template_file_contracts' => 'قالب_العقود',
+    'template_sheet_contracts' => 'العقود',
 ];
