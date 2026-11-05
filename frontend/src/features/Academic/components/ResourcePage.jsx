@@ -147,9 +147,8 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
                 <input
                   className={inputClass}
                   type={f.type ?? 'text'}
-                  dir={f.type === 'email' ? 'ltr' : undefined}
+                  dir={f.type === 'email' || f.type === 'tel' ? 'ltr' : undefined}
                   required={Boolean(f.requiredWhen?.(form))}
-                  dir={f.type === 'tel' ? 'ltr' : undefined}
                   value={form[f.name] ?? ''}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                 />
