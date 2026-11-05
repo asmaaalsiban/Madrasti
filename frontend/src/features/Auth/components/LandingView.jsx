@@ -3,10 +3,20 @@ import { useTranslation } from 'react-i18next'
 import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, GraduationCap, Heart, MessageCircle, Briefcase, Users, Wallet } from 'lucide-react'
 
 const YEAR = new Date().getFullYear()
+// Kids reading among books under the stars (MotionSites free media shelf, #24). Swap it for the school's own film; if it cannot load, the aurora below stays.
+const HERO_VIDEO = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4'
 const ROLES = [['admin', Briefcase], ['teacher', Users], ['student', GraduationCap], ['parent', Heart]]
 const FEATURES = [['grades', Award], ['attendance', CircleCheck], ['schedule', CalendarClock], ['chat', MessageCircle], ['reports', FileBarChart], ['finance', Wallet]]
 const BARS = [46, 68, 54, 82, 74, 92, 64]
 const LESSONS = [['08:00', 'w-[78%]'], ['09:00', 'w-[56%]'], ['10:15', 'w-[88%]']]
+
+// A looping background film that fades in once it can play. Not used when the person asks for less motion or for less data.
+function HeroVideo({ src }) {
+  const [ready, setReady] = useState(false)
+  const skip = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData)
+  if (skip) return null
+  return <video aria-hidden autoPlay muted loop playsInline preload="auto" src={src} onLoadedData={() => setReady(true)} onError={() => setReady(false)} className={`lp-video ${ready ? 'is-ready' : ''}`} />
+}
 
 // Shows its children when they scroll into view (at once for people who ask for less motion, or when the browser cannot tell).
 function Reveal({ children, className = '', delay = 0 }) {
@@ -66,7 +76,7 @@ function DashboardMock({ t }) {
           </div>
         </div>
 
-        <div className="lp-glass lp-mock-side lp-float-a">
+        <div className="lp-glass lp-mock-side">
           <div className="flex items-center gap-2 text-white">
             <CalendarClock size={16} className="text-sky-200" /><span className="text-sm font-bold">{t('landing.features.schedule')}</span>
           </div>
@@ -79,12 +89,12 @@ function DashboardMock({ t }) {
           </div>
         </div>
 
-        <div className="lp-glass lp-mock-chat lp-float-b">
+        <div className="lp-glass lp-mock-chat">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-sky-200 text-deep-harbor"><MessageCircle size={17} /></span>
           <div className="space-y-1.5"><span className="block h-2 w-24 rounded-full bg-white/60" /><span className="block h-2 w-14 rounded-full bg-white/30" /></div>
         </div>
 
-        <div className="lp-glass lp-mock-grade lp-float-b">
+        <div className="lp-glass lp-mock-grade">
           <Award size={18} className="text-amber-200" />
           <span dir="ltr" className="text-2xl font-extrabold text-white">18.5</span>
         </div>
@@ -101,12 +111,14 @@ export default function LandingView({ name, logo, title, text, header, actions, 
   const marquee = [...FEATURES, ...FEATURES]
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <section className="lp-hero">
+      <section className="lp-hero lp-hero-first">
         <div aria-hidden className="lp-aurora"><i /><i /><i /></div>
+        <HeroVideo src={HERO_VIDEO} />
+        <div aria-hidden className="lp-veil" />
         <div aria-hidden className="lp-grid" />
         <div aria-hidden className="lp-grain" />
 
-        <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
+        <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4">
           <div className="flex items-center gap-2">
             {logo ? <img src={logo} alt="" className="h-10 w-10 rounded-2xl object-cover" /> : <span aria-hidden className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 font-extrabold text-white ring-1 ring-white/25">{name.trim().charAt(0)}</span>}
             <span className="text-lg font-extrabold text-white">{name}</span>
@@ -115,19 +127,16 @@ export default function LandingView({ name, logo, title, text, header, actions, 
         </header>
 
         <main id="main" tabIndex={-1} className="outline-none">
-          <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-10 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24 lg:pt-16">
-            <div className="text-center lg:text-start">
-              <span className="lp-rise inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-sky-100 ring-1 ring-white/20 backdrop-blur" style={{ '--i': 0 }}>
-                <span aria-hidden className="h-2 w-2 rounded-full bg-emerald-300 lp-pulse" />{t('landing.welcome')}
-              </span>
-              <h1 dir="auto" className="lp-title mt-5 text-white">
-                {words.map((w, i) => <span key={i}>{i > 0 && ' '}<span className="lp-word" style={{ '--i': i + 1 }}>{w}</span></span>)}
-              </h1>
-              <p className="lp-rise mt-5 text-xl font-bold text-sky-100 sm:text-2xl" style={{ '--i': words.length + 2 }}>{title}</p>
-              <p className="lp-rise mx-auto mt-3 max-w-xl text-white/75 sm:text-lg lg:mx-0" style={{ '--i': words.length + 3 }}>{text}</p>
-              <div className="lp-rise mt-8 flex flex-wrap justify-center gap-3 lg:justify-start" style={{ '--i': words.length + 4 }}>{actions}</div>
-            </div>
-            <DashboardMock t={t} />
+          <div className="lp-hero-body relative z-10 mx-auto flex w-full max-w-6xl flex-col justify-end px-4 pb-12 pt-24 sm:pb-16">
+            <span className="lp-rise inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-sky-100 ring-1 ring-white/20 backdrop-blur" style={{ '--i': 0 }}>
+              <span aria-hidden className="lp-pulse h-2 w-2 rounded-full bg-emerald-300" />{t('landing.welcome')}
+            </span>
+            <h1 dir="auto" className="lp-title mt-5 max-w-4xl text-start text-white">
+              {words.map((w, i) => <span key={i}>{i > 0 && ' '}<span className="lp-word" style={{ '--i': i + 1 }}>{w}</span></span>)}
+            </h1>
+            <p className="lp-rise mt-5 max-w-2xl text-xl font-bold text-sky-100 sm:text-2xl" style={{ '--i': words.length + 2 }}>{title}</p>
+            <p className="lp-rise mt-3 max-w-xl text-white/70 sm:text-lg" style={{ '--i': words.length + 3 }}>{text}</p>
+            <div className="lp-rise mt-8 flex flex-wrap gap-3" style={{ '--i': words.length + 4 }}>{actions}</div>
           </div>
 
           <div aria-hidden className="lp-marquee relative z-10">
@@ -157,19 +166,25 @@ export default function LandingView({ name, logo, title, text, header, actions, 
         </div>
       </section>
 
-      <section className="bg-sky-wash/60 py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <Reveal><h2 className="mb-10 text-center text-3xl font-extrabold sm:text-4xl">{t('landing.featuresTitle')}</h2></Reveal>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            {FEATURES.map(([key, Icon], i) => (
-              <Reveal key={key} delay={i * 70}>
-                <div className="lp-tile h-full" onPointerMove={spotlight}>
-                  <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-deep-harbor text-white"><Icon size={22} /></span>
-                  <span className="text-lg font-extrabold text-deep-harbor">{t(`landing.features.${key}`)}</span>
-                </div>
-              </Reveal>
-            ))}
+      <section className="lp-hero py-20">
+        <div aria-hidden className="lp-aurora"><i /><i /><i /></div>
+        <div aria-hidden className="lp-grid" />
+        <div aria-hidden className="lp-grain" />
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-2">
+          <div>
+            <Reveal><h2 className="text-3xl font-extrabold !text-white sm:text-5xl">{t('landing.featuresTitle')}</h2></Reveal>
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              {FEATURES.map(([key, Icon], i) => (
+                <Reveal key={key} delay={i * 70}>
+                  <div className="lp-glass lp-tile-glass" onPointerMove={spotlight}>
+                    <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/12 text-sky-100"><Icon size={20} /></span>
+                    <span className="font-bold text-white">{t(`landing.features.${key}`)}</span>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
+          <Reveal delay={150}><DashboardMock t={t} /></Reveal>
         </div>
       </section>
 
