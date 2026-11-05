@@ -37,17 +37,17 @@ export default function FindSchoolPage() {
 
   return (
     <CentralShell>
-      <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm text-brand">
+      <Link to="/" className="auth-link mb-4 inline-flex items-center gap-2 text-sm">
         <BackArrow />
         {t('central.back')}
       </Link>
-      <form onSubmit={submit} className="space-y-4 rounded-lg bg-white p-6 shadow">
+      <form onSubmit={submit} className="auth-card space-y-4">
         <h1 className="text-xl font-bold">{t('central.findTitle')}</h1>
         <p className="text-sm text-slate-600">{t('central.findText')}</p>
         <FormField label={t('central.schoolCode')} error={error}>
           <input className="w-full rounded border p-2" dir="ltr" autoCapitalize="none" value={value} onChange={(e) => setValue(e.target.value)} required />
         </FormField>
-        <button className="w-full rounded bg-brand p-2 text-white">{t('central.continue')}</button>
+        <button className="cta w-full bg-brand text-white">{t('central.continue')}</button>
       </form>
     </CentralShell>
   )

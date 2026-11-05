@@ -59,7 +59,7 @@ export default function ChangePasswordPage() {
   if (askEmail) {
     return (
       <CentralShell>
-        <div className="space-y-4 rounded-lg bg-white p-6 shadow">
+        <div className="auth-card space-y-4">
           <h1 className="text-xl font-bold">{t('auth.addEmail.title')}</h1>
           <AddEmailForm onDone={() => navigate('/parent', { replace: true })} onSkip={() => navigate('/parent', { replace: true })} />
         </div>
@@ -70,19 +70,19 @@ export default function ChangePasswordPage() {
   return (
     <CentralShell>
       {!forced && (
-        <Link to={homeFor(user.role)} className="mb-4 inline-flex items-center gap-2 text-sm text-brand">
+        <Link to={homeFor(user.role)} className="auth-link mb-4 inline-flex items-center gap-2 text-sm">
           <BackArrow />
           {t('central.back')}
         </Link>
       )}
-      <form onSubmit={submit} className="space-y-4 rounded-lg bg-white p-6 shadow">
+      <form onSubmit={submit} className="auth-card space-y-4">
         <h1 className="text-xl font-bold">{t('auth.changePassword.title')}</h1>
         {forced && <p className="rounded bg-amber-50 p-3 text-sm text-amber-900">{t('auth.changePassword.forced')}</p>}
         {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
         {field('current_password', 'auth.changePassword.current')}
         {field('password', 'auth.changePassword.new')}
         {field('password_confirmation', 'auth.changePassword.confirm')}
-        <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">{t('auth.changePassword.submit')}</button>
+        <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('auth.changePassword.submit')}</button>
       </form>
     </CentralShell>
   )

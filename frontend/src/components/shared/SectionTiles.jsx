@@ -23,7 +23,7 @@ export default function SectionTiles({ tiles, surface }) {
           const { to, label, icon: Icon, badge } = tile
           const Wrapper = editing ? 'div' : Link
           return (
-            <Wrapper key={keyOf(tile)} {...(editing ? {} : { to })} className={`group relative flex flex-col items-center gap-3 rounded-lg border bg-snow px-3 py-5 text-center transition-transform ${editing ? 'border-dashed border-brand' : 'hover:-translate-y-0.5'}`}>
+            <Wrapper key={keyOf(tile)} style={{ '--i': i }} {...(editing ? {} : { to })} className={`dash-in group relative flex flex-col items-center gap-3 rounded-lg border bg-snow px-3 py-5 text-center transition-transform ${editing ? 'border-dashed border-brand' : 'hover:-translate-y-0.5'}`}>
               <span aria-hidden style={{ width: box, height: box, ...iconPaint(layout.colors[keyOf(tile)]) }} className="grid place-items-center rounded-2xl bg-sky-tint text-deep-harbor transition-colors group-hover:bg-deep-harbor group-hover:text-white"><Icon size={iconPx} /></span>
               <span className="text-sm font-bold leading-snug text-deep-harbor">{label}</span>
               {!editing && badge > 0 && <span className="absolute end-3 top-3 grid min-w-6 place-items-center rounded-full bg-brand px-1.5 text-xs font-bold leading-6 text-white">{badge}</span>}

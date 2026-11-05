@@ -17,6 +17,9 @@ import './index.css'
 import App from './App.jsx'
 import { watchSchoolChanges } from './tenant/school'
 import { startPwa } from './pwa/pwa'
+import { applyLiteMode } from './lite'
+
+applyLiteMode()
 
 // Another tab switched school: reload so this tab shows the same school (never mixes two schools).
 watchSchoolChanges(() => window.location.reload())

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
-import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
+import AuthShell from '../../../components/shared/AuthShell'
 import PasswordInput from '../../../components/shared/PasswordInput'
 import { useSchool } from '../../../tenant/useSchool'
 
@@ -48,12 +48,9 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center justify-between gap-2">
-          <Link to="/login" className="text-sm text-brand">{t('auth.forgot.backToLogin')}</Link>
-          <LanguageSwitcher />
-        </div>
+    <AuthShell name={school?.name} logo={school?.logo}>
+      <div className="auth-card space-y-4">
+        <Link to="/login" className="text-sm text-brand">{t('auth.forgot.backToLogin')}</Link>
         <h1 className="text-xl font-bold">{school?.name ?? t('common.appName')}</h1>
         <h2 className="text-lg">{t('auth.forgot.title')}</h2>
 
@@ -63,7 +60,7 @@ export default function ForgotPasswordPage() {
             <p className="text-xs text-slate-500">{t('auth.forgot.phoneOnly')}</p>
             <label className="block text-sm">{t('auth.login')}<input required className="mt-1 w-full rounded border p-2" value={form.login} onChange={set('login')} /></label>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-            <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">{t('auth.forgot.sendCode')}</button>
+            <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('auth.forgot.sendCode')}</button>
           </form>
         )}
 
@@ -76,7 +73,7 @@ export default function ForgotPasswordPage() {
             <label className="block text-sm">{t('auth.changePassword.new')}<PasswordInput className="mt-1" required value={form.password} onChange={set('password')} /></label>
             <label className="block text-sm">{t('auth.changePassword.confirm')}<PasswordInput className="mt-1" required value={form.password_confirmation} onChange={set('password_confirmation')} /></label>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-            <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">{t('auth.forgot.setPassword')}</button>
+            <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('auth.forgot.setPassword')}</button>
             <button type="button" className="w-full text-sm text-brand underline" disabled={busy} onClick={() => requestCode()}>{t('auth.forgot.resend')}</button>
           </form>
         )}
@@ -84,10 +81,10 @@ export default function ForgotPasswordPage() {
         {step === 'done' && (
           <div className="space-y-4">
             <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{info}</p>
-            <Link to="/login" className="block w-full rounded bg-brand p-2 text-center text-white">{t('auth.submit')}</Link>
+            <Link to="/login" className="cta block w-full bg-brand text-center text-white">{t('auth.submit')}</Link>
           </div>
         )}
       </div>
-    </div>
+    </AuthShell>
   )
 }
