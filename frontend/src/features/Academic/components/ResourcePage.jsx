@@ -26,7 +26,7 @@ function SelectField({ field, value, onChange, form }) {
 }
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
-// fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams? (object, or a function of the form), optionLabel?, getValue?(row), hint?, visibleWhen?(form) }]
+// fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams? (object, or a function of the form), optionLabel?, getValue?(row), hint?, visibleWhen?(form), requiredWhen?(form) }]
 // rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
@@ -138,6 +138,8 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
                   className={inputClass}
                   type={f.type ?? 'text'}
                   dir={f.type === 'email' ? 'ltr' : undefined}
+                  required={Boolean(f.requiredWhen?.(form))}
+                  dir={f.type === 'tel' ? 'ltr' : undefined}
                   value={form[f.name] ?? ''}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                 />

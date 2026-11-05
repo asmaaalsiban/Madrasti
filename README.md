@@ -568,6 +568,10 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
 
+## Parents sign in with the phone number (the email is optional)
+- Adding a student with a NEW parent now requires the parent's **phone** (it is their login); the email is optional. A parent with no email signs in with the phone and the default password (changed at first sign-in).
+- A parent who is already registered is found by email, so a second child needs no phone again. No parent at all is still allowed.
+- The same rule applies to the Excel import (it uses the student form's rules), so a row with a parent name or email but no phone is reported before importing.
 ## The principal's home dashboard
 `/admin` shows today at a glance and the trends, from ONE request: `GET /api/admin/dashboard` (admin only).
 - Today: student and staff attendance rings, and what waits for a decision (purchase and privacy requests).
