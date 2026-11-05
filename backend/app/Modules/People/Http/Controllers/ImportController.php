@@ -12,6 +12,7 @@ use App\Modules\Academic\Import\TeachingAssignmentImporter;
 use App\Modules\Attendance\Import\AttendanceImporter;
 use App\Modules\Grading\Import\MarksImporter;
 use App\Modules\People\Import\GuardianImporter;
+use App\Modules\Finance\Import\FeesImporter;
 use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
@@ -41,6 +42,7 @@ class ImportController extends Controller
         'students' => StudentImporter::class,
         'marks' => MarksImporter::class,
         'guardians' => GuardianImporter::class,
+        'fees' => FeesImporter::class,
         'attendance' => AttendanceImporter::class,
     ];
 
