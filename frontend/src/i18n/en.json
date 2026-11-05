@@ -1174,7 +1174,8 @@
       "teaching": "Teaching",
       "marks": "Marks",
       "guardians": "Parents",
-      "fees": "Fees"
+      "fees": "Fees",
+      "attendance": "Attendance"
     },
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
@@ -1213,7 +1214,9 @@
       "login": "Sign-in",
       "children": "Children",
       "total": "Net fee",
-      "paid": "Paid"
+      "paid": "Paid",
+      "date": "Date",
+      "status": "Status"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",
