@@ -6,7 +6,7 @@ import StatusBadge from './StatusBadge'
 export default function Statement({ data, onPay = null, onReceipt = null, onVoid = null, onDeleteFee = null, onTransport = null, onDiscount = null, onPayOnline = null }) {
   const { t } = useTranslation()
   const c = data.currency
-  const totals = [['net', data.totals.net], ['paid', data.totals.paid], ['remaining', data.totals.remaining], ['overdue', data.totals.overdue]]
+  const totals = [['net', data.totals.net], ['paid', data.totals.paid], ...(Number(data.totals.carried) > 0 ? [['carried', data.totals.carried]] : []), ['remaining', data.totals.remaining], ['overdue', data.totals.overdue]]
 
   return (
     <div className="space-y-4">
@@ -76,8 +76,8 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
                     <span><span dir="ltr">{p.paid_on}</span> · <Money value={p.amount} currency={c} /> · {t(`finance.methods.${p.method}`)} · <span dir="ltr">{p.receipt}</span>{p.payer_name && <> · {t('finance.paidBy', { name: p.payer_name })}</>}</span>
                     <span className="flex gap-2">
-                      {onReceipt && <button type="button" className="text-brand underline" onClick={() => onReceipt(p, fee)}>{t('finance.receipt')}</button>}
-                      {onVoid && <button type="button" className="text-red-700 underline" onClick={() => onVoid(p)}>{t('finance.voidPayment')}</button>}
+                      {onReceipt && p.method !== 'carry_forward' && <button type="button" className="text-brand underline" onClick={() => onReceipt(p, fee)}>{t('finance.receipt')}</button>}
+                      {onVoid && p.method !== 'carry_forward' && <button type="button" className="text-red-700 underline" onClick={() => onVoid(p)}>{t('finance.voidPayment')}</button>}
                     </span>
                   </li>
                 ))}
