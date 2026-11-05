@@ -959,13 +959,16 @@
       "remaining": "Remaining",
       "overdue": "Overdue",
       "collectedThisMonth": "Collected this month",
-      "studentsOverdue": "Students with overdue installments"
+      "studentsOverdue": "Students with overdue installments",
+      "carriedIn": "Carried in from a past year",
+      "carriedOut": "Carried to the next year"
     },
     "totals": {
       "net": "Total fees",
       "paid": "Paid",
       "remaining": "Remaining",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "carried": "Carried to the next year"
     },
     "cols": {
       "no": "#",
@@ -990,7 +993,8 @@
       "bank_transfer": "Bank transfer",
       "card": "Card",
       "cheque": "Cheque",
-      "online": "Online"
+      "online": "Online",
+      "carry_forward": "Carried forward"
     },
     "noFees": "No fees for this student yet.",
     "discount": "discount",
@@ -1078,7 +1082,8 @@
     "spreadHelp": "This student already has a schedule. The amount you add is spread over the {{count}} installments still open: it does not get a schedule of its own.",
     "kinds": {
       "other": "Other (books, activities...)",
-      "transport": "Transport"
+      "transport": "Transport",
+      "carried": "Carried balance"
     },
     "transport": "Transport",
     "firstPaymentTitle": "First payment (optional)",
@@ -2642,5 +2647,36 @@
     "resetDone": "The site is back to its original look.",
     "preview": "Preview",
     "previewHelp": "A rough preview. Very light colours are darkened automatically so text stays readable."
+  },
+  "yearEnd": {
+    "title": "Year-end carry-over",
+    "help": "At the end of the school year, what each student still owes moves to the new year in installments. The old year is closed (nothing left to pay), and the carried balance shows in the student's statement for the new year. The carried amount is not money collected and is never counted in collections. Any move can be undone until a payment is taken on it.",
+    "from": "Year being closed",
+    "to": "New year",
+    "firstDue": "First installment due",
+    "installments": "Installments",
+    "owing": "Students with a balance",
+    "total": "Total",
+    "nobody": "No student owes anything for this year.",
+    "include": "Carry",
+    "includeFor": "Carry {{name}}",
+    "cols": {
+      "number": "Student number",
+      "student": "Student",
+      "remaining": "Remaining",
+      "overdue": "Overdue"
+    },
+    "carry": "Carry the balance of {{count}} students",
+    "carryShort": "Carry over",
+    "confirm": "The balance of {{count}} students ({{total}}) moves from {{from}} to {{to}}. The old year is closed and the installments open in the new year. Sure?",
+    "done": "The balance of {{count}} students was carried over.",
+    "readOnly": "Only the accountant can carry balances over. You can read them.",
+    "history": "Past moves",
+    "noMoves": "No moves yet.",
+    "undo": "Undo",
+    "cannotUndo": "A payment was taken on the carried balance",
+    "confirmUndo": "Undo the carry-over of {{name}}? The balance goes back to the old year and its installments leave the new year.",
+    "undone": "The move was undone.",
+    "reverted": "Undone"
   }
 }

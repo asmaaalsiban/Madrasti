@@ -23,4 +23,10 @@ return [
     'discount_line' => 'Discount',
     'online_note' => 'Paid online.',
     'card_expired' => 'This card has expired.',
+    'carry_year_order' => 'The new year must start after the year being closed.',
+    'carry_note' => 'Balance carried to :year',
+    'carry_description' => 'Balance carried from :year',
+    'carry_already_reverted' => 'This move was already undone.',
+    'carry_has_payments' => 'A payment was already taken on the carried balance. Cancel it first.',
+    'carry_use_year_end' => 'This entry was made by the year-end carry-over: undo it from the Year-end screen.',
 ];

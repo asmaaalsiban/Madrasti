@@ -26,18 +26,21 @@ class AccountReader
         $fees = StudentFee::with(['installments', 'items', 'payments.receiver', 'payments.allocations'])->where('student_id', $student->id)
             ->when($year, fn ($q) => $q->where('academic_year_id', $year->id))->orderBy('id')->get();
 
-        $total = $paid = $overdue = 0;
+        $total = $paid = $overdue = $carried = 0;
         $out = [];
         foreach ($fees as $fee) {
             $net = Money::cents($fee->total_amount) - Money::cents($fee->discount);
             $feePaid = (int) $fee->installments->sum(fn (Installment $i) => Money::cents($i->paid_amount));
+            // What was moved to the next year closes the old fee but is not money paid: it is shown apart from "paid".
+            $feeCarried = (int) $fee->payments->where('method', Payment::CARRY)->sum(fn (Payment $p) => Money::cents($p->amount));
             $feeOverdue = (int) $fee->installments->sum(fn (Installment $i) => $i->effectiveStatus() === 'overdue' ? $i->remainingCents() : 0);
             $total += $net;
-            $paid += $feePaid;
+            $paid += $feePaid - $feeCarried;
+            $carried += $feeCarried;
             $overdue += $feeOverdue;
             $out[] = [
                 'id' => $fee->id, 'kind' => $fee->kind, 'description' => $fee->description, 'total' => $fee->total_amount, 'discount' => $fee->discount, 'net' => Money::amount($net),
-                'paid' => Money::amount($feePaid), 'remaining' => Money::amount($net - $feePaid), 'overdue' => Money::amount($feeOverdue),
+                'paid' => Money::amount($feePaid - $feeCarried), 'carried' => Money::amount($feeCarried), 'remaining' => Money::amount($net - $feePaid), 'overdue' => Money::amount($feeOverdue),
                 'items' => $fee->items->map(fn ($i) => ['id' => $i->id, 'kind' => $i->kind, 'description' => $i->description, 'amount' => $i->amount])->values(),
                 'installments' => $fee->installments->map(fn (Installment $i) => [
                     'id' => $i->id, 'number' => $i->number, 'due_date' => $i->due_date->format('Y-m-d'), 'amount' => $i->amount, 'paid' => $i->paid_amount,
@@ -49,7 +52,7 @@ class AccountReader
 
         return [
             'student' => ['id' => $student->id, 'name_ar' => $student->name_ar, 'name_en' => $student->name_en, 'student_number' => $student->student_number],
-            'totals' => ['net' => Money::amount($total), 'paid' => Money::amount($paid), 'remaining' => Money::amount($total - $paid), 'overdue' => Money::amount($overdue)],
+            'totals' => ['net' => Money::amount($total), 'paid' => Money::amount($paid), 'carried' => Money::amount($carried), 'remaining' => Money::amount($total - $paid - $carried), 'overdue' => Money::amount($overdue)],
             'fees' => $out,
             // Who usually pays (the primary parent): the payment form starts with this name.
             'payer_default' => $student->guardians()->orderByDesc('guardian_student.is_primary')->value('name'),
@@ -130,14 +133,17 @@ class AccountReader
         $net = (float) DB::table('student_fees')->where('academic_year_id', $year->id)->sum(DB::raw('total_amount - discount'));
         $rows = DB::table('installments')->join('student_fees', 'student_fees.id', '=', 'installments.student_fee_id')->where('student_fees.academic_year_id', $year->id)
             ->selectRaw('sum(installments.paid_amount) as paid, sum(case when installments.due_date < ? and installments.paid_amount < installments.amount then installments.amount - installments.paid_amount else 0 end) as overdue', [$today])->first();
-        $month = (float) DB::table('payments')->join('student_fees', 'student_fees.id', '=', 'payments.student_fee_id')->where('student_fees.academic_year_id', $year->id)
+        // What was carried to the next year is closed (it counts as paid) but it is not money: "collected" leaves it out and shows it apart.
+        $carriedOut = Money::cents((float) DB::table('payments')->join('student_fees', 'student_fees.id', '=', 'payments.student_fee_id')->where('student_fees.academic_year_id', $year->id)->where('payments.method', Payment::CARRY)->sum('payments.amount'));
+        $carriedIn = Money::cents((float) DB::table('student_fees')->where('academic_year_id', $year->id)->where('kind', 'carried')->sum(DB::raw('total_amount - discount')));
+        $month = (float) DB::table('payments')->join('student_fees', 'student_fees.id', '=', 'payments.student_fee_id')->where('student_fees.academic_year_id', $year->id)->where('payments.method', '!=', Payment::CARRY)
             ->whereBetween('payments.paid_on', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])->sum('payments.amount');
 
         $paid = Money::cents($rows->paid);
         $total = Money::cents($net);
 
         return [
-            'expected' => Money::amount($total), 'collected' => Money::amount($paid), 'remaining' => Money::amount($total - $paid), 'overdue' => Money::amount(Money::cents($rows->overdue)),
+            'expected' => Money::amount($total), 'collected' => Money::amount($paid - $carriedOut), 'carried_out' => Money::amount($carriedOut), 'carried_in' => Money::amount($carriedIn), 'remaining' => Money::amount($total - $paid), 'overdue' => Money::amount(Money::cents($rows->overdue)),
             'collected_this_month' => Money::amount(Money::cents($month)),
             'students_overdue' => (int) DB::table('installments')->join('student_fees', 'student_fees.id', '=', 'installments.student_fee_id')->where('student_fees.academic_year_id', $year->id)
                 ->where('installments.due_date', '<', $today)->whereColumn('installments.paid_amount', '<', 'installments.amount')->distinct()->count('student_fees.student_id'),

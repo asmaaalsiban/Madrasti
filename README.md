@@ -622,3 +622,10 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **"My bus"** (`/teacher/my-bus`, a tile on the home of a driver and of an escort; `GET /api/transport/mine`): the bus, the driver and the escort with phone links, and for each round the students to pick up or take home with their section and the parent's name and phone. A driver's home shows only his own things (no lessons). Nobody else sees a bus. `GET /api/auth/me` returns `bus_duty` (`driver` / `escort`) for staff.
 - Parents see the escort's name and phone next to the driver on their child's ride card.
 - **Migration** (run `php artisan tenants:migrate`): `buses.driver_id` and `buses.escort_id`.
+## Accounting: year-end carry-over (phase 1)
+`Finance > Year-end carry-over` (`/teacher/finance/year-end` for the accountant, `/admin/finance/year-end` read-only for the principal). Pick the year being closed, the new year, the first due date and the number of installments; the screen lists every student who still owes (with the total, and the overdue part) and the accountant carries all or the chosen ones.
+- The old year is closed with a non-cash **carried forward** entry (a payment with method `carry_forward`; never counted as collected, never chosen by hand, not a receipt) and a new fee of kind **carried** opens in the new year with the same amount, split in installments. The student's statement runs on across years and shows "carried to the next year" apart from "paid".
+- `GET /api/finance/summary` returns `carried_out` and `carried_in`; `collected` is cash only. The principal's dashboard counts cash only too.
+- Every move is recorded (`fee_carryovers`) and **can be undone** until a payment is taken on the carried balance; running it again finds nothing left to carry. A carried entry cannot be cancelled as a normal payment.
+- **Migrations** (run `php artisan tenants:migrate`): `fee_carryovers` table, and `payments.method` becomes text (it was a fixed list).
+- The whole plan (cash and bank, expenses and suppliers, chart of accounts and journal, reports, budgets) is in `docs/accounting-roadmap.md`.

@@ -33,6 +33,7 @@ use App\Modules\Finance\Http\Controllers\FinanceController;
 use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\TransferController;
+use App\Modules\Finance\Http\Controllers\YearEndController;
 use App\Modules\Finance\Http\Controllers\StudentFeesController;
 use App\Modules\Grading\Http\Controllers\AssessmentController;
 use App\Modules\Grading\Http\Controllers\GradingOptionsController;
@@ -391,6 +392,9 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::delete('fees/{fee}', [FinanceController::class, 'destroyFee']);
     Route::post('payments', [FinanceController::class, 'pay']);
     Route::delete('payments/{payment}', [FinanceController::class, 'voidPayment']);
+    Route::get('year-end', [YearEndController::class, 'show']);
+    Route::post('year-end', [YearEndController::class, 'run']);
+    Route::post('year-end/{move}/undo', [YearEndController::class, 'undo'])->whereNumber('move');
 });
 Route::middleware('school-user')->get('students/{student}/fees', StudentFeesController::class);
 
