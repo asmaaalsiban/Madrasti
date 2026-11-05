@@ -3,7 +3,8 @@ import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
-import { Bars, Columns, LineChart, Ring, levelColor } from '../components/charts'
+import { Bars, Columns, LineChart, Ring } from '../components/charts'
+import { levelColor } from '../components/levelColor'
 
 const CARDS = [
   ['academic_years', 'admin.nav.academicYears'],

@@ -13,7 +13,6 @@ use App\Modules\Finance\Services\OnlinePayments;
 use App\Modules\Communication\Services\Notifier;
 use App\Shared\Enums\Role;
 use App\Shared\Enums\StaffType;
-use App\Shared\Payments\Checkout;
 use App\Shared\Payments\DemoPaymentGateway;
 use App\Shared\Payments\InvalidWebhook;
 use App\Shared\Payments\PaymentManager;

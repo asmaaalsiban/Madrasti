@@ -1,9 +1,7 @@
 // Small SVG charts for the principal's home page. No chart library: they are a few lines each, follow the school's brand colour
 // (currentColor + text-brand) and read in both directions (the numbers stay left-to-right).
 
-const GREEN = '#15803d'
-const AMBER = '#b45309'
-const RED = '#b91c1c'
+import { GREEN } from './levelColor'
 
 // A ring that shows one percentage, with the number in the middle.
 export function Ring({ percent, label, color = GREEN }) {
@@ -72,5 +70,3 @@ export function Bars({ items, label, suffix = '' }) {
   )
 }
 
-// Green when good, amber when so-so, red when poor.
-export const levelColor = (percent) => (percent >= 75 ? GREEN : percent >= 50 ? AMBER : RED)

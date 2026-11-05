@@ -140,3 +140,9 @@ main { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
   /* No pull-down-to-refresh bounce that looks like a crash; scrolling inside panels stays normal. */
   body { overscroll-behavior-y: none; }
 }
+
+/* A scrolling table box must contain its own absolutely placed children (the hidden "actions" header label,
+   which is position: absolute): otherwise it widens the whole page on a phone instead of scrolling in the box. */
+.overflow-x-auto {
+  position: relative;
+}

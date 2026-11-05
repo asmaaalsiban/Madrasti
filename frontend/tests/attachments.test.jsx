@@ -19,7 +19,7 @@ beforeEach(async () => { vi.resetAllMocks(); auth.user = { role: 'admin' }; awai
 describe('attachments', () => {
   it('a new task uploads the chosen files after it is saved', async () => {
     api.get.mockImplementation(async (url) => (url === '/tasks/given' ? { data: { data: [] } } : { data: { data: [{ id: 8, name: 'Sara', staff_type: 'teacher' }] } }))
-    api.post.mockImplementation(async (url) => ({ data: { data: { id: 21 } } }))
+    api.post.mockImplementation(async () => ({ data: { data: { id: 21 } } }))
     wrap(<TasksPage />)
     fireEvent.click(await screen.findByRole('button', { name: 'New task' }))
     fireEvent.change(screen.getByLabelText('Task'), { target: { value: 'Prepare' } })

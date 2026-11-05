@@ -43,7 +43,7 @@ describe('staff access', () => {
     fireEvent.click(screen.getByLabelText('Purchase requests'))
     fireEvent.click(screen.getByLabelText('Chat'))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/staff-visibility', { user_ids: [2], hidden: ['procurement', 'chat'].sort((a, b) => 0) }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/staff-visibility', { user_ids: [2], hidden: ['procurement', 'chat'].sort(() => 0) }))
   })
 
   it('several people can be set at once, and the job filter narrows the list', async () => {
