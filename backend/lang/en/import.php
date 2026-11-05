@@ -49,4 +49,8 @@ return [
     'assessment_differs' => '":title" already has a different maximum or weight (:max). Use the same values on every row of it.',
     'template_file_marks' => 'Marks_template',
     'template_sheet_marks' => 'Marks',
+    'bad_attendance_status' => '":value" is not an attendance status. Use present, late, absent or excused.',
+    'date_in_future' => '":value" is in the future.',
+    'template_file_attendance' => 'Attendance_template',
+    'template_sheet_attendance' => 'Attendance',
 ];

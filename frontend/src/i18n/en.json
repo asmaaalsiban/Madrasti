@@ -1173,7 +1173,8 @@
       "classrooms": "Sections",
       "teaching": "Teaching",
       "marks": "Marks",
-      "guardians": "Parents"
+      "guardians": "Parents",
+      "attendance": "Attendance"
     },
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
@@ -1210,7 +1211,9 @@
       "assessment": "Assessment",
       "score": "Mark",
       "login": "Sign-in",
-      "children": "Children"
+      "children": "Children",
+      "date": "Date",
+      "status": "Status"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",

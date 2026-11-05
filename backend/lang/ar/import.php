@@ -49,4 +49,8 @@ return [
     'assessment_differs' => '":title" موجود بعلامة عظمى أو وزن مختلف (:max). استخدم نفس القيم في كل صفوفه.',
     'template_file_marks' => 'قالب_العلامات',
     'template_sheet_marks' => 'العلامات',
+    'bad_attendance_status' => '":value" ليست حالة حضور. استخدم حاضر أو متأخر أو غائب أو بعذر.',
+    'date_in_future' => '":value" تاريخ في المستقبل.',
+    'template_file_attendance' => 'قالب_الحضور',
+    'template_sheet_attendance' => 'الحضور',
 ];

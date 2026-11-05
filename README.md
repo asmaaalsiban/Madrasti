@@ -591,3 +591,6 @@ A new kind in the import screen (after Students): **Parents**. One row per paren
 - Students per level, average mark per subject (published marks only, as a percent of the maximum), and students absent 3+ days this week.
 - The charts are small SVG components in `features/Academic/components/charts.jsx` (no chart library); colours follow the school's brand, and every chart has a text label for screen readers.
 - `GET /api/admin/overview` (the four counts) is unchanged.
+
+## Excel import: past attendance
+A new kind in the import screen: **Attendance**. One row = one student on one day: student number, date, status (present / late / absent / excused, or the Arabic words) and an optional note. The section is the one the student sat in during the academic year that contains the date. Future dates, dates outside every academic year and students with no section that year are reported. Importing a day again corrects it, and nothing is sent to parents.
