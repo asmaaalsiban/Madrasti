@@ -81,7 +81,7 @@ class AdminDashboardController extends Controller
     {
         $fees = StudentFee::all(['total_amount', 'discount']);
         $billed = $fees->sum(fn ($f) => Money::cents($f->total_amount) - Money::cents($f->discount));
-        $collected = Payment::all(['amount', 'paid_on']);
+        $collected = Payment::where('method', '!=', Payment::CARRY)->get(['amount', 'paid_on']);
         $overdue = Installment::whereDate('due_date', '<', now()->toDateString())->get(['amount', 'paid_amount'])
             ->sum(fn ($i) => max(0, Money::cents($i->amount) - Money::cents($i->paid_amount)));
         $months = collect(range(5, 0))->map(fn ($n) => now()->startOfMonth()->subMonths($n)->format('Y-m'));

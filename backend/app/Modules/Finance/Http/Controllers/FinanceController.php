@@ -255,6 +255,9 @@ class FinanceController extends Controller
     public function voidPayment(Request $request, Payment $payment): Response
     {
         $this->manage($request);
+        if ($payment->method === Payment::CARRY) {
+            throw ValidationException::withMessages(['payment' => [__('finance.carry_use_year_end')]]);
+        }
         $this->billing->voidPayment($payment);
 
         return response()->noContent();

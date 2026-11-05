@@ -17,7 +17,7 @@ export default function FinanceDashboardPage({ base }) {
   const save = useMutation({ mutationFn: () => api.put('/finance/settings', { currency }), onSuccess: () => { setCurrency(''); client.invalidateQueries({ queryKey: ['finance'] }) } })
 
   const data = summary.data
-  const cards = data ? [['expected', data.expected], ['collected', data.collected], ['remaining', data.remaining], ['overdue', data.overdue], ['collectedThisMonth', data.collected_this_month]] : []
+  const cards = data ? [['expected', data.expected], ['collected', data.collected], ['remaining', data.remaining], ['overdue', data.overdue], ['collectedThisMonth', data.collected_this_month], ...(Number(data.carried_in) > 0 ? [['carriedIn', data.carried_in]] : []), ...(Number(data.carried_out) > 0 ? [['carriedOut', data.carried_out]] : [])] : []
 
   return (
     <section className="space-y-4">
@@ -27,6 +27,7 @@ export default function FinanceDashboardPage({ base }) {
           <Link to={`${base}/finance/accounts`} className="rounded bg-brand px-4 py-1.5 text-white">{t('finance.accounts')}</Link>
           <Link to={`${base}/finance/transfers`} className="rounded border px-4 py-1.5 text-brand">{t('transfers.title')}</Link>
           <Link to={`${base}/finance/structures`} className="rounded border px-4 py-1.5 text-brand">{t('finance.structures')}</Link>
+          <Link to={`${base}/finance/year-end`} className="rounded border px-4 py-1.5 text-brand">{t('yearEnd.title')}</Link>
         </div>
       </div>
       {data && (

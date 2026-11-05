@@ -16,6 +16,9 @@ class Payment extends Model
 
     public const METHODS = ['cash', 'bank_transfer', 'card', 'cheque', 'online'];
 
+    /** Not money: what was still owed when a year closed and moved to the next year (see YearEndCarryOver). Never chosen by hand, never counted as collected. */
+    public const CARRY = 'carry_forward';
+
     /**
      * @var list<string>
      */
