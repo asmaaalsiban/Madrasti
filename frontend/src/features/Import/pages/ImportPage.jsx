@@ -6,7 +6,7 @@ import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 
 // In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
-const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians']
+const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians', 'marks']
 // For these a file may have one name only (Arabic or English), so "some name column" is what is needed.
 const NAME_KINDS = ['students', 'subjects', 'grade_levels']
 const WITH_ACCOUNTS = ['students', 'staff', 'guardians']

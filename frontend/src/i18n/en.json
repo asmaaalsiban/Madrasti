@@ -1172,6 +1172,7 @@
       "subjects": "Subjects",
       "classrooms": "Sections",
       "teaching": "Teaching",
+      "marks": "Marks",
       "guardians": "Parents"
     },
     "step1": "Download the template and fill it in (one row per person).",
@@ -1206,6 +1207,8 @@
       "teacher": "Teacher",
       "classroom": "Section",
       "subject": "Subject",
+      "assessment": "Assessment",
+      "score": "Mark",
       "login": "Sign-in",
       "children": "Children"
     },
