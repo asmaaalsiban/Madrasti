@@ -38,8 +38,20 @@ class StudentRequest extends FormRequest
             'first_payment_method' => ['nullable', Rule::in(Payment::METHODS)],
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_email' => ['nullable', 'email', 'max:255', $this->guardianEmailRule()],
-            'guardian_phone' => ['nullable', 'string', 'max:30', $this->guardianPhoneRule()],
+            // The phone is the parent's login, so it is required whenever a parent is entered. The email is optional.
+            'guardian_phone' => ['nullable', Rule::requiredIf(fn () => $this->guardianIsNew()), 'string', 'max:30', $this->guardianPhoneRule()],
         ];
+    }
+
+    /** A parent that is not registered yet needs a phone number (it is their login); an existing parent is found by email. */
+    private function guardianIsNew(): bool
+    {
+        $email = $this->input('guardian_email');
+        if (is_string($email) && $email !== '' && User::where('email', $email)->where('role', Role::Guardian)->exists()) {
+            return false;
+        }
+
+        return filled($this->input('guardian_name')) || filled($email);
     }
 
     /**

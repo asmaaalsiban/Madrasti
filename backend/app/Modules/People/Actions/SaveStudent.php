@@ -138,7 +138,7 @@ class SaveStudent
      * The form edits the primary parent: with $replacePrimary a different email replaces the old primary parent's
      * link (their account stays), so fixing a mistyped email does not leave the wrong account with access to the child.
      */
-    private function linkGuardian(Student $student, ?string $email, ?string $name, ?string $phone = null, bool $replacePrimary = false): void
+    public function linkGuardian(Student $student, ?string $email, ?string $name, ?string $phone = null, bool $replacePrimary = false): void
     {
         $email = $email === '' ? null : $email;
         $phone = PhoneNumber::normalize($phone);

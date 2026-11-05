@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { api } from '../src/api/client'
@@ -7,7 +8,7 @@ import ImportPage from '../src/features/Import/pages/ImportPage'
 
 vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
 
-const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><ImportPage /></QueryClientProvider>)
+const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter><ImportPage /></MemoryRouter></QueryClientProvider>)
 const pick = () => fireEvent.change(screen.getByLabelText('File'), { target: { files: [new File(['x'], 'school.xlsx')] } })
 
 const studentFields = [{ key: 'student_number', label: 'Student number', required: false }, { key: 'name_ar', label: 'Name (Arabic)', required: false }, { key: 'classroom', label: 'Section', required: false }]
@@ -114,7 +115,7 @@ describe('ImportPage', () => {
     })).mockResolvedValueOnce({ data: { data: { total: 1, valid: 1, created: [{ name: '5-A', grade: 'الصف الخامس', teacher: null }], created_columns: ['name', 'grade', 'teacher'], problem_count: 0, problems: [] } } })
     renderPage()
     const tabs = screen.getAllByRole('tab').map((b) => b.textContent)
-    expect(tabs).toEqual(['Grades', 'Subjects', 'Staff', 'Sections', 'Teaching', 'Students', 'Fees'])
+    expect(tabs).toEqual(['Grades', 'Subjects', 'Staff', 'Sections', 'Teaching', 'Students', 'Parents', 'Marks', 'Fees'])
     fireEvent.click(screen.getByRole('tab', { name: 'Sections' }))
     expect(screen.getByText(/import grades first/)).toBeInTheDocument()
     pick()

@@ -267,7 +267,7 @@ class AutoFeesTest extends AcademicTestCase
 
     public function test_the_payer_defaults_to_the_parents_name_at_registration(): void
     {
-        $this->enrol($this->first, ['first_payment' => 100, 'guardian_name' => 'Um Ahmad', 'guardian_email' => 'um@x.test'])->assertCreated();
+        $this->enrol($this->first, ['first_payment' => 100, 'guardian_name' => 'Um Ahmad', 'guardian_email' => 'um@x.test', 'guardian_phone' => '0599111444'])->assertCreated();
 
         $this->assertSame('Um Ahmad', Payment::first()->payer_name);
     }

@@ -572,3 +572,26 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 A new kind in the import screen (after Students): **Fees**, for the opening balances when a school moves to the system. One row = one fee of one student: student number, total fee, and optionally description, discount, number of installments (1 by default, up to 24), first due date, months between installments, paid so far, payment date, payment method (cash by default) and academic year (the current one by default).
 - The fee is split into equal installments (the last takes the remainder) and what was paid is recorded as ONE payment spread over the oldest installments, with a note that it was imported.
 - A student who already has a fee with the same description that year is refused, so importing a file twice never charges anybody twice.
+## Excel import: marks
+A new kind in the import screen (after Students): **Marks**. One row = one student's mark in one assessment: student number, subject (code or name), term (name, or 1/2/3), assessment name, out of, mark (or a status: absent / makeup / retake), and optionally type (exam, quiz, assignment, project, participation; empty = exam), weight %, date, academic year (empty = the current year) and "visible to parents" (yes by default; no keeps the assessment unpublished).
+- The section is the one the student sat in that year, so past years work if their sections and teaching were imported.
+- An assessment is created the first time its name is seen for that section, subject and term and reused after, so importing a file twice only updates the marks. All rows of one assessment must have the same maximum; the weights of a subject in a term may not pass 100; a subject with no teacher in that section is refused.
+- Importing is silent: no notification goes to parents.
+## Excel import: parents
+A new kind in the import screen (after Students): **Parents**. One row per parent: name, phone (required, it is the login), email (optional) and the student numbers of their children (several separated by a comma). A parent who already exists is only linked; a student with two parents has two rows. A phone or email that belongs to a staff or student account is refused, and unknown student numbers are reported. The preview creates nothing.
+## Student files (documents of each student)
+- Each student can have a file of documents (birth certificate, records, ID copies...). It uses the shared attachments system (`student` owner, up to 10 files of 10 MB: images, PDF, Office, txt, csv).
+- **Only the principal** can add, see and remove them (students, teachers and parents get 403/404). Deleting a student deletes their files.
+- Two ways to add: the **Add / Edit student** form has a "Student file" field (files are uploaded right after the student is saved), and the screen **Student files** (`/admin/student-files`, linked from the Import page): find the student by name or number, then upload their files.
+- The students list (admin only) returns each student's `files`.
+## Parents sign in with the phone number (the email is optional)
+- Adding a student with a NEW parent now requires the parent's **phone** (it is their login); the email is optional. A parent with no email signs in with the phone and the default password (changed at first sign-in).
+- A parent who is already registered is found by email, so a second child needs no phone again. No parent at all is still allowed.
+- The same rule applies to the Excel import (it uses the student form's rules), so a row with a parent name or email but no phone is reported before importing.
+## The principal's home dashboard
+`/admin` shows today at a glance and the trends, from ONE request: `GET /api/admin/dashboard` (admin only).
+- Today: student and staff attendance rings, and what waits for a decision (purchase and privacy requests).
+- Attendance rate of the last 14 days (line), money billed / collected / overdue with the last 6 months collected (columns).
+- Students per level, average mark per subject (published marks only, as a percent of the maximum), and students absent 3+ days this week.
+- The charts are small SVG components in `features/Academic/components/charts.jsx` (no chart library); colours follow the school's brand, and every chart has a text label for screen readers.
+- `GET /api/admin/overview` (the four counts) is unchanged.

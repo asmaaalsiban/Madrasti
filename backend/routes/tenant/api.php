@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Modules\Academic\Http\Controllers\AcademicYearController;
+use App\Modules\Academic\Http\Controllers\AdminDashboardController;
 use App\Modules\Academic\Http\Controllers\AdminOverviewController;
 use App\Modules\Academic\Http\Controllers\BuildingController;
 use App\Modules\Academic\Http\Controllers\ClassroomController;
@@ -213,6 +214,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
 // School structure: admin only.
 Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
+    Route::get('admin/dashboard', AdminDashboardController::class);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::post('classrooms/generate', [ClassroomController::class, 'generate']);
@@ -508,7 +510,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group
 
 // Files attached to tasks, a task's hand-in and surveys: the checks are by owner (see AttachmentAccess).
 Route::middleware('school-user')->prefix('attachments')->group(function (): void {
-    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey', 'online_payment'])->whereNumber('id');
+    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey', 'online_payment', 'student'])->whereNumber('id');
     Route::get('{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment');
     Route::delete('{attachment}', [AttachmentController::class, 'destroy'])->whereNumber('attachment');
 });

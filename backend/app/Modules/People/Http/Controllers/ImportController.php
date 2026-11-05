@@ -9,6 +9,8 @@ use App\Modules\Academic\Import\ClassroomImporter;
 use App\Modules\Academic\Import\GradeLevelImporter;
 use App\Modules\Academic\Import\SubjectImporter;
 use App\Modules\Academic\Import\TeachingAssignmentImporter;
+use App\Modules\Grading\Import\MarksImporter;
+use App\Modules\People\Import\GuardianImporter;
 use App\Modules\Finance\Import\FeesImporter;
 use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
@@ -37,6 +39,8 @@ class ImportController extends Controller
         'classrooms' => ClassroomImporter::class,
         'teaching' => TeachingAssignmentImporter::class,
         'students' => StudentImporter::class,
+        'marks' => MarksImporter::class,
+        'guardians' => GuardianImporter::class,
         'fees' => FeesImporter::class,
     ];
 
