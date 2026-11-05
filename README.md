@@ -567,3 +567,8 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Phones**: safe areas (notch / home bar), 16px fields (no iPhone zoom), 40px touch targets, no tap delay; the installments table is a list of cards on a phone.
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
+
+## Excel import: fees and what was already paid
+A new kind in the import screen (after Students): **Fees**, for the opening balances when a school moves to the system. One row = one fee of one student: student number, total fee, and optionally description, discount, number of installments (1 by default, up to 24), first due date, months between installments, paid so far, payment date, payment method (cash by default) and academic year (the current one by default).
+- The fee is split into equal installments (the last takes the remainder) and what was paid is recorded as ONE payment spread over the oldest installments, with a note that it was imported.
+- A student who already has a fee with the same description that year is refused, so importing a file twice never charges anybody twice.
