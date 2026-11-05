@@ -6,10 +6,10 @@ import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 
 // In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
-const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students']
+const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians']
 // For these a file may have one name only (Arabic or English), so "some name column" is what is needed.
 const NAME_KINDS = ['students', 'subjects', 'grade_levels']
-const WITH_ACCOUNTS = ['students', 'staff']
+const WITH_ACCOUNTS = ['students', 'staff', 'guardians']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
 // Admin: add many students or staff from the school's own Excel/CSV file.

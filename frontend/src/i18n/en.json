@@ -1171,7 +1171,8 @@
       "grade_levels": "Grades",
       "subjects": "Subjects",
       "classrooms": "Sections",
-      "teaching": "Teaching"
+      "teaching": "Teaching",
+      "guardians": "Parents"
     },
     "step1": "Download the template and fill it in (one row per person).",
     "downloadTemplate": "Download the template",
@@ -1204,7 +1205,9 @@
       "grade": "Grade",
       "teacher": "Teacher",
       "classroom": "Section",
-      "subject": "Subject"
+      "subject": "Subject",
+      "login": "Sign-in",
+      "children": "Children"
     },
     "chooseFile": "Choose your file.",
     "read": "Read the file",
