@@ -10,4 +10,5 @@ return [
     'capacity_below_riders' => 'The capacity is lower than the students already riding.',
     'wrong_period_morning' => 'The way to school needs a morning round.',
     'wrong_period_evening' => 'The way home needs an evening round.',
+    'not_eligible' => 'Choose an active member of the school staff with the right position (a driver for the driver; a teacher or bus supervisor for the escort).',
 ];

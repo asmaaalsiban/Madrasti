@@ -93,6 +93,7 @@ import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
 import TransportPage from '../features/Transport/TransportPage'
 import MyTransportPage from '../features/Transport/MyTransportPage'
+import MyBusPage from '../features/Transport/MyBusPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
 import ParentHome from '../features/Parent/pages/ParentHome'
@@ -168,6 +169,7 @@ const HOME_ROUTES = {
     { path: 'finance/structures', element: <FeeStructuresPage /> },
     { path: 'finance/accounts', element: <AccountsPage base="/teacher" /> },
     { path: 'finance/transfers', element: <TransfersPage base="/teacher" /> },
+    { path: 'my-bus', element: <MyBusPage /> },
     { path: 'finance/year-end', element: <YearEndPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'renewals', element: <RenewalsPage /> },

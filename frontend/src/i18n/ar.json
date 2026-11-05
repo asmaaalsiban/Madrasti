@@ -362,7 +362,7 @@
       "lab_technician": "فني مختبر",
       "it_support": "دعم تقني",
       "caretaker": "آذن",
-      "driver": "سائق",
+      "driver": "سائق باص",
       "security_guard": "حارس",
       "canteen_worker": "عامل مقصف"
     },
@@ -2148,7 +2148,26 @@
     "morningRound": "الجولة الصباحية",
     "eveningRound": "الجولة المسائية",
     "bus": "الباص",
-    "noRoundsInPeriod": "لا توجد جولات بعد."
+    "noRoundsInPeriod": "لا توجد جولات بعد.",
+    "chooseDriver": "اختر السائق",
+    "driverOther": "آخر (اكتب اسماً)",
+    "escort": "المرافقة",
+    "escortNone": "بدون مرافقة",
+    "myBusTitle": "باصي",
+    "myBusTile": "جولتي وطلابي",
+    "noBusYet": "لم يُسنَد لك باص بعد.",
+    "noRoundsYet": "لا توجد جولات لهذا الباص بعد.",
+    "noStudentsInRound": "لا يوجد طلاب في هذه الجولة.",
+    "studentsCount": "{{count}} طالب",
+    "part": {
+      "driver": "أنت السائق",
+      "escort": "أنت المرافقة"
+    },
+    "mine": {
+      "student": "الطالب",
+      "classroom": "الشعبة",
+      "parent": "ولي الأمر"
+    }
   },
   "tasks": {
     "title": "المهام",

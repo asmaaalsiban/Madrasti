@@ -2,7 +2,7 @@ import useBadges from '../../Badges/useBadges'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, Banknote, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, Bus, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet } from 'lucide-react'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 import { isHidden } from '../../StaffAccess/staffFeatures'
@@ -92,8 +92,11 @@ export default function TeacherHome() {
   const layout = useLayout('teacher_home')
   const [editing, setEditing] = useState(false)
   // The groups of this person's home (an accountant's home is the school's money), in the order they chose.
-  const base = accountant ? [['money', MONEY]] : [['teaching', TEACHING], ['followUp', FOLLOW_UP], ...(head ? [['department', HEAD]] : [])]
-  const sections = orderBy([...base, ['mine', MINE]], (x) => x[0], layout.groups)
+  // A driver or an escort also has "My bus" (his bus, rounds and students); a driver has no lessons, so his home is only his own things.
+  const busTile = (user?.bus_duty?.length ?? 0) > 0 ? [['/teacher/my-bus', 'transport.myBusTitle', 'transport.myBusTile', Bus]] : []
+  const driver = user?.staff_type === 'driver'
+  const base = driver ? [] : accountant ? [['money', MONEY]] : [['teaching', TEACHING], ['followUp', FOLLOW_UP], ...(head ? [['department', HEAD]] : [])]
+  const sections = orderBy([...base, ['mine', [...busTile, ...MINE]]], (x) => x[0], layout.groups)
   const flat = () => sections.flatMap(([, tiles]) => orderBy(tiles, (x) => x[0], layout.items).map((x) => x[0]))
   const setColor = (key, color) => { const colors = { ...layout.colors }; if (color) colors[key] = color; else delete colors[key]; layout.save({ colors }) }
   const moveGroup = (id, delta) => layout.save({ groups: swap(sections.map((x) => x[0]), id, delta), items: flat() })
