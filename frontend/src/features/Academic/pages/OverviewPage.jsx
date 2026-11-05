@@ -2,20 +2,21 @@ import { useQuery } from '@tanstack/react-query'
 import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { BookOpen, CalendarRange, DoorOpen, Layers } from 'lucide-react'
 import { api } from '../../../api/client'
 import { Bars, Columns, LineChart, Ring } from '../components/charts'
 import { levelColor } from '../components/levelColor'
 
 const CARDS = [
-  ['academic_years', 'admin.nav.academicYears'],
-  ['grade_levels', 'admin.nav.gradeLevels'],
-  ['classrooms', 'admin.nav.classrooms'],
-  ['subjects', 'admin.nav.subjects'],
+  ['academic_years', 'admin.nav.academicYears', CalendarRange],
+  ['grade_levels', 'admin.nav.gradeLevels', Layers],
+  ['classrooms', 'admin.nav.classrooms', DoorOpen],
+  ['subjects', 'admin.nav.subjects', BookOpen],
 ]
 
 const Panel = ({ title, children, className = '', i = 0 }) => (
-  <section style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-lg border bg-white p-4 shadow-sm ${className}`}>
-    <h2 className="text-sm font-bold text-slate-700">{title}</h2>
+  <section style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-lg border bg-white p-4 shadow-sm border-sky-tint/60 ${className}`}>
+    <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
     {children}
   </section>
 )
@@ -40,16 +41,18 @@ export default function OverviewPage() {
   const paidPct = fin && fin.billed > 0 ? (fin.collected / fin.billed) * 100 : 0
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('academic.overview.title')}</h1>
-      {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>}
-
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {CARDS.map(([key, label], n) => (
-          <div key={key} style={{ '--i': n }} className="dash-in rounded-lg border-t-4 border-brand bg-white p-4 shadow-sm">
-            <p className="text-3xl font-bold">{data?.[key] ?? '–'}</p>
-            <p className="mt-1 text-sm text-slate-600">{t(label)}</p>
-          </div>
-        ))}
+      <div className="dash-band dash-in space-y-4">
+        <h1 className="text-2xl font-extrabold !text-white">{t('academic.overview.title')}</h1>
+        {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-2xl bg-white/90 p-3 font-bold text-deep-harbor">{t('surveys.waiting', { count: pending.data })}</Link>}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {CARDS.map(([key, label, Icon], n) => (
+            <div key={key} style={{ '--i': n + 1 }} className="dash-in dash-stat">
+              <span aria-hidden className="grid h-9 w-9 place-items-center rounded-xl bg-white/12 text-sky-100"><Icon size={18} /></span>
+              <p className="mt-3 text-3xl font-extrabold leading-none text-white">{data?.[key] ?? '–'}</p>
+              <p className="mt-1 text-sm text-sky-100/90">{t(label)}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {!d ? <p className="text-slate-500">{t('common.loading')}</p> : (
