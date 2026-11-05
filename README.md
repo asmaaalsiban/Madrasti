@@ -567,3 +567,9 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Phones**: safe areas (notch / home bar), 16px fields (no iPhone zoom), 40px touch targets, no tap delay; the installments table is a list of cards on a phone.
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
+
+## Excel import: marks
+A new kind in the import screen (after Students): **Marks**. One row = one student's mark in one assessment: student number, subject (code or name), term (name, or 1/2/3), assessment name, out of, mark (or a status: absent / makeup / retake), and optionally type (exam, quiz, assignment, project, participation; empty = exam), weight %, date, academic year (empty = the current year) and "visible to parents" (yes by default; no keeps the assessment unpublished).
+- The section is the one the student sat in that year, so past years work if their sections and teaching were imported.
+- An assessment is created the first time its name is seen for that section, subject and term and reused after, so importing a file twice only updates the marks. All rows of one assessment must have the same maximum; the weights of a subject in a term may not pass 100; a subject with no teacher in that section is refused.
+- Importing is silent: no notification goes to parents.

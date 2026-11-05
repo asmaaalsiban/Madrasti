@@ -114,7 +114,7 @@ describe('ImportPage', () => {
     })).mockResolvedValueOnce({ data: { data: { total: 1, valid: 1, created: [{ name: '5-A', grade: 'الصف الخامس', teacher: null }], created_columns: ['name', 'grade', 'teacher'], problem_count: 0, problems: [] } } })
     renderPage()
     const tabs = screen.getAllByRole('tab').map((b) => b.textContent)
-    expect(tabs).toEqual(['Grades', 'Subjects', 'Staff', 'Sections', 'Teaching', 'Students'])
+    expect(tabs).toEqual(['Grades', 'Subjects', 'Staff', 'Sections', 'Teaching', 'Students', 'Marks'])
     fireEvent.click(screen.getByRole('tab', { name: 'Sections' }))
     expect(screen.getByText(/import grades first/)).toBeInTheDocument()
     pick()
