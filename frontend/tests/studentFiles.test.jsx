@@ -40,7 +40,7 @@ describe('student files page', () => {
 describe('students form', () => {
   it('uploads the chosen file after a new student is saved, and does not send it as data', async () => {
     api.get.mockResolvedValue({ data: { data: [], meta: { current_page: 1, last_page: 1 } } })
-    api.post.mockImplementation(async (url) => ({ data: { data: { id: 77, account: { email: 'a@b.c', password: 'x' } } } }))
+    api.post.mockImplementation(async () => ({ data: { data: { id: 77, account: { email: 'a@b.c', password: 'x' } } } }))
     wrap(<StudentsPage />)
     fireEvent.click(await screen.findByRole('button', { name: 'Add' }))
     fireEvent.change(await screen.findByLabelText('Student number'), { target: { value: 'S-9' } })

@@ -121,7 +121,7 @@ describe('AttendanceReportPage', () => {
     { student: { id: 12, student_number: 'S-2', name_ar: 'ليلى', name_en: 'Layla' }, classroom: '1-A', absent: 0, late: 1 },
   ]
   const serveReport = () => {
-    api.get.mockImplementation((url, config) => {
+    api.get.mockImplementation((url) => {
       if (url === '/attendance/classrooms') return Promise.resolve({ data: { data: [room] } })
       if (url === '/attendance/report') return Promise.resolve({ data: { data: rows, meta: { current_page: 1, last_page: 1, from: '2026-09-01', to: '2027-06-30' } } })
       if (url === '/attendance/students/11') {

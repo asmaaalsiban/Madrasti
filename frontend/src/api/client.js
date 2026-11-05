@@ -7,7 +7,10 @@ export const tokenKey = () => `token:${getSchool() ?? ''}`
 export const getToken = () => { try { return getSchool() ? localStorage.getItem(tokenKey()) : null } catch { return null } }
 export const setToken = (t) => {
   if (!getSchool()) return
-  try { t ? localStorage.setItem(tokenKey(), t) : localStorage.removeItem(tokenKey()) } catch { /* ignore */ }
+  try {
+    if (t) localStorage.setItem(tokenKey(), t)
+    else localStorage.removeItem(tokenKey())
+  } catch { /* ignore */ }
 }
 
 // Same origin: the Vite dev proxy and the production web server forward /api to Laravel.

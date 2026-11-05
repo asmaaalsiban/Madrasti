@@ -14,7 +14,6 @@ use App\Modules\Communication\Services\Notifier;
 use App\Modules\Surveys\Models\Survey;
 use App\Modules\Surveys\Models\SurveyQuestion;
 use App\Modules\Surveys\Models\SurveyRecipient;
-use App\Shared\Enums\Role;
 use App\Modules\Surveys\Models\SurveyResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
