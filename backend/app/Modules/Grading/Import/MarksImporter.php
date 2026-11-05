@@ -94,6 +94,11 @@ class MarksImporter extends Importer
         $status = $this->status($row['status'] ?? null);
         $status === false && $errors[] = __('import.bad_status', ['value' => $row['status']]);
         $score = filled($row['score'] ?? null) ? $this->number($row['score']) : null;
+        // Schools often write "غ" (absent) or "إعادة" in the mark column itself.
+        if (filled($row['score'] ?? null) && $score === null && ! filled($row['status'] ?? null) && ($fromMark = $this->status((string) $row['score'])) !== false && $fromMark !== null) {
+            $status = $fromMark;
+            $row['score'] = null;
+        }
         filled($row['score'] ?? null) && ($score === null || $score < 0) && $errors[] = __('import.bad_mark', ['value' => $row['score']]);
         if ($score === null && ! filled($row['score'] ?? null) && ($status === null || $status === false) && $status !== false) {
             $errors[] = __('import.mark_needed');
@@ -170,7 +175,7 @@ class MarksImporter extends Importer
             return abs($planned[$name]['max'] - $max) > 0.0001 || abs($planned[$name]['weight'] - $weight) > 0.0001 ? [__('import.assessment_differs', ['title' => $title, 'max' => $planned[$name]['max']])] : [];
         }
         $used = (float) $existing->sum('weight') + array_sum(array_column($planned, 'weight'));
-        if ($used + $weight > 100) {
+        if ($weight > 0 && $used + $weight > 100) {
             return [__('grading.weight_over_100', ['used' => rtrim(rtrim(number_format($used, 2, '.', ''), '0'), '.')])];
         }
         $this->planned[$key][$name] = ['max' => $max, 'weight' => $weight];
@@ -180,9 +185,7 @@ class MarksImporter extends Importer
 
     private function number(mixed $value): ?float
     {
-        $text = trim(str_replace(['٫', ',', '٬'], ['.', '.', ''], strtr((string) $value, ['٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'])));
-
-        return $text !== '' && is_numeric($text) ? (float) $text : null;
+        return \App\Shared\Import\Numbers::parse($value);
     }
 
     /** The term by its name, or by its number in the year ("1" = the first). */
@@ -234,7 +237,7 @@ class MarksImporter extends Importer
         if ($v === '') {
             return null;
         }
-        foreach (['absent' => ['absent', 'غائب', 'غايب', 'غياب'], 'makeup' => ['makeup', 'تعويضي', 'تعويض', 'اعاده اختبار'], 'retake' => ['retake', 'اعاده', 'إعادة', 'رسوب', 'راسب']] as $status => $list) {
+        foreach (['absent' => ['absent', 'غائب', 'غايب', 'غياب', 'غ', 'غائبه', 'abs'], 'makeup' => ['makeup', 'تعويضي', 'تعويض', 'اعاده اختبار'], 'retake' => ['retake', 'اعاده', 'إعادة', 'رسوب', 'راسب']] as $status => $list) {
             if (in_array($v, array_map(fn ($w) => $this->norm($w), $list), true)) {
                 return $status;
             }

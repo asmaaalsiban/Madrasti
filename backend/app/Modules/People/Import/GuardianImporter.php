@@ -33,7 +33,7 @@ class GuardianImporter extends Importer
             'name' => ['en' => 'Parent name', 'ar' => 'اسم ولي الأمر', 'required' => true, 'example' => 'Ahmad Ali', 'aliases' => ['اسم ولي الامر', 'ولي الامر', 'الاسم', 'اسم الاب', 'اسم الام', 'parent name', 'guardian name', 'name']],
             'phone' => ['en' => 'Phone', 'ar' => 'الهاتف', 'required' => true, 'example' => '0790000000', 'aliases' => ['هاتف ولي الامر', 'جوال ولي الامر', 'رقم الهاتف', 'الهاتف', 'الجوال', 'موبايل', 'رقم الجوال', 'phone', 'mobile', 'parent phone']],
             'email' => ['en' => 'Email', 'ar' => 'الإيميل', 'required' => false, 'example' => 'ahmad@example.com', 'aliases' => ['بريد ولي الامر', 'ايميل ولي الامر', 'الايميل', 'البريد الالكتروني', 'البريد', 'email', 'parent email']],
-            'students' => ['en' => 'Student numbers', 'ar' => 'أرقام الطلاب', 'required' => true, 'example' => '1001, 1002', 'aliases' => ['رقم الطالب', 'ارقام الطلاب', 'ارقام الابناء', 'الابناء', 'الطالب', 'student number', 'student numbers', 'children', 'students']],
+            'students' => ['en' => 'Student numbers', 'ar' => 'أرقام الطلاب', 'required' => true, 'example' => '1001, 1002', 'aliases' => ['رقم الطالب', 'ارقام الطلاب', 'ارقام الابناء', 'الابناء', 'ابناؤه', 'ابناءه', 'ابنائه', 'ابناؤها', 'اولاده', 'الاولاد', 'اولاد', 'الطلاب', 'رقم الابن', 'الطالب', 'student number', 'student numbers', 'children', 'students']],
         ];
     }
 
@@ -72,6 +72,7 @@ class GuardianImporter extends Importer
 
         $ids = [];
         $numbers = preg_split('/[,;،؛\/\n\s]+/u', (string) ($row['students'] ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $numbers = array_values(array_filter($numbers, fn ($n) => ! in_array(mb_strtolower($n), ['و', 'and', '&', '+'], true))); // "1001 و 1002"
         $numbers === [] && $errors[] = __('import.parent_needs_students');
         foreach ($numbers as $number) {
             $student = $this->student($number);

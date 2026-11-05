@@ -95,4 +95,14 @@ class FeesImportTest extends AcademicTestCase
         Sanctum::actingAs(User::factory()->staff(StaffType::Accountant)->create());
         $this->post('/api/import/fees', [], ['Accept' => 'application/json'])->assertForbidden();
     }
+
+    public function test_thousands_separators_and_arabic_digits_are_read(): void
+    {
+        $this->upload([self::HEAD, ['S-1', '1,200', '١٠٠', '٤', '2026-09-15', '٣٠٠', '']])->assertOk()->assertJsonPath('data.problem_count', 0);
+
+        $fee = StudentFee::first();
+        $this->assertEqualsWithDelta(1200.0, (float) $fee->total_amount, 0.001);
+        $this->assertEqualsWithDelta(100.0, (float) $fee->discount, 0.001);
+        $this->assertEqualsWithDelta(300.0, (float) Payment::first()->amount, 0.001);
+    }
 }

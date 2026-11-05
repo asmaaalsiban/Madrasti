@@ -598,3 +598,6 @@ A new kind in the import screen (after Students): **Parents**. One row per paren
 
 ## Excel import: past attendance
 A new kind in the import screen: **Attendance**. One row = one student on one day: student number, date, status (present / late / absent / excused, or the Arabic words) and an optional note. The section is the one the student sat in during the academic year that contains the date. Future dates, dates outside every academic year and students with no section that year are reported. Importing a day again corrects it, and nothing is sent to parents.
+
+### Import: what real school files taught us
+Tried with messy Arabic files (Arabic digits, `1,200`, `غ` / `ح` for absent / present, "1001 و 1002"). The importers now read: numbers with thousands commas, decimal commas and Arabic digits (`App\Shared\Import\Numbers`); a single letter in the mark column (`غ` = absent); single letters in the attendance status (`ح` present, `غ` absent, `ت` late, `ع` excused); the parents' children column called "أبناؤه" / "الأولاد", with the word "و" between numbers; and a zero-weight assessment is no longer refused when the subject's weights already pass 100.

@@ -97,10 +97,10 @@ class AttendanceImporter extends Importer
     {
         $v = $this->norm((string) $value);
         $words = [
-            'present' => ['present', 'p', 'حاضر', 'حاضره', 'حضور'],
-            'late' => ['late', 'l', 'متاخر', 'متاخره', 'تاخير', 'تأخر'],
-            'absent' => ['absent', 'a', 'غائب', 'غايب', 'غائبه', 'غياب'],
-            'excused' => ['excused', 'e', 'بعذر', 'غياببعذر', 'غائببعذر', 'معذور', 'اجازه', 'إجازة'],
+            'present' => ['present', 'p', 'حاضر', 'حاضره', 'حضور', 'ح'],
+            'late' => ['late', 'l', 'متاخر', 'متاخره', 'تاخير', 'تأخر', 'ت'],
+            'absent' => ['absent', 'a', 'غائب', 'غايب', 'غائبه', 'غياب', 'غ'],
+            'excused' => ['excused', 'e', 'بعذر', 'غياببعذر', 'غائببعذر', 'معذور', 'اجازه', 'إجازة', 'ع'],
         ];
         foreach ($words as $status => $list) {
             if (in_array($v, array_map(fn ($w) => $this->norm($w), $list), true)) {
