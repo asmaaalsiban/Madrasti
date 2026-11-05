@@ -43,13 +43,16 @@ function RoundDialog({ round, onClose }) {
   )
 }
 
-function BusDialog({ bus, rounds, onClose }) {
+function BusDialog({ bus, rounds, drivers = [], escorts = [], onClose }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
+  // The driver is chosen from the staff (position "driver"); "other" lets the principal type a name for a driver who is not registered.
+  const [driverChoice, setDriverChoice] = useState(bus?.driver_id ? String(bus.driver_id) : bus || drivers.length === 0 ? 'other' : '')
+  const [escortId, setEscortId] = useState(bus?.escort_id ? String(bus.escort_id) : '')
   const [form, setForm] = useState({ number: bus?.number ?? '', driver_name: bus?.driver_name ?? '', driver_phone: bus?.driver_phone ?? '', capacity: bus?.capacity ?? 30, area_from: bus?.area_from ?? '', area_to: bus?.area_to ?? '', notes: bus?.notes ?? '', is_active: bus?.is_active ?? true, round_ids: bus?.round_ids ?? [] })
   const [error, setError] = useState('')
   const save = useMutation({
-    mutationFn: () => { const body = { ...form, driver_phone: form.driver_phone || null, notes: form.notes || null }; return bus ? api.put(`/transport/buses/${bus.id}`, body) : api.post('/transport/buses', body) },
+    mutationFn: () => { const staff = driverChoice !== 'other'; const body = { ...form, driver_id: staff ? Number(driverChoice) : null, escort_id: escortId ? Number(escortId) : null, driver_name: staff ? undefined : form.driver_name, driver_phone: staff ? undefined : (form.driver_phone || null), notes: form.notes || null }; return bus ? api.put(`/transport/buses/${bus.id}`, body) : api.post('/transport/buses', body) },
     onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
@@ -61,8 +64,23 @@ function BusDialog({ bus, rounds, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="block text-sm">{t('transport.busNumber')}<input required dir="ltr" className="mt-1 w-full rounded border p-2" value={form.number} onChange={set('number')} /></label>
-          <label className="block text-sm">{t('transport.driverName')}<input required className="mt-1 w-full rounded border p-2" placeholder={t('transport.driverHint')} value={form.driver_name} onChange={set('driver_name')} /></label>
-          <label className="block text-sm">{t('transport.driverPhone')}<input dir="ltr" className="mt-1 w-full rounded border p-2" value={form.driver_phone} onChange={set('driver_phone')} /></label>
+          <label className="block text-sm">{t('transport.driver')}
+            <select required className="mt-1 w-full rounded border p-2" value={driverChoice} onChange={(e) => setDriverChoice(e.target.value)}>
+              <option value="" disabled>{t('transport.chooseDriver')}</option>
+              {drivers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              <option value="other">{t('transport.driverOther')}</option>
+            </select>
+          </label>
+          {driverChoice === 'other' && <>
+            <label className="block text-sm">{t('transport.driverName')}<input required className="mt-1 w-full rounded border p-2" placeholder={t('transport.driverHint')} value={form.driver_name} onChange={set('driver_name')} /></label>
+            <label className="block text-sm">{t('transport.driverPhone')}<input dir="ltr" className="mt-1 w-full rounded border p-2" value={form.driver_phone} onChange={set('driver_phone')} /></label>
+          </>}
+          <label className="block text-sm">{t('transport.escort')}
+            <select className="mt-1 w-full rounded border p-2" value={escortId} onChange={(e) => setEscortId(e.target.value)}>
+              <option value="">{t('transport.escortNone')}</option>
+              {escorts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </label>
           <label className="block text-sm">{t('transport.areaFrom')}<input required className="mt-1 w-full rounded border p-2" value={form.area_from} onChange={set('area_from')} /></label>
           <label className="block text-sm">{t('transport.areaTo')}<input required className="mt-1 w-full rounded border p-2" value={form.area_to} onChange={set('area_to')} /></label>
           <label className="block text-sm">{t('transport.capacity')}<input required type="number" min="1" max="100" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.capacity} onChange={set('capacity')} /></label>
@@ -196,7 +214,8 @@ function BusesTab({ overview }) {
             <header className="flex items-start justify-between gap-2">
               <div>
                 <h3 className="flex items-center gap-2 text-lg font-extrabold"><Bus aria-hidden size={20} />{t('transport.busNo', { number: b.number })}{!b.is_active && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal">{t('transport.inactive')}</span>}</h3>
-                <p className="text-sm"><bdi>{b.driver_name}</bdi>{b.driver_phone && <> · <bdi dir="ltr">{b.driver_phone}</bdi></>}</p>
+                <p className="text-sm">{t('transport.driver')}: <bdi>{b.driver?.name ?? b.driver_name}</bdi>{(b.driver?.phone ?? b.driver_phone) && <> · <bdi dir="ltr">{b.driver?.phone ?? b.driver_phone}</bdi></>}</p>
+                {b.escort && <p className="text-sm">{t('transport.escort')}: <bdi>{b.escort.name}</bdi>{b.escort.phone && <> · <bdi dir="ltr">{b.escort.phone}</bdi></>}</p>}
                 <p className="text-sm text-slate-600">{t('transport.areaFromTo', { from: b.area_from, to: b.area_to })}</p>
               </div>
               <span className="flex gap-1">
@@ -217,7 +236,7 @@ function BusesTab({ overview }) {
           </article>
         ))}
       </div>
-      {dialog?.type === 'bus' && <BusDialog bus={dialog.bus} rounds={overview.rounds} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'bus' && <BusDialog bus={dialog.bus} rounds={overview.rounds} drivers={overview.drivers ?? []} escorts={overview.escorts ?? []} onClose={() => setDialog(null)} />}
       {dialog?.type === 'riders' && <RidersDialog bus={dialog.bus} rounds={overview.rounds} onClose={() => setDialog(null)} />}
       <ConfirmDialog open={Boolean(del)} message={t('transport.deleteBus', { number: del?.number })} onConfirm={() => remove.mutate(del)} onCancel={() => setDel(null)} busy={remove.isPending} />
     </div>

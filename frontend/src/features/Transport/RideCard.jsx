@@ -17,6 +17,7 @@ function Leg({ title, round, bus }) {
           <p className="flex items-center gap-2 text-lg font-extrabold text-deep-harbor"><Bus aria-hidden size={20} />{t('transport.busNo', { number: bus.number })}</p>
           <p>{t('transport.driver')}: <bdi>{bus.driver_name}</bdi></p>
           {bus.driver_phone && <p className="flex items-center gap-2 text-sm"><Phone aria-hidden size={14} /><bdi dir="ltr">{bus.driver_phone}</bdi></p>}
+          {bus.escort_name && <p>{t('transport.escort')}: <bdi>{bus.escort_name}</bdi>{bus.escort_phone && <> · <bdi dir="ltr" className="text-sm">{bus.escort_phone}</bdi></>}</p>}
           <p className="flex items-center gap-2 text-sm text-slate-600"><MapPin aria-hidden size={14} />{t('transport.areaFromTo', { from: bus.area_from, to: bus.area_to })}</p>
         </div>
       )}

@@ -501,6 +501,7 @@ Route::middleware(['school-user', 'role:admin'])->prefix('transport')->group(fun
     Route::delete('students/{student}', [TransportController::class, 'unassign']);
 });
 Route::middleware('school-user')->get('students/{student}/transport', [TransportController::class, 'forStudent']);
+Route::middleware('school-user')->get('transport/mine', [TransportController::class, 'mine']); // a driver's or an escort's own buses
 
 // Tasks for staff: management gives to any teacher, a head of department to their department; each assignee moves their own part.
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group(function (): void {

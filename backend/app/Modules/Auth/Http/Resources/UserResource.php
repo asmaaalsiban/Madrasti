@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Resources;
 
 use App\Models\User;
+use App\Modules\Transport\Models\Bus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +33,11 @@ class UserResource extends JsonResource
             'layout' => (object) ($this->layout ?? []),
             // Only for staff: what kind of employee (the app shows the tools that fit).
             'staff_type' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->staff_type->value),
+            // Only for staff: whether they drive a bus or ride as its escort (the app then shows "My bus").
+            'bus_duty' => $this->whenLoaded('staffProfile', fn () => array_values(array_filter([
+                Bus::where('is_active', true)->where('driver_id', $this->id)->exists() ? 'driver' : null,
+                Bus::where('is_active', true)->where('escort_id', $this->id)->exists() ? 'escort' : null,
+            ]))),
             // Only for staff: the screens the principal switched off for them.
             'hidden_features' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->hidden_features ?? []),
             // Only for staff: the subject they teach (a head of department: the department).

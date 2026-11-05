@@ -362,7 +362,7 @@
       "lab_technician": "Lab technician",
       "it_support": "IT support",
       "caretaker": "Caretaker",
-      "driver": "Driver",
+      "driver": "Bus driver",
       "security_guard": "Security guard",
       "canteen_worker": "Canteen worker"
     },
@@ -2128,7 +2128,26 @@
     "morningRound": "Morning round",
     "eveningRound": "Evening round",
     "bus": "Bus",
-    "noRoundsInPeriod": "No rounds yet."
+    "noRoundsInPeriod": "No rounds yet.",
+    "chooseDriver": "Choose the driver",
+    "driverOther": "Other (type a name)",
+    "escort": "Escort",
+    "escortNone": "No escort",
+    "myBusTitle": "My bus",
+    "myBusTile": "My rounds and students",
+    "noBusYet": "No bus is assigned to you yet.",
+    "noRoundsYet": "This bus has no rounds yet.",
+    "noStudentsInRound": "No students in this round.",
+    "studentsCount": "{{count}} students",
+    "part": {
+      "driver": "You are the driver",
+      "escort": "You are the escort"
+    },
+    "mine": {
+      "student": "Student",
+      "classroom": "Section",
+      "parent": "Parent"
+    }
   },
   "tasks": {
     "title": "Tasks",
