@@ -568,6 +568,11 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Deploying** (needs HTTPS): serve `sw.js` and `index.html` with `Cache-Control: no-cache` and `/assets/*` with `Cache-Control: public, max-age=31536000, immutable`; otherwise updates reach people late. Check with Chrome DevTools → Application → Manifest (installable) and Service Workers.
 - **Push on iPhone** only works for an installed app on iOS 16.4+; test on real iPhones and Androids before the pilot. A store app (Android first) is the next step, see the discussion in the project notes.
 
+## Student files (documents of each student)
+- Each student can have a file of documents (birth certificate, records, ID copies...). It uses the shared attachments system (`student` owner, up to 10 files of 10 MB: images, PDF, Office, txt, csv).
+- **Only the principal** can add, see and remove them (students, teachers and parents get 403/404). Deleting a student deletes their files.
+- Two ways to add: the **Add / Edit student** form has a "Student file" field (files are uploaded right after the student is saved), and the screen **Student files** (`/admin/student-files`, linked from the Import page): find the student by name or number, then upload their files.
+- The students list (admin only) returns each student's `files`.
 ## Parents sign in with the phone number (the email is optional)
 - Adding a student with a NEW parent now requires the parent's **phone** (it is their login); the email is optional. A parent with no email signs in with the phone and the default password (changed at first sign-in).
 - A parent who is already registered is found by email, so a second child needs no phone again. No parent at all is still allowed.

@@ -5,6 +5,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import DataTable from '../../../components/shared/DataTable'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
+import { uploadAttachments } from '../../../api/attachments'
 import { useResource } from '../hooks/useResource'
 
 const inputClass = 'w-full rounded border p-2'
@@ -31,7 +32,8 @@ function SelectField({ field, value, onChange, form }) {
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
 // actions: extra buttons / links next to the Add button.
-export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved, actions = null }) {
+// uploadsTo: owner type of the files chosen in the form (form key `_files`); they are uploaded after the save. Keys that start with `_` are never sent as data.
+export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved, actions = null, uploadsTo = null }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const { useList, save, remove } = useResource(path)
@@ -58,13 +60,21 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const submit = (e) => {
     e.preventDefault()
     setFormError('')
-    const body = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v === '' ? null : v]))
+    const body = Object.fromEntries(Object.entries(form).filter(([k]) => !k.startsWith('_')).map(([k, v]) => [k, v === '' ? null : v]))
     const isNew = !editing.id
     save.mutate(
       { id: editing.id, body },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           setEditing(null)
+          if (uploadsTo && form._files?.length) {
+            try {
+              await uploadAttachments(uploadsTo, response?.data?.id ?? editing.id, form._files)
+              client.invalidateQueries({ queryKey: [path] })
+            } catch (err) {
+              setNotice(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || t('admin.actions.error'))
+            }
+          }
           onSaved?.(response, isNew)
         },
         onError: (err) => {
@@ -137,9 +147,8 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
                 <input
                   className={inputClass}
                   type={f.type ?? 'text'}
-                  dir={f.type === 'email' ? 'ltr' : undefined}
+                  dir={f.type === 'email' || f.type === 'tel' ? 'ltr' : undefined}
                   required={Boolean(f.requiredWhen?.(form))}
-                  dir={f.type === 'tel' ? 'ltr' : undefined}
                   value={form[f.name] ?? ''}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                 />

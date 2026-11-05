@@ -5,10 +5,17 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import GuardianPicker from '../components/GuardianPicker'
+import { AttachmentsField } from '../../../components/shared/Attachments'
 import ResourcePage from '../../Academic/components/ResourcePage'
 import { useResource } from '../../Academic/hooks/useResource'
 
 // A heading that explains the fee fields below it.
+// The title of the file field: what a student's file is for.
+function StudentFileLabel() {
+  const { t } = useTranslation()
+  return <span><b>{t('studentFiles.field')}</b> <span className="text-xs text-slate-500">{t('studentFiles.fieldHint')}</span></span>
+}
+
 function FeesHeading() {
   const { t } = useTranslation()
   return (
@@ -41,6 +48,19 @@ const fields = [
   {
     name: 'first_payment_method', label: 'people.fields.firstPaymentMethod', type: 'select', getValue: () => 'cash', visibleWhen: (f) => f.is_new_student && f.classroom_id && f.first_payment,
     options: ['cash', 'bank_transfer', 'card', 'cheque', 'online'].map((m) => ({ value: m, label: `finance.methods.${m}` })),
+  },
+  { name: '_saved', type: 'custom', getValue: (row) => row.files ?? [], visibleWhen: () => false, render: () => null },
+  {
+    name: '_files', type: 'custom', getValue: () => [],
+    render: ({ form, setForm }) => (
+      <AttachmentsField
+        label={<StudentFileLabel />}
+        files={form._files ?? []}
+        saved={form._saved ?? []}
+        onChange={(files) => setForm((f) => ({ ...f, _files: files }))}
+        onRemoveSaved={async (file) => { await api.delete(`/attachments/${file.id}`); setForm((f) => ({ ...f, _saved: (f._saved ?? []).filter((x) => x.id !== file.id) })) }}
+      />
+    ),
   },
   { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
@@ -104,12 +124,13 @@ export default function StudentsPage() {
         key={classroom}
         filters={classroom ? { classroom_id: classroom } : {}}
         path="students"
+        uploadsTo="student"
         title="people.students"
         columns={columns}
         fields={fields}
         empty={{
           student_number: '', name_ar: '', name_en: '', birth_date: '', gender: '',
-          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '', first_payment: '', first_payment_method: 'cash', first_payment_payer: '',
+          classroom_id: '', guardian_email: '', guardian_name: '', guardian_phone: '', is_new_student: true, transport_fee: '', fee_discount: '', first_payment: '', first_payment_method: 'cash', first_payment_payer: '', _files: [], _saved: [],
         }}
         rowActions={rowActions}
         onSaved={(response, isNew) => isNew && setAccount(response?.data?.account ? { ...response.data.account, fees: response.data.created_fees ?? [], payments: response.data.created_payments ?? [] } : null)}

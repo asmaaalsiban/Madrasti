@@ -6,6 +6,7 @@ namespace App\Modules\People\Http\Resources;
 
 use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\Money;
+use App\Shared\Attachments\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -48,6 +49,8 @@ class StudentResource extends JsonResource
             }),
             // For the admin only: what the student owes, paid and remaining this year (filled by the list).
             'balance' => $this->when($request->attributes->has('student_balances'), fn () => $request->attributes->get('student_balances')[$this->id] ?? null),
+            // For the admin only: the student's file (documents), filled by the list.
+            'files' => $this->when($request->attributes->has('student_files'), fn () => Attachment::list($request->attributes->get('student_files')->get($this->id))),
             // The primary parent first: the form edits that one.
             'guardians' => $this->guardians->sortByDesc(fn ($guardian) => (int) $guardian->pivot->is_primary)->map(fn ($guardian) => [
                 'id' => $guardian->id,

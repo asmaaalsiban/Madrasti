@@ -172,7 +172,8 @@
       "tasks": "Tasks",
       "staffAccess": "What staff see",
       "privacyRequests": "Data requests",
-      "photoConsent": "Photo consent"
+      "photoConsent": "Photo consent",
+      "studentFiles": "Student files"
     },
     "actions": {
       "add": "Add",
@@ -1221,7 +1222,8 @@
     "autoEmails": "No email column: login emails are generated from the names.",
     "defaultPosition": "Position of everyone in this file (it has no position column)",
     "order": "Suggested order for a new school: Grades, Subjects, Staff, Sections, Teaching, then Students.",
-    "needColumns": "Choose the column for: {{columns}}."
+    "needColumns": "Choose the column for: {{columns}}.",
+    "studentFilesLink": "To upload each student's own file (certificates, records): Student files"
   },
   "reportCard": {
     "title": "Report card",
@@ -2570,5 +2572,17 @@
     "offline": "No connection. What you see may be old and nothing will be sent.",
     "update": "A new version is ready.",
     "reload": "Update"
+  },
+  "studentFiles": {
+    "title": "Student files",
+    "help": "Each student's file (birth certificate, records, ID copies...). Find the student by name or number, then add their files. Only the school's management can see them.",
+    "find": "Student name or number",
+    "findHint": "Type the name or the number",
+    "none": "No student with this name or number.",
+    "change": "Another student",
+    "files": "The student's files",
+    "empty": "This student has no files yet.",
+    "field": "Student file",
+    "fieldHint": "(optional: birth certificate, records...)"
   }
 }

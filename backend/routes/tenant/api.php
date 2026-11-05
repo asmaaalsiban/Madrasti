@@ -510,7 +510,7 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group
 
 // Files attached to tasks, a task's hand-in and surveys: the checks are by owner (see AttachmentAccess).
 Route::middleware('school-user')->prefix('attachments')->group(function (): void {
-    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey', 'online_payment'])->whereNumber('id');
+    Route::post('{type}/{id}', [AttachmentController::class, 'store'])->whereIn('type', ['task', 'task_part', 'survey', 'online_payment', 'student'])->whereNumber('id');
     Route::get('{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment');
     Route::delete('{attachment}', [AttachmentController::class, 'destroy'])->whereNumber('attachment');
 });
