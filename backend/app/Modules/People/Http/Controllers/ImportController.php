@@ -10,6 +10,7 @@ use App\Modules\Academic\Import\GradeLevelImporter;
 use App\Modules\Academic\Import\SubjectImporter;
 use App\Modules\Academic\Import\TeachingAssignmentImporter;
 use App\Modules\Grading\Import\MarksImporter;
+use App\Modules\People\Import\GuardianImporter;
 use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
@@ -38,6 +39,7 @@ class ImportController extends Controller
         'teaching' => TeachingAssignmentImporter::class,
         'students' => StudentImporter::class,
         'marks' => MarksImporter::class,
+        'guardians' => GuardianImporter::class,
     ];
 
     private function importer(string $kind): Importer

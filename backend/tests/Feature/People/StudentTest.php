@@ -116,7 +116,7 @@ class StudentTest extends AcademicTestCase
             ->assertCreated()->assertJsonPath('data.classroom.id', $room->id)->json('data.id');
         $this->putJson("/api/students/$id", $this->body(['classroom_id' => (string) $other->id]))
             ->assertOk()->assertJsonPath('data.classroom.id', $other->id);
-        $this->postJson('/api/students', $this->body(['student_number' => 'S-2', 'guardian_email' => null, 'guardian_phone' => null, 'classroom_id' => '']))
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-2', 'guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null, 'classroom_id' => '']))
             ->assertCreated()->assertJsonPath('data.classroom', null);
     }
 
@@ -205,7 +205,7 @@ class StudentTest extends AcademicTestCase
         $this->actAsAdmin();
         $this->postJson('/api/students', $this->body())->assertCreated();
 
-        $this->postJson('/api/students', $this->body(['guardian_email' => 'dad2@mail.test', 'guardian_phone' => null]))
+        $this->postJson('/api/students', $this->body(['guardian_email' => 'dad2@mail.test', 'guardian_phone' => '0599777001']))
             ->assertUnprocessable()->assertJsonValidationErrors('student_number');
         $this->postJson('/api/students', [])->assertUnprocessable()->assertJsonValidationErrors(['student_number', 'name_ar']);
         $this->postJson('/api/students', $this->body(['student_number' => 'S-3', 'gender' => 'other', 'classroom_id' => 9999, 'birth_date' => 'tomorrow']))
@@ -219,7 +219,7 @@ class StudentTest extends AcademicTestCase
         $sameYearRoom = Classroom::factory()->create(['academic_year_id' => $room->academic_year_id]);
         $nextYear = AcademicYear::factory()->create(['name' => '2027/2028']);
         $nextYearRoom = Classroom::factory()->create(['academic_year_id' => $nextYear->id]);
-        $id = $this->postJson('/api/students', $this->body(['classroom_id' => $room->id, 'guardian_email' => null, 'guardian_phone' => null]))->json('data.id');
+        $id = $this->postJson('/api/students', $this->body(['classroom_id' => $room->id, 'guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))->json('data.id');
 
         $this->putJson("/api/students/$id", $this->body(['name_ar' => 'محمد علي', 'classroom_id' => $sameYearRoom->id, 'guardian_email' => 'mum@mail.test', 'guardian_name' => 'Mum', 'guardian_phone' => '0599555555']))
             ->assertOk()
@@ -229,7 +229,7 @@ class StudentTest extends AcademicTestCase
         $this->assertSame(1, DB::table('enrollments')->where('student_id', $id)->count());
         $this->assertSame('محمد علي', Student::find($id)->user->name);
 
-        $this->putJson("/api/students/$id", $this->body(['classroom_id' => $nextYearRoom->id, 'guardian_email' => null, 'guardian_phone' => null]))
+        $this->putJson("/api/students/$id", $this->body(['classroom_id' => $nextYearRoom->id, 'guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))
             ->assertOk()->assertJsonPath('data.classroom.id', $nextYearRoom->id);
         $this->assertSame(2, DB::table('enrollments')->where('student_id', $id)->count());
     }
@@ -237,11 +237,11 @@ class StudentTest extends AcademicTestCase
     public function test_update_keeps_the_password_of_the_student(): void
     {
         $this->actAsAdmin();
-        $id = $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_phone' => null]))->json('data.id');
+        $id = $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))->json('data.id');
         $user = Student::find($id)->user;
         $user->forceFill(['password' => 'TheirOwnPass1', 'must_change_password' => false])->save();
 
-        $this->putJson("/api/students/$id", $this->body(['guardian_email' => null, 'guardian_phone' => null, 'name_en' => 'Mo']))->assertOk();
+        $this->putJson("/api/students/$id", $this->body(['guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null, 'name_en' => 'Mo']))->assertOk();
 
         $this->assertTrue(Hash::check('TheirOwnPass1', $user->fresh()->password));
         $this->assertFalse($user->fresh()->must_change_password);
@@ -250,7 +250,7 @@ class StudentTest extends AcademicTestCase
     public function test_update_refuses_a_parent_email_of_another_account_type(): void
     {
         $this->actAsAdmin();
-        $id = $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_phone' => null]))->json('data.id');
+        $id = $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))->json('data.id');
         User::factory()->staff(StaffType::Teacher)->create(['email' => 'teacher@mail.test']);
 
         $this->putJson("/api/students/$id", $this->body(['guardian_email' => 'teacher@mail.test']))
@@ -262,7 +262,7 @@ class StudentTest extends AcademicTestCase
         $this->actAsAdmin();
         $room = Classroom::factory()->create();
         $this->postJson('/api/students', $this->body(['classroom_id' => $room->id]))->assertCreated();
-        $this->postJson('/api/students', $this->body(['student_number' => 'S-2000', 'name_ar' => 'سارة', 'name_en' => 'Sara', 'guardian_email' => null, 'guardian_phone' => null]))->assertCreated();
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-2000', 'name_ar' => 'سارة', 'name_en' => 'Sara', 'guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))->assertCreated();
 
         $this->getJson('/api/students')->assertOk()->assertJsonCount(2, 'data');
         $this->getJson('/api/students?search=S-2000')->assertOk()->assertJsonCount(1, 'data');
@@ -303,7 +303,7 @@ class StudentTest extends AcademicTestCase
         $room = Classroom::factory()->create(['name' => '1-A']);
         $this->postJson('/api/students', $this->body(['classroom_id' => $room->id]))->assertCreated();
         $this->postJson('/api/students', $this->body(['student_number' => 'S-1002', 'name_en' => 'Sara', 'name_ar' => 'سارة']))->assertCreated();
-        $this->postJson('/api/students', $this->body(['student_number' => 'S-3000', 'name_en' => 'Omar', 'guardian_email' => 'other-family@mail.test', 'guardian_phone' => null]))->assertCreated();
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-3000', 'name_en' => 'Omar', 'guardian_email' => 'other-family@mail.test', 'guardian_phone' => '0599777002']))->assertCreated();
         $token = User::where('email', 'dad@mail.test')->first()->createToken('web')->plainTextToken;
         $this->app['auth']->forgetGuards();
 
@@ -362,5 +362,33 @@ class StudentTest extends AcademicTestCase
     {
         Sanctum::actingAs(User::factory()->staff()->create());
         $this->getJson('/api/guardians')->assertForbidden();
+    }
+
+    public function test_a_new_parent_needs_a_phone_but_not_an_email(): void
+    {
+        $this->actAsAdmin();
+
+        // A name or an email without a phone is refused: the phone is the parent's login.
+        $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_phone' => null]))
+            ->assertUnprocessable()->assertJsonValidationErrors('guardian_phone');
+        $this->postJson('/api/students', $this->body(['guardian_phone' => null]))
+            ->assertUnprocessable()->assertJsonValidationErrors('guardian_phone');
+
+        // The phone alone is enough, and the parent then signs in with it.
+        $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_phone' => '0791234567']))->assertCreated();
+        $parent = User::where('phone', '+962791234567')->first() ?? User::findByLogin('0791234567');
+        $this->assertNotNull($parent);
+        $this->assertNull($parent->email);
+        $this->assertSame($parent->id, User::findByLogin('0791234567')->id);
+
+        // A second child of a parent who is already registered needs no phone again.
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-5', 'guardian_email' => 'dad@mail.test', 'guardian_phone' => '0599123456']))->assertCreated();
+        $this->postJson('/api/students', $this->body(['student_number' => 'S-6', 'guardian_email' => 'dad@mail.test', 'guardian_phone' => null]))->assertCreated();
+    }
+
+    public function test_no_parent_at_all_is_allowed(): void
+    {
+        $this->actAsAdmin();
+        $this->postJson('/api/students', $this->body(['guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))->assertCreated();
     }
 }

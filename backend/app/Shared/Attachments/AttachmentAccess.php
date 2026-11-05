@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Attachments;
 
 use App\Models\User;
+use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\OnlinePayment;
 use App\Modules\Finance\Services\FinanceAccess;
 use App\Modules\Surveys\Models\Survey;
@@ -25,6 +26,8 @@ class AttachmentAccess
             $owner instanceof Survey => $owner->created_by === $user->id || $user->hasRole(Role::Admin),
             // The proof of a transfer: its payer adds it while it waits for the school.
             $owner instanceof OnlinePayment => $owner->user_id === $user->id && $owner->status === OnlinePayment::PENDING,
+            // The student's file (documents, certificates, records) belongs to the school's management only.
+            $owner instanceof Student => $user->hasRole(Role::Admin),
             default => false,
         };
     }

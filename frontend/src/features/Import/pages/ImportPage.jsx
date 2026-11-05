@@ -1,14 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 
 // In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
-const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'marks']
+const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians', 'marks']
 // For these a file may have one name only (Arabic or English), so "some name column" is what is needed.
 const NAME_KINDS = ['students', 'subjects', 'grade_levels']
-const WITH_ACCOUNTS = ['students', 'staff']
+const WITH_ACCOUNTS = ['students', 'staff', 'guardians']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
 // Admin: add many students or staff from the school's own Excel/CSV file.
@@ -72,6 +73,8 @@ export default function ImportPage() {
           <button key={k} type="button" role="tab" aria-selected={kind === k} className={`rounded border px-4 py-1.5 ${kind === k ? 'bg-brand text-white' : 'bg-white'}`} onClick={() => restart(k)}>{t(`import.kinds.${k}`)}</button>
         ))}
       </div>
+
+      <p className="text-sm"><Link to="/admin/student-files" className="text-brand underline">{t('import.studentFilesLink')}</Link></p>
 
       {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
