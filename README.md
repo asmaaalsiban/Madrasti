@@ -573,3 +573,14 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Only the principal** can add, see and remove them (students, teachers and parents get 403/404). Deleting a student deletes their files.
 - Two ways to add: the **Add / Edit student** form has a "Student file" field (files are uploaded right after the student is saved), and the screen **Student files** (`/admin/student-files`, linked from the Import page): find the student by name or number, then upload their files.
 - The students list (admin only) returns each student's `files`.
+## Parents sign in with the phone number (the email is optional)
+- Adding a student with a NEW parent now requires the parent's **phone** (it is their login); the email is optional. A parent with no email signs in with the phone and the default password (changed at first sign-in).
+- A parent who is already registered is found by email, so a second child needs no phone again. No parent at all is still allowed.
+- The same rule applies to the Excel import (it uses the student form's rules), so a row with a parent name or email but no phone is reported before importing.
+## The principal's home dashboard
+`/admin` shows today at a glance and the trends, from ONE request: `GET /api/admin/dashboard` (admin only).
+- Today: student and staff attendance rings, and what waits for a decision (purchase and privacy requests).
+- Attendance rate of the last 14 days (line), money billed / collected / overdue with the last 6 months collected (columns).
+- Students per level, average mark per subject (published marks only, as a percent of the maximum), and students absent 3+ days this week.
+- The charts are small SVG components in `features/Academic/components/charts.jsx` (no chart library); colours follow the school's brand, and every chart has a text label for screen readers.
+- `GET /api/admin/overview` (the four counts) is unchanged.
