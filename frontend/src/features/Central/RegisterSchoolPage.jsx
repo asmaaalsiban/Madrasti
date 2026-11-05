@@ -46,7 +46,7 @@ export default function RegisterSchoolPage() {
 
   return (
     <CentralShell>
-      <form onSubmit={submit} className="space-y-4 rounded-lg bg-white p-6 shadow">
+      <form onSubmit={submit} className="auth-card space-y-4">
         <h1 className="text-xl font-bold">{t('central.registerTitle')}</h1>
         {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
         {field('school_name', 'central.schoolName')}
@@ -56,7 +56,7 @@ export default function RegisterSchoolPage() {
         {field('admin_email', 'central.email', { type: 'email', dir: 'ltr' })}
         {field('password', 'central.password', { type: 'password', dir: 'ltr' })}
         {field('password_confirmation', 'central.passwordConfirmation', { type: 'password', dir: 'ltr' })}
-        <button disabled={busy} className="w-full rounded bg-brand p-2 text-white disabled:opacity-60">{t('central.createAccount')}</button>
+        <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('central.createAccount')}</button>
       </form>
     </CentralShell>
   )

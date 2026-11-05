@@ -13,8 +13,8 @@ const CARDS = [
   ['subjects', 'admin.nav.subjects'],
 ]
 
-const Panel = ({ title, children, className = '' }) => (
-  <section className={`space-y-3 rounded-lg border bg-white p-4 shadow-sm ${className}`}>
+const Panel = ({ title, children, className = '', i = 0 }) => (
+  <section style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-lg border bg-white p-4 shadow-sm ${className}`}>
     <h2 className="text-sm font-bold text-slate-700">{title}</h2>
     {children}
   </section>
@@ -44,8 +44,8 @@ export default function OverviewPage() {
       {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-lg border border-brand bg-blue-50 p-4 font-medium text-brand">{t('surveys.waiting', { count: pending.data })}</Link>}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {CARDS.map(([key, label]) => (
-          <div key={key} className="rounded-lg border-t-4 border-brand bg-white p-4 shadow-sm">
+        {CARDS.map(([key, label], n) => (
+          <div key={key} style={{ '--i': n }} className="dash-in rounded-lg border-t-4 border-brand bg-white p-4 shadow-sm">
             <p className="text-3xl font-bold">{data?.[key] ?? '–'}</p>
             <p className="mt-1 text-sm text-slate-600">{t(label)}</p>
           </div>
@@ -55,7 +55,7 @@ export default function OverviewPage() {
       {!d ? <p className="text-slate-500">{t('common.loading')}</p> : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Panel title={t('dashboard.students.title')}>
+            <Panel i={1} title={t('dashboard.students.title')}>
               <div className="flex items-center gap-4">
                 {kids === null ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <Ring percent={kids} label={t('dashboard.students.title')} color={levelColor(kids)} />}
                 <ul className="space-y-1 text-sm">
@@ -64,7 +64,7 @@ export default function OverviewPage() {
                 </ul>
               </div>
             </Panel>
-            <Panel title={t('dashboard.staff.title')}>
+            <Panel i={2} title={t('dashboard.staff.title')}>
               <div className="flex items-center gap-4">
                 {staff === null ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <Ring percent={staff} label={t('dashboard.staff.title')} color={levelColor(staff)} />}
                 <ul className="space-y-1 text-sm">
@@ -73,7 +73,7 @@ export default function OverviewPage() {
                 </ul>
               </div>
             </Panel>
-            <Panel title={t('dashboard.waiting.title')}>
+            <Panel i={3} title={t('dashboard.waiting.title')}>
               {waiting.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.waiting.none')}</p> : (
                 <ul className="space-y-2">
                   {waiting.map(([to, label, count]) => <li key={to}><Link to={to} className="flex items-center justify-between rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"><span>{t(label)}</span><b dir="ltr">{count}</b></Link></li>)}
@@ -83,10 +83,10 @@ export default function OverviewPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Panel title={t('dashboard.trend')}>
+            <Panel i={4} title={t('dashboard.trend')}>
               {d.attendance_trend.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <LineChart label={t('dashboard.trend')} points={d.attendance_trend.map((p) => ({ label: p.date, value: p.rate }))} />}
             </Panel>
-            <Panel title={t('dashboard.money.title')}>
+            <Panel i={5} title={t('dashboard.money.title')}>
               <div className="flex flex-wrap items-center gap-4">
                 <Ring percent={paidPct} label={t('dashboard.money.collectedOf')} color={levelColor(paidPct)} />
                 <ul className="space-y-1 text-sm">
@@ -100,13 +100,13 @@ export default function OverviewPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Panel title={t('dashboard.byLevel')}>
+            <Panel i={6} title={t('dashboard.byLevel')}>
               {d.students_by_level.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.noData')}</p> : <Bars label={t('dashboard.byLevel')} items={d.students_by_level.map((l) => ({ label: name(l), value: l.count }))} />}
             </Panel>
-            <Panel title={t('dashboard.marks')}>
+            <Panel i={7} title={t('dashboard.marks')}>
               {d.marks_by_subject.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.noMarks')}</p> : <Bars label={t('dashboard.marks')} suffix="%" items={d.marks_by_subject.map((s) => ({ label: name(s), value: s.average, max: 100, color: levelColor(s.average) }))} />}
             </Panel>
-            <Panel title={t('dashboard.absences.title')}>
+            <Panel i={8} title={t('dashboard.absences.title')}>
               {d.frequent_absences.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.absences.none')}</p> : (
                 <ul className="space-y-2 text-sm">
                   {d.frequent_absences.map((s) => <li key={s.id} className="flex justify-between rounded bg-red-50 px-3 py-2 text-red-800"><bdi>{name(s)}</bdi><b>{t('dashboard.absences.days', { count: s.days })}</b></li>)}

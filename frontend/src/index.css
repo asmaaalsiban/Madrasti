@@ -218,3 +218,25 @@ main { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 
 .lp-tile-glass > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .lp-tile-glass { padding: .75rem .8rem; gap: .6rem; font-size: .875rem; } }
+
+/* ---- Lite mode (weak devices) and the sign-in pages ------------------------------------------------------------------------------------ */
+/* On a weak device: no blurred glow, no glass blur, no film, no endless loops. The colours stay, so the page looks the same. */
+html[data-lite] .lp-aurora { filter: none; opacity: 0.7; background: radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--color-brand) 75%, #2e96ff) 0%, transparent 70%), radial-gradient(50% 60% at 90% 30%, rgba(46,150,255,.45) 0%, transparent 70%); }
+html[data-lite] .lp-aurora i { display: none; }
+html[data-lite] .lp-grain, html[data-lite] .lp-video { display: none; }
+html[data-lite] .lp-glass, html[data-lite] .lp-marquee { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-lite] .lp-marquee-track, html[data-lite] .lp-pulse { animation: none; }
+html[data-lite] .lp-tilt { transition: none; }
+
+/* The background of the sign-in pages: the landing's deep navy, painted once (no blur, no animation). */
+.auth-bg { background: radial-gradient(70% 60% at 12% 0%, color-mix(in srgb, var(--color-brand) 70%, #0a2540) 0%, transparent 70%), radial-gradient(55% 50% at 95% 25%, rgba(46,150,255,.28) 0%, transparent 70%), #0a2540; color: #fff; }
+.auth-card { background: var(--color-snow); color: var(--color-ink); border-radius: 28px; padding: 1.75rem; box-shadow: 0 24px 50px -18px rgba(0,0,0,.55); animation: auth-in .45s cubic-bezier(.2,.7,.2,1) both; }
+.auth-card input:not([type="checkbox"]):not([type="radio"]) { border-radius: 14px; padding: .65rem .85rem; transition: box-shadow .15s ease, border-color .15s ease; }
+.auth-card input:not([type="checkbox"]):not([type="radio"]):focus { outline: none; border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 28%, transparent); }
+.auth-link { color: var(--color-sky-tint); text-decoration: underline; text-underline-offset: 3px; }
+@keyframes auth-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* Dashboard: cards come in one after another (opacity and position only, 0.4s: cheap even on weak devices). */
+.dash-in { animation: dash-in .4s ease-out both; animation-delay: calc(min(var(--i, 0), 10) * 40ms); }
+@keyframes dash-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .dash-in, .auth-card { animation: none; } }

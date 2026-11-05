@@ -2,7 +2,7 @@ import PasswordInput from '../../../components/shared/PasswordInput'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import LanguageSwitcher from '../../../components/shared/LanguageSwitcher'
+import AuthShell from '../../../components/shared/AuthShell'
 import ChangeSchoolCodeButton from '../../../components/shared/ChangeSchoolCodeButton'
 import { CHANGE_PASSWORD_PATH, homeFor } from '../../../app/guards'
 import { getSchool } from '../../../tenant/school'
@@ -35,17 +35,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-sky-wash p-4 outline-none">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl bg-snow p-7 shadow">
-        <div className="flex items-center justify-between gap-2">
-          <ChangeSchoolCodeButton />
-          <LanguageSwitcher />
-        </div>
+    <AuthShell name={school?.name} logo={school?.logo} top={<ChangeSchoolCodeButton />}>
+      <form onSubmit={submit} className="auth-card space-y-4">
         <div>
-          <h1 className="text-xl font-bold">{school?.name ?? t('common.appName')}</h1>
+          <h1 className="text-2xl font-extrabold">{t('auth.title')}</h1>
           <p dir="ltr" className="text-start text-sm text-slate-500">{getSchool()}</p>
         </div>
-        <h2 className="text-lg">{t('auth.title')}</h2>
         <label className="block text-sm">
           {t('auth.login')}
           <input
@@ -70,6 +65,6 @@ export default function LoginPage() {
           {t('auth.submit')}
         </button>
       </form>
-    </main>
+    </AuthShell>
   )
 }

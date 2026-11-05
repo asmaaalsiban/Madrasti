@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { isLowEndDevice } from '../../../lite'
 import { useTranslation } from 'react-i18next'
 import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, GraduationCap, Heart, MessageCircle, Briefcase, Users, Wallet } from 'lucide-react'
 
@@ -13,7 +14,7 @@ const LESSONS = [['08:00', 'w-[78%]'], ['09:00', 'w-[56%]'], ['10:15', 'w-[88%]'
 // A looping background film that fades in once it can play. Not used when the person asks for less motion or for less data.
 function HeroVideo({ src }) {
   const [ready, setReady] = useState(false)
-  const skip = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData)
+  const skip = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || isLowEndDevice())
   if (skip) return null
   return <video aria-hidden autoPlay muted loop playsInline preload="auto" src={src} onLoadedData={() => setReady(true)} onError={() => setReady(false)} className={`lp-video ${ready ? 'is-ready' : ''}`} />
 }

@@ -604,3 +604,8 @@ Tried with messy Arabic files (Arabic digits, `1,200`, `غ` / `ح` for absent / 
 
 ## Excel import: staff contracts and salaries
 A new kind in the import screen: **Staff contracts**. One row = one running contract: the staff member (email, phone or full name), base salary, contract start, and optionally end, payment method (cash / bank transfer / cheque), account details, one monthly allowance and notes. Someone who already has a running contract is refused (renew or end it from the Contracts screen), so importing a file twice never doubles anything. It uses the same service as the Contracts screen. Admin only.
+
+## Sign-in pages and light animations
+- All the sign-in pages (school code, sign in, forgot password, change password, register) share `AuthShell`: the landing's deep navy, the school's name and logo, a white card that slides in (0.45s). The inputs have a brand-coloured focus ring and the buttons are the same pills as the landing.
+- Dashboard cards (the principal's overview, the child and student tiles) come in one after another with `.dash-in`: opacity and position only, 0.4s, at most 10 steps. No JavaScript timers.
+- **Weak devices**: `src/lite.js` sets `html[data-lite]` when the device has 4 GB of memory or less, 4 cores or fewer, or the data-saver setting is on. CSS then switches off the heavy decoration (blurred glow, glass blur, film, grain, endless loops) and keeps the colours, so the page looks the same, just calmer. `prefers-reduced-motion` switches every animation off.
