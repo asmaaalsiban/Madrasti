@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Shared\Branding\SchoolBranding;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -19,10 +20,14 @@ class SchoolBrandingController extends Controller
 
         abort_if($school === null, 404, __('tenancy.school_not_found'));
 
+        // The school's own logo and colours (set by its principal from the logo) win; otherwise what the platform gave it at registration.
+        $own = app(SchoolBranding::class)->publicData();
+
         return response()->json([
             'name' => $school->name,
-            'logo_url' => $school->logo_path,
-            'primary_color' => $school->primary_color,
+            'logo_url' => $own['logo_url'] ?? $school->logo_path,
+            'primary_color' => $own['primary_color'] ?? $school->primary_color,
+            'dark_color' => $own['dark_color'],
             'default_locale' => $school->default_locale ?? config('app.locale'),
         ]);
     }

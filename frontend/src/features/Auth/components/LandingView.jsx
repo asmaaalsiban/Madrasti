@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { isLowEndDevice } from '../../../lite'
+import SchoolLogo from '../../../components/shared/SchoolLogo'
 import { useTranslation } from 'react-i18next'
 import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, GraduationCap, Heart, MessageCircle, Briefcase, Users, Wallet } from 'lucide-react'
 
@@ -121,7 +122,7 @@ export default function LandingView({ name, logo, title, text, header, actions, 
 
         <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4">
           <div className="flex items-center gap-2">
-            {logo ? <img src={logo} alt="" className="h-10 w-10 rounded-2xl object-cover" /> : <span aria-hidden className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 font-extrabold text-white ring-1 ring-white/25">{name.trim().charAt(0)}</span>}
+            {logo ? <SchoolLogo url={logo} /> : <span aria-hidden className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 font-extrabold text-white ring-1 ring-white/25">{name.trim().charAt(0)}</span>}
             <span className="text-lg font-extrabold text-white">{name}</span>
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white/90 p-1 ps-3 text-deep-harbor shadow-lg backdrop-blur">{header}</div>
@@ -132,7 +133,7 @@ export default function LandingView({ name, logo, title, text, header, actions, 
             <span className="lp-rise inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-sky-100 ring-1 ring-white/20 backdrop-blur" style={{ '--i': 0 }}>
               <span aria-hidden className="lp-pulse h-2 w-2 rounded-full bg-emerald-300" />{t('landing.welcome')}
             </span>
-            <h1 dir="auto" className="lp-title mt-5 max-w-4xl text-start text-white">
+            <h1 dir="auto" className="lp-title mt-5 w-fit max-w-full text-start text-white">
               {words.map((w, i) => <span key={i}>{i > 0 && ' '}<span className="lp-word" style={{ '--i': i + 1 }}>{w}</span></span>)}
             </h1>
             <p className="lp-rise mt-5 max-w-2xl text-xl font-bold text-sky-100 sm:text-2xl" style={{ '--i': words.length + 2 }}>{title}</p>

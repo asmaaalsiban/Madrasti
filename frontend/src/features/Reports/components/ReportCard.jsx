@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import SchoolLogo from '../../../components/shared/SchoolLogo'
 import { api } from '../../../api/client'
 import { useSchool } from '../../../tenant/useSchool'
 
@@ -34,7 +35,7 @@ export default function ReportCard({ studentId }) {
 
       <article className="print-area mx-auto max-w-3xl space-y-5 rounded-lg border bg-white p-6 text-slate-900 shadow-sm print:max-w-none print:rounded-none print:border-0 print:p-8 print:shadow-none" aria-label={t('reportCard.title')}>
         <header className="flex items-center gap-4 border-b-2 border-brand pb-3">
-          {school?.logo_url && <img src={school.logo_url} alt="" className="h-16 w-16 object-contain" />}
+          <SchoolLogo url={school?.logo_url} className="h-16 w-16 !rounded-lg !bg-transparent !p-0 !shadow-none" />
           <div className="flex-1">
             <h2 className="text-xl font-bold">{school?.name}</h2>
             <p className="text-lg">{t('reportCard.title')}{data.year ? ` · ${data.year.name}` : ''}</p>

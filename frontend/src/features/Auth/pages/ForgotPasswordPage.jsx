@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell name={school?.name} logo={school?.logo}>
+    <AuthShell name={school?.name} logo={school?.logo_url}>
       <div className="auth-card space-y-4">
         <Link to="/login" className="text-sm text-brand">{t('auth.forgot.backToLogin')}</Link>
         <h1 className="text-xl font-bold">{school?.name ?? t('common.appName')}</h1>

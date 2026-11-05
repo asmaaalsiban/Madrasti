@@ -173,7 +173,8 @@
       "staffAccess": "What staff see",
       "privacyRequests": "Data requests",
       "photoConsent": "Photo consent",
-      "studentFiles": "Student files"
+      "studentFiles": "Student files",
+      "branding": "School look"
     },
     "actions": {
       "add": "Add",
@@ -2600,5 +2601,27 @@
     "empty": "This student has no files yet.",
     "field": "Student file",
     "fieldHint": "(optional: birth certificate, records...)"
+  },
+  "branding": {
+    "title": "School look",
+    "help": "Upload your school's logo and the site reads its colours and turns into your school's theme (buttons, headings, the first page and the dashboard). The rest of the site stays as it is. You can go back to the original look at any time.",
+    "logo": "Logo",
+    "choose": "Choose a logo",
+    "chosen": "The chosen logo",
+    "hint": "PNG, JPG or WebP, up to 2 MB. A clear logo in its colours works best.",
+    "badType": "This file type is not supported. Use PNG, JPG or WebP.",
+    "tooBig": "The image is bigger than 2 MB.",
+    "noColours": "I found no colours in this logo (only white, black or grey). The logo is saved and the colours stay as they are.",
+    "unreadable": "The image could not be read. Try another one.",
+    "mainColour": "Main colour (choose)",
+    "darkColour": "Dark colour",
+    "darkened": "The colour was darkened a little so the text stays readable on it.",
+    "save": "Save",
+    "saved": "The school look is saved. Everyone who opens the site will see it.",
+    "reset": "Back to the original look",
+    "confirmReset": "The logo is removed and the colours go back to the original. Sure?",
+    "resetDone": "The site is back to its original look.",
+    "preview": "Preview",
+    "previewHelp": "A rough preview. Very light colours are darkened automatically so text stays readable."
   }
 }

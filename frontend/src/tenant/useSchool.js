@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { api } from '../api/client'
-import { readableBrand } from './color'
+import { applyTheme, clearTheme } from './theme'
 
 // School name / logo / color come from the API by domain.
 export function useSchool() {
@@ -11,11 +11,12 @@ export function useSchool() {
     staleTime: Infinity,
     retry: false,
   })
-  const color = query.data?.primary_color
+  const primary = query.data?.primary_color
+  const dark = query.data?.dark_color
   useEffect(() => {
-    // A light colour chosen by the school is darkened just enough for text to be readable on it.
-    const readable = readableBrand(color)
-    if (readable) document.documentElement.style.setProperty('--color-brand', readable)
-  }, [color])
+    // The colours come from the school's logo (set by its principal). A light colour is darkened just enough for text to be readable on it.
+    if (primary) applyTheme({ primary, dark })
+    else clearTheme()
+  }, [primary, dark])
   return query
 }
