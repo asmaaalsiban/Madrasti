@@ -42,6 +42,7 @@ import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
 import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
 import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
 import ImportPage from '../features/Import/pages/ImportPage'
+import BrandingPage from '../features/Branding/BrandingPage'
 import SignaturesPage from '../features/Reports/pages/SignaturesPage'
 import ReportCardPage, { MyReportCardPage } from '../features/Reports/pages/ReportCardPage'
 import MySurveysPage from '../features/Surveys/pages/MySurveysPage'
@@ -266,6 +267,7 @@ export const routes = [
               { path: '/admin/surveys/:id', element: <SurveyResultsPage base="/admin" /> },
               { path: '/admin/surveys/:id/responses', element: <SurveyResponsesPage base="/admin" /> },
               { path: '/admin/import', element: <ImportPage /> },
+              { path: '/admin/branding', element: <BrandingPage /> },
               { path: '/admin/motivation', element: <MotivationPage base="/admin" /> },
               { path: '/admin/motivation/students/:id', element: <StudentMotivationPage staff /> },
               { path: '/admin/motivation-settings', element: <MotivationSettingsPage /> },

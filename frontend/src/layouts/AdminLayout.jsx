@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
@@ -9,6 +9,7 @@ import { ArrangeBar, ColorButton, MoveButtons } from '../components/shared/Arran
 import useLayout from '../features/Layout/useLayout'
 import { iconPaint, iconSize, orderBy, swap } from '../features/Layout/arrange'
 import { useSchool } from '../tenant/useSchool'
+import SchoolLogo from '../components/shared/SchoolLogo'
 
 // The menu in groups, each item with its icon: what the principal reaches for most is at the top.
 const GROUPS = [
@@ -17,7 +18,7 @@ const GROUPS = [
   { key: 'learning', items: [['/admin/attendance', 'attendance', CircleCheck], ['/admin/attendance-report', 'attendanceReport', FileBarChart], ['/admin/grades', 'grades', ClipboardList], ['/admin/behavior', 'behavior', Smile], ['/admin/motivation', 'motivation', Award], ['/admin/surveys', 'surveys', Vote], ['/admin/signatures', 'signatures', PenLine]] },
   { key: 'schedule', items: [['/admin/timetable', 'timetable', CalendarClock], ['/admin/exams', 'exams', FileCheck2], ['/admin/duties', 'duties', ShieldCheck], ['/admin/school-day', 'schoolDay', Clock], ['/admin/transport', 'transport', Bus], ['/admin/availability', 'availability', UserCheck], ['/admin/teaching', 'teaching', Users]] },
   { key: 'money', items: [['/admin/finance', 'finance', Wallet], ['/admin/payroll', 'payroll', Banknote], ['/admin/staff-attendance', 'staffAttendance', Fingerprint], ['/admin/procurement', 'procurement', ShoppingCart]] },
-  { key: 'school', items: [['/admin/academic-years', 'academicYears', CalendarRange], ['/admin/terms', 'terms', CalendarDays], ['/admin/grade-levels', 'gradeLevels', Layers], ['/admin/classrooms', 'classrooms', DoorOpen], ['/admin/subjects', 'subjects', BookOpen], ['/admin/curriculum', 'curriculum', ListChecks], ['/admin/buildings', 'buildings', Building2]] },
+  { key: 'school', items: [['/admin/branding', 'branding', Palette], ['/admin/academic-years', 'academicYears', CalendarRange], ['/admin/terms', 'terms', CalendarDays], ['/admin/grade-levels', 'gradeLevels', Layers], ['/admin/classrooms', 'classrooms', DoorOpen], ['/admin/subjects', 'subjects', BookOpen], ['/admin/curriculum', 'curriculum', ListChecks], ['/admin/buildings', 'buildings', Building2]] },
   { key: 'system', items: [['/admin/audit-log', 'auditLog', ScrollText], ['/admin/photo-consent', 'photoConsent', Camera], ['/admin/privacy-requests', 'privacyRequests', FileLock2]] },
 ]
 
@@ -45,7 +46,7 @@ export default function AdminLayout() {
       <aside className="bg-deep-harbor text-white md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto print:hidden">
         <div className="flex items-center justify-between gap-2 p-4">
           <span className="flex min-w-0 items-center gap-2">
-            {school?.logo && <img src={school.logo} alt="" className="h-9 w-9 rounded-xl object-cover" />}
+            <SchoolLogo url={school?.logo_url} className="h-9 w-9" />
             <span className="truncate text-lg font-extrabold">{school?.name ?? t('common.appName')}</span>
           </span>
           <button type="button" className="flex items-center gap-1 rounded border px-3 py-1 text-sm md:hidden" aria-expanded={open} onClick={() => setOpen((v) => !v)}>

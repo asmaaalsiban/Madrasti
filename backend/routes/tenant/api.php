@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\Academic\Http\Controllers\AcademicYearController;
 use App\Modules\Academic\Http\Controllers\AdminDashboardController;
 use App\Modules\Academic\Http\Controllers\AdminOverviewController;
+use App\Modules\Academic\Http\Controllers\BrandingController;
 use App\Modules\Academic\Http\Controllers\BuildingController;
 use App\Modules\Academic\Http\Controllers\ClassroomController;
 use App\Modules\Academic\Http\Controllers\CurriculumController;
@@ -80,6 +81,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public: school name, logo and colors for the login screen.
 Route::get('school', SchoolBrandingController::class);
+Route::get('school/logo', [BrandingController::class, 'logo']);
 
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -215,6 +217,9 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
 Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::get('admin/dashboard', AdminDashboardController::class);
+    Route::get('branding', [BrandingController::class, 'show']);
+    Route::post('branding', [BrandingController::class, 'update']);
+    Route::delete('branding', [BrandingController::class, 'destroy']);
     Route::apiResource('academic-years', AcademicYearController::class);
     Route::apiResource('grade-levels', GradeLevelController::class);
     Route::post('classrooms/generate', [ClassroomController::class, 'generate']);

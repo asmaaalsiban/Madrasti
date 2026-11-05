@@ -35,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell name={school?.name} logo={school?.logo} top={<ChangeSchoolCodeButton />}>
+    <AuthShell name={school?.name} logo={school?.logo_url} top={<ChangeSchoolCodeButton />}>
       <form onSubmit={submit} className="auth-card space-y-4">
         <div>
           <h1 className="text-2xl font-extrabold">{t('auth.title')}</h1>

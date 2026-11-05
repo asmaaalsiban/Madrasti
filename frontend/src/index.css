@@ -33,6 +33,8 @@
 }
 
 :root {
+  --lp-navy: #0a2540; /* the landing and sign-in navy, and its glow: worked out from the logo's colours when a school has them (see tenant/theme.js) */
+  --lp-glow: #2e96ff;
   --pop: color-mix(in srgb, var(--color-brand) 38%, white);
   --shadow-pop: 0 5px 0 0 var(--pop);
   --shadow-pop-big: 0 7px 0 0 var(--pop);
@@ -114,11 +116,11 @@ div.rounded, li.rounded, p.rounded, ul.rounded, fieldset.rounded, article.rounde
 [role="dialog"], .modal-card { border-radius: 26px; }
 
 /* ---- Landing page: a cinematic hero (deep navy, a slow aurora of the school's colour, glass cards, one signature dashboard) ------------ */
-.lp-hero { position: relative; isolation: isolate; overflow: hidden; background: #0a2540; color: #fff; }
+.lp-hero { position: relative; isolation: isolate; overflow: hidden; background: var(--lp-navy); color: #fff; }
 .lp-aurora { position: absolute; inset: 0; z-index: 0; overflow: hidden; filter: blur(70px) saturate(1.2); }
 .lp-aurora i { position: absolute; border-radius: 50%; opacity: 0.55; will-change: transform; }
-.lp-aurora i:nth-child(1) { width: 46rem; height: 46rem; inset-block-start: -18rem; inset-inline-start: -10rem; background: color-mix(in srgb, var(--color-brand) 85%, #2e96ff); animation: lp-drift-a 22s ease-in-out infinite; }
-.lp-aurora i:nth-child(2) { width: 38rem; height: 38rem; inset-block-start: 4rem; inset-inline-end: -12rem; background: #2e96ff; opacity: 0.4; animation: lp-drift-b 27s ease-in-out infinite; }
+.lp-aurora i:nth-child(1) { width: 46rem; height: 46rem; inset-block-start: -18rem; inset-inline-start: -10rem; background: color-mix(in srgb, var(--color-brand) 85%, var(--lp-glow)); animation: lp-drift-a 22s ease-in-out infinite; }
+.lp-aurora i:nth-child(2) { width: 38rem; height: 38rem; inset-block-start: 4rem; inset-inline-end: -12rem; background: var(--lp-glow); opacity: 0.4; animation: lp-drift-b 27s ease-in-out infinite; }
 .lp-aurora i:nth-child(3) { width: 30rem; height: 30rem; inset-block-end: -14rem; inset-inline-start: 30%; background: #7ee0b0; opacity: 0.22; animation: lp-drift-a 31s ease-in-out infinite reverse; }
 .lp-grid { position: absolute; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 72%); mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 72%); }
 .lp-grain { position: absolute; inset: 0; z-index: 0; opacity: 0.09; mix-blend-mode: overlay; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
@@ -149,7 +151,7 @@ html[lang="ar"] .lp-title { line-height: 1.3; }
 .lp-card { background: var(--color-deep-harbor); color: #fff; box-shadow: var(--shadow-pop); }
 .lp-card h3 { color: #fff; font-weight: 800; font-size: 1.15rem; }
 .lp-tile { display: flex; align-items: center; gap: .9rem; background: var(--color-snow); box-shadow: var(--shadow-flat); }
-.lp-card::after, .lp-tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(46,150,255,.28), transparent 70%); }
+.lp-card::after, .lp-tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--lp-glow) 28%, transparent), transparent 70%); }
 .lp-card:hover, .lp-tile:hover { transform: translateY(-4px); }
 .lp-card:hover::after, .lp-tile:hover::after { opacity: 1; }
 @keyframes lp-up { to { opacity: 1; transform: none; } }
@@ -176,7 +178,7 @@ html[lang="ar"] .lp-title { line-height: 1.3; }
 .lp-hero-body { flex: 1; }
 .lp-video { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
 .lp-video.is-ready { opacity: 0.6; }
-.lp-veil { position: absolute; inset: 0; z-index: 0; background: linear-gradient(180deg, rgba(10,37,64,.55) 0%, rgba(10,37,64,.15) 38%, rgba(10,37,64,.78) 100%); }
+.lp-veil { position: absolute; inset: 0; z-index: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--lp-navy) 55%, transparent) 0%, color-mix(in srgb, var(--lp-navy) 15%, transparent) 38%, color-mix(in srgb, var(--lp-navy) 78%, transparent) 100%); }
 .lp-tile-glass { display: flex; align-items: center; gap: .8rem; border-radius: 20px; padding: .9rem 1rem; position: relative; overflow: hidden; }
 .lp-tile-glass::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.18), transparent 70%); }
 .lp-tile-glass:hover::after { opacity: 1; }
@@ -221,7 +223,7 @@ main { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 
 /* ---- Lite mode (weak devices) and the sign-in pages ------------------------------------------------------------------------------------ */
 /* On a weak device: no blurred glow, no glass blur, no film, no endless loops. The colours stay, so the page looks the same. */
-html[data-lite] .lp-aurora { filter: none; opacity: 0.7; background: radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--color-brand) 75%, #2e96ff) 0%, transparent 70%), radial-gradient(50% 60% at 90% 30%, rgba(46,150,255,.45) 0%, transparent 70%); }
+html[data-lite] .lp-aurora { filter: none; opacity: 0.7; background: radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--color-brand) 75%, var(--lp-glow)) 0%, transparent 70%), radial-gradient(50% 60% at 90% 30%, color-mix(in srgb, var(--lp-glow) 45%, transparent) 0%, transparent 70%); }
 html[data-lite] .lp-aurora i { display: none; }
 html[data-lite] .lp-grain, html[data-lite] .lp-video { display: none; }
 html[data-lite] .lp-glass, html[data-lite] .lp-marquee { -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -229,7 +231,7 @@ html[data-lite] .lp-marquee-track, html[data-lite] .lp-pulse { animation: none; 
 html[data-lite] .lp-tilt { transition: none; }
 
 /* The background of the sign-in pages: the landing's deep navy, painted once (no blur, no animation). */
-.auth-bg { background: radial-gradient(70% 60% at 12% 0%, color-mix(in srgb, var(--color-brand) 70%, #0a2540) 0%, transparent 70%), radial-gradient(55% 50% at 95% 25%, rgba(46,150,255,.28) 0%, transparent 70%), #0a2540; color: #fff; }
+.auth-bg { background: radial-gradient(70% 60% at 12% 0%, color-mix(in srgb, var(--color-brand) 70%, var(--lp-navy)) 0%, transparent 70%), radial-gradient(55% 50% at 95% 25%, color-mix(in srgb, var(--lp-glow) 28%, transparent) 0%, transparent 70%), var(--lp-navy); color: #fff; }
 .auth-card { background: var(--color-snow); color: var(--color-ink); border-radius: 28px; padding: 1.75rem; box-shadow: 0 24px 50px -18px rgba(0,0,0,.55); animation: auth-in .45s cubic-bezier(.2,.7,.2,1) both; }
 .auth-card input:not([type="checkbox"]):not([type="radio"]) { border-radius: 14px; padding: .65rem .85rem; transition: box-shadow .15s ease, border-color .15s ease; }
 .auth-card input:not([type="checkbox"]):not([type="radio"]):focus { outline: none; border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 28%, transparent); }
@@ -242,5 +244,5 @@ html[data-lite] .lp-tilt { transition: none; }
 @media (prefers-reduced-motion: reduce) { .dash-in, .auth-card { animation: none; } }
 
 /* The principal's overview: a deep-navy band on top (the landing's colours, painted once: no blur, no animation) and white panels below. */
-.dash-band { border-radius: 28px; padding: 1.5rem; color: #fff; background: radial-gradient(60% 90% at 10% 0%, color-mix(in srgb, var(--color-brand) 65%, #0a2540) 0%, transparent 70%), radial-gradient(45% 70% at 95% 20%, rgba(46,150,255,.3) 0%, transparent 70%), #0a2540; box-shadow: 0 18px 36px -18px rgba(10,37,64,.6); }
+.dash-band { border-radius: 28px; padding: 1.5rem; color: #fff; background: radial-gradient(60% 90% at 10% 0%, color-mix(in srgb, var(--color-brand) 65%, var(--lp-navy)) 0%, transparent 70%), radial-gradient(45% 70% at 95% 20%, color-mix(in srgb, var(--lp-glow) 30%, transparent) 0%, transparent 70%), var(--lp-navy); box-shadow: 0 18px 36px -18px color-mix(in srgb, var(--lp-navy) 60%, transparent); }
 .dash-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }

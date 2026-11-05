@@ -6,6 +6,7 @@ import HeaderIcons from '../components/shared/HeaderIcons'
 import { useAuth } from '../features/Auth/AuthProvider'
 import { isHidden } from '../features/StaffAccess/staffFeatures'
 import { useSchool } from '../tenant/useSchool'
+import SchoolLogo from '../components/shared/SchoolLogo'
 
 // Mobile-first shell shared by all four roles.
 export default function DashboardLayout() {
@@ -23,7 +24,7 @@ export default function DashboardLayout() {
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-fog bg-snow px-4 py-2.5 print:hidden">
         <Link to={`/${user.role}`} className="flex min-w-0 items-center gap-2">
-          {school?.logo && <img src={school.logo} alt="" className="h-9 w-9 rounded-xl object-cover" />}
+          <SchoolLogo url={school?.logo_url} className="h-9 w-9" />
           <span className="truncate text-lg font-extrabold text-deep-harbor">{school?.name ?? t('common.appName')}</span>
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-2">
