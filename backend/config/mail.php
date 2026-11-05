@@ -111,8 +111,9 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+        // `?:` and not a default: a line `MAIL_FROM_ADDRESS=` in .env gives an empty string, and mail without a sender fails ("An email must have a From or a Sender header").
+        'address' => env('MAIL_FROM_ADDRESS') ?: 'hello@example.com',
+        'name' => env('MAIL_FROM_NAME') ?: (env('APP_NAME') ?: 'Madrasati'),
     ],
 
 ];
