@@ -162,4 +162,13 @@ class MarksImportTest extends AcademicTestCase
         \Laravel\Sanctum\Sanctum::actingAs(User::factory()->staff(StaffType::Teacher)->create());
         $this->post('/api/import/marks', [], ['Accept' => 'application/json'])->assertForbidden();
     }
+
+    public function test_a_letter_in_the_mark_column_means_absent(): void
+    {
+        $this->upload([self::HEAD, ['S-1', 'MATH', 'First term', 'Exam', 20, 'غ', 0, 'exam'], ['S-2', 'MATH', 'First term', 'Exam', '20', '17,5', 0, 'exam']])
+            ->assertOk()->assertJsonPath('data.problem_count', 0);
+
+        $this->assertSame('absent', AssessmentScore::whereHas('student', fn ($q) => $q->where('student_number', 'S-1'))->first()->status);
+        $this->assertEqualsWithDelta(17.5, (float) AssessmentScore::whereHas('student', fn ($q) => $q->where('student_number', 'S-2'))->value('score'), 0.001);
+    }
 }

@@ -100,4 +100,12 @@ class AttendanceImportTest extends AcademicTestCase
         Sanctum::actingAs(User::factory()->staff(StaffType::Teacher)->create());
         $this->post('/api/import/attendance', [], ['Accept' => 'application/json'])->assertForbidden();
     }
+
+    public function test_single_arabic_letters_are_understood(): void
+    {
+        $this->upload([['Student number', 'Date', 'Status'], ['S-1', $this->day(1), 'غ'], ['S-2', $this->day(1), 'ح'], ['S-1', $this->day(2), 'ت'], ['S-2', $this->day(2), 'ع']])
+            ->assertOk()->assertJsonPath('data.problem_count', 0);
+
+        $this->assertSame(['absent', 'present', 'late', 'excused'], StudentAttendance::orderBy('id')->get()->map(fn ($a) => $a->status->value)->all());
+    }
 }

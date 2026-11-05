@@ -93,4 +93,11 @@ class GuardianImportTest extends AcademicTestCase
 
         $this->get('/api/import/guardians/template')->assertOk();
     }
+
+    public function test_children_written_with_the_word_and_and_the_arabic_column_name_are_understood(): void
+    {
+        $this->upload([['اسم ولي الأمر', 'رقم الجوال', 'أبناؤه'], ['خالد', '0790000011', '1001 و 1002']])->assertOk()->assertJsonPath('data.problem_count', 0);
+
+        $this->assertSame(2, User::findByLogin('0790000011')->children()->count());
+    }
 }

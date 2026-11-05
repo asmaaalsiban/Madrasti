@@ -70,10 +70,12 @@ class FeesImporter extends Importer
         $net = ($total ?? 0) - ($discount ?? 0);
         $total !== null && $discount !== null && $net <= 0 && $errors[] = __('import.discount_too_big');
 
-        $count = filled($row['installments'] ?? null) ? (int) $row['installments'] : 1;
-        (! is_numeric($row['installments'] ?? 1) || $count < 1 || $count > 24) && $errors[] = __('import.bad_installments', ['value' => $row['installments'] ?? '']);
-        $every = filled($row['every_months'] ?? null) ? (int) $row['every_months'] : 1;
-        (! is_numeric($row['every_months'] ?? 1) || $every < 1 || $every > 12) && $errors[] = __('import.bad_every', ['value' => $row['every_months'] ?? '']);
+        $count = filled($row['installments'] ?? null) ? \App\Shared\Import\Numbers::parse($row['installments']) : 1.0;
+        ($count === null || $count != (int) $count || $count < 1 || $count > 24) && $errors[] = __('import.bad_installments', ['value' => $row['installments'] ?? '']);
+        $every = filled($row['every_months'] ?? null) ? \App\Shared\Import\Numbers::parse($row['every_months']) : 1.0;
+        ($every === null || $every != (int) $every || $every < 1 || $every > 12) && $errors[] = __('import.bad_every', ['value' => $row['every_months'] ?? '']);
+        $count = (int) $count;
+        $every = (int) $every;
         $firstDue = $this->date($row['first_due'] ?? null, $year?->starts_on?->format('Y-m-d') ?? now()->toDateString(), $errors);
 
         $paid = filled($row['paid'] ?? null) ? $this->money($row['paid']) : 0;
@@ -118,9 +120,9 @@ class FeesImporter extends Importer
     /** An amount in cents, or null when it is not a number. */
     private function money(mixed $value): ?int
     {
-        $text = trim(str_replace(['٫', ',', '٬'], ['.', '.', ''], strtr((string) $value, ['٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'])));
+        $number = \App\Shared\Import\Numbers::parse($value);
 
-        return $text !== '' && is_numeric($text) ? Money::cents($text) : null;
+        return $number === null ? null : Money::cents(number_format($number, 2, '.', ''));
     }
 
     /** @param  list<string>  $errors */
