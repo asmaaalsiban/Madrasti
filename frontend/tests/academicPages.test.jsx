@@ -25,12 +25,44 @@ beforeEach(async () => {
 })
 
 describe('OverviewPage', () => {
+  const dash = {
+    people: { students: 40, teachers: 5 },
+    students_today: { present: 31, late: 5, absent: 2, excused: 2 },
+    staff_today: { present: 4, late: 0, absent: 1, leave: 0 },
+    attendance_trend: [{ date: '2026-11-03', rate: 90, total: 40 }, { date: '2026-11-04', rate: 87.5, total: 40 }],
+    finance: { currency: 'JOD', billed: 10000, collected: 6000, overdue: 500, monthly: [{ month: '2026-10', amount: 3000 }, { month: '2026-11', amount: 3000 }] },
+    students_by_level: [{ id: 1, name_ar: 'الأول', name_en: 'Grade 1', count: 22 }],
+    marks_by_subject: [{ id: 1, name_ar: 'رياضيات', name_en: 'Math', average: 81.5 }],
+    waiting: { procurement: 2, privacy: 0 },
+    frequent_absences: [{ id: 9, name_ar: 'سامي', name_en: 'Sami', days: 3 }],
+  }
+  const mockApi = () => api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/admin/dashboard' ? dash : { academic_years: 2, grade_levels: 12, classrooms: 30, subjects: 9 } } }))
+
   it('renders the four counts', async () => {
-    api.get.mockResolvedValue({ data: { data: { academic_years: 2, grade_levels: 12, classrooms: 30, subjects: 9 } } })
+    mockApi()
     renderPage(<OverviewPage />)
     expect(await screen.findByText('30')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/admin/overview')
+  })
+
+  it('draws today, the money, and what waits', async () => {
+    mockApi()
+    renderPage(<OverviewPage />)
+    expect(await screen.findByText('Student attendance today')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Student attendance rate (last 14 days)' })).toBeInTheDocument()
+    expect(screen.getByText('Purchase requests')).toBeInTheDocument()
+    expect(screen.queryByText('Data privacy requests')).not.toBeInTheDocument()
+    expect(screen.getByText('Sami')).toBeInTheDocument()
+    expect(screen.getByText('10,000 JOD')).toBeInTheDocument()
+  })
+
+  it('says so when nothing was recorded today', async () => {
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/admin/dashboard' ? { ...dash, students_today: { present: 0, late: 0, absent: 0, excused: 0 }, attendance_trend: [], frequent_absences: [], marks_by_subject: [], waiting: { procurement: 0, privacy: 0 } } : {} } }))
+    renderPage(<OverviewPage />)
+    expect(await screen.findByText('Nothing is waiting. 👍')).toBeInTheDocument()
+    expect(screen.getByText('No published marks yet.')).toBeInTheDocument()
   })
 })
 

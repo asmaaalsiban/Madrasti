@@ -17,7 +17,7 @@ class ReviewFixesTest extends AcademicTestCase
     {
         return [...[
             'student_number' => 'S-1001', 'name_ar' => 'محمد', 'student_email' => 'mohammad@school.test',
-            'guardian_email' => 'dad@mail.test', 'guardian_name' => 'Dad',
+            'guardian_email' => 'dad@mail.test', 'guardian_name' => 'Dad', 'guardian_phone' => '0599111222',
         ], ...$override];
     }
 
@@ -63,7 +63,7 @@ class ReviewFixesTest extends AcademicTestCase
         $this->actAsAdmin();
         $id = $this->postJson('/api/students', $this->studentBody())->json('data.id');
 
-        $response = $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => 'mum@mail.test', 'guardian_name' => 'Mum']))
+        $response = $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => 'mum@mail.test', 'guardian_name' => 'Mum', 'guardian_phone' => '0599111333']))
             ->assertOk()->assertJsonCount(1, 'data.guardians')->assertJsonPath('data.guardians.0.email', 'mum@mail.test');
 
         $student = Student::find($id);
@@ -91,7 +91,7 @@ class ReviewFixesTest extends AcademicTestCase
         $second = User::factory()->role(Role::Guardian)->create(['email' => 'aunt@mail.test']);
         Student::find($id)->guardians()->attach($second->id, ['is_primary' => false]);
 
-        $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => 'mum@mail.test']))->assertOk();
+        $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => 'mum@mail.test', 'guardian_phone' => '0599111333']))->assertOk();
 
         $emails = Student::find($id)->guardians()->pluck('email')->sort()->values()->all();
         $this->assertSame(['aunt@mail.test', 'mum@mail.test'], $emails);
@@ -104,7 +104,7 @@ class ReviewFixesTest extends AcademicTestCase
         $other = User::factory()->role(Role::Guardian)->create(['email' => 'a-first@mail.test']);
         Student::find($id)->guardians()->attach($other->id, ['is_primary' => false]);
 
-        $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => null, 'guardian_name' => null]))
+        $this->putJson("/api/students/$id", $this->studentBody(['guardian_email' => null, 'guardian_name' => null, 'guardian_phone' => null]))
             ->assertOk()->assertJsonCount(2, 'data.guardians')->assertJsonPath('data.guardians.0.email', 'dad@mail.test');
     }
 }

@@ -61,7 +61,47 @@
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
-    "soon": "{{role}} tools will appear here soon."
+    "soon": "{{role}} tools will appear here soon.",
+    "excused": "Excused",
+    "noData": "No data yet.",
+    "notTaken": "No attendance taken today.",
+    "noMarks": "No published marks yet.",
+    "total": "Total students: {{count}}",
+    "teachers": "Teachers: {{count}}",
+    "trend": "Student attendance rate (last 14 days)",
+    "byLevel": "Students per level",
+    "marks": "Average mark per subject",
+    "students": {
+      "title": "Student attendance today"
+    },
+    "staff": {
+      "title": "Staff attendance today"
+    },
+    "waiting": {
+      "title": "Waiting for your decision",
+      "none": "Nothing is waiting. 👍",
+      "procurement": "Purchase requests",
+      "privacy": "Data privacy requests"
+    },
+    "money": {
+      "title": "Finance",
+      "billed": "Billed",
+      "collected": "Collected",
+      "overdue": "Overdue",
+      "collectedOf": "Collection rate",
+      "monthly": "Collected per month"
+    },
+    "absences": {
+      "title": "Frequent absences (7 days)",
+      "none": "No student is absent often.",
+      "days": "{{count}} days"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "student": "Manage students",
+      "announce": "Send an announcement",
+      "import": "Import from Excel"
+    }
   },
   "errors": {
     "forbidden": "You are not allowed to view this page.",
@@ -132,7 +172,8 @@
       "tasks": "Tasks",
       "staffAccess": "What staff see",
       "privacyRequests": "Data requests",
-      "photoConsent": "Photo consent"
+      "photoConsent": "Photo consent",
+      "studentFiles": "Student files"
     },
     "actions": {
       "add": "Add",
@@ -282,7 +323,8 @@
     "feesHeading": "Fees",
     "feesHelp": "The yearly fee of the grade is added by itself (Finance > Yearly fees). Below: what differs for this student.",
     "firstPaymentPayerHint": "Who paid. The receipt is written in this name; if empty, the parent's name is used.",
-    "guardianHint": "Optional. A parent with no email signs in with the phone number below (the default password at first)."
+    "guardianHint": "Optional. A parent without an email signs in with the phone number (with the default password the first time).",
+    "guardianPhoneHint": "Required when a parent is added: it is their sign-in name."
   },
   "staff": {
     "title": "Staff",
@@ -1183,7 +1225,8 @@
     "autoEmails": "No email column: login emails are generated from the names.",
     "defaultPosition": "Position of everyone in this file (it has no position column)",
     "order": "Suggested order for a new school: Grades, Subjects, Staff, Sections, Teaching, then Students.",
-    "needColumns": "Choose the column for: {{columns}}."
+    "needColumns": "Choose the column for: {{columns}}.",
+    "studentFilesLink": "To upload each student's own file (certificates, records): Student files"
   },
   "reportCard": {
     "title": "Report card",
@@ -2532,5 +2575,17 @@
     "offline": "No connection. What you see may be old and nothing will be sent.",
     "update": "A new version is ready.",
     "reload": "Update"
+  },
+  "studentFiles": {
+    "title": "Student files",
+    "help": "Each student's file (birth certificate, records, ID copies...). Find the student by name or number, then add their files. Only the school's management can see them.",
+    "find": "Student name or number",
+    "findHint": "Type the name or the number",
+    "none": "No student with this name or number.",
+    "change": "Another student",
+    "files": "The student's files",
+    "empty": "This student has no files yet.",
+    "field": "Student file",
+    "fieldHint": "(optional: birth certificate, records...)"
   }
 }

@@ -11,6 +11,7 @@ use App\Modules\Finance\Services\AccountReader;
 use App\Modules\People\Actions\SaveStudent;
 use App\Modules\People\Http\Requests\StudentRequest;
 use App\Modules\People\Http\Resources\StudentResource;
+use App\Shared\Attachments\Attachment;
 use App\Shared\Enums\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +39,9 @@ class StudentController extends AcademicController
     {
         $response = parent::index($request);
         $year = AcademicYear::where('is_current', true)->first();
+        if ($request->user()->hasRole(Role::Admin)) {
+            $request->attributes->set('student_files', Attachment::groupedFor('student', $response->collection->map(fn ($r) => $r->resource->id)->all()));
+        }
         if ($year !== null && $request->user()->hasRole(Role::Admin)) {
             $ids = $response->collection->map(fn ($r) => $r->resource->id)->all();
             $request->attributes->set('student_balances', app(AccountReader::class)->balances($ids, $year));
@@ -71,6 +75,7 @@ class StudentController extends AcademicController
     /** The student's login account goes with the student: signed out everywhere and removed from the lists. */
     protected function deleting(Model $model): void
     {
+        Attachment::purge('student', $model->id);
         $model->user?->tokens()->delete();
         $model->user?->delete();
     }
