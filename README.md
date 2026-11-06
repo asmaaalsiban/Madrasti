@@ -658,3 +658,12 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Locked books**: pick a date; nothing on or before it can be added or removed.
 - The principal reads; only the accountant changes. Automatic entries from fees, payments and bills come next (phase 4b).
 - After pulling: `php artisan tenants:migrate`.
+
+### Automatic entries (accounting phase 4b)
+
+- Nothing to do by hand: a new or edited fee, a payment (and its cancellation), a bill, a bill payment, a transfer between boxes, a salary, a correction and an opening balance each post their own balanced entry. They show an *Automatic* tag and cannot be deleted by hand; cancel the source instead.
+- Posting is done by the *difference*: editing a fee or bill posts only the change, so the result is always balanced and running it twice changes nothing.
+- A locked day is never touched: a change dated inside the locked period lands on the first open day.
+- Year-end carried fees and non-cash carry-forward payments post nothing (the debt is already on the books).
+- Old data is filled in by the migration. After pulling: `php artisan tenants:migrate`.
+- The *Funds in transit* account (1190) clears transfers between boxes; its balance is always zero.

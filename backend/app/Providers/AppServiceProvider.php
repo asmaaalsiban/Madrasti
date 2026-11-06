@@ -49,6 +49,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Every money event posts its own balanced entry in the journal.
+        \App\Modules\Finance\Models\StudentFee::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->fee($m));
+        \App\Modules\Finance\Models\Expense::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->bill($m));
+        \App\Modules\Finance\Models\MoneyAccount::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->opening($m));
+        \App\Modules\Finance\Models\AccountEntry::created(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->entry($m));
+        \App\Modules\Finance\Models\AccountEntry::deleted(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->entry($m, true));
+        \App\Modules\Finance\Models\StudentFee::deleted(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->sync('fee', $m->id, now()->toDateString(), __('finance.auto.fee', ['name' => $m->description]), []));
+        \App\Modules\Finance\Models\Expense::deleted(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->sync('bill', $m->id, now()->toDateString(), __('finance.auto.bill', ['name' => $m->description]), []));
+
         foreach ([AcademicYear::class, Classroom::class, GradeLevel::class, Student::class, Subject::class, Term::class, TeachingAssignment::class, Building::class, Floor::class, Room::class, GradeLevelSubject::class, Period::class] as $model) {
             Gate::policy($model, AcademicPolicy::class);
         }

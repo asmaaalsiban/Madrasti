@@ -128,7 +128,7 @@ export default function JournalPage() {
               {journal.data.data.map((e) => (
                 <article key={e.id} className="rounded-lg border bg-white p-3 text-sm">
                   <div className="flex items-start justify-between gap-2">
-                    <p><b dir="ltr">{e.date}</b> · {e.memo}</p>
+                    <p><b dir="ltr">{e.date}</b> · {e.memo}{!e.manual && <span className="ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{t('journal.automatic')}</span>}</p>
                     {canManage && e.manual && <button type="button" className="text-red-700 underline" onClick={() => setRemoving(e)}>{t('admin.actions.delete')}</button>}
                   </div>
                   <table className="mt-2 w-full">

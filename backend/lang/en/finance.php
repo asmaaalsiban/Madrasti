@@ -49,4 +49,5 @@ return [
     'entry_unbalanced' => 'The entry is not balanced: debits must equal credits, with at least two lines.',
     'ledger_account_used' => 'This account is used (or built in). Switch it off instead of deleting it.',
     'entry_is_automatic' => 'This entry was made by the system. Cancel its source instead.',
+    'auto' => ['fee' => 'Fee: :name', 'bill' => 'Bill: :name', 'opening' => 'Opening balance: :name', 'entry' => ':name', 'kinds' => ['receipt' => 'Payment received','transfer_in' => 'Transfer in','transfer_out' => 'Transfer out','adjustment' => 'Correction','expense' => 'Bill payment','payroll' => 'Salary']],
 ];

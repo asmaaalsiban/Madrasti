@@ -49,4 +49,5 @@ return [
     'entry_unbalanced' => 'القيد غير متوازن: لازم المدين يساوي الدائن، وبحد أدنى سطرين.',
     'ledger_account_used' => 'هذا الحساب مستخدم (أو أساسي). عطّله بدل حذفه.',
     'entry_is_automatic' => 'هذا القيد أنشأه النظام. ألغِ مصدره بدلًا من ذلك.',
+    'auto' => ['fee' => 'رسوم: :name', 'bill' => 'فاتورة: :name', 'opening' => 'رصيد افتتاحي: :name', 'entry' => ':name', 'kinds' => ['receipt' => 'دفعة مستلمة','transfer_in' => 'تحويل وارد','transfer_out' => 'تحويل صادر','adjustment' => 'تصحيح','expense' => 'دفع فاتورة','payroll' => 'راتب']],
 ];
