@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Question extends Model
 {
     /** @var list<string> */
-    protected $fillable = ['question_lesson_id', 'created_by', 'body', 'explanation', 'is_active'];
+    protected $fillable = ['question_lesson_id', 'created_by', 'body', 'explanation', 'is_active', 'image_path', 'explanation_image_path'];
 
     /** @return array<string, string> */
     protected function casts(): array

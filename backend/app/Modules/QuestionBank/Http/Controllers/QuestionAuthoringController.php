@@ -15,6 +15,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\ValidationException;
 
 /** Teachers (and the admin) write lessons and multiple-choice questions for the grades and subjects they teach. */
@@ -126,9 +128,55 @@ class QuestionAuthoringController extends Controller
     {
         $lesson = $question->lesson;
         $this->allow($request, (int) $lesson->grade_level_id, (int) $lesson->subject_id);
-        QuizQuestion::where('question_id', $question->id)->exists() ? $question->update(['is_active' => false]) : $question->delete();
+        if (QuizQuestion::where('question_id', $question->id)->exists()) {
+            $question->update(['is_active' => false]);
+        } else {
+            array_map(fn (?string $p) => $p !== null && Storage::delete($p), [$question->image_path, $question->explanation_image_path]);
+            $question->delete();
+        }
 
         return response()->noContent();
+    }
+
+    /** A picture for the question itself or for its explanation (jpg, png or webp, up to 5 MB). It replaces the one it had. */
+    public function setImage(Request $request, Question $question, string $slot): JsonResponse
+    {
+        $column = $this->column($request, $question, $slot);
+        $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        $old = $question->{$column};
+        $question->update([$column => $request->file('image')->store('question-bank')]);
+        if ($old !== null) {
+            Storage::delete($old);
+        }
+
+        return response()->json(['data' => $this->present($question->refresh()->load('options'))]);
+    }
+
+    public function removeImage(Request $request, Question $question, string $slot): JsonResponse
+    {
+        $column = $this->column($request, $question, $slot);
+        if ($question->{$column} !== null) {
+            Storage::delete($question->{$column});
+            $question->update([$column => null]);
+        }
+
+        return response()->json(['data' => $this->present($question->load('options'))]);
+    }
+
+    public function showImage(Request $request, Question $question, string $slot): StreamedResponse
+    {
+        $column = $this->column($request, $question, $slot);
+        abort_unless($question->{$column} !== null && Storage::exists($question->{$column}), 404);
+
+        return Storage::response($question->{$column});
+    }
+
+    private function column(Request $request, Question $question, string $slot): string
+    {
+        abort_unless(in_array($slot, ['question', 'explanation'], true), 404);
+        $this->allow($request, (int) $question->lesson->grade_level_id, (int) $question->lesson->subject_id);
+
+        return $slot === 'question' ? 'image_path' : 'explanation_image_path';
     }
 
     private function allow(Request $request, int $grade, int $subject): void
@@ -173,6 +221,6 @@ class QuestionAuthoringController extends Controller
     /** @return array<string, mixed> */
     private function present(Question $q): array
     {
-        return ['id' => $q->id, 'body' => $q->body, 'explanation' => $q->explanation, 'is_active' => $q->is_active, 'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'body' => $o->body, 'is_correct' => $o->is_correct])->values()];
+        return ['id' => $q->id, 'body' => $q->body, 'explanation' => $q->explanation, 'is_active' => $q->is_active, 'has_image' => $q->image_path !== null, 'has_explanation_image' => $q->explanation_image_path !== null, 'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'body' => $o->body, 'is_correct' => $o->is_correct])->values()];
     }
 }

@@ -700,5 +700,14 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Safe by design**: a question reaches the student without its answer; the right option and the explanation come back only after the student answers it wrong. A student cannot answer twice or open another student's quiz.
 - **History**: the student keeps their quizzes with the score; a parent sees the same list for each child (`/parent/children/:id/quizzes`).
 - A question students already met is switched off instead of deleted, so their results stay whole; its options can be reworded but not added or removed.
-- Not built yet (decide with the team): a timer, pictures and equations, principal approval of questions, per-class results for the teacher.
+- Not built yet (decide with the team): principal approval of questions, per-class results for the teacher.
 - After pulling: `php artisan tenants:migrate`.
+
+### Timer, mistakes practice, retake, pictures and equations
+
+- **Timer (optional)**: when making a quiz the student can tick *Use a timer* and choose the minutes. Without it there is no time limit. The server keeps the deadline: when time runs out the quiz is closed and what was not answered does not count as right.
+- **Practise my mistakes**: one click makes a quiz only of the questions the student still gets wrong (their *last* answer to it was wrong), for one subject or all, optionally limited in number. A question leaves the list once the student answers it right. So after 10 quizzes with 50 mistakes, the student reviews just those 50 and finds the weak points.
+- **Retake**: any finished quiz can be taken again with the same questions (reshuffled) and the same timer. The history marks mistakes quizzes and retakes.
+- **Pictures**: a teacher can attach one picture to a question and one to its explanation (jpg, png, webp, up to 5 MB). They are private: only a student who has the question in their quiz sees it, and the explanation picture only after a wrong answer.
+- **Equations**: write them between dollar signs (`$x^2 + 1$`, or `$$...$$` on their own line) in questions, options and explanations; the teacher sees a preview.
+- After pulling: `php artisan tenants:migrate`, then `npm install` in `frontend` (new package: `katex`).

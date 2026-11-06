@@ -5,9 +5,26 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
+import RichText from '../components/RichText'
+import QuestionImage from '../components/QuestionImage'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const blankOption = (correct = false) => ({ body: '', is_correct: correct })
+
+// One optional picture (of the question, or of its explanation): keep, replace or remove it.
+function ImageField({ slot, question, files, setFiles, removed, setRemoved }) {
+  const { t } = useTranslation()
+  const has = slot === 'question' ? question?.has_image : question?.has_explanation_image
+  return (
+    <div className="space-y-1 text-sm">
+      <p className="font-bold">{t(slot === 'question' ? 'questionBank.questionImage' : 'questionBank.explanationImage')} <span className="font-normal text-slate-500">({t('questionBank.optional')})</span></p>
+      {has && !removed[slot] && !files[slot] && (
+        <div className="flex items-end gap-3"><QuestionImage path={`/question-bank/questions/${question.id}/image/${slot}`} alt={t('questionBank.imageAlt')} /><button type="button" className="text-red-700 underline" onClick={() => setRemoved({ ...removed, [slot]: true })}>{t('questionBank.removeImage')}</button></div>
+      )}
+      <input type="file" accept="image/png,image/jpeg,image/webp" aria-label={t(slot === 'question' ? 'questionBank.questionImage' : 'questionBank.explanationImage')} onChange={(e) => setFiles({ ...files, [slot]: e.target.files?.[0] ?? null })} />
+    </div>
+  )
+}
 
 function QuestionDialog({ lessonId, question, onClose }) {
   const { t } = useTranslation()
@@ -16,10 +33,23 @@ function QuestionDialog({ lessonId, question, onClose }) {
   const [explanation, setExplanation] = useState(question?.explanation ?? '')
   const [options, setOptions] = useState(question ? question.options.map((o) => ({ body: o.body, is_correct: o.is_correct })) : [blankOption(true), blankOption(), blankOption()])
   const [error, setError] = useState('')
+  const [files, setFiles] = useState({ question: null, explanation: null })
+  const [removed, setRemoved] = useState({ question: false, explanation: false })
   const save = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const payload = { body, explanation: explanation || null, options }
-      return question ? api.put(`/question-bank/questions/${question.id}`, payload) : api.post(`/question-bank/lessons/${lessonId}/questions`, payload)
+      const res = await (question ? api.put(`/question-bank/questions/${question.id}`, payload) : api.post(`/question-bank/lessons/${lessonId}/questions`, payload))
+      const id = res.data.data.id
+      for (const slot of ['question', 'explanation']) {
+        if (files[slot]) {
+          const form = new FormData()
+          form.append('image', files[slot])
+          await api.post(`/question-bank/questions/${id}/image/${slot}`, form)
+        } else if (removed[slot]) {
+          await api.delete(`/question-bank/questions/${id}/image/${slot}`)
+        }
+      }
+      return res
     },
     onSuccess: () => { client.invalidateQueries({ queryKey: ['question-bank'] }); onClose() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
@@ -29,7 +59,9 @@ function QuestionDialog({ lessonId, question, onClose }) {
     <Modal open size="lg" title={question ? t('questionBank.editQuestion') : t('questionBank.newQuestion')} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-        <label className="block text-sm">{t('questionBank.questionText')}<textarea required rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={body} onChange={(e) => setBody(e.target.value)} /></label>
+        <label className="block text-sm">{t('questionBank.questionText')}<textarea required rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={body} onChange={(e) => setBody(e.target.value)} /><span className="text-xs text-slate-500">{t('questionBank.mathHint')}</span></label>
+        {body.includes('$') && <p className="rounded bg-slate-50 p-2 text-sm" aria-label={t('questionBank.preview')}><RichText text={body} /></p>}
+        <ImageField slot="question" question={question} files={files} setFiles={setFiles} removed={removed} setRemoved={setRemoved} />
         <fieldset className="space-y-2">
           <legend className="text-sm font-bold">{t('questionBank.options')} <span className="font-normal text-slate-500">({t('questionBank.pickCorrect')})</span></legend>
           {options.map((o, i) => (
@@ -42,6 +74,7 @@ function QuestionDialog({ lessonId, question, onClose }) {
           {options.length < 6 && !question && <button type="button" className="text-sm text-brand underline" onClick={() => setOptions([...options, blankOption()])}>{t('questionBank.addOption')}</button>}
         </fieldset>
         <label className="block text-sm">{t('questionBank.explanation')}<textarea rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={explanation} onChange={(e) => setExplanation(e.target.value)} /><span className="text-xs text-slate-500">{t('questionBank.explanationHint')}</span></label>
+        <ImageField slot="explanation" question={question} files={files} setFiles={setFiles} removed={removed} setRemoved={setRemoved} />
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
           <button type="submit" disabled={save.isPending || options.filter((o) => o.is_correct).length !== 1} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
@@ -69,13 +102,14 @@ function Questions({ lesson }) {
           {data.filter((q) => q.is_active).map((q) => (
             <li key={q.id} className="rounded-lg border bg-white p-3 text-sm">
               <div className="flex items-start justify-between gap-2">
-                <p dir="auto" className="font-medium">{q.body}</p>
+                <p className="font-medium"><RichText text={q.body} /></p>
                 <span className="flex shrink-0 gap-3">
                   <button type="button" aria-label={t('admin.actions.edit')} className="text-brand" onClick={() => setDialog({ question: q })}><Pencil size={16} aria-hidden /></button>
                   <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setRemoving(q)}><Trash2 size={16} aria-hidden /></button>
                 </span>
               </div>
-              <ul className="mt-2 space-y-1">{q.options.map((o) => <li key={o.id} dir="auto" className={o.is_correct ? 'font-bold text-green-700' : 'text-slate-600'}>{o.is_correct ? '✓ ' : '• '}{o.body}</li>)}</ul>
+              {q.has_image && <div className="mt-2"><QuestionImage path={`/question-bank/questions/${q.id}/image/question`} alt={t('questionBank.imageAlt')} /></div>}
+              <ul className="mt-2 space-y-1">{q.options.map((o) => <li key={o.id} className={o.is_correct ? 'font-bold text-green-700' : 'text-slate-600'}>{o.is_correct ? '✓ ' : '• '}<RichText text={o.body} /></li>)}</ul>
             </li>
           ))}
         </ul>

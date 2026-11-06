@@ -600,6 +600,9 @@ Route::middleware(['school-user', 'role:teacher,admin'])->prefix('question-bank'
     Route::post('lessons/{lesson}/questions', [QuestionAuthoringController::class, 'storeQuestion'])->whereNumber('lesson');
     Route::put('questions/{question}', [QuestionAuthoringController::class, 'updateQuestion'])->whereNumber('question');
     Route::delete('questions/{question}', [QuestionAuthoringController::class, 'destroyQuestion'])->whereNumber('question');
+    Route::post('questions/{question}/image/{slot}', [QuestionAuthoringController::class, 'setImage'])->whereNumber('question');
+    Route::get('questions/{question}/image/{slot}', [QuestionAuthoringController::class, 'showImage'])->whereNumber('question');
+    Route::delete('questions/{question}/image/{slot}', [QuestionAuthoringController::class, 'removeImage'])->whereNumber('question');
 });
 Route::middleware(['school-user', 'role:student'])->prefix('quizzes')->group(function (): void {
     Route::get('options', [QuizController::class, 'options']);
@@ -607,5 +610,7 @@ Route::middleware(['school-user', 'role:student'])->prefix('quizzes')->group(fun
     Route::post('/', [QuizController::class, 'store']);
     Route::get('{quiz}', [QuizController::class, 'show'])->whereNumber('quiz');
     Route::post('{quiz}/answer', [QuizController::class, 'answer'])->whereNumber('quiz');
+    Route::post('{quiz}/retake', [QuizController::class, 'retake'])->whereNumber('quiz');
+    Route::get('{quiz}/items/{item}/image/{slot}', [QuizController::class, 'image'])->whereNumber(['quiz', 'item']);
 });
 Route::middleware('school-user')->get('students/{student}/quizzes', [QuizController::class, 'forStudent']);

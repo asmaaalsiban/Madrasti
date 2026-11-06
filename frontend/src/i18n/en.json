@@ -2976,7 +2976,14 @@
     "explanationHint": "Students see this when they answer wrong.",
     "confirmDeleteQuestion": "Delete this question?",
     "confirmDeleteLesson": "Delete this lesson?",
-    "nothingToTeach": "You have no grade and subject to write questions for yet."
+    "nothingToTeach": "You have no grade and subject to write questions for yet.",
+    "mathHint": "For equations write them between dollar signs, like $x^2 + 1$.",
+    "preview": "Preview",
+    "questionImage": "Picture for the question",
+    "explanationImage": "Picture for the explanation",
+    "optional": "optional",
+    "removeImage": "Remove",
+    "imageAlt": "Question picture"
   },
   "quiz": {
     "title": "Quizzes",
@@ -3000,6 +3007,20 @@
     "next": "Next",
     "finished": "Quiz finished",
     "backToQuizzes": "Back to quizzes",
-    "childTitle": "Quizzes of {{name}}"
+    "childTitle": "Quizzes of {{name}}",
+    "useTimer": "Use a timer",
+    "minutes": "Minutes",
+    "timeLeft": "Time left",
+    "timeUp": "Time is up",
+    "retake": "Retake",
+    "mistakesTitle": "Practise your mistakes",
+    "mistakesIntro": "You still get {{n}} questions wrong. Make a quiz of only those, to find your weak points. A question leaves the list when you answer it right.",
+    "allSubjects": "All subjects",
+    "countOptional": "How many (optional)",
+    "practiceMistakes": "Practise my mistakes",
+    "kinds": {
+      "mistakes": "Mistakes",
+      "retake": "Retake"
+    }
   }
 }

@@ -11,4 +11,7 @@ return [
     'bad_option' => 'That option does not belong to this question.',
     'students_only' => 'Only students can take quizzes.',
     'no_grade' => 'Your grade is not set yet. Ask the school.',
+    'no_mistakes' => 'You have no mistakes to practise. Well done!',
+    'finish_first' => 'Finish the quiz before taking it again.',
+    'time_up' => 'Time is up for this quiz.',
 ];
