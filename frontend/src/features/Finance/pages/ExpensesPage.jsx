@@ -38,7 +38,7 @@ function BillDialog({ bill, options, onClose }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const lang = i18n.language
-  const [form, setForm] = useState({ expense_date: bill?.date ?? today(), expense_category_id: String(bill?.category?.id ?? ''), supplier_id: String(bill?.supplier?.id ?? ''), description: bill?.description ?? '', reference: bill?.reference ?? '', amount: bill?.amount ?? '', due_date: bill?.due_date ?? '', procurement_request_id: bill?.procurement_request_id ? String(bill.procurement_request_id) : '' })
+  const [form, setForm] = useState({ expense_date: bill?.date ?? today(), expense_category_id: String(bill?.category?.id ?? ''), supplier_id: String(bill?.supplier?.id ?? ''), description: bill?.description ?? '', reference: bill?.reference ?? '', amount: bill?.amount ?? '', tax_amount: bill && Number(bill.tax_amount) > 0 ? bill.tax_amount : '', due_date: bill?.due_date ?? '', procurement_request_id: bill?.procurement_request_id ? String(bill.procurement_request_id) : '' })
   const [payNow, setPayNow] = useState(false)
   const [pay, setPay] = useState({ money_account_id: String(options.accounts[0]?.id ?? ''), method: 'cash', paid_on: today(), reference: '' })
   const [error, setError] = useState('')
@@ -47,7 +47,7 @@ function BillDialog({ bill, options, onClose }) {
   const approved = (requests.data ?? []).filter((r) => r.status === 'approved')
   const save = useMutation({
     mutationFn: () => {
-      const body = { ...form, supplier_id: form.supplier_id ? Number(form.supplier_id) : null, expense_category_id: Number(form.expense_category_id), due_date: form.due_date || null, reference: form.reference || null, procurement_request_id: form.procurement_request_id ? Number(form.procurement_request_id) : null }
+      const body = { ...form, supplier_id: form.supplier_id ? Number(form.supplier_id) : null, expense_category_id: Number(form.expense_category_id), due_date: form.due_date || null, tax_amount: form.tax_amount || null, reference: form.reference || null, procurement_request_id: form.procurement_request_id ? Number(form.procurement_request_id) : null }
       if (!bill && payNow) body.pay_now = { ...pay, money_account_id: Number(pay.money_account_id), reference: pay.reference || null }
       return bill ? api.put(`/finance/expenses/${bill.id}`, body) : api.post('/finance/expenses', body)
     },
@@ -89,6 +89,7 @@ function BillDialog({ bill, options, onClose }) {
         <Field label={t('expenses.description')}><input required className="mt-1 w-full rounded border p-2" value={form.description} onChange={set('description')} /></Field>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t('expenses.amount')}><input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></Field>
+          {options.tax?.enabled && <Field label={t('tax.insideBill', { name: options.tax.name })}><input type="number" step="0.01" min="0" max={form.amount || undefined} dir="ltr" className="mt-1 w-full rounded border p-2" value={form.tax_amount} onChange={set('tax_amount')} /></Field>}
           <Field label={t('expenses.dueDate')}><DateInput className="mt-1 w-full rounded border p-2" value={form.due_date} onChange={set('due_date')} /></Field>
         </div>
         {!bill && (
@@ -217,7 +218,7 @@ export default function ExpensesPage({ base }) {
   const all = useQuery({ queryKey: ['finance', 'expenses'], queryFn: async () => (await api.get('/finance/expenses')).data })
   const set = (k) => (e) => setFilters({ ...filters, [k]: e.target.value })
   const c = data?.currency
-  const options = { categories: all.data?.categories ?? [], suppliers: all.data?.suppliers ?? [], accounts: all.data?.accounts ?? [], methods: all.data?.methods ?? [] }
+  const options = { categories: all.data?.categories ?? [], suppliers: all.data?.suppliers ?? [], accounts: all.data?.accounts ?? [], methods: all.data?.methods ?? [], tax: all.data?.tax }
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">

@@ -6,8 +6,8 @@ import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 import { DateInput } from '../../../components/shared/DateInput'
 
-const REPORTS = ['trial-balance', 'income-statement', 'balance-sheet', 'account-ledger', 'receivables-ageing']
-const MONEY_COLS = ['debit', 'credit', 'amount', 'balance', 'current', 'd30', 'd60', 'd90', 'over90', 'total']
+const REPORTS = ['trial-balance', 'income-statement', 'balance-sheet', 'account-ledger', 'receivables-ageing', 'tax-summary']
+const MONEY_COLS = ['debit', 'credit', 'amount', 'balance', 'current', 'd30', 'd60', 'd90', 'over90', 'total', 'output', 'input', 'net']
 const today = () => new Date().toISOString().slice(0, 10)
 
 // Trial balance, income statement, balance sheet, account ledger and receivables ageing, read from the journal.
@@ -38,7 +38,7 @@ export default function AccountingReportsPage() {
       </div>
       <div className="flex flex-wrap gap-2 print:hidden">{REPORTS.map((k) => <button key={k} type="button" className={tab(k)} onClick={() => setReport(k)}>{t(`acctReports.names.${k}`)}</button>)}</div>
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-white p-3 text-sm print:hidden">
-        {['income-statement', 'account-ledger'].includes(report) && <label>{t('money.fromDate')}<DateInput className="mt-1 block rounded border p-1.5" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} /></label>}
+        {['income-statement', 'account-ledger', 'tax-summary'].includes(report) && <label>{t('money.fromDate')}<DateInput className="mt-1 block rounded border p-1.5" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} /></label>}
         <label>{['trial-balance', 'balance-sheet', 'receivables-ageing'].includes(report) ? t('acctReports.asOf') : t('money.toDate')}<DateInput className="mt-1 block rounded border p-1.5" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} /></label>
         {needsAccount && (
           <label>{t('journal.account')}
