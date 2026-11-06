@@ -34,6 +34,7 @@ use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\ExpenseController;
 use App\Modules\Finance\Http\Controllers\AccountingReportController;
+use App\Modules\Finance\Http\Controllers\BudgetController;
 use App\Modules\Finance\Http\Controllers\JournalController;
 use App\Modules\Finance\Http\Controllers\MoneyAccountController;
 use App\Modules\Finance\Http\Controllers\TransferController;
@@ -420,6 +421,8 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('finance')->gro
     Route::put('expense-categories/{category}', [ExpenseController::class, 'updateCategory'])->whereNumber('category');
     Route::delete('expense-categories/{category}', [ExpenseController::class, 'destroyCategory'])->whereNumber('category');
     Route::get('accounting-reports/{report}', [AccountingReportController::class, 'show']);
+    Route::get('budgets', [BudgetController::class, 'show']);
+    Route::put('budgets', [BudgetController::class, 'save']);
     Route::get('ledger-accounts', [JournalController::class, 'accounts']);
     Route::post('ledger-accounts', [JournalController::class, 'storeAccount']);
     Route::put('ledger-accounts/{account}', [JournalController::class, 'updateAccount'])->whereNumber('account');

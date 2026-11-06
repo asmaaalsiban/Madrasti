@@ -2913,5 +2913,20 @@
       "over90": "Over 90 days",
       "total": "Total owed"
     }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "year": "Year",
+    "budget": "Budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "noYear": "Add an academic year first.",
+    "status": {
+      "ok": "On track",
+      "near": "Almost used up",
+      "over": "Over budget",
+      "unplanned": "Spent with no budget",
+      "none": "No budget set"
+    }
   }
 }

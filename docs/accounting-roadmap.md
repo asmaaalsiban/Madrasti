@@ -10,7 +10,8 @@ Goal: a full accounting application inside the platform (double entry), built in
 | 4a | **Chart of accounts and journal**: default chart, manual balanced entries, locked periods | done |
 | 4b | **Automatic entries**: every fee, payment, bill, transfer and salary posts a balanced entry by itself; old data is filled in | done |
 | 5 | **Reports**: trial balance, income statement, balance sheet, account ledger, receivables ageing; Excel export and print / PDF | done |
-| 6 | Budgets per year/department and variance; tax (VAT) if the country needs it | |
+| 6 | **Budgets** per year and expense category with spent / remaining and warnings | done |
+| - | Tax (VAT): not built; only if the school's country requires it | later |
 
 Notes
 - We build the features from standard accounting practice; no code or design of another product is copied.

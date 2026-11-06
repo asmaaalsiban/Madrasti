@@ -89,6 +89,7 @@ import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
 import YearEndPage from '../features/Finance/pages/YearEndPage'
 import AccountingReportsPage from '../features/Finance/pages/AccountingReportsPage'
+import BudgetsPage from '../features/Finance/pages/BudgetsPage'
 import JournalPage from '../features/Finance/pages/JournalPage'
 import MoneyAccountsPage from '../features/Finance/pages/MoneyAccountsPage'
 import MoneyLedgerPage from '../features/Finance/pages/MoneyLedgerPage'
@@ -179,6 +180,7 @@ const HOME_ROUTES = {
     { path: 'finance/year-end', element: <YearEndPage base="/teacher" /> },
     { path: 'finance/money', element: <MoneyAccountsPage base="/teacher" /> },
     { path: 'finance/journal', element: <JournalPage /> },
+    { path: 'finance/budgets', element: <BudgetsPage /> },
     { path: 'finance/accounting-reports', element: <AccountingReportsPage /> },
     { path: 'finance/money/:id', element: <MoneyLedgerPage base="/teacher" /> },
     { path: 'finance/expenses', element: <ExpensesPage base="/teacher" /> },
@@ -253,6 +255,7 @@ export const routes = [
               { path: '/admin/finance/year-end', element: <YearEndPage base="/admin" /> },
               { path: '/admin/finance/money', element: <MoneyAccountsPage base="/admin" /> },
               { path: '/admin/finance/journal', element: <JournalPage /> },
+              { path: '/admin/finance/budgets', element: <BudgetsPage /> },
               { path: '/admin/finance/accounting-reports', element: <AccountingReportsPage /> },
               { path: '/admin/finance/money/:id', element: <MoneyLedgerPage base="/admin" /> },
               { path: '/admin/finance/expenses', element: <ExpensesPage base="/admin" /> },
