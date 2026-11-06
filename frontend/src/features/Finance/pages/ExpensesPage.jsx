@@ -180,7 +180,7 @@ function CategoriesDialog({ canManage, onClose }) {
   const add = useMutation({ mutationFn: () => api.post('/finance/expense-categories', form), onSuccess: () => { setForm({ name_ar: '', name_en: '' }); setError(''); done() }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
   const toggle = useMutation({ mutationFn: (c) => api.put(`/finance/expense-categories/${c.id}`, { is_active: !c.is_active }), onSuccess: done })
   return (
-    <Modal open title={t('expenses.categories')} onClose={onClose}>
+    <Modal open size="lg" title={t('expenses.categories')} onClose={onClose}>
       <div className="space-y-3">
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <ul className="divide-y rounded border text-sm">
@@ -198,6 +198,9 @@ function CategoriesDialog({ canManage, onClose }) {
             <button type="submit" className="rounded bg-brand px-4 py-2 text-white">{t('admin.actions.add')}</button>
           </form>
         )}
+        <div className="flex justify-end">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('common.back')}</button>
+        </div>
       </div>
     </Modal>
   )
