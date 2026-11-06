@@ -470,6 +470,7 @@ Every delete asks first in the same styled dialog (`ConfirmDialog`: a red trash 
 - **Ask** (`/teacher/procurement`, `/admin/procurement`): any member of staff files a request: what, details, quantity, category, priority (low / normal / high / urgent), estimated cost, needed by. They edit or delete it while it waits.
 - **Decide**: the **principal** approves (the accountant is told to buy) or declines **with a reason** (the requester reads it).
 - **Buy**: the **accountant** records the purchase of an approved request: where from, what it really cost, the invoice number and date. The requester is told.
+  - One button also **records the bill** (expense) linked to the request, in the same step: the supplier is found or created, the category defaults to *Supplies* (changeable), and a due date can be set. Tick **Paid now** to pay it at once from a chosen account. If anything fails, nothing is saved. No migration needed.
 - **Receive**: the requester (or the principal / accountant) presses "It arrived".
 - **Board**: columns Waiting → Approved → Bought → Received (and Declined when there is one), urgent first; tabs on a phone. The principal and the accountant see everything with "waiting for a decision", "approved, to spend" and "spent so far"; everyone else sees only their own requests. Every change is in the audit log.
 - After pulling: `php artisan tenants:migrate` (replaces the old unused `procurement_requests` table).

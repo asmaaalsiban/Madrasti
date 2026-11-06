@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CalendarClock, Check, PackageCheck, Pencil, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
 import { api } from '../../api/client'
@@ -67,12 +68,27 @@ function RejectDialog({ request, onClose }) {
 function PurchaseDialog({ request, currency, onClose }) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [form, setForm] = useState({ supplier: '', actual_cost: request.estimated_cost ?? '', purchase_ref: '', purchased_on: '' })
+  const { i18n } = useTranslation()
+  const [form, setForm] = useState({ supplier: '', actual_cost: request.estimated_cost ?? '', purchase_ref: '', purchased_on: '', expense_category_id: '', due_date: '' })
+  const [payNow, setPayNow] = useState(false)
+  const [pay, setPay] = useState({ money_account_id: '', method: 'cash', reference: '' })
   const [error, setError] = useState('')
-  const save = useMutation({ mutationFn: () => api.post(`/procurement/${request.id}/purchase`, { ...form, purchase_ref: form.purchase_ref || null, purchased_on: form.purchased_on || null }), onSuccess: () => { client.invalidateQueries({ queryKey: ['procurement'] }); onClose() }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
+  const { data: fin } = useQuery({ queryKey: ['finance', 'expenses', 'options'], queryFn: async () => (await api.get('/finance/expenses')).data })
+  const categories = Array.isArray(fin?.categories) ? fin.categories.filter((c) => c.is_active !== false) : []
+  const accounts = Array.isArray(fin?.accounts) ? fin.accounts : []
+  const methods = Array.isArray(fin?.methods) ? fin.methods : ['cash']
+  const save = useMutation({
+    mutationFn: () => api.post(`/procurement/${request.id}/purchase`, {
+      ...form, purchase_ref: form.purchase_ref || null, purchased_on: form.purchased_on || null,
+      expense_category_id: form.expense_category_id || null, due_date: form.due_date || null,
+      ...(payNow ? { pay_now: { ...pay, money_account_id: Number(pay.money_account_id), reference: pay.reference || null } } : {}),
+    }),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ['procurement'] }); client.invalidateQueries({ queryKey: ['finance'] }); onClose() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
   return (
-    <Modal open title={t('procurement.purchaseTitle', { title: request.title })} onClose={onClose}>
+    <Modal open size="lg" title={t('procurement.purchaseTitle', { title: request.title })} onClose={onClose}>
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         {request.estimated_cost && <p className="text-sm text-slate-600">{t('procurement.estimated')}: <Money value={request.estimated_cost} currency={currency} /></p>}
@@ -82,6 +98,32 @@ function PurchaseDialog({ request, currency, onClose }) {
           <label className="block text-sm">{t('procurement.invoice')}<input className="mt-1 w-full rounded border p-2" dir="ltr" value={form.purchase_ref} onChange={set('purchase_ref')} /></label>
         </div>
         <label className="block text-sm sm:max-w-xs">{t('procurement.boughtOn')}<DateInput className="mt-1 w-full rounded border p-2" value={form.purchased_on} onChange={set('purchased_on')} /></label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block text-sm">{t('procurement.billCategory')}
+            <select className="mt-1 w-full rounded border p-2" value={form.expense_category_id} onChange={set('expense_category_id')}>
+              <option value="">{t('procurement.defaultCategory')}</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c[`name_${i18n.language}`] || c.name_ar}</option>)}
+            </select>
+          </label>
+          <label className="block text-sm">{t('procurement.dueDate')}<DateInput className="mt-1 w-full rounded border p-2" value={form.due_date} onChange={set('due_date')} /></label>
+        </div>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={payNow} onChange={(e) => setPayNow(e.target.checked)} />{t('procurement.paidNow')}</label>
+        {payNow && (
+          <div className="grid gap-3 rounded border p-3 sm:grid-cols-3">
+            <label className="block text-sm">{t('procurement.payAccount')}
+              <select required className="mt-1 w-full rounded border p-2" value={pay.money_account_id} onChange={(e) => setPay({ ...pay, money_account_id: e.target.value })}>
+                <option value="" />
+                {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </label>
+            <label className="block text-sm">{t('procurement.payMethod')}
+              <select className="mt-1 w-full rounded border p-2" value={pay.method} onChange={(e) => setPay({ ...pay, method: e.target.value })}>
+                {methods.map((m) => <option key={m} value={m}>{t(`expenses.methods.${m}`, { defaultValue: m })}</option>)}
+              </select>
+            </label>
+            <label className="block text-sm">{t('procurement.payRef')}<input dir="ltr" className="mt-1 w-full rounded border p-2" value={pay.reference} onChange={(e) => setPay({ ...pay, reference: e.target.value })} /></label>
+          </div>
+        )}
         <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button><button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('procurement.recordPurchase')}</button></div>
       </form>
     </Modal>
@@ -91,6 +133,7 @@ function PurchaseDialog({ request, currency, onClose }) {
 function Card({ r, data, onDialog }) {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
+  const base = useLocation().pathname.startsWith('/admin') ? '/admin' : '/teacher'
   const act = useMutation({ mutationFn: (path) => api.post(`/procurement/${r.id}/${path}`), onSuccess: () => client.invalidateQueries({ queryKey: ['procurement'] }) })
   const date = (d) => new Date(`${d}T12:00:00`).toLocaleDateString(i18n.language === 'ar' ? 'ar-JO-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short' })
   const btn = 'flex items-center gap-1.5 rounded px-3 py-1 text-sm'
@@ -109,7 +152,7 @@ function Card({ r, data, onDialog }) {
       {r.description && <p className="text-sm text-slate-600">{r.description}</p>}
       <p className="text-xs text-slate-500">{r.requester.name}{r.reviewed_by && ` · ${r.status === 'rejected' ? t('procurement.declinedBy') : t('procurement.approvedBy')} ${r.reviewed_by}`}</p>
       {r.review_note && <p className="rounded-lg bg-slate-50 p-2 text-xs text-slate-600">“{r.review_note}”</p>}
-      {r.supplier && <p className="rounded-lg bg-green-50 p-2 text-xs text-green-900">{t('procurement.boughtFrom', { supplier: r.supplier })} · <Money value={r.actual_cost} currency={data.currency} />{r.purchase_ref && <> · <bdi dir="ltr">{r.purchase_ref}</bdi></>}</p>}
+      {r.supplier && <p className="rounded-lg bg-green-50 p-2 text-xs text-green-900">{t('procurement.boughtFrom', { supplier: r.supplier })} · <Money value={r.actual_cost} currency={data.currency} />{r.purchase_ref && <> · <bdi dir="ltr">{r.purchase_ref}</bdi></>}{r.expense_id && <> · <Link to={`${base}/finance/expenses`} className="underline">{t('procurement.billRecorded')}</Link></>}</p>}
       <div className="flex flex-wrap gap-2 pt-1">
         {data.can_review && r.status === 'pending' && <button type="button" disabled={act.isPending} className={`${btn} bg-green-700 text-white`} onClick={() => act.mutate('approve')}><Check size={15} aria-hidden />{t('procurement.approve')}</button>}
         {data.can_review && r.status === 'pending' && <button type="button" className={`${btn} border border-red-300 text-red-700`} onClick={() => onDialog({ type: 'reject', request: r })}><X size={15} aria-hidden />{t('procurement.reject')}</button>}

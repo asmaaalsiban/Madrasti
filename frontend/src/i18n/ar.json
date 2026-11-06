@@ -2062,7 +2062,15 @@
     "approvedBy": "اعتمده",
     "declinedBy": "رفضه",
     "boughtFrom": "اشتُري من {{supplier}}",
-    "deleteTitle": "حذف هذا الطلب؟"
+    "deleteTitle": "حذف هذا الطلب؟",
+    "billCategory": "تصنيف الفاتورة",
+    "defaultCategory": "مستلزمات (افتراضي)",
+    "dueDate": "تاريخ الاستحقاق",
+    "paidNow": "مدفوعة الآن",
+    "payAccount": "الدفع من حساب",
+    "payMethod": "طريقة الدفع",
+    "payRef": "المرجع",
+    "billRecorded": "الفاتورة مسجلة"
   },
   "transport": {
     "title": "المواصلات",

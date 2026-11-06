@@ -2051,7 +2051,15 @@
     "approvedBy": "approved by",
     "declinedBy": "declined by",
     "boughtFrom": "Bought from {{supplier}}",
-    "deleteTitle": "Delete this request?"
+    "deleteTitle": "Delete this request?",
+    "billCategory": "Bill category",
+    "defaultCategory": "Supplies (default)",
+    "dueDate": "Due date",
+    "paidNow": "Paid now",
+    "payAccount": "Pay from account",
+    "payMethod": "Payment method",
+    "payRef": "Reference",
+    "billRecorded": "Bill recorded"
   },
   "transport": {
     "title": "School transport",
