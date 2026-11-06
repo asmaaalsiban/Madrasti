@@ -27,6 +27,7 @@ export default function FinanceDashboardPage({ base }) {
           <Link to={`${base}/finance/accounts`} className="rounded bg-brand px-4 py-1.5 text-white">{t('finance.accounts')}</Link>
           <Link to={`${base}/finance/transfers`} className="rounded border px-4 py-1.5 text-brand">{t('transfers.title')}</Link>
           <Link to={`${base}/finance/structures`} className="rounded border px-4 py-1.5 text-brand">{t('finance.structures')}</Link>
+          <Link to={`${base}/finance/money`} className="rounded border px-4 py-1.5 text-brand">{t('money.title')}</Link>
           <Link to={`${base}/finance/year-end`} className="rounded border px-4 py-1.5 text-brand">{t('yearEnd.title')}</Link>
         </div>
       </div>

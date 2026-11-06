@@ -2678,5 +2678,79 @@
     "confirmUndo": "Undo the carry-over of {{name}}? The balance goes back to the old year and its installments leave the new year.",
     "undone": "The move was undone.",
     "reverted": "Undone"
+  },
+  "money": {
+    "title": "Cash & banks",
+    "help": "The school's money: its cash boxes and bank accounts. Every payment from students goes into one automatically (the cash box for cash and cheques, the bank for transfers, cards and online payments). You can move money between accounts, correct a balance with a reason, and match the bank book with the bank statement.",
+    "total": "Total balance",
+    "newAccount": "Add an account",
+    "editAccount": "Edit the account",
+    "name": "Account name",
+    "type": "Type",
+    "types": {
+      "cash": "Cash box",
+      "bank": "Bank account"
+    },
+    "opening": "Opening balance",
+    "bankName": "Bank name",
+    "iban": "Account number / IBAN",
+    "active": "Active",
+    "off": "Off",
+    "book": "Account book",
+    "transfer": "Transfer between accounts",
+    "doTransfer": "Transfer",
+    "from": "From account",
+    "to": "To account",
+    "amount": "Amount",
+    "date": "Date",
+    "note": "Note (optional)",
+    "adjust": "Correct",
+    "adjustFor": "Correct the balance of {{name}}",
+    "adjustHelp": "For differences found when counting the cash box or bank fees. The reason is kept in the book.",
+    "direction": "Direction",
+    "directions": {
+      "in": "Increase",
+      "out": "Decrease"
+    },
+    "reason": "Reason",
+    "unmatched": "{{count}} lines not matched with the bank statement",
+    "intoAccount": "Account the payment goes into",
+    "usual": "The usual one for the payment method",
+    "balance": "Balance",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "clear": "Clear",
+    "forward": "Balance brought forward",
+    "closing": "Closing balance",
+    "matched": "Matched with the bank",
+    "cols": {
+      "date": "Date",
+      "what": "Description",
+      "in": "In",
+      "out": "Out",
+      "balance": "Balance",
+      "amount": "Amount"
+    },
+    "kinds": {
+      "receipt": "Student payment",
+      "transfer_in": "Transfer in",
+      "transfer_out": "Transfer out",
+      "adjustment": "Correction"
+    },
+    "tabs": {
+      "book": "Book",
+      "reconcile": "Match the bank statement"
+    },
+    "reconcileHelp": "Tick the lines that appear on the bank statement, and enter the statement's date and closing balance. The matching can be finished only when the two balances agree.",
+    "lastStatement": "Last statement ({{date}})",
+    "allMatched": "Every line is matched with the statement.",
+    "onStatement": "On the statement",
+    "onStatementFor": "Line {{date}} of {{amount}} is on the statement",
+    "statementDate": "Statement date",
+    "statementBalance": "Closing balance on the statement",
+    "ourBalance": "Balance of the chosen lines",
+    "difference": "Difference",
+    "finish": "Finish matching",
+    "reconciled": "Matched."
   }
 }

@@ -29,4 +29,13 @@ return [
     'carry_already_reverted' => 'This move was already undone.',
     'carry_has_payments' => 'A payment was already taken on the carried balance. Cancel it first.',
     'carry_use_year_end' => 'This entry was made by the year-end carry-over: undo it from the Year-end screen.',
+    'account_not_usable' => 'This account does not exist or is switched off.',
+    'void_reconciled' => 'This payment was already matched with the bank statement, so it cannot be cancelled.',
+    'transfer_invalid' => 'Choose two different active accounts and an amount.',
+    'transfer_to' => 'Transfer to :name',
+    'transfer_from' => 'Transfer from :name',
+    'opening_locked' => 'The opening balance cannot change once lines were matched with the bank statement.',
+    'account_has_entries' => 'This account has a book. Switch it off instead of deleting it.',
+    'reconcile_bad_lines' => 'Some of the chosen lines are not open lines of this account.',
+    'reconcile_difference' => 'The chosen lines do not reach the statement balance: the difference is :difference.',
 ];

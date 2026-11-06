@@ -629,3 +629,13 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - Every move is recorded (`fee_carryovers`) and **can be undone** until a payment is taken on the carried balance; running it again finds nothing left to carry. A carried entry cannot be cancelled as a normal payment.
 - **Migrations** (run `php artisan tenants:migrate`): `fee_carryovers` table, and `payments.method` becomes text (it was a fixed list).
 - The whole plan (cash and bank, expenses and suppliers, chart of accounts and journal, reports, budgets) is in `docs/accounting-roadmap.md`.
+
+## Accounting: cash boxes and bank accounts (phase 2)
+`Finance > Cash & banks` (`/teacher/finance/money` for the accountant, `/admin/finance/money` read-only for the principal).
+- Every school starts with a **cash box** and a **bank account** (the migration also moves every payment already taken into one: cash and cheques to the cash box, the rest to the bank, so the books start complete). Add more accounts (a petty cash, a second bank), switch one off, or delete an empty one.
+- **Every student payment lands in an account**: the one chosen in the payment form (it shows when there are 2 or more active accounts), else the usual one for the method (cash box for cash and cheques; bank for bank transfers, cards and online). All payment routes (manual, first payment, online, approved bank transfers, imports) go through `FeeBilling::recordPayment`, so none escapes. Cancelling a payment takes its line out of the book, unless the line was already matched with the bank statement. The year-end "carried forward" entries are not money and never enter an account.
+- **Transfers** between two accounts (two lines sharing a reference, the total stays), and **corrections** by hand (a difference found counting the cash box, a bank fee) that always need a reason.
+- **Account book** (`/finance/money/:id`): balance brought forward, each line with in / out and the running balance, a date filter, and a tick on the lines matched with the bank.
+- **Match the bank statement**: tick the lines that appear on the statement, enter its date and closing balance; it can be finished only when the difference is zero, and then those lines are locked (the opening balance too).
+- API (finance routes; the accountant changes, the principal reads): `money-accounts` (CRUD), `money-accounts/{id}/ledger`, `money-accounts/{id}/adjustments`, `money-accounts/{id}/reconciliation` (GET open lines, POST to finish), `money-transfers`.
+- **Migration** (run `php artisan tenants:migrate`): `money_accounts`, `account_entries`, `reconciliations`, `payments.money_account_id`.

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
@@ -13,13 +13,16 @@ export default function PaymentDialog({ fee, currency, payerDefault = '', onClos
   const { t } = useTranslation()
   const client = useQueryClient()
   const [form, setForm] = useState({ amount: fee.remaining, method: 'cash', paid_on: today(), reference: '', note: '', installment_id: '', payer_name: payerDefault ?? '' })
+  const [accountId, setAccountId] = useState('') // '' = the usual account for the method (cash box for cash and cheques, the bank for the rest)
   const [error, setError] = useState('')
+  const accounts = useQuery({ queryKey: ['finance', 'money-accounts'], queryFn: async () => (await api.get('/finance/money-accounts')).data })
+  const usable = (Array.isArray(accounts.data?.data) ? accounts.data.data : []).filter((a) => a.is_active)
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
 
   const save = useMutation({
     mutationFn: () => api.post('/finance/payments', {
       student_fee_id: fee.id, amount: form.amount, method: form.method, paid_on: form.paid_on, reference: form.reference || null, payer_name: form.payer_name || null, note: form.note || null,
-      installment_id: form.installment_id ? Number(form.installment_id) : null,
+      installment_id: form.installment_id ? Number(form.installment_id) : null, money_account_id: accountId ? Number(accountId) : null,
     }).then((r) => r.data.data),
     onSuccess: (payment) => { client.invalidateQueries({ queryKey: ['finance'] }); onDone(payment) },
     onError: (err) => setError(Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || t('admin.actions.error')),
@@ -34,6 +37,14 @@ export default function PaymentDialog({ fee, currency, payerDefault = '', onClos
         <label className="block text-sm">{t('finance.fields.method')}
           <select className="mt-1 w-full rounded border p-2" value={form.method} onChange={set('method')}>{METHODS.map((m) => <option key={m} value={m}>{t(`finance.methods.${m}`)}</option>)}</select>
         </label>
+        {usable.length > 1 && (
+          <label className="block text-sm">{t('money.intoAccount')}
+            <select className="mt-1 w-full rounded border p-2" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+              <option value="">{t('money.usual')}</option>
+              {usable.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </label>
+        )}
         <label className="block text-sm">{t('finance.fields.paidOn')}<DateInput required max={today()} className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
         <label className="block text-sm">{t('finance.fields.installment')}
           <select className="mt-1 w-full rounded border p-2" value={form.installment_id} onChange={set('installment_id')}>
