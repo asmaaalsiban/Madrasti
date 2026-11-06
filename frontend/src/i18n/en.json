@@ -2860,6 +2860,7 @@
       "equity": "Equity",
       "income": "Income",
       "expense": "Expense"
-    }
+    },
+    "automatic": "Automatic"
   }
 }
