@@ -31,6 +31,7 @@ export default function FinanceDashboardPage({ base }) {
           <Link to={`${base}/finance/money`} className="rounded border px-4 py-1.5 text-brand">{t('money.title')}</Link>
           <Link to={`${base}/finance/journal`} className="rounded border px-4 py-1.5 text-brand">{t('journal.title')}</Link>
           <Link to={`${base}/finance/accounting-reports`} className="rounded border px-4 py-1.5 text-brand">{t('acctReports.title')}</Link>
+          <Link to={`${base}/finance/budgets`} className="rounded border px-4 py-1.5 text-brand">{t('budgets.title')}</Link>
           <Link to={`${base}/finance/year-end`} className="rounded border px-4 py-1.5 text-brand">{t('yearEnd.title')}</Link>
         </div>
       </div>

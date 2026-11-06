@@ -677,3 +677,9 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Account ledger**: the lines of one account with a running balance.
 - **Receivables ageing**: what each student owes, split by how late it is (not due, 1-30, 31-60, 61-90, over 90 days).
 - Every report exports to Excel; the Print button gives a PDF through the browser. No migration.
+
+## Budgets (accounting phase 6)
+
+- `/admin/finance/budgets` (and `/teacher/finance/budgets` for the accountant): for each academic year, the accountant sets a budget per expense category. The page shows what is spent (bills dated inside the year), what is left, and a bar that turns amber near the limit and red when over, or when money is spent on a category with no budget.
+- The principal reads; only the accountant changes. After pulling: `php artisan tenants:migrate`.
+- Tax (VAT) is not built; add it only if the school's country requires it.
