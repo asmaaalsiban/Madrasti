@@ -34,6 +34,8 @@ use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\ExpenseController;
 use App\Modules\Finance\Http\Controllers\AccountingReportController;
+use App\Modules\QuestionBank\Http\Controllers\QuestionAuthoringController;
+use App\Modules\QuestionBank\Http\Controllers\QuizController;
 use App\Modules\Finance\Http\Controllers\BudgetController;
 use App\Modules\Finance\Http\Controllers\JournalController;
 use App\Modules\Finance\Http\Controllers\TaxController;
@@ -586,3 +588,24 @@ Route::middleware('school-user')->prefix('privacy')->group(function (): void {
         Route::put('requests/{dataRequest}', [PrivacyController::class, 'decide']);
     });
 });
+
+// Question bank: teachers write lessons and multiple-choice questions; a student builds quizzes from their own grade.
+Route::middleware(['school-user', 'role:teacher,admin'])->prefix('question-bank')->group(function (): void {
+    Route::get('scope', [QuestionAuthoringController::class, 'scope']);
+    Route::get('lessons', [QuestionAuthoringController::class, 'lessons']);
+    Route::post('lessons', [QuestionAuthoringController::class, 'storeLesson']);
+    Route::put('lessons/{lesson}', [QuestionAuthoringController::class, 'updateLesson'])->whereNumber('lesson');
+    Route::delete('lessons/{lesson}', [QuestionAuthoringController::class, 'destroyLesson'])->whereNumber('lesson');
+    Route::get('lessons/{lesson}/questions', [QuestionAuthoringController::class, 'questions'])->whereNumber('lesson');
+    Route::post('lessons/{lesson}/questions', [QuestionAuthoringController::class, 'storeQuestion'])->whereNumber('lesson');
+    Route::put('questions/{question}', [QuestionAuthoringController::class, 'updateQuestion'])->whereNumber('question');
+    Route::delete('questions/{question}', [QuestionAuthoringController::class, 'destroyQuestion'])->whereNumber('question');
+});
+Route::middleware(['school-user', 'role:student'])->prefix('quizzes')->group(function (): void {
+    Route::get('options', [QuizController::class, 'options']);
+    Route::get('/', [QuizController::class, 'index']);
+    Route::post('/', [QuizController::class, 'store']);
+    Route::get('{quiz}', [QuizController::class, 'show'])->whereNumber('quiz');
+    Route::post('{quiz}/answer', [QuizController::class, 'answer'])->whereNumber('quiz');
+});
+Route::middleware('school-user')->get('students/{student}/quizzes', [QuizController::class, 'forStudent']);

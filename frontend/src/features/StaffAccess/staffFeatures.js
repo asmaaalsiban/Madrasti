@@ -1,7 +1,7 @@
 // The screens of a member of staff that the principal can switch off. `paths` are under /teacher/; a longer path wins over a shorter one.
 export const GROUPS = [
   { key: 'general', features: ['chat', 'announcements', 'stories', 'tasks'] },
-  { key: 'teaching', features: ['timetable', 'attendance', 'attendance_report', 'exams', 'lesson_plans', 'daily_summary', 'homework', 'grades'] },
+  { key: 'teaching', features: ['timetable', 'attendance', 'attendance_report', 'exams', 'lesson_plans', 'daily_summary', 'homework', 'question_bank', 'grades'] },
   { key: 'followUp', features: ['behavior', 'motivation', 'surveys', 'signature', 'lesson_plan_review', 'department'] },
   { key: 'mine', features: ['duties', 'staff_attendance', 'payslips', 'procurement'] },
   { key: 'money', features: ['finance', 'renewals', 'payroll'] },
@@ -9,7 +9,7 @@ export const GROUPS = [
 
 const PATHS = {
   chat: ['chat'], announcements: ['announcements'], stories: ['stories'], tasks: ['tasks'],
-  timetable: ['timetable'], attendance: ['attendance'], attendance_report: ['attendance/report'], exams: ['exams'], lesson_plans: ['lesson-plans'], daily_summary: ['daily-summary'], homework: ['homework'], grades: ['grades'],
+  timetable: ['timetable'], attendance: ['attendance'], attendance_report: ['attendance/report'], exams: ['exams'], lesson_plans: ['lesson-plans'], daily_summary: ['daily-summary'], homework: ['homework'], question_bank: ['question-bank'], grades: ['grades'],
   behavior: ['behavior'], motivation: ['motivation'], surveys: ['surveys', 'my-surveys'], signature: ['signature'], lesson_plan_review: ['lesson-plans/review'], department: ['department'],
   duties: ['duties'], staff_attendance: ['staff-attendance'], payslips: ['payslips'], procurement: ['procurement'],
   finance: ['finance'], renewals: ['renewals'], payroll: ['payroll'],

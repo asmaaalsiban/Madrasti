@@ -1,7 +1,7 @@
 import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bus, Award, BookOpenCheck, CalendarClock, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
+import { Bus, Award, BookOpenCheck, CalendarClock, ListChecks, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Vote } from 'lucide-react'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import { useAuth } from '../../Auth/AuthProvider'
 import StudentGrades from '../../Grading/components/StudentGrades'
@@ -14,6 +14,7 @@ export default function StudentHome() {
   const tiles = [
     { key: 'timetable', to: '/student/timetable', label: t('timetable.myTimetable'), icon: CalendarClock },
     { key: 'homework', to: '/student/homework', label: t('homework.title'), icon: BookOpenCheck },
+    { key: 'quizzes', to: '/student/quizzes', label: t('quiz.title'), icon: ListChecks },
     { key: 'exams', to: '/student/exams', label: t('exams.myTitle'), icon: FileCheck2 },
     { key: 'summaries', to: '/student/summaries', label: t('dailySummary.title'), icon: FileText },
     { key: 'lesson-plans', to: '/student/lesson-plans', label: t('lessonPlans.title'), icon: NotebookPen },

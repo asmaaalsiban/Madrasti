@@ -691,3 +691,14 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - Report *Tax summary* (accounting reports): tax charged, tax paid and the net to pay, month by month, with Excel export.
 - Saving the settings re-posts the fees and bills, so the journal follows. A school must confirm the rate and which items are taxable with its accountant or the tax authority.
 - After pulling: `php artisan tenants:migrate`.
+
+## Question bank and quizzes
+
+- **Teachers** (`/teacher/question-bank`, and the admin at `/admin/question-bank`): pick a grade and subject they teach (the admin: any), add lessons, then add multiple-choice questions (2 to 6 options, exactly one correct) with a *how to solve it* explanation. The principal can switch the screen off per teacher (Staff access).
+- **Students** (`/student/quizzes`): pick a subject, the lessons and how many questions, then *Generate*. Questions are drawn at random from the student's **own grade only** (decided on the server, never by the screen). If fewer questions exist than asked, the quiz is shorter and the student is told.
+- **Taking a quiz**: one question at a time. A right answer goes straight on; a wrong one shows the right answer and the explanation, then *Next*. The end shows the score. An unfinished quiz can be continued.
+- **Safe by design**: a question reaches the student without its answer; the right option and the explanation come back only after the student answers it wrong. A student cannot answer twice or open another student's quiz.
+- **History**: the student keeps their quizzes with the score; a parent sees the same list for each child (`/parent/children/:id/quizzes`).
+- A question students already met is switched off instead of deleted, so their results stay whole; its options can be reworded but not added or removed.
+- Not built yet (decide with the team): a timer, pictures and equations, principal approval of questions, per-class results for the teacher.
+- After pulling: `php artisan tenants:migrate`.
