@@ -50,4 +50,5 @@ return [
     'ledger_account_used' => 'This account is used (or built in). Switch it off instead of deleting it.',
     'entry_is_automatic' => 'This entry was made by the system. Cancel its source instead.',
     'auto' => ['fee' => 'Fee: :name', 'bill' => 'Bill: :name', 'opening' => 'Opening balance: :name', 'entry' => ':name', 'kinds' => ['receipt' => 'Payment received','transfer_in' => 'Transfer in','transfer_out' => 'Transfer out','adjustment' => 'Correction','expense' => 'Bill payment','payroll' => 'Salary']],
+    'rpt' => ['cols' => ['code' => 'Code','account' => 'Account','debit' => 'Debit','credit' => 'Credit','type' => 'Type','amount' => 'Amount','date' => 'Date','memo' => 'Description','balance' => 'Balance','student' => 'Student','current' => 'Not due','d30' => '1-30 days','d60' => '31-60 days','d90' => '61-90 days','over90' => 'Over 90 days','total' => 'Total'], 'names' => ['trial-balance' => 'Trial balance','income-statement' => 'Income statement','balance-sheet' => 'Balance sheet','account-ledger' => 'Account ledger','receivables-ageing' => 'Receivables ageing']],
 ];

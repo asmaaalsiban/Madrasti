@@ -9,7 +9,7 @@ Goal: a full accounting application inside the platform (double entry), built in
 | 3 | **Expenses and suppliers**: bills, payments out of an account, categories, links to purchase requests and payroll | done |
 | 4a | **Chart of accounts and journal**: default chart, manual balanced entries, locked periods | done |
 | 4b | **Automatic entries**: every fee, payment, bill, transfer and salary posts a balanced entry by itself; old data is filled in | done |
-| 5 | Reports: trial balance, income statement, balance sheet, account ledger, receivables ageing, export to Excel/PDF | |
+| 5 | **Reports**: trial balance, income statement, balance sheet, account ledger, receivables ageing; Excel export and print / PDF | done |
 | 6 | Budgets per year/department and variance; tax (VAT) if the country needs it | |
 
 Notes

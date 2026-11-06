@@ -667,3 +667,13 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - Year-end carried fees and non-cash carry-forward payments post nothing (the debt is already on the books).
 - Old data is filled in by the migration. After pulling: `php artisan tenants:migrate`.
 - The *Funds in transit* account (1190) clears transfers between boxes; its balance is always zero.
+
+## Accounting reports (accounting phase 5)
+
+- `/admin/finance/accounting-reports` (and `/teacher/finance/accounting-reports` for the accountant). Read from the journal; the principal and the accountant can open them.
+- **Trial balance**: every account's debit or credit balance on a date. The totals must be equal; the page warns when they are not.
+- **Income statement**: income minus expenses between two dates = net profit.
+- **Balance sheet**: assets = liabilities + equity (the profit so far counts as equity).
+- **Account ledger**: the lines of one account with a running balance.
+- **Receivables ageing**: what each student owes, split by how late it is (not due, 1-30, 31-60, 61-90, over 90 days).
+- Every report exports to Excel; the Print button gives a PDF through the browser. No migration.
