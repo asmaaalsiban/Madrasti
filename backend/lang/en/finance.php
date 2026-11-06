@@ -44,4 +44,9 @@ return [
     'supplier_has_bills' => 'This supplier has bills. Switch him off instead of deleting him.',
     'category_in_use' => 'This category is used by bills. Switch it off instead of deleting it.',
     'salary_line' => 'Salary :month · :name',
+    'books_locked' => 'Books are locked up to :date. Choose a later date.',
+    'line_one_side' => 'Every line needs either a debit or a credit, not both.',
+    'entry_unbalanced' => 'The entry is not balanced: debits must equal credits, with at least two lines.',
+    'ledger_account_used' => 'This account is used (or built in). Switch it off instead of deleting it.',
+    'entry_is_automatic' => 'This entry was made by the system. Cancel its source instead.',
 ];
