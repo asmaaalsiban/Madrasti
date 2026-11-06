@@ -58,7 +58,22 @@ describe('ProcurementPage', () => {
     fireEvent.change(within(dialog).getByLabelText('What it cost (JOD)'), { target: { value: '32.5' } })
     fireEvent.change(within(dialog).getByLabelText('Invoice number'), { target: { value: 'INV-77' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Record purchase' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/procurement/3/purchase', { supplier: 'Al Noor Library', actual_cost: '32.5', purchase_ref: 'INV-77', purchased_on: null }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/procurement/3/purchase', { supplier: 'Al Noor Library', actual_cost: '32.5', purchase_ref: 'INV-77', purchased_on: null, expense_category_id: null, due_date: null }))
+  })
+
+  it('can pay the bill right away from an account', async () => {
+    api.get.mockImplementation(async (url) => (url === '/finance/expenses'
+      ? { data: { categories: [], accounts: [{ id: 7, name: 'Cash box' }], methods: ['cash'] } }
+      : board([req(3, 'approved')], { can_buy: true })))
+    api.post.mockResolvedValue({ data: { data: {} } })
+    wrap()
+    fireEvent.click(await screen.findByRole('button', { name: 'Record purchase' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Purchase: Item 3' })
+    fireEvent.change(within(dialog).getByLabelText('Bought from'), { target: { value: 'Al Noor' } })
+    fireEvent.click(within(dialog).getByLabelText('Paid now'))
+    fireEvent.change(await within(dialog).findByLabelText('Pay from account'), { target: { value: '7' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Record purchase' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/procurement/3/purchase', expect.objectContaining({ pay_now: { money_account_id: 7, method: 'cash', reference: null } })))
   })
 
   it('the requester confirms it arrived and sees where it was bought', async () => {
