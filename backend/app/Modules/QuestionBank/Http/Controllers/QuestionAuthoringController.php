@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\QuestionBank\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\QuestionBank\Models\Question;
@@ -17,6 +18,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Shared\Enums\Role;
 use Illuminate\Validation\ValidationException;
 
 /** Teachers (and the admin) write lessons and multiple-choice questions for the grades and subjects they teach. */
@@ -42,7 +44,14 @@ class QuestionAuthoringController extends Controller
     {
         $d = $request->validate(['grade_level_id' => ['required', 'integer'], 'subject_id' => ['required', 'integer']]);
         $this->allow($request, (int) $d['grade_level_id'], (int) $d['subject_id']);
-        $rows = QuestionLesson::withCount('questions')->where($d)->orderBy('id')->get()->map(fn ($l) => ['id' => $l->id, 'title' => $l->title, 'questions' => $l->questions_count]);
+        $lessons = QuestionLesson::withCount('questions')->where($d)->orderBy('id')->get();
+        $authors = Question::whereIn('question_lesson_id', $lessons->pluck('id'))->whereNotNull('created_by')->get(['question_lesson_id', 'created_by'])->groupBy('question_lesson_id');
+        $names = User::whereIn('id', $authors->flatten(1)->pluck('created_by')->unique())->pluck('name', 'id');
+        $me = $request->user();
+        $rows = $lessons->map(fn ($l) => [
+            'id' => $l->id, 'title' => $l->title, 'questions' => $l->questions_count, 'mine' => $this->ownsLesson($me, $l),
+            'teachers' => ($authors[$l->id] ?? collect())->pluck('created_by')->unique()->map(fn ($id) => $names[$id] ?? null)->filter()->values(),
+        ]);
 
         return response()->json(['data' => $rows]);
     }
@@ -51,17 +60,20 @@ class QuestionAuthoringController extends Controller
     {
         $d = $request->validate(['grade_level_id' => ['required', 'integer', 'exists:grade_levels,id'], 'subject_id' => ['required', 'integer', 'exists:subjects,id'], 'title' => ['required', 'string', 'max:150']]);
         $this->allow($request, (int) $d['grade_level_id'], (int) $d['subject_id']);
-        if (QuestionLesson::where($d)->exists()) {
-            throw ValidationException::withMessages(['title' => [__('questions.lesson_exists')]]);
+        // The lessons of a grade and subject are shared by all its teachers (9A's and 9B's too): the same lesson is never made twice.
+        $existing = QuestionLesson::where('grade_level_id', $d['grade_level_id'])->where('subject_id', $d['subject_id'])->whereRaw('lower(title) = ?', [mb_strtolower(trim($d['title']))])->first();
+        if ($existing !== null) {
+            return response()->json(['data' => ['id' => $existing->id, 'title' => $existing->title, 'questions' => $existing->questions()->count()], 'existing' => true]);
         }
-        $lesson = QuestionLesson::create($d + ['created_by' => $request->user()->id]);
+        $lesson = QuestionLesson::create(['title' => trim($d['title']), 'grade_level_id' => $d['grade_level_id'], 'subject_id' => $d['subject_id'], 'created_by' => $request->user()->id]);
 
-        return response()->json(['data' => ['id' => $lesson->id, 'title' => $lesson->title, 'questions' => 0]], 201);
+        return response()->json(['data' => ['id' => $lesson->id, 'title' => $lesson->title, 'questions' => 0], 'existing' => false], 201);
     }
 
     public function updateLesson(Request $request, QuestionLesson $lesson): JsonResponse
     {
         $this->allow($request, (int) $lesson->grade_level_id, (int) $lesson->subject_id);
+        abort_unless($this->ownsLesson($request->user(), $lesson), 403, __('questions.only_owner'));
         $d = $request->validate(['title' => ['required', 'string', 'max:150']]);
         if (QuestionLesson::where('grade_level_id', $lesson->grade_level_id)->where('subject_id', $lesson->subject_id)->where('title', $d['title'])->where('id', '!=', $lesson->id)->exists()) {
             throw ValidationException::withMessages(['title' => [__('questions.lesson_exists')]]);
@@ -74,6 +86,7 @@ class QuestionAuthoringController extends Controller
     public function destroyLesson(Request $request, QuestionLesson $lesson): Response
     {
         $this->allow($request, (int) $lesson->grade_level_id, (int) $lesson->subject_id);
+        abort_unless($this->ownsLesson($request->user(), $lesson), 403, __('questions.only_owner'));
         if ($lesson->questions()->exists()) {
             throw ValidationException::withMessages(['lesson' => [__('questions.lesson_has_questions')]]);
         }
@@ -109,6 +122,7 @@ class QuestionAuthoringController extends Controller
     {
         $lesson = $question->lesson;
         $this->allow($request, (int) $lesson->grade_level_id, (int) $lesson->subject_id);
+        $this->ownOnly($request, $question);
         $d = $this->data($request);
         DB::transaction(function () use ($question, $d): void {
             $question->update(['body' => $d['body'], 'explanation' => $d['explanation'] ?? null]);
@@ -128,6 +142,7 @@ class QuestionAuthoringController extends Controller
     {
         $lesson = $question->lesson;
         $this->allow($request, (int) $lesson->grade_level_id, (int) $lesson->subject_id);
+        $this->ownOnly($request, $question);
         if (QuizQuestion::where('question_id', $question->id)->exists()) {
             $question->update(['is_active' => false]);
         } else {
@@ -175,8 +190,23 @@ class QuestionAuthoringController extends Controller
     {
         abort_unless(in_array($slot, ['question', 'explanation'], true), 404);
         $this->allow($request, (int) $question->lesson->grade_level_id, (int) $question->lesson->subject_id);
+        if ($request->isMethod('post') || $request->isMethod('delete')) {
+            $this->ownOnly($request, $question); // reading a picture is open to the teachers of the lesson; changing it is not
+        }
 
         return $slot === 'question' ? 'image_path' : 'explanation_image_path';
+    }
+
+    /** A question can be changed only by the teacher who wrote it (and the admin): another teacher of the same lesson adds to it, never edits it. */
+    private function ownOnly(Request $request, Question $question): void
+    {
+        $user = $request->user();
+        abort_unless($user->hasRole(Role::Admin) || $question->created_by === $user->id, 403, __('questions.only_owner'));
+    }
+
+    private function ownsLesson(User $user, QuestionLesson $lesson): bool
+    {
+        return $user->hasRole(Role::Admin) || $lesson->created_by === $user->id;
     }
 
     private function allow(Request $request, int $grade, int $subject): void
@@ -221,6 +251,6 @@ class QuestionAuthoringController extends Controller
     /** @return array<string, mixed> */
     private function present(Question $q): array
     {
-        return ['id' => $q->id, 'body' => $q->body, 'explanation' => $q->explanation, 'is_active' => $q->is_active, 'has_image' => $q->image_path !== null, 'has_explanation_image' => $q->explanation_image_path !== null, 'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'body' => $o->body, 'is_correct' => $o->is_correct])->values()];
+        return ['id' => $q->id, 'author' => $q->created_by !== null ? User::find($q->created_by)?->name : null, 'mine' => $q->created_by === auth()->id() || auth()->user()?->hasRole(Role::Admin), 'body' => $q->body, 'explanation' => $q->explanation, 'is_active' => $q->is_active, 'has_image' => $q->image_path !== null, 'has_explanation_image' => $q->explanation_image_path !== null, 'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'body' => $o->body, 'is_correct' => $o->is_correct])->values()];
     }
 }

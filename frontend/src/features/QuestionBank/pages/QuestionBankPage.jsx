@@ -103,9 +103,10 @@ function Questions({ lesson }) {
             <li key={q.id} className="rounded-lg border bg-white p-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <p className="font-medium"><RichText text={q.body} /></p>
-                <span className="flex shrink-0 gap-3">
-                  <button type="button" aria-label={t('admin.actions.edit')} className="text-brand" onClick={() => setDialog({ question: q })}><Pencil size={16} aria-hidden /></button>
-                  <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setRemoving(q)}><Trash2 size={16} aria-hidden /></button>
+                <span className="flex shrink-0 items-center gap-3">
+                  {q.author && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{q.author}</span>}
+                  {q.mine && <button type="button" aria-label={t('admin.actions.edit')} className="text-brand" onClick={() => setDialog({ question: q })}><Pencil size={16} aria-hidden /></button>}
+                  {q.mine && <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setRemoving(q)}><Trash2 size={16} aria-hidden /></button>}
                 </span>
               </div>
               {q.has_image && <div className="mt-2"><QuestionImage path={`/question-bank/questions/${q.id}/image/question`} alt={t('questionBank.imageAlt')} /></div>}
@@ -129,6 +130,7 @@ export default function QuestionBankPage() {
   const [lessonId, setLessonId] = useState(null)
   const [title, setTitle] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [renaming, setRenaming] = useState(null)
   const [removing, setRemoving] = useState(null)
   const scope = useQuery({ queryKey: ['question-bank', 'scope'], queryFn: async () => (await api.get('/question-bank/scope')).data.data })
@@ -141,7 +143,7 @@ export default function QuestionBankPage() {
   const refresh = () => client.invalidateQueries({ queryKey: ['question-bank'] })
   const add = useMutation({
     mutationFn: () => api.post('/question-bank/lessons', { grade_level_id: pair.grade_level_id, subject_id: pair.subject_id, title }),
-    onSuccess: (res) => { setTitle(''); setError(''); setLessonId(res.data.data.id); refresh() },
+    onSuccess: (res) => { setTitle(''); setError(''); setNotice(res.data.existing ? t('questionBank.lessonReused', { title: res.data.data.title }) : ''); setLessonId(res.data.data.id); refresh() },
     onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
   })
   const rename = useMutation({ mutationFn: () => api.put(`/question-bank/lessons/${renaming.id}`, { title: renaming.title }), onSuccess: () => { setRenaming(null); refresh() }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) })
@@ -159,6 +161,8 @@ export default function QuestionBankPage() {
         </label>
       )}
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+      {notice && <p role="status" className="rounded bg-sky-tint p-2 text-sm">{notice}</p>}
+      <p className="text-sm text-slate-600">{t('questionBank.sharedHint')}</p>
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
         <aside className="space-y-3">
           <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate() }}>
@@ -176,9 +180,9 @@ export default function QuestionBankPage() {
                   </form>
                 ) : (
                   <>
-                    <button type="button" dir="auto" className="min-w-0 flex-1 text-start" onClick={() => setLessonId(l.id)}>{l.title} <span className="text-xs text-slate-500">({l.questions})</span></button>
-                    <button type="button" aria-label={t('admin.actions.edit')} className="text-brand" onClick={() => setRenaming({ id: l.id, title: l.title })}><Pencil size={15} aria-hidden /></button>
-                    <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setRemoving(l)}><Trash2 size={15} aria-hidden /></button>
+                    <button type="button" dir="auto" className="min-w-0 flex-1 text-start" onClick={() => { setNotice(''); setLessonId(l.id) }}>{l.title} <span className="text-xs text-slate-500">({l.questions})</span>{l.teachers?.length > 0 && <span className="block text-xs text-slate-500">{l.teachers.join('، ')}</span>}</button>
+                    {l.mine && <button type="button" aria-label={t('admin.actions.edit')} className="text-brand" onClick={() => setRenaming({ id: l.id, title: l.title })}><Pencil size={15} aria-hidden /></button>}
+                    {l.mine && <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setRemoving(l)}><Trash2 size={15} aria-hidden /></button>}
                   </>
                 )}
               </li>

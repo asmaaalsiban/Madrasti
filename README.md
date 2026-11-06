@@ -711,3 +711,11 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Pictures**: a teacher can attach one picture to a question and one to its explanation (jpg, png, webp, up to 5 MB). They are private: only a student who has the question in their quiz sees it, and the explanation picture only after a wrong answer.
 - **Equations**: write them between dollar signs (`$x^2 + 1$`, or `$$...$$` on their own line) in questions, options and explanations; the teacher sees a preview.
 - After pulling: `php artisan tenants:migrate`, then `npm install` in `frontend` (new package: `katex`).
+
+### Shared lessons between teachers
+
+- Lessons belong to a **grade and a subject**, not to a teacher or a section. So the English teacher of 9A and the English teacher of 9B see the same lessons and write into the same bank; a student of either section gets questions from both in their quizzes.
+- A teacher picks the existing lesson from the list and adds questions to it. Typing a lesson that already exists (any letter case) does not fail: it opens the existing one and says the questions will join the others.
+- Each lesson shows which teachers wrote in it, and each question shows its author.
+- Each teacher changes or deletes **only their own questions** (and their pictures); the admin can change any. Only the teacher who created a lesson (or the admin) can rename or delete it.
+- No migration.

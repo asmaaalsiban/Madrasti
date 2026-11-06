@@ -2983,7 +2983,9 @@
     "explanationImage": "Picture for the explanation",
     "optional": "optional",
     "removeImage": "Remove",
-    "imageAlt": "Question picture"
+    "imageAlt": "Question picture",
+    "sharedHint": "Lessons are shared by every teacher of this grade and subject, in all sections. Pick the lesson from the list and add your own questions to it; add a new lesson only if it is not listed. Everyone's questions go together in students' quizzes, and each of you can change only the questions you wrote.",
+    "lessonReused": "\"{{title}}\" already existed, so your questions will join the other teachers' questions in it."
   },
   "quiz": {
     "title": "Quizzes",

@@ -20,7 +20,7 @@ describe('QuestionBankPage', () => {
   it('lets a teacher add a lesson and a question with exactly one correct option', async () => {
     api.get.mockImplementation(async (url) => {
       if (url === '/question-bank/scope') return { data: { data: [{ grade_level_id: 1, grade_en: 'Grade 5', grade_ar: 'x', subject_id: 2, subject_en: 'Math', subject_ar: 'y' }] } }
-      if (url === '/question-bank/lessons') return { data: { data: [{ id: 7, title: 'Fractions', questions: 0 }] } }
+      if (url === '/question-bank/lessons') return { data: { data: [{ id: 7, title: 'Fractions', questions: 2, mine: true, teachers: ['Mr A', 'Ms B'] }] } }
       return { data: { data: [] } }
     })
     api.post.mockResolvedValue({ data: { data: { id: 1 } } })
@@ -111,5 +111,34 @@ describe('Quizzes', () => {
     render(<QueryClientProvider client={client()}><MemoryRouter initialEntries={['/student/quizzes/6']}><Routes><Route path="/student/quizzes/:id" element={<QuizRunPage />} /></Routes></MemoryRouter></QueryClientProvider>)
     expect(await screen.findByRole('timer')).toHaveTextContent(/2:0[0-5]/)
     expect(document.querySelector('.katex')).not.toBeNull()
+  })
+})
+
+describe('Shared lessons', () => {
+  it('shows who wrote what and lets a teacher change only their own questions', async () => {
+    api.get.mockImplementation(async (url) => {
+      if (url === '/question-bank/scope') return { data: { data: [{ grade_level_id: 1, grade_en: 'Grade 9', grade_ar: 'x', subject_id: 2, subject_en: 'English', subject_ar: 'y' }] } }
+      if (url === '/question-bank/lessons') return { data: { data: [{ id: 7, title: 'Present continuous', questions: 2, mine: false, teachers: ['Mr A', 'Ms B'] }] } }
+      return { data: { data: [
+        { id: 1, body: 'From A', author: 'Mr A', mine: false, is_active: true, options: [{ id: 1, body: 'a', is_correct: true }, { id: 2, body: 'b', is_correct: false }] },
+        { id: 2, body: 'From B', author: 'Ms B', mine: true, is_active: true, options: [{ id: 3, body: 'a', is_correct: true }, { id: 4, body: 'b', is_correct: false }] }] } }
+    })
+    render(<QueryClientProvider client={client()}><MemoryRouter><QuestionBankPage /></MemoryRouter></QueryClientProvider>)
+    expect(await screen.findByText(/Mr A، Ms B/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Present continuous/ }))
+    await screen.findByText('From A')
+    expect(screen.getAllByRole('button', { name: 'Edit' })).toHaveLength(1) // only B's own question
+  })
+
+  it('adding a lesson that already exists joins it instead of failing', async () => {
+    api.get.mockImplementation(async (url) => {
+      if (url === '/question-bank/scope') return { data: { data: [{ grade_level_id: 1, grade_en: 'Grade 9', grade_ar: 'x', subject_id: 2, subject_en: 'English', subject_ar: 'y' }] } }
+      return { data: { data: [] } }
+    })
+    api.post.mockResolvedValue({ data: { data: { id: 7, title: 'Present continuous', questions: 3 }, existing: true } })
+    render(<QueryClientProvider client={client()}><MemoryRouter><QuestionBankPage /></MemoryRouter></QueryClientProvider>)
+    fireEvent.change(await screen.findByLabelText('Lesson title'), { target: { value: 'present continuous' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('already existed')
   })
 })

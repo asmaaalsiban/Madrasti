@@ -47,7 +47,7 @@ class QuizExtrasTest extends AcademicTestCase
         Enrollment::create(['student_id' => $student->id, 'classroom_id' => $room->id, 'academic_year_id' => $year->id]);
         $this->lesson = QuestionLesson::create(['grade_level_id' => $grade->id, 'subject_id' => $this->math->id, 'title' => 'L'])->id;
         foreach (['A', 'B', 'C'] as $n) {
-            $q = Question::create(['question_lesson_id' => $this->lesson, 'body' => "Q $n", 'explanation' => "Why $n"]);
+            $q = Question::create(['question_lesson_id' => $this->lesson, 'created_by' => $this->teacher->id, 'body' => "Q $n", 'explanation' => "Why $n"]);
             $q->options()->createMany([['body' => 'right', 'is_correct' => true, 'position' => 0], ['body' => 'wrong', 'is_correct' => false, 'position' => 1]]);
             $this->questions[] = $q;
         }
