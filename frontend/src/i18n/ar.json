@@ -174,7 +174,8 @@
       "privacyRequests": "طلبات البيانات",
       "photoConsent": "الموافقة على الصور",
       "studentFiles": "ملفات الطلاب",
-      "branding": "هوية المدرسة"
+      "branding": "هوية المدرسة",
+      "questionBank": "بنك الأسئلة"
     },
     "actions": {
       "add": "إضافة",
@@ -2277,7 +2278,8 @@
       "procurement": "طلبات الشراء",
       "finance": "المالية (المحاسب)",
       "renewals": "تجديد تسجيل الطلاب (المحاسب)",
-      "payroll": "الرواتب (المحاسب)"
+      "payroll": "الرواتب (المحاسب)",
+      "question_bank": "بنك الأسئلة"
     },
     "cols": {
       "name": "الاسم",
@@ -2972,5 +2974,51 @@
       "transport": "المواصلات",
       "other": "أخرى"
     }
+  },
+  "questionBank": {
+    "title": "بنك الأسئلة",
+    "hint": "اكتب دروسًا وأسئلة لاختبارات طلابك",
+    "gradeAndSubject": "الصف والمادة",
+    "lessonTitle": "عنوان الدرس",
+    "noLessons": "لا توجد دروس بعد. أضف أول درس.",
+    "pickLesson": "اختر درسًا لعرض أسئلته أو إضافة أسئلة.",
+    "noQuestions": "لا توجد أسئلة في هذا الدرس بعد.",
+    "newQuestion": "سؤال جديد",
+    "editQuestion": "تعديل السؤال",
+    "questionText": "السؤال",
+    "options": "الخيارات",
+    "pickCorrect": "حدّد الصحيح",
+    "optionN": "الخيار {{n}}",
+    "correctOne": "الخيار {{n}} هو الإجابة الصحيحة",
+    "addOption": "إضافة خيار",
+    "explanation": "طريقة الحل",
+    "explanationHint": "يراها الطالب عندما يخطئ في الإجابة.",
+    "confirmDeleteQuestion": "حذف هذا السؤال؟",
+    "confirmDeleteLesson": "حذف هذا الدرس؟",
+    "nothingToTeach": "لا يوجد لديك صف ومادة لكتابة أسئلة لها بعد."
+  },
+  "quiz": {
+    "title": "الاختبارات",
+    "newQuiz": "إنشاء اختبار",
+    "subject": "المادة",
+    "lessons": "الدروس",
+    "count": "عدد الأسئلة",
+    "generate": "توليد",
+    "onlyAvailable": "المتاح في هذه الدروس {{n}} سؤالًا فقط. سيكون الاختبار من {{n}} سؤال.",
+    "reduced": "المتاح كان {{n}} سؤالًا فقط، لذلك اختبارك أقصر.",
+    "history": "اختباراتي",
+    "noHistory": "لا توجد اختبارات بعد.",
+    "noneYet": "لم يضف معلموك أسئلة لصفك بعد.",
+    "scoreLine": "{{correct}} صحيحة من {{total}}",
+    "continue": "متابعة",
+    "unfinished": "غير مكتمل",
+    "questionOf": "السؤال {{n}} من {{total}}",
+    "wrong": "ليست صحيحة.",
+    "howToSolve": "طريقة الحل",
+    "noExplanation": "لم يُكتب شرح لهذا السؤال.",
+    "next": "التالي",
+    "finished": "انتهى الاختبار",
+    "backToQuizzes": "العودة إلى الاختبارات",
+    "childTitle": "اختبارات {{name}}"
   }
 }

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import useBadges from '../../Badges/useBadges'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Bus, BookOpenCheck, CalendarClock, ClipboardList, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
+import { Bus, BookOpenCheck, CalendarClock, ClipboardList, ListChecks, FileBadge, FileCheck2, FileText, NotebookPen, Smile, Star, Wallet } from 'lucide-react'
 import SectionTiles from '../../../components/shared/SectionTiles'
 import AddEmailForm from '../../Auth/components/AddEmailForm'
 import { useAuth } from '../../Auth/AuthProvider'
@@ -26,6 +26,7 @@ export default function ParentHome() {
     { key: 'grades', to: `${base}/grades`, label: t('studentGrades.linkLabel'), icon: ClipboardList },
     { key: 'timetable', to: `${base}/timetable`, label: t('timetable.linkLabel'), icon: CalendarClock },
     { key: 'homework', to: `${base}/homework`, label: t('homework.title'), icon: BookOpenCheck },
+    { key: 'quizzes', to: `${base}/quizzes`, label: t('quiz.title'), icon: ListChecks },
     { key: 'exams', to: `${base}/exams`, label: t('exams.myTitle'), icon: FileCheck2 },
     { key: 'summaries', to: `${base}/summaries`, label: t('dailySummary.title'), icon: FileText },
     { key: 'lesson-plans', to: `${base}/lesson-plans`, label: t('lessonPlans.title'), icon: NotebookPen },

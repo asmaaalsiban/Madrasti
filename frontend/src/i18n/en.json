@@ -174,7 +174,8 @@
       "privacyRequests": "Data requests",
       "photoConsent": "Photo consent",
       "studentFiles": "Student files",
-      "branding": "School look"
+      "branding": "School look",
+      "questionBank": "Question bank"
     },
     "actions": {
       "add": "Add",
@@ -2258,7 +2259,8 @@
       "procurement": "Purchase requests",
       "finance": "Finance (accountant)",
       "renewals": "Student renewal (accountant)",
-      "payroll": "Payroll (accountant)"
+      "payroll": "Payroll (accountant)",
+      "question_bank": "Question bank"
     },
     "cols": {
       "name": "Name",
@@ -2953,5 +2955,51 @@
       "transport": "Transport",
       "other": "Other"
     }
+  },
+  "questionBank": {
+    "title": "Question bank",
+    "hint": "Write lessons and questions for your students' quizzes",
+    "gradeAndSubject": "Grade and subject",
+    "lessonTitle": "Lesson title",
+    "noLessons": "No lessons yet. Add the first one.",
+    "pickLesson": "Pick a lesson to see or add its questions.",
+    "noQuestions": "No questions in this lesson yet.",
+    "newQuestion": "New question",
+    "editQuestion": "Edit question",
+    "questionText": "Question",
+    "options": "Options",
+    "pickCorrect": "mark the correct one",
+    "optionN": "Option {{n}}",
+    "correctOne": "Option {{n}} is the correct answer",
+    "addOption": "Add an option",
+    "explanation": "How to solve it",
+    "explanationHint": "Students see this when they answer wrong.",
+    "confirmDeleteQuestion": "Delete this question?",
+    "confirmDeleteLesson": "Delete this lesson?",
+    "nothingToTeach": "You have no grade and subject to write questions for yet."
+  },
+  "quiz": {
+    "title": "Quizzes",
+    "newQuiz": "Make a quiz",
+    "subject": "Subject",
+    "lessons": "Lessons",
+    "count": "Number of questions",
+    "generate": "Generate",
+    "onlyAvailable": "Only {{n}} questions are available in these lessons. The quiz will have {{n}}.",
+    "reduced": "Only {{n}} questions were available, so your quiz is shorter.",
+    "history": "My quizzes",
+    "noHistory": "No quizzes yet.",
+    "noneYet": "Your teachers have not added questions for your grade yet.",
+    "scoreLine": "{{correct}} of {{total}} right",
+    "continue": "Continue",
+    "unfinished": "Not finished",
+    "questionOf": "Question {{n}} of {{total}}",
+    "wrong": "Not quite.",
+    "howToSolve": "How to solve it",
+    "noExplanation": "No explanation was written for this question.",
+    "next": "Next",
+    "finished": "Quiz finished",
+    "backToQuizzes": "Back to quizzes",
+    "childTitle": "Quizzes of {{name}}"
   }
 }

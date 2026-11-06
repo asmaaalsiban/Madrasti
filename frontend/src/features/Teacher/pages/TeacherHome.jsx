@@ -18,6 +18,7 @@ const TEACHING = [
   ['/teacher/lesson-plans', 'lessonPlans.title', 'lessonPlans.hint', NotebookPen],
   ['/teacher/daily-summary', 'dailySummary.title', 'dailySummary.hint', FileText],
   ['/teacher/homework', 'homework.title', 'homework.hint', BookOpenCheck],
+  ['/teacher/question-bank', 'questionBank.title', 'questionBank.hint', ListChecks],
   ['/teacher/grades', 'grading.title', 'grading.hint', ClipboardList],
 ]
 const FOLLOW_UP = [

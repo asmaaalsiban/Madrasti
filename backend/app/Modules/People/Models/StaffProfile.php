@@ -24,7 +24,7 @@ class StaffProfile extends Model
     /** The screens of a member of staff that the principal can switch off (the same keys the app uses). */
     public const FEATURES = [
         'chat', 'announcements', 'stories', 'tasks',
-        'timetable', 'attendance', 'attendance_report', 'exams', 'lesson_plans', 'daily_summary', 'homework', 'grades',
+        'timetable', 'attendance', 'attendance_report', 'exams', 'lesson_plans', 'daily_summary', 'homework', 'question_bank', 'grades',
         'behavior', 'motivation', 'surveys', 'signature', 'lesson_plan_review', 'department',
         'duties', 'staff_attendance', 'payslips', 'procurement',
         'finance', 'renewals', 'payroll',
