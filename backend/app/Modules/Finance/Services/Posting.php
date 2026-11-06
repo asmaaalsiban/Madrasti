@@ -36,6 +36,10 @@ class Posting
 
     public const TUITION = '4000';
 
+    public const INPUT_TAX = '1300';
+
+    public const TAX_PAYABLE = '2200';
+
     public const OTHER_INCOME = '4100';
 
     public const SALARIES = '5000';
@@ -78,15 +82,17 @@ class Posting
     public function fee(StudentFee $fee): void
     {
         $net = Money::cents($fee->total_amount) - Money::cents($fee->discount);
+        $tax = app(Tax::class)->ofFee($fee);
         $carried = $fee->kind === 'carried'; // moved from last year: the debt is already on the books
-        $this->sync('fee', $fee->id, ($fee->created_at ?? now())->toDateString(), __('finance.auto.fee', ['name' => $fee->description]), $carried ? [] : [self::RECEIVABLE => $net, self::TUITION => -$net]);
+        $this->sync('fee', $fee->id, ($fee->created_at ?? now())->toDateString(), __('finance.auto.fee', ['name' => $fee->description]), $carried ? [] : [self::RECEIVABLE => $net, self::TUITION => -($net - $tax), self::TAX_PAYABLE => -$tax]);
     }
 
     public function bill(Expense $bill): void
     {
         $bill->loadMissing('category');
         $cents = Money::cents($bill->amount);
-        $this->sync('bill', $bill->id, $bill->expense_date->toDateString(), __('finance.auto.bill', ['name' => $bill->description]), [(self::BILL_ACCOUNTS[$bill->category?->name_en] ?? self::OTHER_EXPENSE) => $cents, self::PAYABLE => -$cents]);
+        $tax = min($cents, Money::cents($bill->tax_amount));
+        $this->sync('bill', $bill->id, $bill->expense_date->toDateString(), __('finance.auto.bill', ['name' => $bill->description]), [(self::BILL_ACCOUNTS[$bill->category?->name_en] ?? self::OTHER_EXPENSE) => $cents - $tax, self::INPUT_TAX => $tax, self::PAYABLE => -$cents]);
     }
 
     public function opening(MoneyAccount $account): void

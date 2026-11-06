@@ -15,12 +15,12 @@ class Expense extends Model
     use Auditable;
 
     /** @var list<string> */
-    protected $fillable = ['expense_date', 'supplier_id', 'expense_category_id', 'description', 'reference', 'amount', 'due_date', 'procurement_request_id', 'created_by'];
+    protected $fillable = ['expense_date', 'supplier_id', 'expense_category_id', 'description', 'reference', 'amount', 'tax_amount', 'due_date', 'procurement_request_id', 'created_by'];
 
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['expense_date' => 'date:Y-m-d', 'due_date' => 'date:Y-m-d', 'amount' => 'decimal:2'];
+        return ['expense_date' => 'date:Y-m-d', 'due_date' => 'date:Y-m-d', 'amount' => 'decimal:2', 'tax_amount' => 'decimal:2'];
     }
 
     public function supplier(): BelongsTo

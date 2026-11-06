@@ -52,7 +52,7 @@ class ExpenseController extends Controller
             'categories' => ExpenseCategory::where('is_active', true)->orderBy('id')->get()->map(fn ($c) => $this->category($c))->values(),
             'suppliers' => Supplier::where('is_active', true)->orderBy('name')->get(['id', 'name'])->values(),
             'accounts' => MoneyAccount::where('is_active', true)->orderBy('id')->get(['id', 'name', 'type'])->values(),
-            'methods' => ExpensePayment::METHODS, 'currency' => $this->currency(), 'can_manage' => FinanceAccess::manages($request->user()),
+            'methods' => ExpensePayment::METHODS, 'tax' => ['enabled' => app(\App\Modules\Finance\Services\Tax::class)->settings()['enabled'], 'name' => app(\App\Modules\Finance\Services\Tax::class)->settings()['name']], 'currency' => $this->currency(), 'can_manage' => FinanceAccess::manages($request->user()),
         ]);
     }
 
@@ -178,7 +178,7 @@ class ExpenseController extends Controller
 
         return $request->validate([
             'expense_date' => [$req, 'date_format:Y-m-d', 'before_or_equal:today'], 'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'], 'expense_category_id' => [$req, 'integer', 'exists:expense_categories,id'],
-            'description' => [$req, 'string', 'max:255'], 'reference' => ['nullable', 'string', 'max:80'], 'amount' => [$req, 'numeric', 'gt:0', 'max:100000000'],
+            'description' => [$req, 'string', 'max:255'], 'reference' => ['nullable', 'string', 'max:80'], 'amount' => [$req, 'numeric', 'gt:0', 'max:100000000'], 'tax_amount' => ['nullable', 'numeric', 'min:0', 'lte:amount'],
             'due_date' => ['nullable', 'date_format:Y-m-d'], 'procurement_request_id' => ['nullable', 'integer', 'exists:procurement_requests,id'],
         ]);
     }
@@ -200,7 +200,7 @@ class ExpenseController extends Controller
     {
         return [
             'id' => $e->id, 'date' => $e->expense_date->format('Y-m-d'), 'supplier' => $e->supplier ? ['id' => $e->supplier->id, 'name' => $e->supplier->name] : null, 'category' => $this->category($e->category),
-            'description' => $e->description, 'reference' => $e->reference, 'amount' => $e->amount, 'due_date' => $e->due_date?->format('Y-m-d'), 'procurement_request_id' => $e->procurement_request_id,
+            'description' => $e->description, 'reference' => $e->reference, 'amount' => $e->amount, 'tax_amount' => $e->tax_amount, 'due_date' => $e->due_date?->format('Y-m-d'), 'procurement_request_id' => $e->procurement_request_id,
             'paid' => Money::amount($e->paidCents()), 'remaining' => Money::amount($e->remainingCents()), 'status' => $e->status(),
             'payments' => $e->payments->map(fn (ExpensePayment $p) => ['id' => $p->id, 'amount' => $p->amount, 'paid_on' => $p->paid_on->format('Y-m-d'), 'method' => $p->method, 'account' => $p->account ? ['id' => $p->account->id, 'name' => $p->account->name] : null, 'reference' => $p->reference, 'note' => $p->note])->values(),
         ];

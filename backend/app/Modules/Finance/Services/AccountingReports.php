@@ -152,4 +152,37 @@ class AccountingReports
 
         return ['columns' => ['student', 'current', 'd30', 'd60', 'd90', 'over90', 'total'], 'rows' => $rows, 'totals' => array_map(fn ($c) => Money::amount($c), $buckets) + ['total' => Money::amount(array_sum($buckets))]];
     }
+
+    /**
+     * Tax collected on sales (output), tax paid on purchases (input) and the difference, month by month.
+     *
+     * @return array<string, mixed>
+     */
+    public function taxSummary(string $from, string $to): array
+    {
+        $ids = DB::table('ledger_accounts')->whereIn('code', [Posting::TAX_PAYABLE, Posting::INPUT_TAX])->pluck('id', 'code');
+        $months = [];
+        $lines = DB::table('journal_lines as l')->join('journal_entries as e', 'e.id', '=', 'l.journal_entry_id')->whereIn('l.ledger_account_id', $ids->values())
+            ->whereBetween('e.entry_date', [$from, $to])->get(['e.entry_date', 'l.ledger_account_id', 'l.debit', 'l.credit']);
+        foreach ($lines as $l) {
+            $m = substr((string) $l->entry_date, 0, 7);
+            $months[$m] ??= ['output' => 0, 'input' => 0];
+            if ($l->ledger_account_id === $ids[Posting::TAX_PAYABLE]) {
+                $months[$m]['output'] += Money::cents($l->credit) - Money::cents($l->debit);
+            } else {
+                $months[$m]['input'] += Money::cents($l->debit) - Money::cents($l->credit);
+            }
+        }
+        ksort($months);
+        $rows = [];
+        $out = 0;
+        $in = 0;
+        foreach ($months as $m => $v) {
+            $out += $v['output'];
+            $in += $v['input'];
+            $rows[] = [$m, Money::amount($v['output']), Money::amount($v['input']), Money::amount($v['output'] - $v['input'])];
+        }
+
+        return ['columns' => ['month', 'output', 'input', 'net'], 'rows' => $rows, 'totals' => ['output' => Money::amount($out), 'input' => Money::amount($in), 'net' => Money::amount($out - $in)]];
+    }
 }

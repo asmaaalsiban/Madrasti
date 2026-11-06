@@ -2875,7 +2875,8 @@
       "income-statement": "Income statement",
       "balance-sheet": "Balance sheet",
       "account-ledger": "Account ledger",
-      "receivables-ageing": "Receivables ageing"
+      "receivables-ageing": "Receivables ageing",
+      "tax-summary": "Tax summary"
     },
     "cols": {
       "code": "Code",
@@ -2893,7 +2894,11 @@
       "d60": "31-60 days",
       "d90": "61-90 days",
       "over90": "Over 90 days",
-      "total": "Total"
+      "total": "Total",
+      "month": "Month",
+      "output": "Tax charged",
+      "input": "Tax paid",
+      "net": "Tax to pay"
     },
     "totals": {
       "debit": "Total debit",
@@ -2911,7 +2916,11 @@
       "d60": "31-60 days",
       "d90": "61-90 days",
       "over90": "Over 90 days",
-      "total": "Total owed"
+      "total": "Total owed",
+      "month": "Month",
+      "output": "Tax charged",
+      "input": "Tax paid",
+      "net": "Tax to pay"
     }
   },
   "budgets": {
@@ -2927,6 +2936,22 @@
       "over": "Over budget",
       "unplanned": "Spent with no budget",
       "none": "No budget set"
+    }
+  },
+  "tax": {
+    "title": "Tax (VAT)",
+    "intro": "Off by default. When on, prices include the tax. Choose which fee kinds carry it; bills can state the tax they contain. The tax summary report shows what to pay or reclaim.",
+    "enabled": "This school charges tax",
+    "name": "Tax name",
+    "rate": "Rate (%)",
+    "number": "Tax registration number",
+    "feeKinds": "Fee kinds that carry tax",
+    "saved": "Saved. The books were updated.",
+    "insideBill": "{{name}} inside this bill",
+    "kinds": {
+      "yearly": "Tuition",
+      "transport": "Transport",
+      "other": "Other"
     }
   }
 }

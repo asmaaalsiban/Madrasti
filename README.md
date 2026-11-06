@@ -682,4 +682,12 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 
 - `/admin/finance/budgets` (and `/teacher/finance/budgets` for the accountant): for each academic year, the accountant sets a budget per expense category. The page shows what is spent (bills dated inside the year), what is left, and a bar that turns amber near the limit and red when over, or when money is spent on a category with no budget.
 - The principal reads; only the accountant changes. After pulling: `php artisan tenants:migrate`.
-- Tax (VAT) is not built; add it only if the school's country requires it.
+
+## Tax (VAT / sales tax)
+
+- `/admin/finance/tax` (and `/teacher/finance/tax` for the accountant). **Off by default**: a school that does not charge tax sees no change.
+- When on: the accountant sets the tax name, the rate, the registration number and the **fee kinds** that carry tax (e.g. transport). Prices already include the tax (116 at 16% holds 16 of tax), so parents pay the same amount as before.
+- Fees: the tax part posts to *Tax payable* (2200) and the rest to income. Bills: the accountant types the tax a supplier bill contains; it posts to *Input tax* (1300).
+- Report *Tax summary* (accounting reports): tax charged, tax paid and the net to pay, month by month, with Excel export.
+- Saving the settings re-posts the fees and bills, so the journal follows. A school must confirm the rate and which items are taxable with its accountant or the tax authority.
+- After pulling: `php artisan tenants:migrate`.
