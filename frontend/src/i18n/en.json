@@ -2833,5 +2833,33 @@
       "bought": "Total bought",
       "owed": "Owed to him"
     }
+  },
+  "journal": {
+    "title": "Journal & accounts",
+    "entries": "Journal",
+    "chart": "Chart of accounts",
+    "newEntry": "New entry",
+    "date": "Date",
+    "memo": "Description",
+    "account": "Account",
+    "debit": "Debit",
+    "credit": "Credit",
+    "addLine": "Add a line",
+    "totals": "Debit {{debit}} · Credit {{credit}}",
+    "code": "Code",
+    "type": "Type",
+    "lockedUntil": "Books locked until",
+    "saveLock": "Save",
+    "lockedNote": "Nothing up to {{date}} can be added or removed.",
+    "open": "The books are open.",
+    "none": "No entries yet.",
+    "confirmDelete": "Delete this entry?",
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "income": "Income",
+      "expense": "Expense"
+    }
   }
 }

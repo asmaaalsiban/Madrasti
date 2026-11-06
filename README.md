@@ -650,3 +650,11 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Salaries**: when a payroll is paid, each payslip's net leaves an account (the one chosen, else the cash box for cash and the bank for transfers and cheques), as a "salary" line in the book.
 - API (finance routes; the accountant changes, the principal reads): `expenses` (+ `/{id}/payments`), `expense-payments/{id}` (cancel), `suppliers`, `expense-categories`.
 - **Migration** (run `php artisan tenants:migrate`): `suppliers`, `expense_categories` (with the default categories), `expenses`, `expense_payments`, and a source on `account_entries`.
+
+## Journal and chart of accounts (accounting phase 4a)
+
+- **Chart of accounts**: the school starts with a default chart (cash, banks, student receivables, suppliers payable, tuition income, expenses...). The accountant adds accounts and switches them off; a used or built-in account never changes type and is never deleted.
+- **Journal** (`/admin/finance/journal`, `/teacher/finance/journal` for the accountant): manual entries of two or more lines. An entry is saved only when debits equal credits.
+- **Locked books**: pick a date; nothing on or before it can be added or removed.
+- The principal reads; only the accountant changes. Automatic entries from fees, payments and bills come next (phase 4b).
+- After pulling: `php artisan tenants:migrate`.
