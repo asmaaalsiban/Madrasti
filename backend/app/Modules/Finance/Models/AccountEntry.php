@@ -21,8 +21,12 @@ class AccountEntry extends Model
 
     public const ADJUSTMENT = 'adjustment';
 
+    public const EXPENSE = 'expense';
+
+    public const PAYROLL = 'payroll';
+
     /** @var list<string> */
-    protected $fillable = ['money_account_id', 'entry_date', 'kind', 'amount', 'description', 'payment_id', 'transfer_ref', 'created_by', 'reconciled_at', 'reconciliation_id'];
+    protected $fillable = ['money_account_id', 'entry_date', 'kind', 'amount', 'description', 'payment_id', 'source_type', 'source_id', 'transfer_ref', 'created_by', 'reconciled_at', 'reconciliation_id'];
 
     /** @return array<string, string> */
     protected function casts(): array

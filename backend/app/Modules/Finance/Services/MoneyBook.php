@@ -61,6 +61,36 @@ class MoneyBook
         $entry->delete();
     }
 
+    /** Money leaving an account for something other than a transfer (a bill paid, a salary): one negative line that remembers its source. */
+    public function spend(MoneyAccount $account, string|float $amount, string $date, string $kind, ?string $description, string $sourceType, int $sourceId, ?User $by): AccountEntry
+    {
+        $cents = Money::cents($amount);
+        if ($cents <= 0 || ! $account->is_active) {
+            throw ValidationException::withMessages(['money_account_id' => [__('finance.account_not_usable')]]);
+        }
+
+        return AccountEntry::create(['money_account_id' => $account->id, 'entry_date' => $date, 'kind' => $kind, 'amount' => Money::amount(-$cents), 'description' => $description, 'source_type' => $sourceType, 'source_id' => $sourceId, 'created_by' => $by?->id]);
+    }
+
+    /** Takes a line back with its source (a cancelled bill payment), unless it was already matched with the bank's statement. */
+    public function releaseSource(string $sourceType, int $sourceId): void
+    {
+        $entry = AccountEntry::where('source_type', $sourceType)->where('source_id', $sourceId)->first();
+        if ($entry === null) {
+            return;
+        }
+        if ($entry->reconciled_at !== null) {
+            throw ValidationException::withMessages(['payment' => [__('finance.void_reconciled')]]);
+        }
+        $entry->delete();
+    }
+
+    /** The account a salary is paid from when none is chosen: cash from the cash box, bank transfers and cheques from the bank. */
+    public function accountForSalary(?string $method, ?int $chosen = null): ?MoneyAccount
+    {
+        return $chosen !== null ? $this->accountFor('bank_transfer', $chosen) : MoneyAccount::where('is_active', true)->where('type', $method === 'cash' ? 'cash' : 'bank')->orderBy('id')->first();
+    }
+
     /** Moves money from one account to another (e.g. the cash box to the bank): two lines that share a reference. */
     public function transfer(MoneyAccount $from, MoneyAccount $to, string|float $amount, string $date, ?string $note, User $by): void
     {
