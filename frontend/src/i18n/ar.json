@@ -2995,7 +2995,14 @@
     "explanationHint": "يراها الطالب عندما يخطئ في الإجابة.",
     "confirmDeleteQuestion": "حذف هذا السؤال؟",
     "confirmDeleteLesson": "حذف هذا الدرس؟",
-    "nothingToTeach": "لا يوجد لديك صف ومادة لكتابة أسئلة لها بعد."
+    "nothingToTeach": "لا يوجد لديك صف ومادة لكتابة أسئلة لها بعد.",
+    "mathHint": "للمعادلات اكتبها بين علامتي الدولار، مثل $x^2 + 1$.",
+    "preview": "معاينة",
+    "questionImage": "صورة للسؤال",
+    "explanationImage": "صورة لطريقة الحل",
+    "optional": "اختياري",
+    "removeImage": "إزالة",
+    "imageAlt": "صورة السؤال"
   },
   "quiz": {
     "title": "الاختبارات",
@@ -3019,6 +3026,20 @@
     "next": "التالي",
     "finished": "انتهى الاختبار",
     "backToQuizzes": "العودة إلى الاختبارات",
-    "childTitle": "اختبارات {{name}}"
+    "childTitle": "اختبارات {{name}}",
+    "useTimer": "استخدام مؤقت",
+    "minutes": "الدقائق",
+    "timeLeft": "الوقت المتبقي",
+    "timeUp": "انتهى الوقت",
+    "retake": "إعادة الاختبار",
+    "mistakesTitle": "تدرّب على أخطائك",
+    "mistakesIntro": "لا يزال عندك {{n}} سؤالًا تخطئ فيه. اصنع اختبارًا منها فقط لتكتشف نقاط ضعفك. يخرج السؤال من القائمة عندما تجيب عنه صح.",
+    "allSubjects": "كل المواد",
+    "countOptional": "كم سؤالًا (اختياري)",
+    "practiceMistakes": "تدرّب على أخطائي",
+    "kinds": {
+      "mistakes": "أخطاء",
+      "retake": "إعادة"
+    }
   }
 }
