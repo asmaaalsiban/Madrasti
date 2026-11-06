@@ -14,4 +14,5 @@ return [
     'no_mistakes' => 'You have no mistakes to practise. Well done!',
     'finish_first' => 'Finish the quiz before taking it again.',
     'time_up' => 'Time is up for this quiz.',
+    'only_owner' => 'Only the teacher who wrote this can change it. You can add your own questions to the lesson.',
 ];

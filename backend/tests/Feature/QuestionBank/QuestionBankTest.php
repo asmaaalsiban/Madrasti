@@ -51,7 +51,7 @@ class QuestionBankTest extends AcademicTestCase
 
     private function lesson(?GradeLevel $grade = null, ?Subject $subject = null, string $title = 'Fractions'): int
     {
-        return QuestionLesson::create(['grade_level_id' => ($grade ?? $this->grade)->id, 'subject_id' => ($subject ?? $this->math)->id, 'title' => $title])->id;
+        return QuestionLesson::create(['grade_level_id' => ($grade ?? $this->grade)->id, 'subject_id' => ($subject ?? $this->math)->id, 'title' => $title, 'created_by' => $this->teacher->id])->id;
     }
 
     /** @return array<string, mixed> */
@@ -66,7 +66,7 @@ class QuestionBankTest extends AcademicTestCase
         $this->getJson('/api/question-bank/scope')->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.subject_en', 'Math');
 
         $id = $this->postJson('/api/question-bank/lessons', ['grade_level_id' => $this->grade->id, 'subject_id' => $this->math->id, 'title' => 'Fractions'])->assertCreated()->json('data.id');
-        $this->postJson('/api/question-bank/lessons', ['grade_level_id' => $this->grade->id, 'subject_id' => $this->math->id, 'title' => 'Fractions'])->assertStatus(422);
+        $this->postJson('/api/question-bank/lessons', ['grade_level_id' => $this->grade->id, 'subject_id' => $this->math->id, 'title' => ' fractions '])->assertOk()->assertJsonPath('existing', true)->assertJsonPath('data.id', $id); // the same lesson is reused
         $this->postJson('/api/question-bank/lessons', ['grade_level_id' => $this->grade->id, 'subject_id' => $this->science->id, 'title' => 'Cells'])->assertForbidden();
         $this->postJson('/api/question-bank/lessons', ['grade_level_id' => $this->otherGrade->id, 'subject_id' => $this->math->id, 'title' => 'Fractions'])->assertForbidden();
 
@@ -153,7 +153,7 @@ class QuestionBankTest extends AcademicTestCase
     public function test_a_question_students_already_met_is_switched_off_not_deleted_and_students_cannot_write(): void
     {
         $l = $this->lesson();
-        $q = Question::create(['question_lesson_id' => $l, 'body' => 'Q', 'explanation' => 'x']);
+        $q = Question::create(['question_lesson_id' => $l, 'created_by' => $this->teacher->id, 'body' => 'Q', 'explanation' => 'x']);
         $q->options()->createMany([['body' => 'a', 'is_correct' => true, 'position' => 0], ['body' => 'b', 'is_correct' => false, 'position' => 1]]);
         Sanctum::actingAs($this->studentUser);
         $this->postJson('/api/quizzes', ['subject_id' => $this->math->id, 'lesson_ids' => [$l], 'count' => 1])->assertCreated();
