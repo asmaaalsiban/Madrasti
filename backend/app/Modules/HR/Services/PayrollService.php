@@ -321,7 +321,7 @@ class PayrollService
      *
      * @return int how many were paid
      */
-    public function pay(PayrollRun $run, ?Payslip $only, ?string $method, string $paidOn, ?string $reference): int
+    public function pay(PayrollRun $run, ?Payslip $only, ?string $method, string $paidOn, ?string $reference, ?int $accountId = null): int
     {
         $this->assertStatus($run, 'approved', 'paid');
         $slips = $run->payslips()->whereNull('paid_on')->when($only, fn ($q) => $q->whereKey($only->id))->with('user')->get();
@@ -329,9 +329,15 @@ class PayrollService
         if ($slips->contains(fn (Payslip $s) => ! $s->payment_method && ! $method)) {
             throw ValidationException::withMessages(['method' => [__('payroll.no_method')]]);
         }
-        DB::transaction(function () use ($slips, $method, $paidOn, $reference, $run): void {
+        $book = app(\App\Modules\Finance\Services\MoneyBook::class);
+        DB::transaction(function () use ($slips, $method, $paidOn, $reference, $run, $accountId, $book): void {
             foreach ($slips as $slip) {
                 $slip->update(['paid_on' => $paidOn, 'payment_method' => $slip->payment_method ?: $method, 'reference' => $slip->reference ?: $reference]);
+                // The salary leaves an account: the one chosen, else the cash box for cash and the bank for transfers and cheques (no account, no line).
+                $account = $book->accountForSalary($slip->payment_method, $accountId);
+                if ($account !== null) {
+                    $book->spend($account, $slip->net, $paidOn, \App\Modules\Finance\Models\AccountEntry::PAYROLL, __('finance.salary_line', ['month' => $run->month->format('Y-m'), 'name' => $slip->user->name]), 'payslip', $slip->id, auth()->user());
+                }
             }
             if (! $run->payslips()->whereNull('paid_on')->exists()) {
                 $run->update(['status' => 'paid']);

@@ -2735,7 +2735,9 @@
       "receipt": "Student payment",
       "transfer_in": "Transfer in",
       "transfer_out": "Transfer out",
-      "adjustment": "Correction"
+      "adjustment": "Correction",
+      "expense": "Bill payment",
+      "payroll": "Salary"
     },
     "tabs": {
       "book": "Book",
@@ -2752,5 +2754,76 @@
     "difference": "Difference",
     "finish": "Finish matching",
     "reconciled": "Matched."
+  },
+  "expenses": {
+    "title": "Expenses",
+    "suppliers": "Suppliers",
+    "categories": "Categories",
+    "newBill": "Add a bill",
+    "editBill": "Edit the bill",
+    "fromRequest": "From an approved purchase request (optional)",
+    "date": "Bill date",
+    "category": "Category",
+    "supplier": "Supplier",
+    "invoiceNo": "Supplier's invoice number",
+    "description": "Description",
+    "amount": "Amount",
+    "dueDate": "Due date",
+    "payNow": "Paid now",
+    "fromAccount": "From account",
+    "method": "Payment method",
+    "paidOn": "Payment date",
+    "payRef": "Payment reference (transfer or cheque number)",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "payments": "Payments",
+    "noPayments": "No payments yet.",
+    "addPayment": "Record a payment",
+    "pay": "Pay",
+    "cancelPayment": "Cancel the payment",
+    "confirmCancel": "Cancel this payment? The money goes back into the account.",
+    "sum": {
+      "total": "Total bills",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "overdue": "Overdue"
+    },
+    "status": "Status",
+    "statuses": {
+      "open": "Not fully paid",
+      "unpaid": "Unpaid",
+      "partial": "Partly paid",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "cols": {
+      "date": "Date",
+      "description": "Description",
+      "category": "Category",
+      "amount": "Amount",
+      "paid": "Paid",
+      "status": "Status"
+    },
+    "byCategory": "By category",
+    "none": "No bills with these filters.",
+    "open": "Open",
+    "switchOff": "Switch off",
+    "switchOn": "Switch on",
+    "nameAr": "Name in Arabic",
+    "nameEn": "Name in English",
+    "newSupplier": "Add a supplier",
+    "editSupplier": "Edit the supplier",
+    "supplierName": "Supplier name",
+    "phone": "Phone",
+    "email": "Email",
+    "notes": "Notes",
+    "noSuppliers": "No suppliers yet.",
+    "supCols": {
+      "name": "Supplier",
+      "phone": "Phone",
+      "bills": "Bills",
+      "bought": "Total bought",
+      "owed": "Owed to him"
+    }
   }
 }

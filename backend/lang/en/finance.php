@@ -38,4 +38,10 @@ return [
     'account_has_entries' => 'This account has a book. Switch it off instead of deleting it.',
     'reconcile_bad_lines' => 'Some of the chosen lines are not open lines of this account.',
     'reconcile_difference' => 'The chosen lines do not reach the statement balance: the difference is :difference.',
+    'expense_more_than_owed' => 'The payment is more than what is still owed on this bill (:owed).',
+    'expense_below_paid' => 'The bill cannot be less than what was already paid on it (:paid).',
+    'expense_has_payments' => 'A bill with payments cannot be deleted. Cancel the payments first.',
+    'supplier_has_bills' => 'This supplier has bills. Switch him off instead of deleting him.',
+    'category_in_use' => 'This category is used by bills. Switch it off instead of deleting it.',
+    'salary_line' => 'Salary :month · :name',
 ];

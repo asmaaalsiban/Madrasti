@@ -2754,7 +2754,9 @@
       "receipt": "دفعة طالب",
       "transfer_in": "تحويل وارد",
       "transfer_out": "تحويل صادر",
-      "adjustment": "تصحيح"
+      "adjustment": "تصحيح",
+      "expense": "مصروف",
+      "payroll": "راتب"
     },
     "tabs": {
       "book": "الدفتر",
@@ -2771,5 +2773,76 @@
     "difference": "الفرق",
     "finish": "إنهاء المطابقة",
     "reconciled": "تمت المطابقة."
+  },
+  "expenses": {
+    "title": "المصروفات",
+    "suppliers": "الموردون",
+    "categories": "التصنيفات",
+    "newBill": "إضافة فاتورة",
+    "editBill": "تعديل الفاتورة",
+    "fromRequest": "من طلب شراء معتمد (اختياري)",
+    "date": "تاريخ الفاتورة",
+    "category": "التصنيف",
+    "supplier": "المورد",
+    "invoiceNo": "رقم فاتورة المورد",
+    "description": "البيان",
+    "amount": "المبلغ",
+    "dueDate": "تاريخ الاستحقاق",
+    "payNow": "مدفوعة الآن",
+    "fromAccount": "من حساب",
+    "method": "طريقة الدفع",
+    "paidOn": "تاريخ الدفع",
+    "payRef": "مرجع الدفع (رقم الحوالة أو الشيك)",
+    "paid": "المدفوع",
+    "remaining": "المتبقي",
+    "payments": "الدفعات",
+    "noPayments": "لا توجد دفعات بعد.",
+    "addPayment": "تسجيل دفعة",
+    "pay": "دفع",
+    "cancelPayment": "إلغاء الدفعة",
+    "confirmCancel": "إلغاء هذه الدفعة؟ سيعود المبلغ إلى الحساب.",
+    "sum": {
+      "total": "إجمالي الفواتير",
+      "paid": "المدفوع",
+      "remaining": "المتبقي",
+      "overdue": "المتأخر"
+    },
+    "status": "الحالة",
+    "statuses": {
+      "open": "غير مسددة",
+      "unpaid": "غير مدفوعة",
+      "partial": "مدفوعة جزئياً",
+      "paid": "مدفوعة",
+      "overdue": "متأخرة"
+    },
+    "cols": {
+      "date": "التاريخ",
+      "description": "البيان",
+      "category": "التصنيف",
+      "amount": "المبلغ",
+      "paid": "المدفوع",
+      "status": "الحالة"
+    },
+    "byCategory": "حسب التصنيف",
+    "none": "لا توجد فواتير بهذه الفلاتر.",
+    "open": "فتح",
+    "switchOff": "تعطيل",
+    "switchOn": "تفعيل",
+    "nameAr": "الاسم بالعربي",
+    "nameEn": "الاسم بالإنجليزي",
+    "newSupplier": "إضافة مورد",
+    "editSupplier": "تعديل المورد",
+    "supplierName": "اسم المورد",
+    "phone": "الهاتف",
+    "email": "الإيميل",
+    "notes": "ملاحظات",
+    "noSuppliers": "لا يوجد موردون بعد.",
+    "supCols": {
+      "name": "المورد",
+      "phone": "الهاتف",
+      "bills": "الفواتير",
+      "bought": "إجمالي المشتريات",
+      "owed": "المستحق له"
+    }
   }
 }

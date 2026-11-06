@@ -90,6 +90,8 @@ import LegalShell from '../features/Legal/LegalFooter'
 import YearEndPage from '../features/Finance/pages/YearEndPage'
 import MoneyAccountsPage from '../features/Finance/pages/MoneyAccountsPage'
 import MoneyLedgerPage from '../features/Finance/pages/MoneyLedgerPage'
+import ExpensesPage from '../features/Finance/pages/ExpensesPage'
+import SuppliersPage from '../features/Finance/pages/SuppliersPage'
 import TransfersPage from '../features/Finance/pages/TransfersPage'
 import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
@@ -175,6 +177,8 @@ const HOME_ROUTES = {
     { path: 'finance/year-end', element: <YearEndPage base="/teacher" /> },
     { path: 'finance/money', element: <MoneyAccountsPage base="/teacher" /> },
     { path: 'finance/money/:id', element: <MoneyLedgerPage base="/teacher" /> },
+    { path: 'finance/expenses', element: <ExpensesPage base="/teacher" /> },
+    { path: 'finance/suppliers', element: <SuppliersPage base="/teacher" /> },
     { path: 'finance/students/:id', element: <StudentAccountPage /> },
     { path: 'renewals', element: <RenewalsPage /> },
     { path: 'exams', element: <MyExamsPage /> },
@@ -245,6 +249,8 @@ export const routes = [
               { path: '/admin/finance/year-end', element: <YearEndPage base="/admin" /> },
               { path: '/admin/finance/money', element: <MoneyAccountsPage base="/admin" /> },
               { path: '/admin/finance/money/:id', element: <MoneyLedgerPage base="/admin" /> },
+              { path: '/admin/finance/expenses', element: <ExpensesPage base="/admin" /> },
+              { path: '/admin/finance/suppliers', element: <SuppliersPage base="/admin" /> },
               { path: '/admin/finance/students/:id', element: <StudentAccountPage /> },
               { path: '/admin/renewals', element: <RenewalsPage /> },
               { path: '/admin/exams', element: <ExamsAdminPage /> },

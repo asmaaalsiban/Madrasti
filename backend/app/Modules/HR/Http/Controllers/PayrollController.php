@@ -99,10 +99,10 @@ class PayrollController extends Controller
         $this->manage($request);
         $data = $request->validate([
             'payslip_id' => ['nullable', 'integer'], 'method' => ['nullable', Rule::in(self::METHODS)],
-            'paid_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'reference' => ['nullable', 'string', 'max:255'],
+            'paid_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'reference' => ['nullable', 'string', 'max:255'], 'money_account_id' => ['nullable', 'integer'],
         ]);
         $only = isset($data['payslip_id']) ? $run->payslips()->findOrFail($data['payslip_id']) : null;
-        $paid = $this->payroll->pay($run, $only, $data['method'] ?? null, $data['paid_on'] ?? now()->toDateString(), $data['reference'] ?? null);
+        $paid = $this->payroll->pay($run, $only, $data['method'] ?? null, $data['paid_on'] ?? now()->toDateString(), $data['reference'] ?? null, $data['money_account_id'] ?? null);
 
         return response()->json(['data' => $this->detail($run->refresh()), 'paid' => $paid]);
     }

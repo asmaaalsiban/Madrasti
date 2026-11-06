@@ -38,4 +38,10 @@ return [
     'account_has_entries' => 'لهذا الحساب سجل حركات. عطّله بدل حذفه.',
     'reconcile_bad_lines' => 'بعض البنود المختارة ليست بنوداً مفتوحة لهذا الحساب.',
     'reconcile_difference' => 'البنود المختارة لا تصل إلى رصيد الكشف: الفرق :difference.',
+    'expense_more_than_owed' => 'الدفعة أكبر من المتبقي على هذه الفاتورة (:owed).',
+    'expense_below_paid' => 'لا يمكن أن تقل الفاتورة عن المدفوع منها (:paid).',
+    'expense_has_payments' => 'فاتورة عليها دفعات لا تُحذف. ألغِ الدفعات أولاً.',
+    'supplier_has_bills' => 'لهذا المورد فواتير. عطّله بدل حذفه.',
+    'category_in_use' => 'هذا التصنيف مستخدم بفواتير. عطّله بدل حذفه.',
+    'salary_line' => 'راتب :month · :name',
 ];
