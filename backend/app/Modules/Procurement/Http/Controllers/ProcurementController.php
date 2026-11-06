@@ -7,7 +7,12 @@ namespace App\Modules\Procurement\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Communication\Services\Notifier;
+use App\Modules\Finance\Models\Expense;
+use App\Modules\Finance\Models\ExpenseCategory;
+use App\Modules\Finance\Models\ExpensePayment;
 use App\Modules\Finance\Models\Money;
+use App\Modules\Finance\Models\Supplier;
+use App\Modules\Finance\Services\Expenses;
 use App\Modules\Finance\Services\FinanceAccess;
 use App\Modules\Procurement\Models\ProcurementRequest;
 use App\Shared\Enums\Role;
@@ -16,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -85,8 +91,21 @@ class ProcurementController extends Controller
         $user = $this->user($request);
         abort_unless(FinanceAccess::manages($user), 403, __('procurement.not_allowed'));
         $this->expect($procurement, 'approved');
-        $data = $request->validate(['supplier' => ['required', 'string', 'max:150'], 'actual_cost' => ['required', 'numeric', 'gt:0', 'max:10000000'], 'purchase_ref' => ['nullable', 'string', 'max:100'], 'purchased_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today']]);
-        $procurement->update(['status' => 'purchased', 'supplier' => $data['supplier'], 'actual_cost' => $data['actual_cost'], 'purchase_ref' => $data['purchase_ref'] ?? null, 'purchased_by' => $user->id, 'purchased_at' => $data['purchased_on'] ?? now()]);
+        $data = $request->validate([
+            'supplier' => ['required', 'string', 'max:150'], 'actual_cost' => ['required', 'numeric', 'gt:0', 'max:10000000'], 'purchase_ref' => ['nullable', 'string', 'max:100'], 'purchased_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            // The purchase is also recorded as a bill (see below): its category, due date, and optionally the account it was paid from right now.
+            'expense_category_id' => ['nullable', 'integer', 'exists:expense_categories,id'], 'due_date' => ['nullable', 'date_format:Y-m-d'],
+            'pay_now' => ['nullable', 'array'], 'pay_now.money_account_id' => ['required_with:pay_now', 'integer'], 'pay_now.method' => ['required_with:pay_now', Rule::in(ExpensePayment::METHODS)], 'pay_now.reference' => ['nullable', 'string', 'max:80'],
+        ]);
+        // One button, two records: the purchase and its bill (supplier, category, invoice number, and the payment when it was paid at once). All or nothing.
+        DB::transaction(function () use ($procurement, $data, $user): void {
+            $procurement->update(['status' => 'purchased', 'supplier' => $data['supplier'], 'actual_cost' => $data['actual_cost'], 'purchase_ref' => $data['purchase_ref'] ?? null, 'purchased_by' => $user->id, 'purchased_at' => $data['purchased_on'] ?? now()]);
+            $supplier = Supplier::whereRaw('lower(name) = ?', [mb_strtolower(trim($data['supplier']))])->first() ?? Supplier::create(['name' => trim($data['supplier'])]);
+            $category = ExpenseCategory::find($data['expense_category_id'] ?? null) ?? ExpenseCategory::where('name_en', 'Supplies')->where('is_active', true)->first() ?? ExpenseCategory::where('is_active', true)->orderBy('id')->firstOrFail();
+            $when = $data['purchased_on'] ?? now()->toDateString();
+            $payNow = isset($data['pay_now']) ? ['money_account_id' => (int) $data['pay_now']['money_account_id'], 'method' => $data['pay_now']['method'], 'paid_on' => $when, 'reference' => $data['pay_now']['reference'] ?? null] : null;
+            app(Expenses::class)->create(['expense_date' => $when, 'supplier_id' => $supplier->id, 'expense_category_id' => $category->id, 'description' => $procurement->title, 'reference' => $data['purchase_ref'] ?? null, 'amount' => $data['actual_cost'], 'due_date' => $data['due_date'] ?? null, 'procurement_request_id' => $procurement->id], $user, $payNow);
+        });
         $this->notifier->toUsers([$procurement->requested_by], 'procurement_purchased', ['title' => $procurement->title], '/teacher/procurement');
 
         return response()->json(['data' => $this->present($procurement->refresh()->load(['requester:id,name', 'reviewer:id,name', 'buyer:id,name']), $user)]);
@@ -154,6 +173,8 @@ class ProcurementController extends Controller
             'requester' => ['id' => $r->requester->id, 'name' => $r->requester->name], 'review_note' => $r->review_note, 'reviewed_by' => $r->relationLoaded('reviewer') ? $r->reviewer?->name : null,
             'supplier' => $r->supplier, 'actual_cost' => $r->actual_cost, 'purchase_ref' => $r->purchase_ref, 'purchased_at' => $r->purchased_at?->toDateString(), 'received_at' => $r->received_at?->toDateString(),
             'mine' => $r->requested_by === $user->id,
+            // The bill recorded when it was bought (the accountant opens it in Expenses).
+            'expense_id' => in_array($r->status, ['purchased', 'received'], true) ? Expense::where('procurement_request_id', $r->id)->value('id') : null,
         ];
     }
 
