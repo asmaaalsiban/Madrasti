@@ -2862,5 +2862,56 @@
       "expense": "Expense"
     },
     "automatic": "Automatic"
+  },
+  "acctReports": {
+    "title": "Accounting reports",
+    "print": "Print / PDF",
+    "asOf": "As of",
+    "pickAccount": "Pick an account to see its ledger.",
+    "notBalanced": "These books do not balance. Ask the accountant to check.",
+    "none": "Nothing to show.",
+    "names": {
+      "trial-balance": "Trial balance",
+      "income-statement": "Income statement",
+      "balance-sheet": "Balance sheet",
+      "account-ledger": "Account ledger",
+      "receivables-ageing": "Receivables ageing"
+    },
+    "cols": {
+      "code": "Code",
+      "account": "Account",
+      "debit": "Debit",
+      "credit": "Credit",
+      "type": "Type",
+      "amount": "Amount",
+      "date": "Date",
+      "memo": "Description",
+      "balance": "Balance",
+      "student": "Student",
+      "current": "Not due",
+      "d30": "1-30 days",
+      "d60": "31-60 days",
+      "d90": "61-90 days",
+      "over90": "Over 90 days",
+      "total": "Total"
+    },
+    "totals": {
+      "debit": "Total debit",
+      "credit": "Total credit",
+      "income": "Income",
+      "expense": "Expenses",
+      "profit": "Net profit",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "equity": "Equity",
+      "forward": "Brought forward",
+      "closing": "Closing balance",
+      "current": "Not due",
+      "d30": "1-30 days",
+      "d60": "31-60 days",
+      "d90": "61-90 days",
+      "over90": "Over 90 days",
+      "total": "Total owed"
+    }
   }
 }
