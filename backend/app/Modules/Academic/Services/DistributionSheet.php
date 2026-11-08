@@ -100,7 +100,7 @@ class DistributionSheet
 
         $line(__('academic.distribution.title', ['date' => $info['date']]), $this->style(18, true, self::NAVY), 34);
         $line(__('academic.distribution.school', ['school' => $info['school']]), $this->style(13, true), 24);
-        $line(__('academic.distribution.directorate'), $this->style(11), 22);
+        $line(__('academic.distribution.directorate', ['directorate' => app(SchoolDetails::class)->line('directorate'), 'district' => app(SchoolDetails::class)->line('district')]), $this->style(11), 22);
         $line('', $this->style(), 8);
 
         // Header: three rows (the sections span two columns each).

@@ -112,7 +112,7 @@ class TimetableSheet
         $line(__('scheduling.sheet.title'), $this->style(20, true, self::NAVY), 36);
         $line(__('scheduling.sheet.year', ['year' => $info['year']]), $plain(12, true), 22);
         $line($info['school'], $plain(14, true), 26);
-        $line(__('scheduling.sheet.directorate'), $plain(11), 22);
+        $line(__('scheduling.sheet.directorate', ['directorate' => app(\App\Modules\Academic\Services\SchoolDetails::class)->line('directorate'), 'district' => app(\App\Modules\Academic\Services\SchoolDetails::class)->line('district')]), $plain(11), 22);
         $line('', $plain(), 8);
 
         // Homeroom teachers, the sections, then the column titles.

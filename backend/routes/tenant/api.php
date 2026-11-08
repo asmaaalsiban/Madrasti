@@ -14,6 +14,7 @@ use App\Modules\Academic\Http\Controllers\GradeLevelController;
 use App\Modules\Academic\Http\Controllers\RenewalController;
 use App\Modules\Academic\Http\Controllers\RoomController;
 use App\Modules\Academic\Http\Controllers\SchoolBrandingController;
+use App\Modules\Academic\Http\Controllers\SchoolDetailsController;
 use App\Modules\Academic\Http\Controllers\SubjectController;
 use App\Modules\Academic\Http\Controllers\TeachingAssignmentController;
 use App\Modules\Academic\Http\Controllers\TermController;
@@ -226,6 +227,8 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
 Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('admin/overview', AdminOverviewController::class);
     Route::get('admin/dashboard', AdminDashboardController::class);
+    Route::get('school-details', [SchoolDetailsController::class, 'show']);
+    Route::put('school-details', [SchoolDetailsController::class, 'save']);
     Route::get('branding', [BrandingController::class, 'show']);
     Route::post('branding', [BrandingController::class, 'update']);
     Route::delete('branding', [BrandingController::class, 'destroy']);

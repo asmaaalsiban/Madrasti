@@ -8,6 +8,7 @@ import SchoolLogo from '../../components/shared/SchoolLogo'
 import { paletteFromFile, shownPrimary } from '../../tenant/palette'
 import { applyTheme, clearTheme } from '../../tenant/theme'
 import { useSchool } from '../../tenant/useSchool'
+import SchoolDetailsCard from './SchoolDetailsCard'
 
 const MAX_BYTES = 2 * 1024 * 1024
 const TYPES = ['image/png', 'image/jpeg', 'image/webp']
@@ -146,6 +147,7 @@ export default function BrandingPage() {
           <p className="text-xs text-slate-500">{t('branding.previewHelp')}</p>
         </div>
       </div>
+      <SchoolDetailsCard />
       <ConfirmDialog open={confirmReset} message={t('branding.confirmReset')} confirmLabel={t('branding.reset')} onConfirm={() => reset.mutate()} onCancel={() => setConfirmReset(false)} />
     </section>
   )

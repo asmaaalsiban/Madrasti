@@ -19,7 +19,7 @@ return [
         'bismillah' => 'In the name of God, the Most Gracious, the Most Merciful',
         'title' => 'Lesson Timetable',
         'year' => 'Academic year :year',
-        'directorate' => 'Directorate of Education: ....................       Area: ....................',
+        'directorate' => 'Directorate of Education: :directorate       Area: :district',
         'homeroom' => 'Homeroom teacher',
         'section' => 'Section',
         'subject' => 'Subject',
