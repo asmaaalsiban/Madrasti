@@ -13,7 +13,7 @@ use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
 use App\Modules\Scheduling\Services\TimetableChecker;
 use App\Modules\Scheduling\Services\TimetableEditor;
-use App\Shared\Export\XlsxExport;
+use App\Modules\Scheduling\Services\TimetableSheet;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Modules\Scheduling\Services\TimetableGenerator;
 use App\Shared\Enums\Role;
@@ -178,23 +178,12 @@ class TimetableController extends Controller
         return response()->json(['data' => $checker->check()]);
     }
 
-    /** The full timetable as a sheet, like the paper one: a row per day and period, a column per section. */
-    public function export(XlsxExport $xlsx): BinaryFileResponse
+    /** The full timetable on the school's paper form, as an Excel file (see TimetableSheet). */
+    public function export(TimetableSheet $sheet): BinaryFileResponse
     {
         Gate::authorize('viewAny', Period::class);
-        $year = AcademicYear::where('is_current', true)->first();
-        $classrooms = $year ? Classroom::where('academic_year_id', $year->id)->with('gradeLevel')->get()->sortBy(fn (Classroom $c) => sprintf('%05d|%s', $c->gradeLevel?->sort_order ?? 0, $c->name))->values() : collect();
-        $cell = TimetableEntry::where('academic_year_id', $year?->id)->with(['subject', 'teacher'])->get()->keyBy(fn ($e) => $e->classroom_id.'-'.$e->period_id);
-        $ar = app()->getLocale() === 'ar';
-        $rows = Period::orderBy('day_of_week')->orderBy('number')->get()->map(function (Period $p) use ($classrooms, $cell, $ar): array {
-            return [__('scheduling.days.'.$p->day_of_week), $p->number, ...$classrooms->map(function (Classroom $c) use ($cell, $p, $ar): string {
-                $e = $cell[$c->id.'-'.$p->id] ?? null;
 
-                return $e === null ? '' : ($ar ? $e->subject->name_ar : $e->subject->name_en).' - '.$e->teacher->name;
-            })->all()];
-        });
-
-        return $xlsx->download('timetable', __('scheduling.full_timetable'), [__('scheduling.day'), __('scheduling.period'), ...$classrooms->pluck('name')->all()], $rows);
+        return $sheet->download();
     }
 
     /** The week of the signed-in teacher (their lessons) or student (their section's lessons). */

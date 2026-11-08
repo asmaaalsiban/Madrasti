@@ -120,7 +120,27 @@ class FullTimetableTest extends AcademicTestCase
 
     public function test_the_full_timetable_downloads_as_an_excel_sheet(): void
     {
+        $this->a->update(['homeroom_teacher_id' => $this->omar->id]);
         $this->place($this->a, 0, 1, $this->math, $this->sara);
-        $this->get('/api/timetable/export')->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response = $this->get('/api/timetable/export')->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        // Read the file back: the school's form, with the homeroom teacher, the section, and the lesson in its place.
+        $reader = new \OpenSpout\Reader\XLSX\Reader();
+        $reader->open($response->baseResponse->getFile()->getPathname());
+        $rows = [];
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $rows[] = array_map(fn ($c) => $c->getValue(), $row->getCells());
+            }
+            break;
+        }
+        $reader->close();
+        $flat = array_merge(...$rows);
+        $this->assertContains('Lesson Timetable', $flat);
+        $this->assertContains('Omar', $flat);          // the homeroom teacher of 7-A
+        $this->assertContains('7-A', $flat);
+        $this->assertContains('Math', $flat);
+        $this->assertContains('Sara', $flat);
+        $this->assertContains('1st', $flat);           // the period names of the form
     }
 }
