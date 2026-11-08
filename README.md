@@ -781,3 +781,10 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - The timetable checker accepts a joint lesson and still reports any other double booking. The database no longer has a unique rule on teacher and period (the editor and the checker enforce it).
 - Note: both sections keep their own assignment of periods, so the teacher's weekly load in the staff list counts a joint lesson once per section.
 - After pulling: `php artisan tenants:migrate`.
+
+## Secondary tracks (health, business, languages...)
+
+- A track is just a **grade** of its own (Grades page): for example *Health track*, *Business track*, *Languages and humanities*, each with its own curriculum (subjects and periods, including "specialization" or "advanced" subjects), sections, teachers and timetable. Give the grades of the same level the **same order**, and fill the new **Track** field (e.g. `health`).
+- **Renewal**: a student whose grade has a track stays in the **same track** when moving to the next level; a student with no track (e.g. leaving grade 10) gets the first grade of the next level, and the admin can pick another when renewing.
+- Teachers' grade ranges work by order, so a range covering that level covers every track at it.
+- After pulling: `php artisan tenants:migrate`.
