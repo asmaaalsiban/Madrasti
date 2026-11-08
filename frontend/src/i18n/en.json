@@ -3109,6 +3109,7 @@
     "help": "Printed at the top of the timetable and the subject distribution forms (Excel). Leave empty to print a dotted line to fill in by hand.",
     "directorate": "Directorate of Education",
     "district": "Area",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "saveLabel": "Save school details"
   }
 }

@@ -26,7 +26,7 @@ export default function SchoolDetailsCard() {
         <label className="block text-sm">{t('schoolDetails.directorate')}<input className="mt-1 w-full rounded border p-2" value={form.directorate} onChange={(e) => set('directorate', e.target.value)} /></label>
         <label className="block text-sm">{t('schoolDetails.district')}<input className="mt-1 w-full rounded border p-2" value={form.district} onChange={(e) => set('district', e.target.value)} /></label>
       </div>
-      <div className="flex justify-end"><button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button></div>
+      <div className="flex justify-end"><button type="submit" disabled={save.isPending} aria-label={t('schoolDetails.saveLabel')} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button></div>
     </form>
   )
 }

@@ -19,7 +19,7 @@ describe('SchoolDetailsCard', () => {
     render(<QueryClientProvider client={new QueryClient()}><SchoolDetailsCard /></QueryClientProvider>)
     fireEvent.change(await screen.findByLabelText('Directorate of Education'), { target: { value: 'Ain Al-Basha' } })
     fireEvent.change(screen.getByLabelText('Area'), { target: { value: 'Umm Al-Dananeer' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save school details' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/school-details', { directorate: 'Ain Al-Basha', district: 'Umm Al-Dananeer' }))
     expect(await screen.findByRole('status')).toHaveTextContent('Saved')
   })
