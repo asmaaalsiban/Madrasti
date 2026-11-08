@@ -45,4 +45,5 @@ return [
     'payslip_paid' => 'تم دفع راتبك عن :month',
     'contract_expiring' => 'ينتهي عقد :name بتاريخ :date',
     'unknown' => 'إشعار جديد',
+    'lesson_cover' => 'يرجى تغطية :classroom، الحصة :period (:date): :subject، بدل :absent',
 ];

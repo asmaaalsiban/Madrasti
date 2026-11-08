@@ -45,4 +45,5 @@ return [
     'payslip_paid' => 'Your salary for :month was paid',
     'contract_expiring' => ':name\'s contract ends on :date',
     'unknown' => 'New notification',
+    'lesson_cover' => 'Please cover :classroom, period :period (:date): :subject, instead of :absent',
 ];
