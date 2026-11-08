@@ -49,15 +49,16 @@ class TeachingAssignmentRequest extends FormRequest
             }
 
             $valid = User::whereKey($this->input('teacher_id'))->where('is_active', true)
-                ->whereHas('staffProfile', fn ($q) => $q->where('subject_id', $this->input('subject_id'))->whereIn('staff_type', StaffType::valuesIn('teaching')))
+                ->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', StaffType::valuesIn('teaching'))
+                    ->where(fn ($w) => $w->where('subject_id', $this->input('subject_id'))->orWhereHas('extraSubjects', fn ($e) => $e->where('subject_id', $this->input('subject_id')))))
                 ->exists();
             if (! $valid) {
                 $validator->errors()->add('teacher_id', __('academic.teacher_not_for_subject'));
             } else {
                 // The teacher teaches these grades and these students (boys / girls).
                 $classroom = Classroom::with('gradeLevel')->find($this->input('classroom_id'));
-                $profile = User::find($this->input('teacher_id'))->staffProfile()->with(['gradeFrom', 'gradeTo', 'classrooms'])->first();
-                if ($classroom && $profile && ! $profile->canTeach((int) $classroom->gradeLevel->sort_order, $classroom->gender ?? 'mixed', $classroom->id)) {
+                $profile = User::find($this->input('teacher_id'))->staffProfile()->with(['gradeFrom', 'gradeTo', 'classrooms', 'extraSubjects.gradeFrom', 'extraSubjects.gradeTo'])->first();
+                if ($classroom && $profile && ! $profile->canTeachSubject((int) $this->input('subject_id'), (int) $classroom->gradeLevel->sort_order, $classroom->gender ?? 'mixed', $classroom->id)) {
                     $validator->errors()->add('teacher_id', __('academic.teacher_outside_scope'));
                 }
             }

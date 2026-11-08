@@ -25,7 +25,7 @@ class StaffController extends AcademicController
 
     protected array $searchable = ['name', 'email', 'phone'];
 
-    protected array $with = ['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms'];
+    protected array $with = ['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms', 'staffProfile.extraSubjects.gradeFrom', 'staffProfile.extraSubjects.gradeTo'];
 
     protected string $orderBy = 'name';
 
@@ -70,7 +70,7 @@ class StaffController extends AcademicController
         }
 
         if ($request->filled('subject_id')) {
-            $query->whereHas('staffProfile', fn (Builder $q) => $q->where('subject_id', (int) $request->query('subject_id')));
+            $query->whereHas('staffProfile', fn (Builder $q) => $q->where('subject_id', (int) $request->query('subject_id'))->orWhereHas('extraSubjects', fn (Builder $e) => $e->where('subject_id', (int) $request->query('subject_id'))));
         }
         if ($request->boolean('homeroom')) {
             $query->where('is_active', true);

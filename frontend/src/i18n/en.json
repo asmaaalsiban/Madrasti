@@ -382,6 +382,12 @@
       "search": "Search sections",
       "hint": "Leave empty for any section that fits their grades and students. When you choose sections, the teacher teaches only those (e.g. a head of department with one or two sections).",
       "column": "Sections"
+    },
+    "extra": {
+      "title": "Extra subjects",
+      "subject": "Subject",
+      "add": "Add a subject",
+      "hint": "For a teacher who also teaches another subject, each for its own grades (for example Math for grades 5-6 and Science for grades 8-9). Leave the grades empty to use the teacher's grades above."
     }
   },
   "parent": {

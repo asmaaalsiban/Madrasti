@@ -719,3 +719,10 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - Each lesson shows which teachers wrote in it, and each question shows its author.
 - Each teacher changes or deletes **only their own questions** (and their pictures); the admin can change any. Only the teacher who created a lesson (or the admin) can rename or delete it.
 - No migration.
+
+## Teachers who teach more than one subject
+
+- A teacher has a **main subject** and can have **extra subjects**, each with its **own grades** (staff form, *Extra subjects*): e.g. Math for grades 5-6 and Science for grades 8-9. An extra subject with no grades follows the teacher's grades.
+- Everything that assigns teachers respects it: the assignment form and Excel import (a teacher can be given a subject only in the grades set for that subject), the automatic assigner (a teacher is a candidate for every subject they teach), and the staff list filter by subject.
+- The sections chosen for the teacher and the students they teach (boys / girls) apply to all their subjects.
+- After pulling: `php artisan tenants:migrate`.
