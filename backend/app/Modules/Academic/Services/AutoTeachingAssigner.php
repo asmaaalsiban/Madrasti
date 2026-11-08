@@ -66,13 +66,21 @@ class AutoTeachingAssigner
 
         $assigned = [];
         $unassigned = [];
-        $noClassTeacher = [];
+        $problems = [];
         foreach ($pending as $d) {
             // A class-teacher subject goes to the section's class teacher, or to nobody (the admin has to choose one).
             if ($d['by_class_teacher']) {
                 $ct = $d['class_teacher_id'];
-                if ($ct === null || ($load[$ct] ?? 0) + $d['periods'] > $maxLoad) {
-                    $noClassTeacher[$d['classroom']] = true;
+                if ($ct === null) {
+                    $problems[$d['classroom']] ??= ['classroom' => $d['classroom'], 'reason' => app(ClassTeachers::class)->whyNot($d['classroom_id']), 'periods' => 0];
+                    $problems[$d['classroom']]['periods'] += $d['periods'];
+                    $unassigned[] = $d;
+
+                    continue;
+                }
+                if (($load[$ct] ?? 0) + $d['periods'] > $maxLoad) {
+                    $problems[$d['classroom']] ??= ['classroom' => $d['classroom'], 'reason' => 'overload', 'periods' => 0, 'teacher' => (string) DB::table('users')->where('id', $ct)->value('name'), 'load' => $load[$ct] ?? 0, 'max' => $maxLoad];
+                    $problems[$d['classroom']]['periods'] += $d['periods'];
                     $unassigned[] = $d;
 
                     continue;
@@ -110,7 +118,7 @@ class AutoTeachingAssigner
             'invalid' => $invalid->count(),
             'teachers' => $this->teacherSummary(collect($assigned)->reject(fn ($a) => $a['by_class_teacher']), $teachers->flatten(1)->keyBy('id'), $subjects, $load),
             'class_teacher_assigned' => collect($assigned)->where('by_class_teacher', true)->count(),
-            'classrooms_without_class_teacher' => array_keys($noClassTeacher),
+            'class_teacher_problems' => array_values($problems),
             'unassigned' => collect($unassigned)->map(fn ($d) => [
                 'classroom' => $d['classroom'], 'subject' => $subjects[$d['subject_id']]->name_en, 'subject_ar' => $subjects[$d['subject_id']]->name_ar,
             ])->values()->take(200)->all(),

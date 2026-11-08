@@ -6,6 +6,7 @@ namespace App\Modules\Academic\Services;
 
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\GradeLevelSubject;
+use App\Shared\Enums\StaffType;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -33,11 +34,19 @@ class ClassTeachers
         return $cache;
     }
 
-    /** The homeroom teacher of a section, when they are a class teacher. */
+    /** The class teacher of a section: its homeroom teacher, when they are active teaching staff. (No separate flag is needed.) */
     public function classTeacherOf(int $classroomId): ?int
     {
-        $row = DB::table('classrooms')->join('staff_profiles', 'staff_profiles.user_id', '=', 'classrooms.homeroom_teacher_id')->where('classrooms.id', $classroomId)->where('staff_profiles.is_class_teacher', true)->first(['classrooms.homeroom_teacher_id']);
+        $types = StaffType::valuesIn('teaching');
+        $row = DB::table('classrooms')->join('staff_profiles', 'staff_profiles.user_id', '=', 'classrooms.homeroom_teacher_id')->join('users', 'users.id', '=', 'classrooms.homeroom_teacher_id')
+            ->where('classrooms.id', $classroomId)->where('users.is_active', true)->whereIn('staff_profiles.staff_type', $types)->first(['classrooms.homeroom_teacher_id']);
 
         return $row?->homeroom_teacher_id !== null ? (int) $row->homeroom_teacher_id : null;
+    }
+
+    /** Why a section has no class teacher: 'no_homeroom' (nobody chosen) or 'not_teacher' (the homeroom teacher is inactive or not teaching staff). */
+    public function whyNot(int $classroomId): string
+    {
+        return DB::table('classrooms')->where('id', $classroomId)->value('homeroom_teacher_id') === null ? 'no_homeroom' : 'not_teacher';
     }
 }

@@ -98,8 +98,8 @@ class StaffProfile extends Model
      */
     public function canTeachSubject(int $subjectId, int $gradeOrder, ?string $classroomGender, ?int $classroomId = null, ?int $gradeId = null): bool
     {
-        // A class teacher teaches the class-teacher subjects of their own section, whatever their own subject is.
-        if ($this->is_class_teacher && $classroomId !== null && $gradeId !== null
+        // The class teacher (the homeroom teacher) teaches the class-teacher subjects of their own section, whatever their own subject is.
+        if ($classroomId !== null && $gradeId !== null
             && app(\App\Modules\Academic\Services\ClassTeachers::class)->isClassTeacherSubject($gradeId, $subjectId)
             && app(\App\Modules\Academic\Services\ClassTeachers::class)->classTeacherOf($classroomId) === $this->user_id) {
             return true;

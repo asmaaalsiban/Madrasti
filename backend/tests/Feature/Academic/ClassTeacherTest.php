@@ -45,7 +45,7 @@ class ClassTeacherTest extends AcademicTestCase
         foreach ([$this->arabic, $this->math, $this->english, $this->computer] as $s) {
             GradeLevelSubject::create(['grade_level_id' => $this->grade1->id, 'subject_id' => $s->id, 'weekly_periods' => 3]);
         }
-        $this->classTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => null, 'is_class_teacher' => true])->create(['name' => 'Hala']);
+        $this->classTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => null])->create(['name' => 'Hala']);
         $this->englishTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->english->id])->create(['name' => 'Eli']);
         $this->room = Classroom::factory()->create(['name' => '1-A', 'grade_level_id' => $this->grade1->id, 'academic_year_id' => $this->year->id, 'homeroom_teacher_id' => $this->classTeacher->id]);
         $this->actAsAdmin();
@@ -96,7 +96,7 @@ class ClassTeacherTest extends AcademicTestCase
         $this->markGrade([$this->english->id]);
         $this->room->update(['homeroom_teacher_id' => null]);
         $result = app(AutoTeachingAssigner::class)->handle(24, true);
-        $this->assertSame(['1-A'], $result['classrooms_without_class_teacher']);
+        $this->assertSame([['classroom' => '1-A', 'reason' => 'no_homeroom', 'periods' => 9]], $result['class_teacher_problems']); // Arabic, Math and Computer, 3 each (only English is kept for a specialist)
         $this->assertContains('no_class_teacher', array_column($this->getJson('/api/timetable/check')->json('data.issues'), 'type'));
 
         // Grade 5 is a normal grade: a subject teacher teaches there, the class-teacher rule does not apply.
@@ -104,6 +104,27 @@ class ClassTeacherTest extends AcademicTestCase
         $room5 = Classroom::factory()->create(['name' => '5-A', 'grade_level_id' => $this->grade5->id, 'academic_year_id' => $this->year->id]);
         $mathTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
         $this->postJson('/api/teaching-assignments', ['classroom_id' => $room5->id, 'subject_id' => $this->math->id, 'teacher_id' => $mathTeacher->id, 'weekly_periods' => 3])->assertCreated();
+    }
+
+    public function test_the_homeroom_teacher_is_the_class_teacher_without_ticking_anything_else(): void
+    {
+        $this->markGrade([$this->english->id, $this->computer->id]);
+        $plain = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id, 'is_class_teacher' => false])->create(['name' => 'Plain']);
+        $this->room->update(['homeroom_teacher_id' => $plain->id]);
+
+        $result = app(AutoTeachingAssigner::class)->handle(24, false);
+        $this->assertSame($plain->id, TeachingAssignment::where('classroom_id', $this->room->id)->where('subject_id', $this->arabic->id)->value('teacher_id'));
+        $this->assertSame([], $result['class_teacher_problems']);
+    }
+
+    public function test_the_result_says_why_when_the_class_teacher_has_too_many_periods(): void
+    {
+        $this->markGrade([$this->english->id, $this->computer->id]);
+        $result = app(AutoTeachingAssigner::class)->handle(4, true); // a limit of 4 a week: Arabic (3) fits, Math (3) does not
+        $problem = $result['class_teacher_problems'][0];
+        $this->assertSame('overload', $problem['reason']);
+        $this->assertSame('Hala', $problem['teacher']);
+        $this->assertSame(4, $problem['max']);
     }
 
     public function test_a_teacher_is_saved_as_a_class_teacher_from_the_staff_form(): void

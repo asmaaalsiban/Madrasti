@@ -408,8 +408,7 @@
       "doctorate": "Doctorate",
       "other": "Other"
     },
-    "coursesHint": "Separate them with commas, e.g. first aid, ICDL.",
-    "classTeacherHint": "Teaches the subjects of their own section in the class-teacher grades (kindergarten, first grades), except the ones kept for specialists. Also choose them as the homeroom teacher of that section."
+    "coursesHint": "Separate them with commas, e.g. first aid, ICDL."
   },
   "parent": {
     "home": {
@@ -624,7 +623,14 @@
     "subject": "Subject",
     "classrooms": "Sections",
     "load": "Periods",
-    "invalid": "{{count}} existing assignments are outside the teacher's grades or students. They will be replaced when you apply."
+    "invalid": "{{count}} existing assignments are outside the teacher's grades or students. They will be replaced when you apply.",
+    "classTeacherAssigned": "{{count}} lessons go to the class teachers of their own sections.",
+    "classTeacherProblems": "Some sections could not get their class teacher:",
+    "classTeacherReason": {
+      "no_homeroom": "{{classroom}}: no homeroom teacher is chosen. Open the section and choose its class teacher ({{periods}} periods wait for them).",
+      "not_teacher": "{{classroom}}: the homeroom teacher is not an active teaching member of staff ({{periods}} periods).",
+      "overload": "{{classroom}}: {{teacher}} would have more than {{max}} periods a week ({{load}} already). Raise the limit above, or move a subject to a specialist teacher ({{periods}} periods)."
+    }
   },
   "days": {
     "0": "Sunday",

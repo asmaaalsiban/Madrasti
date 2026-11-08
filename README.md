@@ -755,8 +755,8 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 ## Class-teacher grades (kindergarten and the first grades)
 
 - In **Curriculum** (`/admin/curriculum`), the card *Class-teacher grades*: switch a grade on (kindergarten, grades 1-3...), then tick the subjects **kept for specialist teachers** (English, computer...). Every other subject of that grade is taught by the section's **class teacher**.
-- A teacher is marked **Class teacher** in the staff form (and chosen as the homeroom teacher of the section in the classroom form). A class teacher needs no main subject.
-- **Automatic assignment** gives the class teacher every class-teacher subject of their own section, and the specialist subjects go to subject teachers as usual (English teacher, computer teacher...). A section with no class teacher is listed in the result.
+- The **homeroom teacher** of a section in such a grade is its class teacher (choose them in the classroom form). Nothing else has to be ticked, and they need no main subject.
+- **Automatic assignment** gives the class teacher every class-teacher subject of their own section, and the specialist subjects go to subject teachers as usual (English teacher, computer teacher...). The result says why a section got no class teacher: nobody is chosen as homeroom teacher, the homeroom teacher is not active teaching staff, or they would go over the weekly limit.
 - **Manual assignment** is checked too: a class-teacher subject can only be given to that section's class teacher, and a specialist subject cannot be given to the class teacher. Grades that are not switched on work as before.
 - The timetable checker warns about a class-teacher section that has no class teacher.
 - After pulling: `php artisan tenants:migrate`.
