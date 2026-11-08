@@ -375,7 +375,15 @@
       "gradeFrom": "Teaches from grade",
       "gradeTo": "Teaches to grade",
       "teachesGender": "Teaches students",
-      "teaches": "Teaches"
+      "teaches": "Teaches",
+      "degree": "Degree",
+      "specialization": "Specialization",
+      "university": "University",
+      "graduationYear": "Graduation year",
+      "experienceYears": "Years of experience",
+      "courses": "Courses",
+      "qualification": "Qualification",
+      "load": "Periods a week"
     },
     "scopeHint": "Leave the grades empty for a teacher who teaches every grade, and the students empty for boys and girls.",
     "sections": {
@@ -388,8 +396,17 @@
       "title": "Extra subjects",
       "subject": "Subject",
       "add": "Add a subject",
-      "hint": "For a teacher who also teaches another subject, each for its own grades (for example Math for grades 5-6 and Science for grades 8-9). Leave the grades empty to use the teacher's grades above."
-    }
+      "hint": "For a teacher who also teaches another subject. Pick the grades each subject is taught in, one by one (for example Math for four grades and Finance for one). If you pick none, the teacher's grades above are used.",
+      "grades": "Grades"
+    },
+    "degrees": {
+      "diploma": "Diploma",
+      "bachelor": "Bachelor",
+      "master": "Master",
+      "doctorate": "Doctorate",
+      "other": "Other"
+    },
+    "coursesHint": "Separate them with commas, e.g. first aid, ICDL."
   },
   "parent": {
     "home": {

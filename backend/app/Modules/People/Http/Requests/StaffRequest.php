@@ -32,8 +32,14 @@ class StaffRequest extends FormRequest
             'teaches_gender' => ['nullable', 'in:male,female'],
             'extra_subjects' => ['nullable', 'array', 'max:10'],
             'extra_subjects.*.subject_id' => ['required', 'integer', 'distinct', 'exists:subjects,id'],
-            'extra_subjects.*.grade_from_id' => ['nullable', 'integer', 'exists:grade_levels,id'],
-            'extra_subjects.*.grade_to_id' => ['nullable', 'integer', 'exists:grade_levels,id'],
+            'extra_subjects.*.grade_ids' => ['nullable', 'array', 'max:30'],
+            'extra_subjects.*.grade_ids.*' => ['integer', 'distinct', 'exists:grade_levels,id'],
+            'degree' => ['nullable', 'string', 'max:30'],
+            'specialization' => ['nullable', 'string', 'max:120'],
+            'university' => ['nullable', 'string', 'max:120'],
+            'graduation_year' => ['nullable', 'integer', 'min:1950', 'max:2100'],
+            'experience_years' => ['nullable', 'integer', 'min:0', 'max:60'],
+            'courses' => ['nullable', 'string', 'max:500'],
             'classroom_ids' => ['nullable', 'array', 'max:100'],
             'classroom_ids.*' => ['integer', 'exists:classrooms,id'],
         ];
@@ -54,13 +60,6 @@ class StaffRequest extends FormRequest
                 $validator->errors()->add('grade_to_id', __('academic.floor_grade_range_reversed'));
             }
             foreach ((array) $this->input('extra_subjects', []) as $i => $extra) {
-                $a = $extra['grade_from_id'] ?? null;
-                $b = $extra['grade_to_id'] ?? null;
-                if (($a === null) !== ($b === null)) {
-                    $validator->errors()->add("extra_subjects.$i.grade_to_id", __('academic.floor_grade_range_incomplete'));
-                } elseif ($a !== null && GradeLevel::findOrFail($a)->sort_order > GradeLevel::findOrFail($b)->sort_order) {
-                    $validator->errors()->add("extra_subjects.$i.grade_to_id", __('academic.floor_grade_range_reversed'));
-                }
                 if ((int) ($extra['subject_id'] ?? 0) === (int) $this->input('subject_id')) {
                     $validator->errors()->add("extra_subjects.$i.subject_id", __('academic.extra_subject_is_main'));
                 }

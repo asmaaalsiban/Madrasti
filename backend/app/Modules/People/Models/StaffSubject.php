@@ -12,7 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StaffSubject extends Model
 {
     /** @var list<string> */
-    protected $fillable = ['staff_profile_id', 'subject_id', 'grade_from_id', 'grade_to_id'];
+    protected $fillable = ['staff_profile_id', 'subject_id', 'grade_from_id', 'grade_to_id', 'grade_ids'];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['grade_ids' => 'array'];
+    }
 
     public function gradeFrom(): BelongsTo
     {

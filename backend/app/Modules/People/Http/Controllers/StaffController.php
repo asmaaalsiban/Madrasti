@@ -53,7 +53,10 @@ class StaffController extends AcademicController
     /** Staff are the users that have a staff profile (the school's first admin is not staff). */
     protected function baseQuery(): Builder
     {
-        return User::query()->whereHas('staffProfile');
+        $year = \App\Modules\Academic\Models\AcademicYear::where('is_current', true)->value('id');
+
+        // teaching_load: the periods a week the teacher is assigned this year.
+        return User::query()->whereHas('staffProfile')->withSum(['teachingAssignments as teaching_load' => fn ($q) => $q->whereHas('classroom', fn ($c) => $c->where('academic_year_id', $year))], 'weekly_periods');
     }
 
     protected function filter(Builder $query, Request $request): void

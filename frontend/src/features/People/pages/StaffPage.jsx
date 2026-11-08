@@ -56,6 +56,12 @@ export default function StaffPage() {
       name: 'classroom_ids', type: 'custom', getValue: (row) => row.classroom_ids ?? [], visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
       render: ({ form, setForm }) => <SectionPicker value={form.classroom_ids ?? []} onChange={(ids) => setForm({ ...form, classroom_ids: ids })} />,
     },
+    { name: 'degree', label: 'staff.fields.degree', type: 'select', options: ['diploma', 'bachelor', 'master', 'doctorate', 'other'].map((v) => ({ value: v, label: `staff.degrees.${v}` })) },
+    { name: 'specialization', label: 'staff.fields.specialization' },
+    { name: 'university', label: 'staff.fields.university' },
+    { name: 'graduation_year', label: 'staff.fields.graduationYear', type: 'number' },
+    { name: 'experience_years', label: 'staff.fields.experienceYears', type: 'number' },
+    { name: 'courses', label: 'staff.fields.courses', hint: 'staff.coursesHint' },
     { name: 'floor', label: 'staff.fields.floor', visibleWhen: (form) => byValue[form.staff_type]?.needs_floor },
     { name: 'is_active', label: 'people.fields.active', type: 'checkbox' },
   ]
@@ -72,6 +78,8 @@ export default function StaffPage() {
       key: 'scope', label: 'staff.fields.teaches',
       render: (r) => (r.grade_from && r.grade_to ? `${r.grade_from[`name_${i18n.language}`]} → ${r.grade_to[`name_${i18n.language}`]}` : '') + (r.teaches_gender ? ` · ${t(`buildings.gender.${r.teaches_gender}`)}` : ''),
     },
+    { key: 'qualification', label: 'staff.fields.qualification', render: (r) => [r.degree ? t(`staff.degrees.${r.degree}`) : '', r.specialization].filter(Boolean).join(' · ') },
+    { key: 'load', label: 'staff.fields.load', render: (r) => (r.weekly_load === null || r.weekly_load === undefined ? '' : String(r.weekly_load)) },
     { key: 'sections', label: 'staff.sections.column', render: (r) => (r.classrooms ?? []).map((c) => c.name).join(', ') },
     { key: 'phone', label: 'people.fields.phone' },
     { key: 'is_active', label: 'people.fields.active', render: (r) => t(r.is_active ? 'academic.yes' : 'academic.no') },
@@ -99,7 +107,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', degree: '', specialization: '', university: '', graduation_year: '', experience_years: '', courses: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />
