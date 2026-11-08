@@ -79,7 +79,7 @@ export default function StaffPage() {
       render: (r) => (r.grade_from && r.grade_to ? `${r.grade_from[`name_${i18n.language}`]} → ${r.grade_to[`name_${i18n.language}`]}` : '') + (r.teaches_gender ? ` · ${t(`buildings.gender.${r.teaches_gender}`)}` : ''),
     },
     { key: 'qualification', label: 'staff.fields.qualification', render: (r) => [r.degree ? t(`staff.degrees.${r.degree}`) : '', r.specialization].filter(Boolean).join(' · ') },
-    { key: 'load', label: 'staff.fields.load', render: (r) => (r.weekly_load === null || r.weekly_load === undefined ? '' : String(r.weekly_load)) },
+    { key: 'load', label: 'staff.fields.load', render: (r) => (r.weekly_load === null || r.weekly_load === undefined ? '' : <span dir="ltr" className={r.weekly_load > r.max_load ? 'font-bold text-red-700' : ''}>{r.weekly_load} / {r.max_load}</span>) },
     { key: 'sections', label: 'staff.sections.column', render: (r) => (r.classrooms ?? []).map((c) => c.name).join(', ') },
     { key: 'phone', label: 'people.fields.phone' },
     { key: 'is_active', label: 'people.fields.active', render: (r) => t(r.is_active ? 'academic.yes' : 'academic.no') },
