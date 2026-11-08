@@ -31,7 +31,7 @@ return [
     'distribution' => [
         'title' => 'Subject distribution among teachers as of :date',
         'school' => 'School: :school',
-        'directorate' => 'Directorate of Education: ....................       Area: ....................',
+        'directorate' => 'Directorate of Education: :directorate       Area: :district',
         'no' => 'No.',
         'teacher' => 'Teacher',
         'qualification' => 'Qualification',

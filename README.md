@@ -761,3 +761,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Manual assignment** is checked too: a class-teacher subject can only be given to that section's class teacher, and a specialist subject cannot be given to the class teacher. Grades that are not switched on work as before.
 - The timetable checker warns about a class-teacher section that has no class teacher.
 - After pulling: `php artisan tenants:migrate`.
+
+### School details for the official forms
+
+- On the **Branding** page (`/admin/branding`) the card *School details for official forms* keeps the **directorate of education** and the **area**. They are printed at the top of the timetable and the subject distribution Excel forms. Left empty, the forms print a dotted line to fill in by hand. Admin only; no migration.

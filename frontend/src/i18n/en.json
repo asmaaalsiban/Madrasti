@@ -3103,5 +3103,12 @@
     "noSubjects": "This grade has no subjects in the curriculum yet.",
     "specialist": "specialist",
     "byClassTeacher": "class teacher"
+  },
+  "schoolDetails": {
+    "title": "School details for official forms",
+    "help": "Printed at the top of the timetable and the subject distribution forms (Excel). Leave empty to print a dotted line to fill in by hand.",
+    "directorate": "Directorate of Education",
+    "district": "Area",
+    "saved": "Saved."
   }
 }
