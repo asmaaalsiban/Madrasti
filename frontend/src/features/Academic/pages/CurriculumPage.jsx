@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
+import ClassTeacherGrades from '../components/ClassTeacherGrades'
 
 const key = (grade, subject) => `${grade}-${subject}`
 
@@ -126,6 +127,8 @@ export default function CurriculumPage() {
           </tfoot>
         </table>
       </div>
+
+      <ClassTeacherGrades grades={data.grades} subjects={data.subjects} cells={data.cells} onSaved={refresh} />
 
       <ConfirmDialog open={confirmPlan} message={t('curriculum.confirmPlan')} confirmLabel={t('curriculum.apply')} danger={false} onConfirm={() => applyPlan.mutate()} onCancel={() => setConfirmPlan(false)} />
 

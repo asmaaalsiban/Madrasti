@@ -101,6 +101,7 @@ class SaveStaff
             'grade_from_id' => $type->needsSubject() ? ($data['grade_from_id'] ?? null) : null,
             'grade_to_id' => $type->needsSubject() ? ($data['grade_to_id'] ?? null) : null,
             'teaches_gender' => $type->needsSubject() ? ($data['teaches_gender'] ?? null) : null,
+            'is_class_teacher' => $type->needsSubject() ? (bool) ($data['is_class_teacher'] ?? false) : false,
             'degree' => $data['degree'] ?? null,
             'specialization' => $data['specialization'] ?? null,
             'university' => $data['university'] ?? null,

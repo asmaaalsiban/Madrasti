@@ -17,5 +17,11 @@ class GradeLevelSubject extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['grade_level_id', 'subject_id', 'weekly_periods'];
+    protected $fillable = ['grade_level_id', 'subject_id', 'weekly_periods', 'specialist'];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['specialist' => 'boolean'];
+    }
 }

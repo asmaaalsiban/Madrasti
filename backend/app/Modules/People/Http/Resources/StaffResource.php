@@ -35,6 +35,7 @@ class StaffResource extends JsonResource
             'grade_from' => $profile?->gradeFrom?->only(['id', 'name_ar', 'name_en']),
             'grade_to' => $profile?->gradeTo?->only(['id', 'name_ar', 'name_en']),
             'extra_subjects' => $profile?->extraSubjects->map(fn ($x) => ['subject_id' => $x->subject_id, 'grade_ids' => $x->grade_ids ?? []])->values() ?? [],
+            'is_class_teacher' => (bool) $profile?->is_class_teacher,
             'degree' => $profile?->degree,
             'specialization' => $profile?->specialization,
             'university' => $profile?->university,

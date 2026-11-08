@@ -33,14 +33,14 @@ class StaffProfile extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty', 'hidden_features', 'degree', 'specialization', 'university', 'graduation_year', 'experience_years', 'courses'];
+    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty', 'hidden_features', 'degree', 'specialization', 'university', 'graduation_year', 'experience_years', 'courses', 'is_class_teacher'];
 
     /**
      * @return array<string, mixed>
      */
     protected function casts(): array
     {
-        return ['staff_type' => StaffType::class, 'hired_on' => 'date', 'does_duty' => 'boolean', 'hidden_features' => 'array'];
+        return ['staff_type' => StaffType::class, 'hired_on' => 'date', 'does_duty' => 'boolean', 'is_class_teacher' => 'boolean', 'hidden_features' => 'array'];
     }
 
     public function user(): BelongsTo
@@ -98,6 +98,13 @@ class StaffProfile extends Model
      */
     public function canTeachSubject(int $subjectId, int $gradeOrder, ?string $classroomGender, ?int $classroomId = null, ?int $gradeId = null): bool
     {
+        // A class teacher teaches the class-teacher subjects of their own section, whatever their own subject is.
+        if ($this->is_class_teacher && $classroomId !== null && $gradeId !== null
+            && app(\App\Modules\Academic\Services\ClassTeachers::class)->isClassTeacherSubject($gradeId, $subjectId)
+            && app(\App\Modules\Academic\Services\ClassTeachers::class)->classTeacherOf($classroomId) === $this->user_id) {
+            return true;
+        }
+
         if ($subjectId === $this->subject_id) {
             return $this->canTeach($gradeOrder, $classroomGender, $classroomId);
         }

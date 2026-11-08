@@ -384,7 +384,8 @@
       "experienceYears": "Years of experience",
       "courses": "Courses",
       "qualification": "Qualification",
-      "load": "Periods a week"
+      "load": "Periods a week",
+      "classTeacher": "Class teacher"
     },
     "scopeHint": "Leave the grades empty for a teacher who teaches every grade, and the students empty for boys and girls.",
     "sections": {
@@ -407,7 +408,8 @@
       "doctorate": "Doctorate",
       "other": "Other"
     },
-    "coursesHint": "Separate them with commas, e.g. first aid, ICDL."
+    "coursesHint": "Separate them with commas, e.g. first aid, ICDL.",
+    "classTeacherHint": "Teaches the subjects of their own section in the class-teacher grades (kindergarten, first grades), except the ones kept for specialists. Also choose them as the homeroom teacher of that section."
   },
   "parent": {
     "home": {
@@ -3081,7 +3083,17 @@
       "teacher_unavailable": "{{teacher}} has a lesson in {{classroom}} ({{day}}, period {{period}}) while unavailable.",
       "beyond_grade_periods": "{{classroom}} has a lesson on {{day}} in period {{period}}, but its grade has only {{limit}} periods a day.",
       "teacher_overloaded": "{{teacher}} has {{load}} periods a week, more than the limit of {{max}}.",
-      "teacher_gaps": "{{teacher}} has {{gaps}} free periods between lessons in the week."
+      "teacher_gaps": "{{teacher}} has {{gaps}} free periods between lessons in the week.",
+      "no_class_teacher": "{{classroom}} is a class-teacher grade but has no class teacher: choose its homeroom teacher and mark them as a class teacher."
     }
+  },
+  "classTeachers": {
+    "title": "Class-teacher grades",
+    "intro": "In kindergarten and the first grades one teacher, the class teacher (the section's homeroom teacher), teaches most subjects. Switch a grade on, then mark the subjects kept for specialist teachers (English, computer...). Those need another teacher; all the others are taught by the section's class teacher.",
+    "enable": "Class-teacher grade",
+    "pickSpecialist": "Tick the subjects taught by a specialist teacher",
+    "noSubjects": "This grade has no subjects in the curriculum yet.",
+    "specialist": "specialist",
+    "byClassTeacher": "class teacher"
   }
 }

@@ -76,7 +76,11 @@ class TimetableChecker
                     $add('subject_without_teacher', 'warning', ['classroom_id' => $room->id, 'subject_id' => $cell->subject_id], ['classroom' => $room->name, 'subject' => $subjectNames[$cell->subject_id]->name_en, 'subject_ar' => $subjectNames[$cell->subject_id]->name_ar]);
                 }
             }
-            if ($room->homeroom_teacher_id === null) {
+            if ($room->gradeLevel?->class_teacher_grade) {
+                if (app(\App\Modules\Academic\Services\ClassTeachers::class)->classTeacherOf($room->id) === null) {
+                    $add('no_class_teacher', 'warning', ['classroom_id' => $room->id], ['classroom' => $room->name]);
+                }
+            } elseif ($room->homeroom_teacher_id === null) {
                 $add('no_homeroom', 'info', ['classroom_id' => $room->id], ['classroom' => $room->name]);
             }
         }

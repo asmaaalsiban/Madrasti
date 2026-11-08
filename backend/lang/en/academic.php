@@ -77,4 +77,5 @@ return [
         'security_guard' => 'Security guard',
         'canteen_worker' => 'Canteen worker',
     ],
+    'class_teacher_subject' => "This subject is taught by the section's class teacher. Choose them, or mark the subject as kept for a specialist teacher in the curriculum.",
 ];

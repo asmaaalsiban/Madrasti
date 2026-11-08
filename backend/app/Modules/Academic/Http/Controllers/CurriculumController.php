@@ -47,6 +47,25 @@ class CurriculumController extends Controller
         return $this->state();
     }
 
+    /** Marks a grade as a class-teacher grade and which of its subjects are kept for specialist teachers (English, computer...). */
+    public function classTeachers(Request $request): JsonResponse
+    {
+        Gate::authorize('update', new GradeLevelSubject);
+        $data = $request->validate([
+            'grade_level_id' => ['required', 'integer', 'exists:grade_levels,id'],
+            'class_teacher_grade' => ['required', 'boolean'],
+            'specialist_subject_ids' => ['nullable', 'array'],
+            'specialist_subject_ids.*' => ['integer'],
+        ]);
+        DB::transaction(function () use ($data): void {
+            GradeLevel::whereKey($data['grade_level_id'])->update(['class_teacher_grade' => $data['class_teacher_grade']]);
+            $specialist = $data['specialist_subject_ids'] ?? [];
+            GradeLevelSubject::where('grade_level_id', $data['grade_level_id'])->get()->each(fn ($row) => $row->update(['specialist' => in_array($row->subject_id, $specialist, true)]));
+        });
+
+        return $this->state();
+    }
+
     /** Gives the other grades the same subjects and periods as one grade (what they had is replaced). */
     public function copy(Request $request): JsonResponse
     {
@@ -62,7 +81,7 @@ class CurriculumController extends Controller
             $cells = [];
             foreach ($data['to_grade_level_ids'] as $to) {
                 foreach ($source as $row) {
-                    $cells[] = [(int) $to, $row->subject_id, $row->weekly_periods];
+                    $cells[] = [(int) $to, $row->subject_id, $row->weekly_periods, (bool) $row->specialist];
                 }
             }
             $this->replace($cells, array_map('intval', $data['to_grade_level_ids']));
@@ -126,25 +145,25 @@ class CurriculumController extends Controller
             $key = $row->grade_level_id.'-'.$row->subject_id;
             if (! $wanted->has($key)) {
                 $row->delete();
-            } elseif ($row->weekly_periods !== $wanted[$key][2]) {
-                $row->update(['weekly_periods' => $wanted[$key][2]]);
+            } elseif ($row->weekly_periods !== $wanted[$key][2] || (isset($wanted[$key][3]) && $row->specialist !== $wanted[$key][3])) {
+                $row->update(['weekly_periods' => $wanted[$key][2]] + (isset($wanted[$key][3]) ? ['specialist' => $wanted[$key][3]] : []));
             }
         }
-        foreach ($wanted->diffKeys($existing->mapWithKeys(fn ($r) => [$r->grade_level_id.'-'.$r->subject_id => true])) as [$grade, $subject, $periods]) {
-            GradeLevelSubject::create(['grade_level_id' => $grade, 'subject_id' => $subject, 'weekly_periods' => $periods]);
+        foreach ($wanted->diffKeys($existing->mapWithKeys(fn ($r) => [$r->grade_level_id.'-'.$r->subject_id => true])) as $cell) {
+            GradeLevelSubject::create(['grade_level_id' => $cell[0], 'subject_id' => $cell[1], 'weekly_periods' => $cell[2], 'specialist' => $cell[3] ?? false]);
         }
     }
 
     private function state(): JsonResponse
     {
-        $cells = GradeLevelSubject::get(['grade_level_id', 'subject_id', 'weekly_periods']);
+        $cells = GradeLevelSubject::get(['grade_level_id', 'subject_id', 'weekly_periods', 'specialist']);
         $setting = DB::table('school_settings')->where('key', 'periods_per_week')->value('value');
         $schoolDay = app(PeriodSetup::class)->current();
 
         return response()->json(['data' => [
             'periods_per_week' => $setting !== null ? (int) json_decode($setting, true) : self::DEFAULT_PERIODS_PER_WEEK,
             // Every grade is compared with its own week: its periods a day (or the school's) x the school days.
-            'grades' => GradeLevel::orderBy('sort_order')->orderBy('id')->get(['id', 'name_ar', 'name_en', 'code', 'sort_order', 'periods_per_day'])
+            'grades' => GradeLevel::orderBy('sort_order')->orderBy('id')->get(['id', 'name_ar', 'name_en', 'code', 'sort_order', 'periods_per_day', 'class_teacher_grade'])
                 ->map(fn (GradeLevel $g) => $g->toArray() + ['weekly_target' => ($g->periods_per_day ?? (int) $schoolDay['periods_per_day']) * count($schoolDay['days'])]),
             'subjects' => Subject::orderBy('name_en')->get(['id', 'code', 'name_ar', 'name_en']),
             'cells' => $cells,

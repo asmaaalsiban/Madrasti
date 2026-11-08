@@ -1,0 +1,114 @@
+<?php
+
+namespace Tests\Feature\Academic;
+
+use App\Models\User;
+use App\Modules\Academic\Models\AcademicYear;
+use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\GradeLevel;
+use App\Modules\Academic\Models\GradeLevelSubject;
+use App\Modules\Academic\Models\Subject;
+use App\Modules\Academic\Models\TeachingAssignment;
+use App\Modules\Academic\Services\AutoTeachingAssigner;
+use App\Shared\Enums\StaffType;
+
+/** Grade 1: the class teacher teaches every subject except the ones kept for a specialist (English, computer). */
+class ClassTeacherTest extends AcademicTestCase
+{
+    private GradeLevel $grade1;
+
+    private GradeLevel $grade5;
+
+    private Classroom $room;
+
+    private Subject $arabic;
+
+    private Subject $math;
+
+    private Subject $english;
+
+    private Subject $computer;
+
+    private User $classTeacher;
+
+    private User $englishTeacher;
+
+    private AcademicYear $year;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->year = AcademicYear::factory()->create(['is_current' => true]);
+        $this->grade1 = GradeLevel::factory()->create(['sort_order' => 1]);
+        $this->grade5 = GradeLevel::factory()->create(['sort_order' => 5]);
+        [$this->arabic, $this->math, $this->english, $this->computer] = array_map(fn ($n) => Subject::factory()->create(['name_en' => $n]), ['Arabic', 'Math', 'English', 'Computer']);
+        foreach ([$this->arabic, $this->math, $this->english, $this->computer] as $s) {
+            GradeLevelSubject::create(['grade_level_id' => $this->grade1->id, 'subject_id' => $s->id, 'weekly_periods' => 3]);
+        }
+        $this->classTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => null, 'is_class_teacher' => true])->create(['name' => 'Hala']);
+        $this->englishTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->english->id])->create(['name' => 'Eli']);
+        $this->room = Classroom::factory()->create(['name' => '1-A', 'grade_level_id' => $this->grade1->id, 'academic_year_id' => $this->year->id, 'homeroom_teacher_id' => $this->classTeacher->id]);
+        $this->actAsAdmin();
+    }
+
+    private function markGrade(array $specialists = []): void
+    {
+        $this->putJson('/api/curriculum/class-teachers', ['grade_level_id' => $this->grade1->id, 'class_teacher_grade' => true, 'specialist_subject_ids' => $specialists])->assertOk();
+    }
+
+    public function test_the_admin_marks_a_grade_and_the_subjects_kept_for_specialists(): void
+    {
+        $this->markGrade([$this->english->id, $this->computer->id]);
+        $state = $this->getJson('/api/curriculum')->json('data');
+        $this->assertTrue(collect($state['grades'])->firstWhere('id', $this->grade1->id)['class_teacher_grade']);
+        $this->assertFalse(collect($state['grades'])->firstWhere('id', $this->grade5->id)['class_teacher_grade']);
+        $specialist = collect($state['cells'])->where('specialist', true)->pluck('subject_id')->all();
+        $this->assertEqualsCanonicalizing([$this->english->id, $this->computer->id], $specialist);
+    }
+
+    public function test_the_automatic_assigner_gives_the_class_teacher_all_but_the_specialist_subjects(): void
+    {
+        $this->markGrade([$this->english->id, $this->computer->id]);
+        $result = app(AutoTeachingAssigner::class)->handle(24, false);
+
+        $who = fn (Subject $s) => TeachingAssignment::where('classroom_id', $this->room->id)->where('subject_id', $s->id)->value('teacher_id');
+        $this->assertSame($this->classTeacher->id, $who($this->arabic));
+        $this->assertSame($this->classTeacher->id, $who($this->math));
+        $this->assertSame($this->englishTeacher->id, $who($this->english)); // the specialist
+        $this->assertNull($who($this->computer));                          // nobody teaches computer yet: reported as missing
+        $this->assertSame(2, $result['class_teacher_assigned']);
+    }
+
+    public function test_a_class_teacher_subject_can_only_be_given_to_the_class_teacher(): void
+    {
+        $this->markGrade([$this->english->id]);
+        $other = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
+        $body = fn (User $t, Subject $s) => ['classroom_id' => $this->room->id, 'subject_id' => $s->id, 'teacher_id' => $t->id, 'weekly_periods' => 3];
+
+        $this->postJson('/api/teaching-assignments', $body($other, $this->math))->assertStatus(422)->assertJsonValidationErrors('teacher_id'); // Math is the class teacher's
+        $this->postJson('/api/teaching-assignments', $body($this->classTeacher, $this->math))->assertCreated();
+        $this->postJson('/api/teaching-assignments', $body($this->classTeacher, $this->english))->assertStatus(422);  // English is the specialist's
+        $this->postJson('/api/teaching-assignments', $body($this->englishTeacher, $this->english))->assertCreated();
+    }
+
+    public function test_a_section_without_a_class_teacher_is_reported_and_other_grades_are_not_affected(): void
+    {
+        $this->markGrade([$this->english->id]);
+        $this->room->update(['homeroom_teacher_id' => null]);
+        $result = app(AutoTeachingAssigner::class)->handle(24, true);
+        $this->assertSame(['1-A'], $result['classrooms_without_class_teacher']);
+        $this->assertContains('no_class_teacher', array_column($this->getJson('/api/timetable/check')->json('data.issues'), 'type'));
+
+        // Grade 5 is a normal grade: a subject teacher teaches there, the class-teacher rule does not apply.
+        GradeLevelSubject::create(['grade_level_id' => $this->grade5->id, 'subject_id' => $this->math->id, 'weekly_periods' => 3]);
+        $room5 = Classroom::factory()->create(['name' => '5-A', 'grade_level_id' => $this->grade5->id, 'academic_year_id' => $this->year->id]);
+        $mathTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->math->id])->create();
+        $this->postJson('/api/teaching-assignments', ['classroom_id' => $room5->id, 'subject_id' => $this->math->id, 'teacher_id' => $mathTeacher->id, 'weekly_periods' => 3])->assertCreated();
+    }
+
+    public function test_a_teacher_is_saved_as_a_class_teacher_from_the_staff_form(): void
+    {
+        $id = $this->postJson('/api/staff', ['name' => 'Rima', 'email' => 'rima@x.test', 'staff_type' => 'teacher', 'is_class_teacher' => true])->assertCreated()->assertJsonPath('data.is_class_teacher', true)->json('data.id');
+        $this->putJson("/api/staff/$id", ['name' => 'Rima', 'email' => 'rima@x.test', 'staff_type' => 'teacher', 'is_class_teacher' => false])->assertOk()->assertJsonPath('data.is_class_teacher', false);
+    }
+}

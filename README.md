@@ -751,3 +751,12 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - On *Teaching assignments* (`/admin/teaching`) the button **Export distribution table (Excel)** (`GET /api/teaching-assignments/export`) writes the Ministry-style form: *Subject distribution among teachers as of [date]*, the school, then every member of staff with their **qualifications** (experience, degree, specialization, university, graduation year) and **courses** (from the teacher profile), a *Subject* and a *Periods* column for every section, the teacher's **total load**, and the notes (the job of non-teaching staff).
 - A teacher with two subjects in the same section gets one row per subject. More than 14 sections are split over several sheets. Same tidy look as the timetable form (navy header, A3 landscape on one page wide, right-to-left in Arabic).
 - Admin only. No migration.
+
+## Class-teacher grades (kindergarten and the first grades)
+
+- In **Curriculum** (`/admin/curriculum`), the card *Class-teacher grades*: switch a grade on (kindergarten, grades 1-3...), then tick the subjects **kept for specialist teachers** (English, computer...). Every other subject of that grade is taught by the section's **class teacher**.
+- A teacher is marked **Class teacher** in the staff form (and chosen as the homeroom teacher of the section in the classroom form). A class teacher needs no main subject.
+- **Automatic assignment** gives the class teacher every class-teacher subject of their own section, and the specialist subjects go to subject teachers as usual (English teacher, computer teacher...). A section with no class teacher is listed in the result.
+- **Manual assignment** is checked too: a class-teacher subject can only be given to that section's class teacher, and a specialist subject cannot be given to the class teacher. Grades that are not switched on work as before.
+- The timetable checker warns about a class-teacher section that has no class teacher.
+- After pulling: `php artisan tenants:migrate`.

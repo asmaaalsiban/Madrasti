@@ -18,7 +18,13 @@ class GradeLevel extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['name_ar', 'name_en', 'code', 'sort_order', 'periods_per_day'];
+    protected $fillable = ['name_ar', 'name_en', 'code', 'sort_order', 'periods_per_day', 'class_teacher_grade'];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['class_teacher_grade' => 'boolean'];
+    }
 
     public function classrooms(): HasMany
     {
