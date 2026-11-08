@@ -32,8 +32,12 @@ class AutoTeachingAssigner
         $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo', 'teacher.staffProfile.classrooms', 'teacher.staffProfile.extraSubjects.gradeFrom', 'teacher.staffProfile.extraSubjects.gradeTo')->get();
         // Assignments made before a teacher's scope existed (or with another scope) are replaced, not kept.
         $meta = $demands->keyBy('classroom_id');
-        $invalid = $taken->filter(fn ($a) => ($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
-            && ! $profile->canTeachSubject((int) $a->subject_id, $meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id, $meta[$a->classroom_id]['grade_level_id']))->values();
+        $classTeachers = app(ClassTeachers::class);
+        // In a class-teacher grade a subject the class teacher teaches is theirs alone: an old assignment to a subject teacher is replaced too.
+        $notTheirs = fn ($a) => isset($meta[$a->classroom_id]) && $classTeachers->isClassTeacherSubject($meta[$a->classroom_id]['grade_level_id'], (int) $a->subject_id)
+            && $classTeachers->classTeacherOf($a->classroom_id) !== $a->teacher_id;
+        $invalid = $taken->filter(fn ($a) => $notTheirs($a) || (($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
+            && ! $profile->canTeachSubject((int) $a->subject_id, $meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id, $meta[$a->classroom_id]['grade_level_id'])))->values();
         $taken = $taken->reject(fn ($a) => $invalid->contains('id', $a->id))->values();
         $takenKeys = $taken->mapWithKeys(fn ($a) => [$a->classroom_id.'-'.$a->subject_id => true]);
         $buildingOf = $demands->pluck('building_id', 'classroom_id');

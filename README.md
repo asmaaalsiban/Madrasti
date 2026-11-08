@@ -755,7 +755,8 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 ## Class-teacher grades (kindergarten and the first grades)
 
 - In **Curriculum** (`/admin/curriculum`), the card *Class-teacher grades*: switch a grade on (kindergarten, grades 1-3...), then tick the subjects **kept for specialist teachers** (English, computer...). Every other subject of that grade is taught by the section's **class teacher**.
-- The **homeroom teacher** of a section in such a grade is its class teacher (choose them in the classroom form). Nothing else has to be ticked, and they need no main subject.
+- The **homeroom teacher** of a section in such a grade is its class teacher (choose them in the classroom form). In the staff form, instead of a subject you can pick **Class teacher (all subjects of their section)** in the *Subject* list; it is only a label, the homeroom choice is what counts.
+- If a section was assigned before the grade was switched on, the automatic assignment **replaces** the old subject-teacher assignments of the class-teacher subjects (the preview counts them as *no longer right*).
 - **Automatic assignment** gives the class teacher every class-teacher subject of their own section, and the specialist subjects go to subject teachers as usual (English teacher, computer teacher...). The result says why a section got no class teacher: nobody is chosen as homeroom teacher, the homeroom teacher is not active teaching staff, or they would go over the weekly limit.
 - **Manual assignment** is checked too: a class-teacher subject can only be given to that section's class teacher, and a specialist subject cannot be given to the class teacher. Grades that are not switched on work as before.
 - The timetable checker warns about a class-teacher section that has no class teacher.

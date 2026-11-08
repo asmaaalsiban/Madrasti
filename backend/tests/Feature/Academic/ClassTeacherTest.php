@@ -117,6 +117,20 @@ class ClassTeacherTest extends AcademicTestCase
         $this->assertSame([], $result['class_teacher_problems']);
     }
 
+    public function test_an_old_assignment_to_a_subject_teacher_is_replaced_when_the_grade_becomes_a_class_teacher_grade(): void
+    {
+        // Before: the school ran the automatic assignment as a normal grade, so a subject teacher got Arabic in grade 1.
+        $arabicTeacher = User::factory()->staff(StaffType::Teacher, ['subject_id' => $this->arabic->id])->create(['name' => 'Subject teacher']);
+        TeachingAssignment::create(['classroom_id' => $this->room->id, 'subject_id' => $this->arabic->id, 'teacher_id' => $arabicTeacher->id, 'weekly_periods' => 3]);
+
+        $this->markGrade([$this->english->id, $this->computer->id]);
+        $preview = app(AutoTeachingAssigner::class)->handle(24, true);
+        $this->assertSame(1, $preview['invalid']); // the old Arabic assignment is reported as no longer right
+
+        app(AutoTeachingAssigner::class)->handle(24, false);
+        $this->assertSame($this->classTeacher->id, TeachingAssignment::where('classroom_id', $this->room->id)->where('subject_id', $this->arabic->id)->value('teacher_id'));
+    }
+
     public function test_the_result_says_why_when_the_class_teacher_has_too_many_periods(): void
     {
         $this->markGrade([$this->english->id, $this->computer->id]);
