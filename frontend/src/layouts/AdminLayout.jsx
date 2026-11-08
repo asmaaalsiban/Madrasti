@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
-import { ArrowLeftRight, LayoutGrid, Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ChevronDown, ArrowLeftRight, LayoutGrid, Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
@@ -22,8 +22,23 @@ const GROUPS = [
   { key: 'system', items: [['/admin/audit-log', 'auditLog', ScrollText], ['/admin/photo-consent', 'photoConsent', Camera], ['/admin/privacy-requests', 'privacyRequests', FileLock2]] },
 ]
 
+const STORE = 'admin_nav_open'
+const readToggled = () => {
+  try { return JSON.parse(localStorage.getItem(STORE) ?? '{}') } catch { return {} }
+}
+
 export default function AdminLayout() {
   const { t } = useTranslation()
+  const { pathname } = useLocation()
+  // Each group of the menu opens and closes. By default only the group of the current page is open; what the principal opens or closes is remembered on this device.
+  const [toggled, setToggled] = useState(readToggled)
+  const flatItems = GROUPS.flatMap((g) => g.items.map((i) => ({ group: g.key, path: i[0] })))
+  const activeKey = flatItems.filter((i) => pathname === i.path || pathname.startsWith(`${i.path}/`)).sort((a, b) => b.path.length - a.path.length)[0]?.group ?? null
+  const toggleGroup = (key, isOpen) => {
+    const next = { ...toggled, [key]: !isOpen }
+    setToggled(next)
+    try { localStorage.setItem(STORE, JSON.stringify(next)) } catch { /* the menu still works without saving */ }
+  }
   const { data: school } = useSchool()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -58,11 +73,19 @@ export default function AdminLayout() {
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
               {group.key && (
-                <p className="flex items-center justify-between px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/80">
-                  {t(`admin.groups.${group.key}`)}
+                <div className="flex items-center justify-between gap-1">
+                  <button
+                    type="button" aria-expanded={editing || (toggled[group.key] ?? group.key === activeKey)} aria-controls={`nav-${group.key}`}
+                    className="flex min-w-0 flex-1 items-center justify-between rounded-full px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/80 hover:bg-white/10"
+                    onClick={() => toggleGroup(group.key, toggled[group.key] ?? group.key === activeKey)} disabled={editing}
+                  >
+                    <span>{t(`admin.groups.${group.key}`)}</span>
+                    <ChevronDown aria-hidden size={14} className={`transition-transform ${editing || (toggled[group.key] ?? group.key === activeKey) ? '' : '-rotate-90 rtl:rotate-90'}`} />
+                  </button>
                   {editing && <MoveButtons vertical label={t(`admin.groups.${group.key}`)} canEarlier={gi > 1} canLater={gi < groups.length - 1} onEarlier={() => moveGroup(group.key, -1)} onLater={() => moveGroup(group.key, 1)} />}
-                </p>
+                </div>
               )}
+              <div id={group.key ? `nav-${group.key}` : undefined} className="space-y-0.5" hidden={Boolean(group.key) && !editing && !(toggled[group.key] ?? group.key === activeKey)}>
               {group.items.map(([to, key, Icon, end], ii) => editing ? (
                 <div key={to} className="flex items-center gap-3 rounded-full border border-dashed border-white/30 px-3 py-1.5 text-sm text-white/90">
                   {iconOf(Icon, to)}
@@ -82,6 +105,7 @@ export default function AdminLayout() {
                   <span className="min-w-0 flex-1 truncate">{t(`admin.nav.${key}`)}</span>
                 </NavLink>
               ))}
+              </div>
             </div>
           ))}
         </nav>
