@@ -43,7 +43,7 @@ class StaffResource extends JsonResource
             'experience_years' => $profile?->experience_years,
             'courses' => $profile?->courses,
             // Periods a week this year (0 for a teacher with none yet); only teaching staff have a load.
-            'weekly_load' => $profile?->staff_type->category() === 'teaching' && array_key_exists('teaching_load', $this->getAttributes()) ? (int) $this->teaching_load : null,
+            'weekly_load' => $profile?->staff_type->category() === 'teaching' && array_key_exists('teaching_load', $this->getAttributes()) ? max(0, (int) $this->teaching_load - (self::jointDuplicates()[$this->id] ?? 0)) : null,
             'max_load' => $profile?->staff_type->category() === 'teaching' ? self::maxLoad() : null,
             'teaches_gender' => $profile?->teaches_gender,
             'classroom_ids' => $profile?->classrooms->pluck('id')->sort()->values() ?? [],
@@ -57,5 +57,16 @@ class StaffResource extends JsonResource
         static $max = null;
 
         return $max ??= app(\App\Modules\Academic\Services\TeacherPlanner::class)->maxLoad();
+    }
+
+    /** Periods counted twice because of joint lessons, per teacher, read once per request. @return array<int, int> */
+    private static function jointDuplicates(): array
+    {
+        $bag = request()->attributes;
+        if (! $bag->has('joint_duplicates')) {
+            $bag->set('joint_duplicates', app(\App\Modules\Scheduling\Services\JointLoad::class)->duplicates());
+        }
+
+        return $bag->get('joint_duplicates');
     }
 }

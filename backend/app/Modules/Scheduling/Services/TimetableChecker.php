@@ -111,8 +111,9 @@ class TimetableChecker
 
         // 5. Teachers: over the weekly load, and many free periods between lessons.
         $max = $this->planner->maxLoad();
+        $jointTwice = app(JointLoad::class)->duplicates();
         foreach ($assignments->groupBy('teacher_id') as $teacherId => $rows) {
-            $load = (int) $rows->sum('weekly_periods');
+            $load = max(0, (int) $rows->sum('weekly_periods') - ($jointTwice[(int) $teacherId] ?? 0)); // a joint lesson is taught once
             if ($load > $max) {
                 $add('teacher_overloaded', 'warning', ['teacher_id' => (int) $teacherId], ['teacher' => $names[$teacherId] ?? '', 'load' => $load, 'max' => $max]);
             }
