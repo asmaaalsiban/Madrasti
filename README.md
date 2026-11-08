@@ -788,3 +788,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Renewal**: a student whose grade has a track stays in the **same track** when moving to the next level; a student with no track (e.g. leaving grade 10) gets the first grade of the next level, and the admin can pick another when renewing.
 - Teachers' grade ranges work by order, so a range covering that level covers every track at it.
 - After pulling: `php artisan tenants:migrate`.
+
+## Collapsible admin menu
+
+- Every group of the admin menu (People, Learning, Schedules, Money & staff, School setup...) is a header that opens and closes, with a small arrow. By default only the group of the page you are on is open, so the icons take little room; what you open or close is remembered on that device. While arranging the menu (*Arrange*) every group is shown open.
