@@ -408,7 +408,9 @@
       "doctorate": "Doctorate",
       "other": "Other"
     },
-    "coursesHint": "Separate them with commas, e.g. first aid, ICDL."
+    "coursesHint": "Separate them with commas, e.g. first aid, ICDL.",
+    "classTeacherOption": "Class teacher (all subjects of their section)",
+    "classTeacherHint": "Teaches all the subjects of their own section in the class-teacher grades, except the ones kept for specialists. Also choose them as the homeroom teacher of the section."
   },
   "parent": {
     "home": {

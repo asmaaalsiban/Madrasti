@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import SectionPicker from '../components/SectionPicker'
 import ExtraSubjects from '../components/ExtraSubjects'
+import TeacherSubjectField from '../components/TeacherSubjectField'
 import ResourcePage from '../../Academic/components/ResourcePage'
 
 const CATEGORIES = ['all', 'teaching', 'administrative', 'student_affairs', 'health', 'technical', 'services']
@@ -36,9 +37,10 @@ export default function StaffPage() {
     { name: 'phone', label: 'people.fields.phone' },
     { name: 'staff_type', label: 'staff.fields.type', type: 'select', options: types.map((x) => ({ value: x.value, label: `staff.types.${x.value}` })) },
     {
-      name: 'subject_id', label: 'staff.fields.subject', type: 'select', optionsFrom: 'subjects',
-      getValue: (row) => row.subject?.id, visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
+      name: 'subject_id', type: 'custom', getValue: (row) => row.subject?.id, visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
+      render: ({ form, setForm }) => <TeacherSubjectField form={form} setForm={setForm} />,
     },
+    { name: 'is_class_teacher', type: 'custom', getValue: (row) => Boolean(row.is_class_teacher), visibleWhen: () => false, render: () => null },
     {
       name: 'grade_from_id', label: 'staff.fields.gradeFrom', type: 'select', optionsFrom: 'grade-levels', getValue: (row) => row.grade_from?.id,
       visibleWhen: (form) => byValue[form.staff_type]?.needs_subject, hint: 'staff.scopeHint',
@@ -72,7 +74,7 @@ export default function StaffPage() {
     { key: 'staff_type', label: 'staff.fields.type', render: (r) => t(`staff.types.${r.staff_type}`) },
     {
       key: 'subject', label: 'staff.fields.subject',
-      render: (r) => (r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : '')) + ((r.extra_subjects ?? []).length > 0 ? ` +${r.extra_subjects.length}` : ''),
+      render: (r) => (r.is_class_teacher ? t('staff.classTeacherOption') : (r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : ''))) + ((r.extra_subjects ?? []).length > 0 ? ` +${r.extra_subjects.length}` : ''),
     },
     {
       key: 'scope', label: 'staff.fields.teaches',
@@ -107,7 +109,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', degree: '', specialization: '', university: '', graduation_year: '', experience_years: '', courses: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', is_class_teacher: false, degree: '', specialization: '', university: '', graduation_year: '', experience_years: '', courses: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />
