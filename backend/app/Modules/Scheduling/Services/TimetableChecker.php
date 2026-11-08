@@ -42,7 +42,9 @@ class TimetableChecker
 
         // 1. A teacher in two places at the same time (the database forbids it, so this finds old or imported data).
         foreach ($entries->groupBy(fn ($e) => $e->teacher_id.'-'.$e->period_id) as $group) {
-            if ($group->count() > 1) {
+            // A joint lesson (the same subject, all marked joint) is the one allowed way for a teacher to be in two sections at once.
+            $joint = $group->every(fn ($x) => $x->is_joint) && $group->pluck('subject_id')->unique()->count() === 1;
+            if ($group->count() > 1 && ! $joint) {
                 $e = $group->first();
                 $add('teacher_double_booked', 'error', ['teacher_id' => $e->teacher_id, 'period_id' => $e->period_id], ['teacher' => $names[$e->teacher_id] ?? '', 'classrooms' => $group->map(fn ($x) => $classrooms[$x->classroom_id]->name ?? '')->implode(' / ')]);
             }

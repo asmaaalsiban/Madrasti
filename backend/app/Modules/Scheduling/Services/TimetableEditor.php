@@ -19,7 +19,7 @@ use Illuminate\Validation\ValidationException;
  */
 class TimetableEditor
 {
-    public function place(AcademicYear $year, Classroom $classroom, Period $period, int $subjectId, int $by): TimetableEntry
+    public function place(AcademicYear $year, Classroom $classroom, Period $period, int $subjectId, int $by, bool $joint = false): TimetableEntry
     {
         $assignment = TeachingAssignment::where('classroom_id', $classroom->id)->where('subject_id', $subjectId)->first();
         if ($assignment === null) {
@@ -35,8 +35,13 @@ class TimetableEditor
             $this->fail('period_id', 'scheduling.teacher_unavailable');
         }
         $busy = TimetableEntry::where('teacher_id', $teacher)->where('period_id', $period->id)->where('classroom_id', '!=', $classroom->id)->with('classroom')->first();
+        // A joint lesson: the teacher may teach the same subject to another section at the same time.
+        $partner = null;
         if ($busy !== null) {
-            $this->fail('period_id', 'scheduling.teacher_busy', ['classroom' => $busy->classroom->name]);
+            if (! $joint || $busy->subject_id !== $subjectId) {
+                $this->fail('period_id', $joint ? 'scheduling.joint_other_subject' : 'scheduling.teacher_busy', ['classroom' => $busy->classroom->name]);
+            }
+            $partner = $busy;
         }
 
         $building = $classroom->loadMissing('room.floor')->room?->floor?->building_id;
@@ -51,14 +56,30 @@ class TimetableEditor
             }
         }
 
-        return DB::transaction(function () use ($year, $classroom, $period, $subjectId, $teacher): TimetableEntry {
-            TimetableEntry::where('classroom_id', $classroom->id)->where('period_id', $period->id)->delete();
+        return DB::transaction(function () use ($year, $classroom, $period, $subjectId, $teacher, $partner): TimetableEntry {
+            $old = TimetableEntry::where('classroom_id', $classroom->id)->where('period_id', $period->id)->get();
+            $old->each->delete();
+            $old->each(fn ($e) => $this->untangle($e->teacher_id, $e->period_id));
 
-            return TimetableEntry::create([
+            $entry = TimetableEntry::create([
                 'academic_year_id' => $year->id, 'classroom_id' => $classroom->id, 'period_id' => $period->id, 'subject_id' => $subjectId,
-                'teacher_id' => $teacher, 'room_id' => $classroom->room_id, 'is_locked' => true,
+                'teacher_id' => $teacher, 'room_id' => $classroom->room_id, 'is_locked' => true, 'is_joint' => $partner !== null,
             ]);
+            if ($partner !== null) {
+                $partner->update(['is_joint' => true, 'is_locked' => true]);
+            }
+
+            return $entry;
         });
+    }
+
+    /** After a lesson is removed: a joint lesson left with one section is a normal lesson again. */
+    public function untangle(int $teacherId, int $periodId): void
+    {
+        $left = TimetableEntry::where('teacher_id', $teacherId)->where('period_id', $periodId)->get();
+        if ($left->count() === 1 && $left->first()->is_joint) {
+            $left->first()->update(['is_joint' => false]);
+        }
     }
 
     /** @param  array<string, mixed>  $replace */

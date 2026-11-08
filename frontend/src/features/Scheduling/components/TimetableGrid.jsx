@@ -12,6 +12,11 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
     const p = periodAt(day, number)
     return p && entries.find((e) => e.period_id === p.id)
   }
+  // A joint lesson: the teacher has two sections in the same cell; show both.
+  const sectionsAt = (day, number) => {
+    const p = periodAt(day, number)
+    return p ? entries.filter((e) => e.period_id === p.id).map((e) => e.classroom.name).join(' + ') : ''
+  }
   const timeOf = (number) => {
     const p = periods.find((x) => x.number === number)
     return p ? `${p.starts_at} - ${p.ends_at}` : ''
@@ -44,8 +49,9 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
                     {e && (
                       <div className={`rounded p-1 ${e.is_locked ? 'bg-amber-50' : 'bg-slate-50'}`}>
                         <span className="block font-medium">{subjectName(e.subject)}</span>
-                        <span className="block text-xs text-slate-500">{show === 'teacher' ? e.teacher.name : e.classroom.name}</span>
+                        <span className="block text-xs text-slate-500">{show === 'teacher' ? e.teacher.name : sectionsAt(d, n)}</span>
                         {e.is_locked && <span role="img" aria-label={t('timetable.locked')} className="text-xs">🔒</span>}
+                        {e.is_joint && <span role="img" aria-label={t('timetable.jointMark')} title={t('timetable.jointMark')} className="ms-1 text-xs">⇄</span>}
                       </div>
                     )}
                     {marked?.has(period?.id) && <span className="text-xs text-red-700">⛔ {t('availability.unavailable')}</span>}

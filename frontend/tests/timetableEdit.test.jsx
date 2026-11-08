@@ -42,6 +42,17 @@ describe('editing a lesson', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/timetable/entries', { classroom_id: 3, period_id: 3, subject_id: 6 }))
   })
 
+  it('places a joint lesson when the option is ticked', async () => {
+    api.put.mockResolvedValue({ data: { data: { ...lesson, is_joint: true } } })
+    renderPage(<TimetablePage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Monday Period 1' }))
+    await screen.findByRole('option', { name: 'Art' })
+    fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '6' } })
+    fireEvent.click(screen.getByLabelText(/Joint lesson/))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/timetable/entries', expect.objectContaining({ subject_id: 6, joint: true })))
+  })
+
   it('shows the reason when the lesson is refused', async () => {
     api.put.mockRejectedValue({ response: { data: { errors: { period_id: ['The teacher is already teaching 5-B in this period.'] } } } })
     renderPage(<TimetablePage />)

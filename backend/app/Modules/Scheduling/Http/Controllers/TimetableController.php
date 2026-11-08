@@ -59,13 +59,14 @@ class TimetableController extends Controller
             'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
             'period_id' => ['required', 'integer', 'exists:periods,id'],
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],
+            'joint' => ['sometimes', 'boolean'],
         ]);
         $year = AcademicYear::where('is_current', true)->first();
         if ($year === null) {
             throw ValidationException::withMessages(['academic_year' => [__('scheduling.no_year')]]);
         }
 
-        $entry = $editor->place($year, Classroom::with('gradeLevel')->findOrFail($data['classroom_id']), Period::findOrFail($data['period_id']), (int) $data['subject_id'], $request->user()->id);
+        $entry = $editor->place($year, Classroom::with('gradeLevel')->findOrFail($data['classroom_id']), Period::findOrFail($data['period_id']), (int) $data['subject_id'], $request->user()->id, (bool) ($data['joint'] ?? false));
 
         return response()->json(['data' => $this->entry($entry->load(['subject', 'teacher', 'classroom', 'room']))]);
     }
@@ -79,10 +80,11 @@ class TimetableController extends Controller
         return response()->json(['data' => $this->entry($entry->load(['subject', 'teacher', 'classroom', 'room']))]);
     }
 
-    public function destroy(TimetableEntry $entry): Response
+    public function destroy(TimetableEntry $entry, TimetableEditor $editor): Response
     {
         Gate::authorize('update', new Period);
         $entry->delete();
+        $editor->untangle($entry->teacher_id, $entry->period_id);
 
         return response()->noContent();
     }
@@ -131,6 +133,7 @@ class TimetableController extends Controller
             'classroom' => $e->classroom->only(['id', 'name']),
             'room' => $e->room?->only(['id', 'name']),
             'is_locked' => $e->is_locked,
+            'is_joint' => $e->is_joint,
         ];
     }
 
@@ -166,7 +169,7 @@ class TimetableController extends Controller
         return response()->json(['data' => [
             'periods' => Period::orderBy('day_of_week')->orderBy('number')->get()->map(fn (Period $p) => ['id' => $p->id, 'day_of_week' => $p->day_of_week, 'number' => $p->number, 'starts_at' => substr($p->starts_at, 0, 5), 'ends_at' => substr($p->ends_at, 0, 5)])->values(),
             'classrooms' => $classrooms->map(fn (Classroom $c) => ['id' => $c->id, 'name' => $c->name, 'grade_level_id' => $c->grade_level_id, 'grade_ar' => $c->gradeLevel?->name_ar, 'grade_en' => $c->gradeLevel?->name_en, 'periods_per_day' => $c->gradeLevel?->periods_per_day, 'homeroom' => $c->homeroomTeacher?->name])->values(),
-            'entries' => $entries->map(fn (TimetableEntry $e) => ['id' => $e->id, 'classroom_id' => $e->classroom_id, 'period_id' => $e->period_id, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']), 'teacher' => $e->teacher->only(['id', 'name']), 'is_locked' => $e->is_locked])->values(),
+            'entries' => $entries->map(fn (TimetableEntry $e) => ['id' => $e->id, 'classroom_id' => $e->classroom_id, 'period_id' => $e->period_id, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']), 'teacher' => $e->teacher->only(['id', 'name']), 'is_locked' => $e->is_locked, 'is_joint' => $e->is_joint])->values(),
         ]]);
     }
 

@@ -17,14 +17,14 @@ class TimetableEntry extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['academic_year_id', 'classroom_id', 'period_id', 'subject_id', 'teacher_id', 'room_id', 'schedule_generation_id', 'is_locked'];
+    protected $fillable = ['academic_year_id', 'classroom_id', 'period_id', 'subject_id', 'teacher_id', 'room_id', 'schedule_generation_id', 'is_locked', 'is_joint'];
 
     /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
-        return ['is_locked' => 'boolean'];
+        return ['is_locked' => 'boolean', 'is_joint' => 'boolean'];
     }
 
     public function classroom(): BelongsTo

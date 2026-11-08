@@ -9,6 +9,7 @@ export default function EditLessonDialog({ classroomId, period, entry, onClose }
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
   const [subjectId, setSubjectId] = useState(entry ? String(entry.subject.id) : '')
+  const [joint, setJoint] = useState(Boolean(entry?.is_joint))
   const [error, setError] = useState('')
   const name = (s) => s[`name_${i18n.language}`] || s.name_ar
 
@@ -19,7 +20,7 @@ export default function EditLessonDialog({ classroomId, period, entry, onClose }
   const done = () => { client.invalidateQueries({ queryKey: ['timetable'] }); onClose() }
   const fail = (err) => setError(err.response?.data?.errors?.period_id?.[0] || err.response?.data?.errors?.subject_id?.[0] || err.response?.data?.message || t('admin.actions.error'))
 
-  const save = useMutation({ mutationFn: () => api.put('/timetable/entries', { classroom_id: classroomId, period_id: period.id, subject_id: Number(subjectId) }), onSuccess: done, onError: fail })
+  const save = useMutation({ mutationFn: () => api.put('/timetable/entries', { classroom_id: classroomId, period_id: period.id, subject_id: Number(subjectId), ...(joint ? { joint: true } : {}) }), onSuccess: done, onError: fail })
   const lock = useMutation({ mutationFn: () => api.put(`/timetable/entries/${entry.id}/lock`, { locked: !entry.is_locked }), onSuccess: done, onError: fail })
   const remove = useMutation({ mutationFn: () => api.delete(`/timetable/entries/${entry.id}`), onSuccess: done, onError: fail })
 
@@ -37,6 +38,7 @@ export default function EditLessonDialog({ classroomId, period, entry, onClose }
           </select>
         </label>
         {chosen && <p className="text-sm text-slate-600">{t('timetable.teacherIs', { name: chosen.teacher?.name })}</p>}
+        <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={joint} onChange={(e) => setJoint(e.target.checked)} /><span>{t('timetable.joint')}<span className="block text-xs text-slate-500">{t('timetable.jointHelp')}</span></span></label>
         <p className="text-xs text-slate-500">{t('timetable.editHelp')}</p>
         <div className="flex flex-wrap justify-between gap-2">
           <div className="flex gap-2">
