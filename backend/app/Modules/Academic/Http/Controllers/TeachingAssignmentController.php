@@ -34,6 +34,14 @@ class TeachingAssignmentController extends AcademicController
         return (new TeachingAssignmentResource(TeachingAssignment::create($request->validated())->load($this->with)))->response()->setStatusCode(201);
     }
 
+    /** The subject distribution table on the school's paper form, as an Excel file (admin). */
+    public function export(\App\Modules\Academic\Services\DistributionSheet $sheet): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        Gate::authorize('viewAny', TeachingAssignment::class);
+
+        return $sheet->download();
+    }
+
     /** Gives every subject of every classroom a teacher, where there is none yet (preview with dry_run). */
     public function auto(Request $request, AutoTeachingAssigner $assigner, TeacherPlanner $planner): JsonResponse
     {

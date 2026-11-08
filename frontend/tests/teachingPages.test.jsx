@@ -139,4 +139,12 @@ describe('Automatic distribution', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/teaching-assignments/auto', { max_load: 18, dry_run: true }))
     expect(await within(dialog).findByRole('alert')).toHaveTextContent('The max load must be between 8 and 40.')
   })
+
+  it('offers the subject distribution table as an Excel download', async () => {
+    global.URL.createObjectURL = vi.fn(() => 'blob:x')
+    global.URL.revokeObjectURL = vi.fn()
+    renderPage(<TeachingAssignmentsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Export distribution table (Excel)' }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/teaching-assignments/export', expect.objectContaining({ responseType: 'blob' })))
+  })
 })

@@ -10,14 +10,11 @@ use App\Modules\Scheduling\Models\DutyAssignment;
 use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
 use App\Shared\Enums\StaffType;
+use App\Shared\Export\SheetStyles;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
-use OpenSpout\Common\Entity\Style\Border;
-use OpenSpout\Common\Entity\Style\BorderPart;
-use OpenSpout\Common\Entity\Style\CellAlignment;
-use OpenSpout\Common\Entity\Style\CellVerticalAlignment;
 use OpenSpout\Common\Entity\Style\Style;
 use OpenSpout\Writer\XLSX\Entity\SheetView;
 use OpenSpout\Writer\XLSX\Options\PageOrientation;
@@ -33,13 +30,9 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class TimetableSheet
 {
+    use SheetStyles;
+
     private const SECTIONS_PER_SHEET = 12;
-
-    private const NAVY = '0B2A4A';
-
-    private const TINT = 'EAF1F8';
-
-    private const SAND = 'F7F1E3';
 
     public function download(): BinaryFileResponse
     {
@@ -220,28 +213,5 @@ class TimetableSheet
         $list = trans('scheduling.ordinals');
 
         return is_array($list) && isset($list[$n]) ? $list[$n] : (string) $n;
-    }
-
-    private function border(): Border
-    {
-        $part = fn (string $name) => new BorderPart($name, 'CBD5E1', Border::WIDTH_THIN, Border::STYLE_SOLID);
-
-        return new Border($part(Border::TOP), $part(Border::BOTTOM), $part(Border::LEFT), $part(Border::RIGHT));
-    }
-
-    private function style(int $size = 11, bool $bold = false, string $color = '111827', ?string $fill = null, bool $bordered = false, bool $wrap = true): Style
-    {
-        $s = (new Style())->setFontSize($size)->setFontColor($color)->setCellAlignment(CellAlignment::CENTER)->setCellVerticalAlignment(CellVerticalAlignment::CENTER)->setShouldWrapText($wrap);
-        if ($bold) {
-            $s->setFontBold();
-        }
-        if ($fill !== null) {
-            $s->setBackgroundColor($fill);
-        }
-        if ($bordered || $fill !== null) {
-            $s->setBorder($this->border());
-        }
-
-        return $s;
     }
 }

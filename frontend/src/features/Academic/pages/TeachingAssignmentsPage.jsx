@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import AutoAssignDialog from '../components/AutoAssignDialog'
 import ResourcePage from '../components/ResourcePage'
+import ExportButton from '../../../components/shared/ExportButton'
 import { useResource } from '../hooks/useResource'
 
 // Who teaches which subject in which classroom. The teacher list only offers the teachers of the chosen subject.
@@ -44,7 +45,12 @@ export default function TeachingAssignmentsPage() {
         columns={columns}
         fields={fields}
         empty={{ classroom_id: classroom, subject_id: '', teacher_id: '', weekly_periods: 3 }}
-        actions={<button type="button" className="rounded border px-3 py-1.5" onClick={() => setAuto(true)}>{t('autoAssign.button')}</button>}
+        actions={(
+          <>
+            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setAuto(true)}>{t('autoAssign.button')}</button>
+            <ExportButton path="/teaching-assignments/export" fallbackName="distribution.xlsx" label={t('academic.teaching.exportDistribution')} />
+          </>
+        )}
       />
       <AutoAssignDialog open={auto} onClose={() => setAuto(false)} />
     </>
