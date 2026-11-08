@@ -41,10 +41,20 @@ class StaffResource extends JsonResource
             'graduation_year' => $profile?->graduation_year,
             'experience_years' => $profile?->experience_years,
             'courses' => $profile?->courses,
-            'weekly_load' => isset($this->teaching_load) ? (int) $this->teaching_load : null,
+            // Periods a week this year (0 for a teacher with none yet); only teaching staff have a load.
+            'weekly_load' => $profile?->staff_type->category() === 'teaching' && array_key_exists('teaching_load', $this->getAttributes()) ? (int) $this->teaching_load : null,
+            'max_load' => $profile?->staff_type->category() === 'teaching' ? self::maxLoad() : null,
             'teaches_gender' => $profile?->teaches_gender,
             'classroom_ids' => $profile?->classrooms->pluck('id')->sort()->values() ?? [],
             'classrooms' => $profile?->classrooms->sortBy('name')->map->only(['id', 'name'])->values() ?? [],
         ];
+    }
+
+    /** The weekly limit of periods (the school's setting, otherwise 24), read once per request. */
+    private static function maxLoad(): int
+    {
+        static $max = null;
+
+        return $max ??= app(\App\Modules\Academic\Services\TeacherPlanner::class)->maxLoad();
     }
 }

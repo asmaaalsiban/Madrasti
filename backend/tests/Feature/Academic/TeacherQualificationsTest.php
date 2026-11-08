@@ -48,6 +48,12 @@ class TeacherQualificationsTest extends AcademicTestCase
             $room = Classroom::factory()->create(['name' => "R$i", 'grade_level_id' => $grade->id, 'academic_year_id' => $y->id]);
             TeachingAssignment::create(['classroom_id' => $room->id, 'subject_id' => $math->id, 'teacher_id' => $id, 'weekly_periods' => $periods]);
         }
-        $this->getJson('/api/staff')->assertOk()->assertJsonPath('data.0.weekly_load', 9); // last year's 9 periods do not count
+        $this->getJson('/api/staff')->assertOk()->assertJsonPath('data.0.weekly_load', 9)->assertJsonPath('data.0.max_load', 24); // last year's 9 periods do not count
+
+        $this->postJson('/api/staff', $this->body(['email' => 'new@x.test', 'name' => 'Zed']))->assertCreated();
+        $this->postJson('/api/staff', $this->body(['email' => 'nurse@x.test', 'name' => 'Nora', 'staff_type' => 'nurse']))->assertCreated();
+        $rows = collect($this->getJson('/api/staff')->json('data'))->keyBy('name');
+        $this->assertSame(0, $rows['Zed']['weekly_load']);   // a teacher with no periods yet shows 0
+        $this->assertNull($rows['Nora']['weekly_load']);      // a nurse has no teaching load
     }
 }
