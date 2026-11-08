@@ -237,6 +237,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::get('curriculum', [CurriculumController::class, 'show']);
     Route::put('curriculum', [CurriculumController::class, 'save']);
     Route::post('curriculum/copy', [CurriculumController::class, 'copy']);
+    Route::put('curriculum/class-teachers', [CurriculumController::class, 'classTeachers']);
     Route::post('curriculum/standard-plan', [CurriculumController::class, 'standardPlan']);
     Route::get('periods', [PeriodController::class, 'index']);
     Route::put('periods/setup', [PeriodController::class, 'setup']);

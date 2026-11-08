@@ -66,7 +66,23 @@ class AutoTeachingAssigner
 
         $assigned = [];
         $unassigned = [];
+        $noClassTeacher = [];
         foreach ($pending as $d) {
+            // A class-teacher subject goes to the section's class teacher, or to nobody (the admin has to choose one).
+            if ($d['by_class_teacher']) {
+                $ct = $d['class_teacher_id'];
+                if ($ct === null || ($load[$ct] ?? 0) + $d['periods'] > $maxLoad) {
+                    $noClassTeacher[$d['classroom']] = true;
+                    $unassigned[] = $d;
+
+                    continue;
+                }
+                $load[$ct] = ($load[$ct] ?? 0) + $d['periods'];
+                $assigned[] = $d + ['teacher_id' => $ct];
+
+                continue;
+            }
+
             $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeachSubject((int) $d['subject_id'], $d['grade_order'], $d['gender'], $d['classroom_id'], $d['grade_level_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
             if ($teacher === null) {
                 $unassigned[] = $d;
@@ -92,11 +108,13 @@ class AutoTeachingAssigner
             'max_load' => $maxLoad,
             'assigned' => count($assigned),
             'invalid' => $invalid->count(),
-            'teachers' => $this->teacherSummary(collect($assigned), $teachers->flatten(1)->keyBy('id'), $subjects, $load),
+            'teachers' => $this->teacherSummary(collect($assigned)->reject(fn ($a) => $a['by_class_teacher']), $teachers->flatten(1)->keyBy('id'), $subjects, $load),
+            'class_teacher_assigned' => collect($assigned)->where('by_class_teacher', true)->count(),
+            'classrooms_without_class_teacher' => array_keys($noClassTeacher),
             'unassigned' => collect($unassigned)->map(fn ($d) => [
                 'classroom' => $d['classroom'], 'subject' => $subjects[$d['subject_id']]->name_en, 'subject_ar' => $subjects[$d['subject_id']]->name_ar,
             ])->values()->take(200)->all(),
-            'shortages' => $this->shortages(collect($unassigned), $teachers, $subjects, $maxLoad),
+            'shortages' => $this->shortages(collect($unassigned)->reject(fn ($d) => $d['by_class_teacher']), $teachers, $subjects, $maxLoad),
         ];
     }
 

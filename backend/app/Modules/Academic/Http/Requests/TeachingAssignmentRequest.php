@@ -48,9 +48,17 @@ class TeachingAssignmentRequest extends FormRequest
                 $validator->errors()->add('subject_id', __('academic.subject_not_in_curriculum'));
             }
 
+            // In a class-teacher grade the section's class teacher teaches the subjects that are not kept for specialists.
+            $teachers = app(\App\Modules\Academic\Services\ClassTeachers::class);
+            if ($gradeId !== null && $teachers->isClassTeacherSubject((int) $gradeId, (int) $this->input('subject_id')) && $teachers->classTeacherOf((int) $this->input('classroom_id')) !== (int) $this->input('teacher_id')) {
+                $validator->errors()->add('teacher_id', __('academic.class_teacher_subject'));
+
+                return;
+            }
+
             $valid = User::whereKey($this->input('teacher_id'))->where('is_active', true)
                 ->whereHas('staffProfile', fn ($q) => $q->whereIn('staff_type', StaffType::valuesIn('teaching'))
-                    ->where(fn ($w) => $w->where('subject_id', $this->input('subject_id'))->orWhereHas('extraSubjects', fn ($e) => $e->where('subject_id', $this->input('subject_id')))))
+                    ->where(fn ($w) => $w->where('subject_id', $this->input('subject_id'))->orWhere('is_class_teacher', true)->orWhereHas('extraSubjects', fn ($e) => $e->where('subject_id', $this->input('subject_id')))))
                 ->exists();
             if (! $valid) {
                 $validator->errors()->add('teacher_id', __('academic.teacher_not_for_subject'));

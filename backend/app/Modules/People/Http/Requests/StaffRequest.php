@@ -34,6 +34,7 @@ class StaffRequest extends FormRequest
             'extra_subjects.*.subject_id' => ['required', 'integer', 'distinct', 'exists:subjects,id'],
             'extra_subjects.*.grade_ids' => ['nullable', 'array', 'max:30'],
             'extra_subjects.*.grade_ids.*' => ['integer', 'distinct', 'exists:grade_levels,id'],
+            'is_class_teacher' => ['sometimes', 'boolean'],
             'degree' => ['nullable', 'string', 'max:30'],
             'specialization' => ['nullable', 'string', 'max:120'],
             'university' => ['nullable', 'string', 'max:120'],

@@ -34,6 +34,8 @@ class TeacherPlanner
         }
 
         $curriculum = GradeLevelSubject::get()->groupBy('grade_level_id');
+        $classTeachers = app(ClassTeachers::class);
+        $classTeacherSubjects = $classTeachers->map();
 
         return Classroom::where('academic_year_id', $year->id)->with(['room.floor', 'gradeLevel'])->get()
             ->flatMap(fn (Classroom $classroom) => $curriculum->get($classroom->grade_level_id, collect())->map(fn (GradeLevelSubject $row) => [
@@ -45,6 +47,8 @@ class TeacherPlanner
                 'subject_id' => $row->subject_id,
                 'periods' => $row->weekly_periods,
                 'building_id' => $classroom->room?->floor?->building_id,
+                'by_class_teacher' => isset($classTeacherSubjects[$classroom->grade_level_id.'-'.$row->subject_id]),
+                'class_teacher_id' => isset($classTeacherSubjects[$classroom->grade_level_id.'-'.$row->subject_id]) ? $classTeachers->classTeacherOf($classroom->id) : null,
             ]))->values();
     }
 
