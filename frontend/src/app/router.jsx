@@ -95,6 +95,7 @@ import YearEndPage from '../features/Finance/pages/YearEndPage'
 import AccountingReportsPage from '../features/Finance/pages/AccountingReportsPage'
 import BudgetsPage from '../features/Finance/pages/BudgetsPage'
 import TaxPage from '../features/Finance/pages/TaxPage'
+import FullTimetablePage from '../features/Scheduling/pages/FullTimetablePage'
 import JournalPage from '../features/Finance/pages/JournalPage'
 import MoneyAccountsPage from '../features/Finance/pages/MoneyAccountsPage'
 import MoneyLedgerPage from '../features/Finance/pages/MoneyLedgerPage'
@@ -251,6 +252,7 @@ export const routes = [
               { path: '/admin/curriculum', element: <CurriculumPage /> },
               { path: '/admin/school-day', element: <SchoolDayPage /> },
               { path: '/admin/timetable', element: <TimetablePage /> },
+              { path: '/admin/timetable/full', element: <FullTimetablePage /> },
               { path: '/admin/availability', element: <TeacherAvailabilityPage /> },
               { path: '/admin/terms', element: <TermsPage /> },
               { path: '/admin/teaching', element: <TeachingAssignmentsPage /> },

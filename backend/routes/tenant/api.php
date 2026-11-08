@@ -260,6 +260,9 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::delete('exams/{session}', [ExamController::class, 'destroy']);
     Route::post('timetable/generate', [TimetableController::class, 'generate']);
     Route::get('timetable', [TimetableController::class, 'show']);
+    Route::get('timetable/overview', [TimetableController::class, 'overview']);
+    Route::get('timetable/check', [TimetableController::class, 'check']);
+    Route::get('timetable/export', [TimetableController::class, 'export']);
     Route::put('timetable/entries', [TimetableController::class, 'place']);
     Route::put('timetable/entries/{entry}/lock', [TimetableController::class, 'lock']);
     Route::delete('timetable/entries/{entry}', [TimetableController::class, 'destroy']);

@@ -175,7 +175,8 @@
       "photoConsent": "Photo consent",
       "studentFiles": "Student files",
       "branding": "School look",
-      "questionBank": "Question bank"
+      "questionBank": "Question bank",
+      "fullTimetable": "Full timetable"
     },
     "actions": {
       "add": "Add",
@@ -3029,6 +3030,40 @@
     "kinds": {
       "mistakes": "Mistakes",
       "retake": "Retake"
+    }
+  },
+  "fullTimetable": {
+    "title": "Full timetable",
+    "editLessons": "Edit lessons",
+    "allGood": "No problems found in the timetable.",
+    "summary": "The checker found {{error}} errors, {{warning}} warnings and {{info}} notes.",
+    "days": "Day",
+    "wholeWeek": "Whole week",
+    "axis": "Table",
+    "bySections": "By sections",
+    "byTeachers": "By teachers",
+    "grade": "Grade",
+    "highlight": "Highlight a teacher",
+    "onlyProblems": "Show only lessons with problems",
+    "problems": "What the checker found",
+    "none": "Nothing to report.",
+    "severity": {
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Note"
+    },
+    "types": {
+      "teacher_double_booked": "{{teacher}} is in two places at once: {{classrooms}}.",
+      "periods_missing": "{{classroom}} · {{subject}}: {{count}} lesson(s) still to place ({{placed}} of {{planned}}).",
+      "periods_extra": "{{classroom}} · {{subject}}: {{count}} lesson(s) more than planned ({{placed}} of {{planned}}).",
+      "teacher_not_qualified": "{{teacher}} teaches {{subject}} in {{classroom}}, but their subjects or grades do not include it.",
+      "subject_without_teacher": "{{classroom}} has no teacher for {{subject}}.",
+      "no_homeroom": "{{classroom}} has no homeroom teacher.",
+      "lesson_without_assignment": "{{classroom}}: {{teacher}} has a lesson there that does not match the teaching assignment.",
+      "teacher_unavailable": "{{teacher}} has a lesson in {{classroom}} ({{day}}, period {{period}}) while unavailable.",
+      "beyond_grade_periods": "{{classroom}} has a lesson on {{day}} in period {{period}}, but its grade has only {{limit}} periods a day.",
+      "teacher_overloaded": "{{teacher}} has {{load}} periods a week, more than the limit of {{max}}.",
+      "teacher_gaps": "{{teacher}} has {{gaps}} free periods between lessons in the week."
     }
   }
 }
