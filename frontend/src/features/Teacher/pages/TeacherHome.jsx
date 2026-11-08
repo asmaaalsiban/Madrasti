@@ -2,7 +2,7 @@ import useBadges from '../../Badges/useBadges'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Award, Banknote, Bus, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet } from 'lucide-react'
+import { Award, Banknote, Bus, BookOpenCheck, CalendarClock, CircleCheck, ClipboardList, FileBarChart, FileCheck2, FileText, Fingerprint, GraduationCap, ListChecks, ListTodo, Landmark, NotebookPen, PenLine, RefreshCw, ShieldCheck, ShoppingCart, Smile, Users, Vote, Wallet, TriangleAlert } from 'lucide-react'
 import { useAuth } from '../../Auth/AuthProvider'
 import CheckInCard from '../../StaffAttendance/CheckInCard'
 import { isHidden } from '../../StaffAccess/staffFeatures'
@@ -23,6 +23,7 @@ const TEACHING = [
 ]
 const FOLLOW_UP = [
   ['/teacher/behavior', 'behavior.title', 'behavior.hint', Smile],
+  ['/teacher/warnings', 'warnings.mineTitle', 'warnings.hint', TriangleAlert],
   ['/teacher/motivation', 'motivation.title', 'motivation.hint', Award],
   ['/teacher/surveys', 'surveys.title', 'surveys.hint', Vote],
   ['/teacher/signature', 'signatures.mineTitle', 'signatures.mineHint', PenLine],

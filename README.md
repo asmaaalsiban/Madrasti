@@ -792,3 +792,10 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 ## Collapsible admin menu
 
 - Every group of the admin menu (People, Learning, Schedules, Money & staff, School setup...) is a header that opens and closes, with a small arrow. By default only the group of the page you are on is open, so the icons take little room; what you open or close is remembered on that device. While arranging the menu (*Arrange*) every group is shown open.
+
+## Warnings (students and staff)
+
+- **Admin** (`/admin/warnings`, menu *Learning*): two tabs, *Students* and *Staff*. **New warning**: pick the person (search a student by name or number), a **reason** (absence, lateness, behaviour, violence, studies, uniform, other), a **level** (notice, first, second, final warning), a date, a title and the details. Written by the admin it is **active at once** and the people concerned are notified. A warning can be **withdrawn** with a reason: it leaves the parents' page and stays in the admin's record.
+- **Student's page and parents' page**: an active warning shows on the student's own page (`/student/warnings`) and on each parent's page for that child (`/parent/children/:id/warnings`), and each parent gets a notification. A parent presses **I have seen it** (the admin sees when). Another family can never open it.
+- **Teachers** can **propose** a warning for a student (*Warnings* tile): it waits for the admin, and nobody is told before it is approved. They see what they proposed. Only the admin writes a warning for a member of staff; the staff member sees theirs on `/teacher/warnings` and can say they have seen it.
+- Rules that raise warnings by themselves (for schools that want them) come next. After pulling: `php artisan tenants:migrate`.

@@ -177,7 +177,8 @@
       "branding": "School look",
       "questionBank": "Question bank",
       "fullTimetable": "Full timetable",
-      "cover": "Cover for absent teachers"
+      "cover": "Cover for absent teachers",
+      "warnings": "Warnings"
     },
     "actions": {
       "add": "Add",
@@ -949,7 +950,10 @@
       "transfer_rejected": "Your transfer of {{amount}} for {{child_en}} was not accepted: {{note}}",
       "data_request": "{{name}} asked to {{type}} personal data",
       "data_request_answered": "The school answered your data request",
-      "lesson_cover": "Please cover {{classroom}}, period {{period}} ({{date}}): {{subject}}, instead of {{absent}}"
+      "lesson_cover": "Please cover {{classroom}}, period {{period}} ({{date}}): {{subject}}, instead of {{absent}}",
+      "warning_student_parent": "A warning for {{student}}: {{title}}",
+      "warning_student_self": "You have a new warning: {{title}}",
+      "warning_staff": "You have a new warning: {{title}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -3140,5 +3144,65 @@
     "lessonsToday": "{{n}} lessons that day",
     "coversToday": "already covers {{n}}",
     "choose": "Choose"
+  },
+  "warnings": {
+    "title2": "Warnings",
+    "mineTitle": "Warnings",
+    "hint": "Warnings you received, and propose one for a student",
+    "new": "New warning",
+    "newTitle": "New warning",
+    "forWhom": "For",
+    "subject": {
+      "student": "Students",
+      "staff": "Staff"
+    },
+    "searchStudent": "Search a student (name or number)",
+    "pickStaff": "Member of staff",
+    "change": "Change",
+    "category": "Reason",
+    "level": "Level",
+    "date": "Date",
+    "title": "Title",
+    "details": "Details",
+    "issue": "Issue the warning",
+    "propose": "Send for approval",
+    "proposalNote": "A warning you write waits for the school admin. Nobody is told before it is approved.",
+    "statusFilter": "Status",
+    "none": "No warnings.",
+    "approve": "Approve",
+    "withdraw": "Withdraw",
+    "withdrawTitle": "Withdraw this warning",
+    "withdrawHelp": "It disappears from the parents' page and stays in your record with the reason.",
+    "reason": "Reason",
+    "by": "By {{name}}",
+    "seenOn": "seen on {{date}}",
+    "withdrawnBecause": "withdrawn: {{reason}}",
+    "byRule": "By rule",
+    "iHaveSeen": "I have seen it",
+    "childTitle": "Warnings of {{name}}",
+    "noneForChild": "No warnings. Good.",
+    "noneForMe": "You have no warnings.",
+    "proposeForStudent": "Propose a warning for a student",
+    "myProposals": "Warnings you proposed",
+    "levels": {
+      "1": "Notice",
+      "2": "First warning",
+      "3": "Second warning",
+      "4": "Final warning"
+    },
+    "categories": {
+      "absence": "Absence",
+      "late": "Lateness",
+      "behavior": "Behaviour",
+      "violence": "Violence",
+      "academic": "Studies",
+      "uniform": "Uniform",
+      "other": "Other"
+    },
+    "status": {
+      "pending": "Waiting for approval",
+      "active": "Active",
+      "withdrawn": "Withdrawn"
+    }
   }
 }

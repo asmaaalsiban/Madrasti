@@ -46,4 +46,7 @@ return [
     'contract_expiring' => 'ينتهي عقد :name بتاريخ :date',
     'unknown' => 'إشعار جديد',
     'lesson_cover' => 'يرجى تغطية :classroom، الحصة :period (:date): :subject، بدل :absent',
+    'warning_student_parent' => 'إنذار للطالب :student: :title',
+    'warning_student_self' => 'عندك إنذار جديد: :title',
+    'warning_staff' => 'عندك إنذار جديد: :title',
 ];

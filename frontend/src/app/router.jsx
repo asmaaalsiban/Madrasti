@@ -56,6 +56,9 @@ import QuestionBankPage from '../features/QuestionBank/pages/QuestionBankPage'
 import QuizzesPage from '../features/QuestionBank/pages/QuizzesPage'
 import QuizRunPage from '../features/QuestionBank/pages/QuizRunPage'
 import ChildQuizzesPage from '../features/QuestionBank/pages/ChildQuizzesPage'
+import WarningsPage from '../features/Warnings/pages/WarningsPage'
+import ChildWarningsPage from '../features/Warnings/pages/ChildWarningsPage'
+import MyWarningsPage from '../features/Warnings/pages/MyWarningsPage'
 import HomeworkPage from '../features/Homework/pages/HomeworkPage'
 import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
 import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
@@ -137,6 +140,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/stories', element: <Navigate to="/parent/stories" replace /> }, // old notifications pointed here
     { path: 'children/:id/homework', element: <ChildHomeworkPage /> },
     { path: 'children/:id/quizzes', element: <ChildQuizzesPage /> },
+    { path: 'children/:id/warnings', element: <ChildWarningsPage /> },
     { path: 'children/:id/behavior', element: <StudentBehaviorPage /> },
     { path: 'children/:id/motivation', element: <StudentMotivationPage /> },
     { path: 'children/:id/report-card', element: <ReportCardPage /> },
@@ -152,6 +156,7 @@ const HOME_ROUTES = {
     { path: 'grades', element: <StudentHome /> },
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'quizzes', element: <QuizzesPage /> },
+    { path: 'warnings', element: <MyWarningsPage /> },
     { path: 'quizzes/:id', element: <QuizRunPage /> },
     { path: 'behavior', element: <MyBehaviorPage /> },
     { path: 'motivation', element: <MyMotivationPage /> },
@@ -180,6 +185,7 @@ const HOME_ROUTES = {
     { path: 'motivation/students/:id', element: <StudentMotivationPage staff /> },
     { path: 'homework', element: <HomeworkPage /> },
     { path: 'question-bank', element: <QuestionBankPage /> },
+    { path: 'warnings', element: <MyWarningsPage /> },
     { path: 'daily-summary', element: <DailySummaryPage /> },
     { path: 'lesson-plans', element: <LessonPlansPage /> },
     { path: 'lesson-plans/review', element: <ReviewPlansPage /> },
@@ -269,6 +275,7 @@ export const routes = [
               { path: '/admin/finance/year-end', element: <YearEndPage base="/admin" /> },
               { path: '/admin/finance/money', element: <MoneyAccountsPage base="/admin" /> },
               { path: '/admin/question-bank', element: <QuestionBankPage /> },
+              { path: '/admin/warnings', element: <WarningsPage /> },
               { path: '/admin/finance/journal', element: <JournalPage /> },
               { path: '/admin/finance/tax', element: <TaxPage /> },
               { path: '/admin/finance/budgets', element: <BudgetsPage /> },
