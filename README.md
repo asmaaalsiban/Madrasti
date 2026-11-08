@@ -779,7 +779,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - When the admin edits a lesson cell (`/admin/timetable`) there is a **Joint lesson** option: the same teacher teaches the **same subject** to another section at the same time (sport for two sections, a language group...). Place it in both sections with the option ticked. Both lessons are marked ⇄ and locked, so regenerating the timetable keeps them. A teacher's own cell shows both sections ("7-A + 7-B").
 - Without the option nothing changes: a teacher still cannot be in two sections at once, and a joint lesson of two different subjects is refused. Removing one side turns the other back into a normal lesson.
 - The timetable checker accepts a joint lesson and still reports any other double booking. The database no longer has a unique rule on teacher and period (the editor and the checker enforce it).
-- Note: both sections keep their own assignment of periods, so the teacher's weekly load in the staff list counts a joint lesson once per section.
+- Both sections keep their own assignment of periods, but a joint lesson is taught once: the teacher's weekly load (staff list, `periods / limit`) and the checker's *over the weekly limit* warning count it **once**.
 - After pulling: `php artisan tenants:migrate`.
 
 ## Secondary tracks (health, business, languages...)

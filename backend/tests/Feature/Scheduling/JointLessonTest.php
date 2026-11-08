@@ -12,6 +12,7 @@ use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
 use App\Modules\Scheduling\Services\PeriodSetup;
 use App\Shared\Enums\StaffType;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Academic\AcademicTestCase;
 
 /** One teacher teaches the same subject to two sections at once (a joint lesson). */
@@ -108,5 +109,17 @@ class JointLessonTest extends AcademicTestCase
         $kept = TimetableEntry::where('teacher_id', $this->coach->id)->where('is_joint', true)->get();
         $this->assertCount(2, $kept);
         $this->assertSame(1, $kept->pluck('period_id')->unique()->count()); // still the same period, in both sections
+    }
+
+    public function test_a_joint_lesson_counts_once_in_the_teachers_weekly_load(): void
+    {
+        $this->placeLesson($this->a, $this->sport)->assertOk();
+        $this->placeLesson($this->b, $this->sport, ['joint' => true])->assertOk();
+        // Sport is assigned 2 + 2 periods (one assignment per section) and Math 2: 6 on paper, one of the periods is taught to both sections.
+        $coach = collect($this->getJson('/api/staff')->json('data'))->firstWhere('id', $this->coach->id);
+        $this->assertSame(5, $coach['weekly_load']);
+
+        DB::table('school_settings')->insert(['key' => 'max_teacher_load', 'value' => json_encode(5), 'created_at' => now(), 'updated_at' => now()]);
+        $this->assertNotContains('teacher_overloaded', array_column($this->getJson('/api/timetable/check')->json('data.issues'), 'type')); // 5 is not over 5
     }
 }
