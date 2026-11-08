@@ -745,3 +745,9 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - The staff form (any kind of staff) has the **qualifications**: degree (diploma, bachelor, master, doctorate, other), specialization, university, graduation year, years of experience and courses (comma separated). They are on the profile from the moment the person is added.
 - The staff list shows the **qualification** and the **periods a week** each teacher is assigned this year (last years' assignments are not counted).
 - Older extra subjects saved as "from grade to grade" become a list of the grades between them. After pulling: `php artisan tenants:migrate`.
+
+### Subject distribution table (Excel, the school's form)
+
+- On *Teaching assignments* (`/admin/teaching`) the button **Export distribution table (Excel)** (`GET /api/teaching-assignments/export`) writes the Ministry-style form: *Subject distribution among teachers as of [date]*, the school, then every member of staff with their **qualifications** (experience, degree, specialization, university, graduation year) and **courses** (from the teacher profile), a *Subject* and a *Periods* column for every section, the teacher's **total load**, and the notes (the job of non-teaching staff).
+- A teacher with two subjects in the same section gets one row per subject. More than 14 sections are split over several sheets. Same tidy look as the timetable form (navy header, A3 landscape on one page wide, right-to-left in Arabic).
+- Admin only. No migration.

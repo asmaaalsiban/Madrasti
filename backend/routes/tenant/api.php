@@ -274,6 +274,7 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::apiResource('floors', FloorController::class)->only('store', 'update', 'destroy');
     Route::get('rooms', [RoomController::class, 'index']);
     Route::put('rooms/{room}', [RoomController::class, 'update']);
+    Route::get('teaching-assignments/export', [TeachingAssignmentController::class, 'export']);
     Route::post('teaching-assignments/auto', [TeachingAssignmentController::class, 'auto']);
     Route::apiResource('teaching-assignments', TeachingAssignmentController::class);
 
