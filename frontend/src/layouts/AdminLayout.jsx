@@ -76,7 +76,7 @@ export default function AdminLayout() {
                 <div className="flex items-center justify-between gap-1">
                   <button
                     type="button" aria-expanded={editing || (toggled[group.key] ?? group.key === activeKey)} aria-controls={`nav-${group.key}`}
-                    className="flex min-w-0 flex-1 items-center justify-between rounded-full px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-white/80 hover:bg-white/10"
+                    className={`flex min-w-0 flex-1 items-center justify-between rounded-full px-3 py-2 text-sm font-extrabold text-white outline-none transition-colors hover:bg-white/20 focus-visible:bg-white/25 focus-visible:ring-2 focus-visible:ring-white ${editing || (toggled[group.key] ?? group.key === activeKey) ? 'bg-white/10' : ''}`}
                     onClick={() => toggleGroup(group.key, toggled[group.key] ?? group.key === activeKey)} disabled={editing}
                   >
                     <span>{t(`admin.groups.${group.key}`)}</span>
