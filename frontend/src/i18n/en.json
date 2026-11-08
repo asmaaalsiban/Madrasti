@@ -176,7 +176,8 @@
       "studentFiles": "Student files",
       "branding": "School look",
       "questionBank": "Question bank",
-      "fullTimetable": "Full timetable"
+      "fullTimetable": "Full timetable",
+      "cover": "Cover for absent teachers"
     },
     "actions": {
       "add": "Add",
@@ -942,7 +943,8 @@
       "transfer_submitted": "{{name}} reported a bank transfer of {{amount}} for {{child_en}}",
       "transfer_rejected": "Your transfer of {{amount}} for {{child_en}} was not accepted: {{note}}",
       "data_request": "{{name}} asked to {{type}} personal data",
-      "data_request_answered": "The school answered your data request"
+      "data_request_answered": "The school answered your data request",
+      "lesson_cover": "Please cover {{classroom}}, period {{period}} ({{date}}): {{subject}}, instead of {{absent}}"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -3111,5 +3113,27 @@
     "district": "Area",
     "saved": "Saved.",
     "saveLabel": "Save school details"
+  },
+  "cover": {
+    "title": "Cover for absent teachers",
+    "intro": "Pick the date and the teacher who is away. You see their lessons that day and, for each one, the teachers who are free and could cover it (the ones who teach the subject first). The teacher you choose is notified.",
+    "date": "Date",
+    "absentTeacher": "Absent teacher",
+    "away": {
+      "absent": "absent",
+      "leave": "on leave"
+    },
+    "awayToday": "Marked away on this date:",
+    "noLessons": "This teacher has no lessons on that day.",
+    "period": "Period {{n}}",
+    "coveredBy": "Covered by {{name}}",
+    "cancel": "Cancel",
+    "nobody": "Nobody is free for this period.",
+    "teachesSubject": "Teaches this subject",
+    "teachesGrade": "Teaches this grade",
+    "otherGrade": "Another subject and grade",
+    "lessonsToday": "{{n}} lessons that day",
+    "coversToday": "already covers {{n}}",
+    "choose": "Choose"
   }
 }

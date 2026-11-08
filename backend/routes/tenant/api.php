@@ -65,6 +65,7 @@ use App\Modules\People\Http\Controllers\UserPasswordController;
 use App\Modules\Procurement\Http\Controllers\ProcurementController;
 use App\Modules\Reports\Http\Controllers\ReportCardController;
 use App\Modules\Reports\Http\Controllers\SignatureController;
+use App\Modules\Scheduling\Http\Controllers\CoverController;
 use App\Modules\Scheduling\Http\Controllers\DutyController;
 use App\Modules\Scheduling\Http\Controllers\ExamController;
 use App\Modules\Scheduling\Http\Controllers\PeriodController;
@@ -263,6 +264,10 @@ Route::middleware(['school-user', 'role:admin'])->group(function (): void {
     Route::put('exams/{session}', [ExamController::class, 'update']);
     Route::delete('exams/{session}', [ExamController::class, 'destroy']);
     Route::post('timetable/generate', [TimetableController::class, 'generate']);
+    Route::get('cover/teachers', [CoverController::class, 'teachers']);
+    Route::get('cover/plan', [CoverController::class, 'plan']);
+    Route::post('cover', [CoverController::class, 'store']);
+    Route::delete('cover/{cover}', [CoverController::class, 'destroy'])->whereNumber('cover');
     Route::get('timetable', [TimetableController::class, 'show']);
     Route::get('timetable/overview', [TimetableController::class, 'overview']);
     Route::get('timetable/check', [TimetableController::class, 'check']);

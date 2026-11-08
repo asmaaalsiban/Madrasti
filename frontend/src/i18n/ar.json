@@ -176,7 +176,8 @@
       "studentFiles": "ملفات الطلاب",
       "branding": "هوية المدرسة",
       "questionBank": "بنك الأسئلة",
-      "fullTimetable": "الجدول الكامل"
+      "fullTimetable": "الجدول الكامل",
+      "cover": "تغطية الغياب"
     },
     "actions": {
       "add": "إضافة",
@@ -942,7 +943,8 @@
       "transfer_submitted": "أبلغ {{name}} عن تحويل بنكي بقيمة {{amount}} للطالب {{child_ar}}",
       "transfer_rejected": "لم يُقبل تحويلك بقيمة {{amount}} للطالب {{child_ar}}: {{note}}",
       "data_request": "طلب {{name}} ({{type}}) بيانات شخصية",
-      "data_request_answered": "ردّت المدرسة على طلبك بخصوص البيانات"
+      "data_request_answered": "ردّت المدرسة على طلبك بخصوص البيانات",
+      "lesson_cover": "يرجى تغطية {{classroom}}، الحصة {{period}} ({{date}}): {{subject}}، بدل {{absent}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -3130,5 +3132,27 @@
     "district": "المنطقة",
     "saved": "تم الحفظ.",
     "saveLabel": "حفظ بيانات المدرسة"
+  },
+  "cover": {
+    "title": "تغطية حصص المعلمين الغائبين",
+    "intro": "اختر التاريخ والمعلم الغائب. بتشوف حصصه بذلك اليوم، ولكل حصة المعلمين المتفرغين اللي ممكن يغطوها (اللي بيدرّسوا المادة أولًا). المعلم اللي تختاره بيوصله إشعار.",
+    "date": "التاريخ",
+    "absentTeacher": "المعلم الغائب",
+    "away": {
+      "absent": "غائب",
+      "leave": "بإجازة"
+    },
+    "awayToday": "مسجّلون غائبين بهذا التاريخ:",
+    "noLessons": "هذا المعلم ليس عنده حصص بذلك اليوم.",
+    "period": "الحصة {{n}}",
+    "coveredBy": "يغطيها {{name}}",
+    "cancel": "إلغاء",
+    "nobody": "ما في معلم متفرغ بهذه الحصة.",
+    "teachesSubject": "يدرّس هذه المادة",
+    "teachesGrade": "يدرّس هذا الصف",
+    "otherGrade": "مادة وصف آخر",
+    "lessonsToday": "{{n}} حصص ذلك اليوم",
+    "coversToday": "يغطي أصلًا {{n}}",
+    "choose": "اختيار"
   }
 }

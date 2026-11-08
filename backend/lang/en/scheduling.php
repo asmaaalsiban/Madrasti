@@ -35,4 +35,6 @@ return [
         'school_stamp' => 'School stamp',
     ],
     'sheet_name' => 'Timetable :n',
+    'cover_no_lesson' => 'That lesson is not in the timetable on that day.',
+    'cover_teacher_busy' => 'This teacher is not free for that period (or is away).',
 ];

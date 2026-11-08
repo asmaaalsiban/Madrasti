@@ -765,3 +765,11 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 ### School details for the official forms
 
 - On the **Branding** page (`/admin/branding`) the card *School details for official forms* keeps the **directorate of education** and the **area**. They are printed at the top of the timetable and the subject distribution Excel forms. Left empty, the forms print a dotted line to fill in by hand. Admin only; no migration.
+
+## Cover for absent teachers (admin)
+
+- **Cover** (`/admin/cover`): pick the date and the teacher who is away (those marked absent or on leave in staff attendance that day come first). The page lists their lessons of that day from the timetable and, for each one, the **free teachers who could cover it**, the best first: teaches the subject, then teaches the grade, then the fewest lessons and covers that day. One click chooses; the teacher gets a notification ("please cover 7-A, period 2 ... instead of ...") and can be changed or cancelled.
+- A teacher is suggested only if they have no lesson in that period, are not marked unavailable, are not absent or on leave, and are not already covering another section in that period. The server checks it again when you choose.
+- Works for class teachers too: a class teacher's absence lists all their lessons that day.
+- Not built: showing the cover inside the cover teacher's own timetable (they get the notification), counting covers for pay or reports.
+- After pulling: `php artisan tenants:migrate`.
