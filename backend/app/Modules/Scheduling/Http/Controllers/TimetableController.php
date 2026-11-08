@@ -11,7 +11,10 @@ use App\Modules\Academic\Models\Classroom;
 use App\Modules\Academic\Models\Student;
 use App\Modules\Scheduling\Models\Period;
 use App\Modules\Scheduling\Models\TimetableEntry;
+use App\Modules\Scheduling\Services\TimetableChecker;
 use App\Modules\Scheduling\Services\TimetableEditor;
+use App\Shared\Export\XlsxExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Modules\Scheduling\Services\TimetableGenerator;
 use App\Shared\Enums\Role;
 use Illuminate\Http\JsonResponse;
@@ -150,6 +153,48 @@ class TimetableController extends Controller
         $periods = Period::orderBy('day_of_week')->orderBy('number')->when($limit, fn ($q) => $q->where('number', '<=', $limit))->get();
 
         return response()->json(['data' => $this->grid($entries, $periods)]);
+    }
+
+    /** Every section's week in one go (admin): the sections, the bells and all the lessons, for the full timetable screen. */
+    public function overview(): JsonResponse
+    {
+        Gate::authorize('viewAny', Period::class);
+        $year = AcademicYear::where('is_current', true)->first();
+        $classrooms = $year ? Classroom::where('academic_year_id', $year->id)->with(['gradeLevel', 'homeroomTeacher:id,name'])->get()->sortBy(fn (Classroom $c) => sprintf('%05d|%s', $c->gradeLevel?->sort_order ?? 0, $c->name))->values() : collect();
+        $entries = $year ? TimetableEntry::where('academic_year_id', $year->id)->with(['subject:id,name_ar,name_en', 'teacher:id,name'])->get() : collect();
+
+        return response()->json(['data' => [
+            'periods' => Period::orderBy('day_of_week')->orderBy('number')->get()->map(fn (Period $p) => ['id' => $p->id, 'day_of_week' => $p->day_of_week, 'number' => $p->number, 'starts_at' => substr($p->starts_at, 0, 5), 'ends_at' => substr($p->ends_at, 0, 5)])->values(),
+            'classrooms' => $classrooms->map(fn (Classroom $c) => ['id' => $c->id, 'name' => $c->name, 'grade_level_id' => $c->grade_level_id, 'grade_ar' => $c->gradeLevel?->name_ar, 'grade_en' => $c->gradeLevel?->name_en, 'periods_per_day' => $c->gradeLevel?->periods_per_day, 'homeroom' => $c->homeroomTeacher?->name])->values(),
+            'entries' => $entries->map(fn (TimetableEntry $e) => ['id' => $e->id, 'classroom_id' => $e->classroom_id, 'period_id' => $e->period_id, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']), 'teacher' => $e->teacher->only(['id', 'name']), 'is_locked' => $e->is_locked])->values(),
+        ]]);
+    }
+
+    /** What is wrong with the timetable (admin): clashes, missing or extra lessons, teachers outside their subjects... */
+    public function check(TimetableChecker $checker): JsonResponse
+    {
+        Gate::authorize('viewAny', Period::class);
+
+        return response()->json(['data' => $checker->check()]);
+    }
+
+    /** The full timetable as a sheet, like the paper one: a row per day and period, a column per section. */
+    public function export(XlsxExport $xlsx): BinaryFileResponse
+    {
+        Gate::authorize('viewAny', Period::class);
+        $year = AcademicYear::where('is_current', true)->first();
+        $classrooms = $year ? Classroom::where('academic_year_id', $year->id)->with('gradeLevel')->get()->sortBy(fn (Classroom $c) => sprintf('%05d|%s', $c->gradeLevel?->sort_order ?? 0, $c->name))->values() : collect();
+        $cell = TimetableEntry::where('academic_year_id', $year?->id)->with(['subject', 'teacher'])->get()->keyBy(fn ($e) => $e->classroom_id.'-'.$e->period_id);
+        $ar = app()->getLocale() === 'ar';
+        $rows = Period::orderBy('day_of_week')->orderBy('number')->get()->map(function (Period $p) use ($classrooms, $cell, $ar): array {
+            return [__('scheduling.days.'.$p->day_of_week), $p->number, ...$classrooms->map(function (Classroom $c) use ($cell, $p, $ar): string {
+                $e = $cell[$c->id.'-'.$p->id] ?? null;
+
+                return $e === null ? '' : ($ar ? $e->subject->name_ar : $e->subject->name_en).' - '.$e->teacher->name;
+            })->all()];
+        });
+
+        return $xlsx->download('timetable', __('scheduling.full_timetable'), [__('scheduling.day'), __('scheduling.period'), ...$classrooms->pluck('name')->all()], $rows);
     }
 
     /** The week of the signed-in teacher (their lessons) or student (their section's lessons). */

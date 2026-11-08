@@ -726,3 +726,10 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - Everything that assigns teachers respects it: the assignment form and Excel import (a teacher can be given a subject only in the grades set for that subject), the automatic assigner (a teacher is a candidate for every subject they teach), and the staff list filter by subject.
 - The sections chosen for the teacher and the students they teach (boys / girls) apply to all their subjects.
 - After pulling: `php artisan tenants:migrate`.
+
+## Full timetable and the timetable checker (admin)
+
+- **Full timetable** (`/admin/timetable/full`): the whole school's week in one table, like the paper one. A column per section (or per teacher, to see who is free), a row per period, one day at a time or the whole week. Filter by grade; pick a teacher (or click any lesson) to highlight every lesson they teach. Excel export (a row per day and period, a column per section) and print (A3 landscape). Teachers still see only their own timetable.
+- **Checker** (`GET /api/timetable/check`, shown on the same screen): errors, warnings and notes. It finds: a teacher in two places at once; lessons placed above or below the planned weekly periods of an assignment; a teacher teaching a subject or grade outside their subjects; a lesson that does not match the section's teaching assignment; a lesson while the teacher is unavailable; a lesson beyond the periods a grade has per day; a curriculum subject with no teacher; teachers over the weekly load; teachers with many free periods; sections without a homeroom teacher. Problem cells are outlined in the table.
+- Not built yet: lessons shared by two sections with one teacher (the database forbids a teacher in two sections at once); timetable drafts and versions; per-day period counts per grade.
+- No migration.

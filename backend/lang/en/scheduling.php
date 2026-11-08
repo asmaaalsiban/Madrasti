@@ -10,4 +10,8 @@ return [
     'teacher_unavailable' => 'The teacher is not available in this period.',
     'teacher_busy' => 'The teacher is already teaching :classroom in this period.',
     'teacher_other_building' => 'The teacher has a lesson in :classroom in another building right next to this period.',
+    'days' => [0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday'],
+    'full_timetable' => 'Full timetable',
+    'day' => 'Day',
+    'period' => 'Period',
 ];

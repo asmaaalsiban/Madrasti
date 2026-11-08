@@ -175,7 +175,8 @@
       "photoConsent": "الموافقة على الصور",
       "studentFiles": "ملفات الطلاب",
       "branding": "هوية المدرسة",
-      "questionBank": "بنك الأسئلة"
+      "questionBank": "بنك الأسئلة",
+      "fullTimetable": "الجدول الكامل"
     },
     "actions": {
       "add": "إضافة",
@@ -3048,6 +3049,40 @@
     "kinds": {
       "mistakes": "أخطاء",
       "retake": "إعادة"
+    }
+  },
+  "fullTimetable": {
+    "title": "الجدول الكامل",
+    "editLessons": "تعديل الحصص",
+    "allGood": "لم يُعثر على مشاكل في الجدول.",
+    "summary": "وجد الفاحص {{error}} أخطاء و{{warning}} تحذيرات و{{info}} ملاحظات.",
+    "days": "اليوم",
+    "wholeWeek": "الأسبوع كله",
+    "axis": "الجدول",
+    "bySections": "حسب الشعب",
+    "byTeachers": "حسب المعلمين",
+    "grade": "الصف",
+    "highlight": "تمييز معلم",
+    "onlyProblems": "إظهار الحصص التي فيها مشاكل فقط",
+    "problems": "ما وجده الفاحص",
+    "none": "لا شيء للإبلاغ عنه.",
+    "severity": {
+      "error": "خطأ",
+      "warning": "تحذير",
+      "info": "ملاحظة"
+    },
+    "types": {
+      "teacher_double_booked": "{{teacher}} في مكانين بنفس الوقت: {{classrooms}}.",
+      "periods_missing": "{{classroom}} · {{subject}}: ناقص {{count}} حصة ({{placed}} من {{planned}}).",
+      "periods_extra": "{{classroom}} · {{subject}}: زيادة {{count}} حصة عن المخطط ({{placed}} من {{planned}}).",
+      "teacher_not_qualified": "{{teacher}} يدرّس {{subject}} في {{classroom}}، لكن موادّه أو صفوفه لا تشمل ذلك.",
+      "subject_without_teacher": "{{classroom}} ليس لها معلم لمادة {{subject}}.",
+      "no_homeroom": "{{classroom}} ليس لها مربّي صف.",
+      "lesson_without_assignment": "{{classroom}}: عند {{teacher}} حصة هناك لا تطابق تعيين المعلمين.",
+      "teacher_unavailable": "{{teacher}} عنده حصة في {{classroom}} ({{day}}، الحصة {{period}}) وهو غير متاح.",
+      "beyond_grade_periods": "{{classroom}} فيها حصة يوم {{day}} في الحصة {{period}}، وصفها فيه {{limit}} حصص يوميًا فقط.",
+      "teacher_overloaded": "{{teacher}} عنده {{load}} حصة أسبوعيًا، أكثر من الحد {{max}}.",
+      "teacher_gaps": "{{teacher}} عنده {{gaps}} حصة فراغ بين حصصه خلال الأسبوع."
     }
   }
 }
