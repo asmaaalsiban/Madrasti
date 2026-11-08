@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import SectionPicker from '../components/SectionPicker'
+import ExtraSubjects from '../components/ExtraSubjects'
 import ResourcePage from '../../Academic/components/ResourcePage'
 
 const CATEGORIES = ['all', 'teaching', 'administrative', 'student_affairs', 'health', 'technical', 'services']
@@ -48,6 +49,10 @@ export default function StaffPage() {
       options: [{ value: 'male', label: 'buildings.gender.male' }, { value: 'female', label: 'buildings.gender.female' }],
     },
     {
+      name: 'extra_subjects', type: 'custom', getValue: (row) => row.extra_subjects ?? [], visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
+      render: ({ form, setForm }) => <ExtraSubjects value={form.extra_subjects ?? []} onChange={(rows) => setForm({ ...form, extra_subjects: rows })} />,
+    },
+    {
       name: 'classroom_ids', type: 'custom', getValue: (row) => row.classroom_ids ?? [], visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
       render: ({ form, setForm }) => <SectionPicker value={form.classroom_ids ?? []} onChange={(ids) => setForm({ ...form, classroom_ids: ids })} />,
     },
@@ -61,7 +66,7 @@ export default function StaffPage() {
     { key: 'staff_type', label: 'staff.fields.type', render: (r) => t(`staff.types.${r.staff_type}`) },
     {
       key: 'subject', label: 'staff.fields.subject',
-      render: (r) => r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : ''),
+      render: (r) => (r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : '')) + ((r.extra_subjects ?? []).length > 0 ? ` +${r.extra_subjects.length}` : ''),
     },
     {
       key: 'scope', label: 'staff.fields.teaches',
@@ -94,7 +99,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', classroom_ids: [], floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />

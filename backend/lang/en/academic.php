@@ -27,4 +27,5 @@ return [
         'term' => 'term',
         'teaching_assignment' => 'teaching assignment',
     ],
+    'extra_subject_is_main' => 'An extra subject must differ from the main subject.',
 ];

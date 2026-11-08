@@ -80,6 +80,42 @@ class StaffProfile extends Model
         return $inGrades && ($this->teaches_gender === null || $this->teaches_gender === $classroomGender);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<StaffSubject, $this> */
+    public function extraSubjects(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffSubject::class);
+    }
+
+    /** Every subject the teacher teaches: the main one and the extra ones. @return list<int> */
+    public function subjectIds(): array
+    {
+        return array_values(array_unique(array_filter([$this->subject_id, ...$this->extraSubjects->pluck('subject_id')->all()])));
+    }
+
+    /**
+     * Whether this teacher may teach THIS subject in a section: the main subject follows the teacher's grades, an extra subject
+     * follows its own grades. The sections chosen for the teacher and the students they teach (boys / girls) apply to all.
+     */
+    public function canTeachSubject(int $subjectId, int $gradeOrder, ?string $classroomGender, ?int $classroomId = null): bool
+    {
+        if ($subjectId === $this->subject_id) {
+            return $this->canTeach($gradeOrder, $classroomGender, $classroomId);
+        }
+        $extra = $this->extraSubjects->firstWhere('subject_id', $subjectId);
+        if ($extra === null) {
+            return false;
+        }
+        if ($classroomId !== null && $this->classrooms->isNotEmpty() && ! $this->classrooms->contains('id', $classroomId)) {
+            return false;
+        }
+        // No grades on the extra subject = the grades of the teacher.
+        $from = $extra->gradeFrom ?? $this->gradeFrom;
+        $to = $extra->gradeTo ?? $this->gradeTo;
+        $inGrades = $from === null || $to === null || ($from->sort_order <= $gradeOrder && $gradeOrder <= $to->sort_order);
+
+        return $inGrades && ($this->teaches_gender === null || $this->teaches_gender === $classroomGender);
+    }
+
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);

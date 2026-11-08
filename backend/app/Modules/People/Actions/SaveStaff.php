@@ -34,8 +34,9 @@ class SaveStaff
             ]);
             $profile = $user->staffProfile()->create($this->profile($type, $data));
             $profile->classrooms()->sync($type->needsSubject() ? ($data['classroom_ids'] ?? []) : []);
+            $this->syncExtraSubjects($profile, $type->needsSubject() ? ($data['extra_subjects'] ?? []) : []);
 
-            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms']);
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms', 'staffProfile.extraSubjects.gradeFrom', 'staffProfile.extraSubjects.gradeTo']);
         });
     }
 
@@ -58,6 +59,7 @@ class SaveStaff
             ]);
             $profile = $user->staffProfile()->updateOrCreate(['user_id' => $user->id], $this->profile($type, $data));
             $profile->classrooms()->sync($type->needsSubject() ? ($data['classroom_ids'] ?? []) : []);
+            $this->syncExtraSubjects($profile, $type->needsSubject() ? ($data['extra_subjects'] ?? []) : []);
 
             // Someone who can no longer be a homeroom teacher must not stay one (it would block edits of the classroom).
             if (! $type->canBeHomeroom() || ! $user->is_active) {
@@ -69,8 +71,21 @@ class SaveStaff
                 $user->tokens()->delete();
             }
 
-            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms']);
+            return $user->load(['staffProfile.subject', 'staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms', 'staffProfile.extraSubjects.gradeFrom', 'staffProfile.extraSubjects.gradeTo']);
         });
+    }
+
+    /**
+     * The extra subjects replace the old ones. Teaching assignments the teacher has for a subject they no longer teach are the admin's to review (the checker flags them).
+     *
+     * @param  list<array<string, mixed>>  $rows
+     */
+    private function syncExtraSubjects(\App\Modules\People\Models\StaffProfile $profile, array $rows): void
+    {
+        $profile->extraSubjects()->delete();
+        foreach ($rows as $r) {
+            $profile->extraSubjects()->create(['subject_id' => $r['subject_id'], 'grade_from_id' => $r['grade_from_id'] ?? null, 'grade_to_id' => $r['grade_to_id'] ?? null]);
+        }
     }
 
     /**

@@ -29,11 +29,11 @@ class AutoTeachingAssigner
     public function handle(int $maxLoad, bool $dryRun): array
     {
         $demands = $this->planner->demands();
-        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo', 'teacher.staffProfile.classrooms')->get();
+        $taken = TeachingAssignment::whereIn('classroom_id', $demands->pluck('classroom_id')->unique())->with('teacher.staffProfile.gradeFrom', 'teacher.staffProfile.gradeTo', 'teacher.staffProfile.classrooms', 'teacher.staffProfile.extraSubjects.gradeFrom', 'teacher.staffProfile.extraSubjects.gradeTo')->get();
         // Assignments made before a teacher's scope existed (or with another scope) are replaced, not kept.
         $meta = $demands->keyBy('classroom_id');
         $invalid = $taken->filter(fn ($a) => ($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
-            && ! $profile->canTeach($meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id))->values();
+            && ! $profile->canTeachSubject((int) $a->subject_id, $meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id))->values();
         $taken = $taken->reject(fn ($a) => $invalid->contains('id', $a->id))->values();
         $takenKeys = $taken->mapWithKeys(fn ($a) => [$a->classroom_id.'-'.$a->subject_id => true]);
         $buildingOf = $demands->pluck('building_id', 'classroom_id');
@@ -50,7 +50,15 @@ class AutoTeachingAssigner
 
         $teachers = User::query()->where('is_active', true)
             ->whereHas('staffProfile', fn ($q) => $q->whereNotNull('subject_id')->whereIn('staff_type', StaffType::valuesIn('teaching')))
-            ->with(['staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms'])->orderBy('id')->get()->groupBy(fn (User $u) => $u->staffProfile->subject_id);
+            ->with(['staffProfile.gradeFrom', 'staffProfile.gradeTo', 'staffProfile.classrooms', 'staffProfile.extraSubjects.gradeFrom', 'staffProfile.extraSubjects.gradeTo'])->orderBy('id')->get();
+        // A teacher is a candidate for every subject they teach (the main one and the extra ones).
+        $bySubject = [];
+        foreach ($teachers as $teacher) {
+            foreach ($teacher->staffProfile->subjectIds() as $subjectId) {
+                $bySubject[$subjectId][] = $teacher;
+            }
+        }
+        $teachers = collect($bySubject)->map(fn ($list) => collect($list));
         $subjects = Subject::all()->keyBy('id');
 
         $pending = $demands->reject(fn ($d) => $takenKeys->has($d['classroom_id'].'-'.$d['subject_id']))
@@ -59,7 +67,7 @@ class AutoTeachingAssigner
         $assigned = [];
         $unassigned = [];
         foreach ($pending as $d) {
-            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeach($d['grade_order'], $d['gender'], $d['classroom_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
+            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeachSubject((int) $d['subject_id'], $d['grade_order'], $d['gender'], $d['classroom_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
             if ($teacher === null) {
                 $unassigned[] = $d;
 
