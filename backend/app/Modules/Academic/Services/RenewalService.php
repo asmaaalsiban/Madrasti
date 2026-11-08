@@ -60,7 +60,7 @@ class RenewalService
                     continue;
                 }
                 $grade = $rooms[$enrollment->classroom_id]?->grade_level_id;
-                $next = $grade === null ? null : $grades->first(fn (GradeLevel $g) => $g->sort_order > $grades->firstWhere('id', $grade)->sort_order);
+                $next = $grade === null ? null : $this->nextGrade($grades, $grades->firstWhere('id', $grade));
                 // Someone already placed in the new year (e.g. by hand) is renewed already.
                 $status = $placedAlready->has($enrollment->student_id) ? 'renewed' : ($next === null ? 'graduating' : 'pending');
                 StudentRenewal::create([
@@ -72,6 +72,23 @@ class RenewalService
         });
 
         return $added;
+    }
+
+    /**
+     * The grade a student goes to next: the level after theirs. When that level has several tracks (health, business...) a student
+     * who is in a track stays in the same track, a student with no track gets the first one (the admin can pick another when renewing).
+     *
+     * @param  \Illuminate\Support\Collection<int, GradeLevel>  $grades  ordered by sort_order
+     */
+    private function nextGrade($grades, GradeLevel $current): ?GradeLevel
+    {
+        $level = $grades->first(fn (GradeLevel $g) => $g->sort_order > $current->sort_order)?->sort_order;
+        if ($level === null) {
+            return null;
+        }
+        $options = $grades->filter(fn (GradeLevel $g) => $g->sort_order === $level);
+
+        return ($current->track !== null && $current->track !== '' ? $options->first(fn (GradeLevel $g) => $g->track === $current->track) : null) ?? $options->first();
     }
 
     /**

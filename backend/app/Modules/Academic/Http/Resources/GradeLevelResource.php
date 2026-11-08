@@ -19,6 +19,7 @@ class GradeLevelResource extends JsonResource
             'name_ar' => $this->name_ar,
             'name_en' => $this->name_en,
             'sort_order' => $this->sort_order,
+            'track' => $this->track,
         ];
     }
 }

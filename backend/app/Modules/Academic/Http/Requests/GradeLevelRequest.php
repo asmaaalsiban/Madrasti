@@ -24,6 +24,7 @@ class GradeLevelRequest extends FormRequest
             'name_ar' => ['required', 'string', 'max:255'],
             'name_en' => ['required', 'string', 'max:255'],
             'sort_order' => ['integer', 'min:0', 'max:65535'],
+            'track' => ['nullable', 'string', 'max:60'],
         ];
     }
 }

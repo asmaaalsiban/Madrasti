@@ -234,7 +234,9 @@
       "teacher": "Teacher",
       "weeklyPeriods": "Periods per week",
       "gender": "Students",
-      "room": "Room"
+      "room": "Room",
+      "track": "Track",
+      "trackHint": "Only for tracks of the secondary grades (e.g. health, business). Grades with the same order and different tracks are alternatives at the same level; a student stays in their track when renewed."
     },
     "overview": {
       "title": "Overview"
