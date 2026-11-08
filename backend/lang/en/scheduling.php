@@ -37,4 +37,5 @@ return [
     'sheet_name' => 'Timetable :n',
     'cover_no_lesson' => 'That lesson is not in the timetable on that day.',
     'cover_teacher_busy' => 'This teacher is not free for that period (or is away).',
+    'joint_other_subject' => 'A joint lesson must be the same subject: :classroom has this teacher in another subject in this period.',
 ];

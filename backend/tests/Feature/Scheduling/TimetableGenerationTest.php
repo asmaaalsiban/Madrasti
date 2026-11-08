@@ -215,7 +215,7 @@ class TimetableGenerationTest extends AcademicTestCase
         $section = $this->getJson("/api/timetable?classroom_id={$classroom->id}")->assertOk()->json('data');
         $this->assertCount(35, $section['periods']);
         $this->assertCount(35, $section['entries']);
-        $this->assertSame(['id', 'period_id', 'subject', 'teacher', 'classroom', 'room', 'is_locked'], array_keys($section['entries'][0]));
+        $this->assertSame(['id', 'period_id', 'subject', 'teacher', 'classroom', 'room', 'is_locked', 'is_joint'], array_keys($section['entries'][0]));
 
         $teacher = $this->getJson("/api/timetable?teacher_id=$teacherId")->assertOk()->json('data');
         $this->assertSame(TimetableEntry::where('teacher_id', $teacherId)->count(), count($teacher['entries']));

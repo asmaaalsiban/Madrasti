@@ -694,7 +694,10 @@
     "editHelp": "A lesson placed by hand is locked, so generating the timetable again keeps it. The teacher must be free and available.",
     "lock": "Lock",
     "unlock": "Unlock",
-    "emptyCell": "Empty this period"
+    "emptyCell": "Empty this period",
+    "joint": "Joint lesson",
+    "jointHelp": "The same teacher teaches this subject to another section at the same time (for example sport for two sections together). Place it in both sections with this ticked.",
+    "jointMark": "Joint lesson: taught to two sections at once"
   },
   "availability": {
     "title": "Teacher availability",

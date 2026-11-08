@@ -731,7 +731,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 
 - **Full timetable** (`/admin/timetable/full`): the whole school's week in one table, like the paper one. A column per section (or per teacher, to see who is free), a row per period, one day at a time or the whole week. Filter by grade; pick a teacher (or click any lesson) to highlight every lesson they teach. Excel export on the school's own paper form (below) and print (A3 landscape). Teachers still see only their own timetable.
 - **Checker** (`GET /api/timetable/check`, shown on the same screen): errors, warnings and notes. It finds: a teacher in two places at once; lessons placed above or below the planned weekly periods of an assignment; a teacher teaching a subject or grade outside their subjects; a lesson that does not match the section's teaching assignment; a lesson while the teacher is unavailable; a lesson beyond the periods a grade has per day; a curriculum subject with no teacher; teachers over the weekly load; teachers with many free periods; sections without a homeroom teacher. Problem cells are outlined in the table.
-- Not built yet: lessons shared by two sections with one teacher (the database forbids a teacher in two sections at once); timetable drafts and versions; per-day period counts per grade.
+- Joint lessons are built (see below). Not built yet: timetable drafts and versions; per-day period counts per grade.
 - No migration.
 
 ### Timetable Excel on the school's paper form
@@ -772,4 +772,12 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - A teacher is suggested only if they have no lesson in that period, are not marked unavailable, are not absent or on leave, and are not already covering another section in that period. The server checks it again when you choose.
 - Works for class teachers too: a class teacher's absence lists all their lessons that day.
 - Not built: showing the cover inside the cover teacher's own timetable (they get the notification), counting covers for pay or reports.
+- After pulling: `php artisan tenants:migrate`.
+
+## Joint lessons (one teacher, two sections at once)
+
+- When the admin edits a lesson cell (`/admin/timetable`) there is a **Joint lesson** option: the same teacher teaches the **same subject** to another section at the same time (sport for two sections, a language group...). Place it in both sections with the option ticked. Both lessons are marked ⇄ and locked, so regenerating the timetable keeps them. A teacher's own cell shows both sections ("7-A + 7-B").
+- Without the option nothing changes: a teacher still cannot be in two sections at once, and a joint lesson of two different subjects is refused. Removing one side turns the other back into a normal lesson.
+- The timetable checker accepts a joint lesson and still reports any other double booking. The database no longer has a unique rule on teacher and period (the editor and the checker enforce it).
+- Note: both sections keep their own assignment of periods, so the teacher's weekly load in the staff list counts a joint lesson once per section.
 - After pulling: `php artisan tenants:migrate`.

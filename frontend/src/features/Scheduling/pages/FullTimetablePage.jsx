@@ -32,7 +32,7 @@ export default function FullTimetablePage() {
     const periodId = new Map(d.periods.map((p) => [`${p.day_of_week}-${p.number}`, p.id]))
     const byCell = new Map(d.entries.map((e) => [`${e.classroom_id}-${e.period_id}`, e]))
     const byTeacher = new Map()
-    d.entries.forEach((e) => byTeacher.set(`${e.teacher.id}-${e.period_id}`, e))
+    d.entries.forEach((e) => byTeacher.set(`${e.teacher.id}-${e.period_id}`, [...(byTeacher.get(`${e.teacher.id}-${e.period_id}`) ?? []), e]))
     const teachers = [...new Map(d.entries.map((e) => [e.teacher.id, e.teacher])).values()].sort((a, b) => a.name.localeCompare(b.name))
     const numbers = [...new Set(d.periods.map((p) => p.number))].sort((a, b) => a - b)
     return { d, days, periodId, byCell, byTeacher, teachers, numbers }
@@ -67,10 +67,11 @@ export default function FullTimetablePage() {
       const room = d.classrooms.find((c) => c.id === col.id)
       if (room.periods_per_day && number > room.periods_per_day) return { gone: true }
       const e = byCell.get(`${col.id}-${pid}`)
-      return { entry: e, mark: marks.get(`c${col.id}-${pid}`), teacher: e?.teacher.id, text: e && name(e.subject), sub: e?.teacher.name }
+      return { entry: e, mark: marks.get(`c${col.id}-${pid}`), teacher: e?.teacher.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: e?.teacher.name }
     }
-    const e = byTeacher.get(`${col.id}-${pid}`)
-    return { entry: e, mark: marks.get(`t${col.id}-${pid}`), teacher: col.id, text: e && name(e.subject), sub: e && d.classrooms.find((c) => c.id === e.classroom_id)?.name }
+    const list = byTeacher.get(`${col.id}-${pid}`) ?? []
+    const e = list[0]
+    return { entry: e, mark: marks.get(`t${col.id}-${pid}`), teacher: col.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: list.map((x) => d.classrooms.find((c) => c.id === x.classroom_id)?.name).join(' + ') }
   }
 
   const tab = (key, label) => <button key={key} type="button" role="tab" aria-selected={String(day) === String(key)} className={`rounded-full border px-3 py-1 text-sm ${String(day) === String(key) ? 'bg-brand text-white' : 'bg-white'}`} onClick={() => setDay(key)}>{label}</button>
