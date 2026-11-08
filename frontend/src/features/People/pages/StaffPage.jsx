@@ -39,7 +39,6 @@ export default function StaffPage() {
       name: 'subject_id', label: 'staff.fields.subject', type: 'select', optionsFrom: 'subjects',
       getValue: (row) => row.subject?.id, visibleWhen: (form) => byValue[form.staff_type]?.needs_subject,
     },
-    { name: 'is_class_teacher', label: 'staff.fields.classTeacher', type: 'checkbox', hint: 'staff.classTeacherHint', visibleWhen: (form) => byValue[form.staff_type]?.needs_subject },
     {
       name: 'grade_from_id', label: 'staff.fields.gradeFrom', type: 'select', optionsFrom: 'grade-levels', getValue: (row) => row.grade_from?.id,
       visibleWhen: (form) => byValue[form.staff_type]?.needs_subject, hint: 'staff.scopeHint',
@@ -73,7 +72,7 @@ export default function StaffPage() {
     { key: 'staff_type', label: 'staff.fields.type', render: (r) => t(`staff.types.${r.staff_type}`) },
     {
       key: 'subject', label: 'staff.fields.subject',
-      render: (r) => (r.is_class_teacher ? t('staff.fields.classTeacher') : (r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : ''))) + ((r.extra_subjects ?? []).length > 0 ? ` +${r.extra_subjects.length}` : ''),
+      render: (r) => (r.subject?.[`name_${i18n.language}`] ?? (r.floor ? `${t('staff.fields.floor')} ${r.floor}` : '')) + ((r.extra_subjects ?? []).length > 0 ? ` +${r.extra_subjects.length}` : ''),
     },
     {
       key: 'scope', label: 'staff.fields.teaches',
@@ -108,7 +107,7 @@ export default function StaffPage() {
         title="staff.title"
         columns={columns}
         fields={fields}
-        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', is_class_teacher: false, degree: '', specialization: '', university: '', graduation_year: '', experience_years: '', courses: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
+        empty={{ name: '', email: '', phone: '', staff_type: defaultType, subject_id: '', grade_from_id: '', grade_to_id: '', teaches_gender: '', degree: '', specialization: '', university: '', graduation_year: '', experience_years: '', courses: '', extra_subjects: [], classroom_ids: [], floor: '', is_active: true }}
         filters={category === 'all' ? {} : { category }}
         rowActions={rowActions}
       />

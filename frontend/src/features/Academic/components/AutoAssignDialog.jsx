@@ -49,6 +49,15 @@ export default function AutoAssignDialog({ open, onClose }) {
                 </ul>
               </div>
             )}
+            {result.class_teacher_assigned > 0 && <p className="text-sm text-slate-600">{t('autoAssign.classTeacherAssigned', { count: result.class_teacher_assigned })}</p>}
+            {(result.class_teacher_problems ?? []).length > 0 && (
+              <div role="alert" className="rounded bg-red-50 p-3 text-sm text-red-800">
+                <p className="font-medium">{t('autoAssign.classTeacherProblems')}</p>
+                <ul className="list-disc ps-5">
+                  {result.class_teacher_problems.map((p) => <li key={p.classroom}>{t(`autoAssign.classTeacherReason.${p.reason}`, p)}</li>)}
+                </ul>
+              </div>
+            )}
             {result.teachers.length > 0 && (
               <table className="w-full text-start text-sm">
                 <thead className="bg-slate-100">
