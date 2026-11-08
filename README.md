@@ -722,7 +722,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 
 ## Teachers who teach more than one subject
 
-- A teacher has a **main subject** and can have **extra subjects**, each with its **own grades** (staff form, *Extra subjects*): e.g. Math for grades 5-6 and Science for grades 8-9. An extra subject with no grades follows the teacher's grades.
+- A teacher has a **main subject** and can have **extra subjects**. For each extra subject the admin picks the grades **one by one** (checkboxes): e.g. Math for four grades and Finance for one. Grades need not follow each other. An extra subject with no grade picked follows the teacher's grades.
 - Everything that assigns teachers respects it: the assignment form and Excel import (a teacher can be given a subject only in the grades set for that subject), the automatic assigner (a teacher is a candidate for every subject they teach), and the staff list filter by subject.
 - The sections chosen for the teacher and the students they teach (boys / girls) apply to all their subjects.
 - After pulling: `php artisan tenants:migrate`.
@@ -739,3 +739,9 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Export to Excel** (full timetable screen, `GET /api/timetable/export`) writes the timetable in the layout schools hand in: the title block (*In the name of God*, *Lesson Timetable*, academic year, school name, directorate and area lines to fill), a row with the homeroom teacher of every section, the section names, then for each section a *Subject* and a *Teacher* column, a block of periods for every day (first, second...) with the day on the side, the **duty** column (who is on duty each weekday, from the duty roster), and the signature block (checked by the general education section, director of education, principal, signatures, date, official and school stamps).
 - Made to look tidy and print on one page: navy header, tinted day and period columns, bold subjects, thin borders, right-to-left in Arabic, A3 landscape fit to one page wide, frozen header. More than 12 sections are split over several sheets (*Timetable 1*, *Timetable 2*...).
 - This is the form only (taken from a real school's sheet; none of its content). Importing the timetable from Excel is not offered.
+
+### Teacher profile: qualifications and periods a week
+
+- The staff form (any kind of staff) has the **qualifications**: degree (diploma, bachelor, master, doctorate, other), specialization, university, graduation year, years of experience and courses (comma separated). They are on the profile from the moment the person is added.
+- The staff list shows the **qualification** and the **periods a week** each teacher is assigned this year (last years' assignments are not counted).
+- Older extra subjects saved as "from grade to grade" become a list of the grades between them. After pulling: `php artisan tenants:migrate`.

@@ -61,7 +61,7 @@ class TimetableChecker
                 $add('periods_extra', 'error', $where, $params + ['count' => $have - $a->weekly_periods]);
             }
             $profile = $a->teacher?->staffProfile;
-            if ($profile !== null && ! $profile->canTeachSubject((int) $a->subject_id, (int) $room->gradeLevel->sort_order, $room->gender ?? 'mixed', $room->id)) {
+            if ($profile !== null && ! $profile->canTeachSubject((int) $a->subject_id, (int) $room->gradeLevel->sort_order, $room->gender ?? 'mixed', $room->id, (int) $room->grade_level_id)) {
                 $add('teacher_not_qualified', 'error', $where, ['teacher' => $a->teacher->name] + $params);
             }
         }

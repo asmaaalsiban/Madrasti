@@ -53,7 +53,7 @@ class ExtraSubjectsTest extends AcademicTestCase
     private function teacherBody(array $extra = []): array
     {
         return ['name' => 'Omar', 'email' => 'omar@x.test', 'staff_type' => 'teacher', 'subject_id' => $this->math->id, 'grade_from_id' => $this->g5->id, 'grade_to_id' => $this->g6->id,
-            'extra_subjects' => [['subject_id' => $this->science->id, 'grade_from_id' => $this->g8->id, 'grade_to_id' => $this->g9->id]], ...$extra];
+            'extra_subjects' => [['subject_id' => $this->science->id, 'grade_ids' => [$this->g8->id, $this->g9->id]]], ...$extra];
     }
 
     private function assign(User|int $teacher, Subject $subject, Classroom $room)
@@ -64,14 +64,14 @@ class ExtraSubjectsTest extends AcademicTestCase
     public function test_the_staff_form_saves_extra_subjects_with_their_own_grades(): void
     {
         $id = $this->postJson('/api/staff', $this->teacherBody())->assertCreated()
-            ->assertJsonPath('data.extra_subjects.0.subject_id', $this->science->id)->assertJsonPath('data.extra_subjects.0.grade_from_id', $this->g8->id)->json('data.id');
+            ->assertJsonPath('data.extra_subjects.0.subject_id', $this->science->id)->assertJsonPath('data.extra_subjects.0.grade_ids', [$this->g8->id, $this->g9->id])->json('data.id');
         $this->putJson("/api/staff/$id", $this->teacherBody(['extra_subjects' => []]))->assertOk()->assertJsonPath('data.extra_subjects', []);
     }
 
     public function test_extra_subjects_are_validated(): void
     {
         $this->postJson('/api/staff', $this->teacherBody(['extra_subjects' => [['subject_id' => $this->math->id]]]))->assertStatus(422)->assertJsonValidationErrors('extra_subjects.0.subject_id'); // same as the main one
-        $this->postJson('/api/staff', $this->teacherBody(['extra_subjects' => [['subject_id' => $this->science->id, 'grade_from_id' => $this->g9->id, 'grade_to_id' => $this->g8->id]]]))->assertStatus(422)->assertJsonValidationErrors('extra_subjects.0.grade_to_id');
+        $this->postJson('/api/staff', $this->teacherBody(['extra_subjects' => [['subject_id' => $this->science->id, 'grade_ids' => [999999]]]]))->assertStatus(422);
         $this->postJson('/api/staff', $this->teacherBody(['extra_subjects' => [['subject_id' => $this->science->id], ['subject_id' => $this->science->id]]]))->assertStatus(422);
     }
 
@@ -82,6 +82,16 @@ class ExtraSubjectsTest extends AcademicTestCase
         $this->assign($id, $this->science, $this->room($this->g8, '8A'))->assertCreated();   // the extra subject, in its grades
         $this->assign($id, $this->math, $this->room($this->g8, '8B'))->assertStatus(422);     // the main subject is not for grade 8
         $this->assign($id, $this->science, $this->room($this->g5, '5B'))->assertStatus(422);  // the extra subject is not for grade 5
+    }
+
+    public function test_the_grades_of_a_subject_do_not_have_to_follow_each_other(): void
+    {
+        // Science for grades 5 and 9 only (not 6 or 8): picked one by one.
+        $id = $this->postJson('/api/staff', $this->teacherBody(['grade_from_id' => null, 'grade_to_id' => null, 'extra_subjects' => [['subject_id' => $this->science->id, 'grade_ids' => [$this->g5->id, $this->g9->id]]]]))->json('data.id');
+        $this->assign($id, $this->science, $this->room($this->g5, '5A'))->assertCreated();
+        $this->assign($id, $this->science, $this->room($this->g9, '9A'))->assertCreated();
+        $this->assign($id, $this->science, $this->room($this->g6, '6A'))->assertStatus(422);
+        $this->assign($id, $this->science, $this->room($this->g8, '8A'))->assertStatus(422);
     }
 
     public function test_an_extra_subject_without_grades_follows_the_teachers_grades(): void

@@ -33,7 +33,7 @@ class StaffProfile extends Model
     /**
      * @var list<string>
      */
-    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty', 'hidden_features'];
+    protected $fillable = ['user_id', 'staff_type', 'subject_id', 'floor', 'grade_from_id', 'grade_to_id', 'teaches_gender', 'job_title', 'hired_on', 'weekly_hours', 'does_duty', 'hidden_features', 'degree', 'specialization', 'university', 'graduation_year', 'experience_years', 'courses'];
 
     /**
      * @return array<string, mixed>
@@ -96,7 +96,7 @@ class StaffProfile extends Model
      * Whether this teacher may teach THIS subject in a section: the main subject follows the teacher's grades, an extra subject
      * follows its own grades. The sections chosen for the teacher and the students they teach (boys / girls) apply to all.
      */
-    public function canTeachSubject(int $subjectId, int $gradeOrder, ?string $classroomGender, ?int $classroomId = null): bool
+    public function canTeachSubject(int $subjectId, int $gradeOrder, ?string $classroomGender, ?int $classroomId = null, ?int $gradeId = null): bool
     {
         if ($subjectId === $this->subject_id) {
             return $this->canTeach($gradeOrder, $classroomGender, $classroomId);
@@ -108,10 +108,16 @@ class StaffProfile extends Model
         if ($classroomId !== null && $this->classrooms->isNotEmpty() && ! $this->classrooms->contains('id', $classroomId)) {
             return false;
         }
-        // No grades on the extra subject = the grades of the teacher.
-        $from = $extra->gradeFrom ?? $this->gradeFrom;
-        $to = $extra->gradeTo ?? $this->gradeTo;
-        $inGrades = $from === null || $to === null || ($from->sort_order <= $gradeOrder && $gradeOrder <= $to->sort_order);
+        // The grades picked for the extra subject; none picked = the grades of the teacher.
+        $picked = $extra->grade_ids ?? [];
+        if ($picked !== []) {
+            $gradeId ??= \App\Modules\Academic\Models\GradeLevel::where('sort_order', $gradeOrder)->value('id');
+            $inGrades = in_array((int) $gradeId, array_map('intval', $picked), true);
+        } else {
+            $from = $this->gradeFrom;
+            $to = $this->gradeTo;
+            $inGrades = $from === null || $to === null || ($from->sort_order <= $gradeOrder && $gradeOrder <= $to->sort_order);
+        }
 
         return $inGrades && ($this->teaches_gender === null || $this->teaches_gender === $classroomGender);
     }

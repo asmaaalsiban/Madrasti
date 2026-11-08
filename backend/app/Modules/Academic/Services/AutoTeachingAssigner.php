@@ -33,7 +33,7 @@ class AutoTeachingAssigner
         // Assignments made before a teacher's scope existed (or with another scope) are replaced, not kept.
         $meta = $demands->keyBy('classroom_id');
         $invalid = $taken->filter(fn ($a) => ($profile = $a->teacher?->staffProfile) !== null && isset($meta[$a->classroom_id])
-            && ! $profile->canTeachSubject((int) $a->subject_id, $meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id))->values();
+            && ! $profile->canTeachSubject((int) $a->subject_id, $meta[$a->classroom_id]['grade_order'], $meta[$a->classroom_id]['gender'], $a->classroom_id, $meta[$a->classroom_id]['grade_level_id']))->values();
         $taken = $taken->reject(fn ($a) => $invalid->contains('id', $a->id))->values();
         $takenKeys = $taken->mapWithKeys(fn ($a) => [$a->classroom_id.'-'.$a->subject_id => true]);
         $buildingOf = $demands->pluck('building_id', 'classroom_id');
@@ -67,7 +67,7 @@ class AutoTeachingAssigner
         $assigned = [];
         $unassigned = [];
         foreach ($pending as $d) {
-            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeachSubject((int) $d['subject_id'], $d['grade_order'], $d['gender'], $d['classroom_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
+            $teacher = $this->pick($teachers->get($d['subject_id'], collect())->filter(fn (User $t) => $t->staffProfile->canTeachSubject((int) $d['subject_id'], $d['grade_order'], $d['gender'], $d['classroom_id'], $d['grade_level_id'])), $d['classroom_id'], $load, $home, $d['building_id'], $d['periods'], $maxLoad);
             if ($teacher === null) {
                 $unassigned[] = $d;
 

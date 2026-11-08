@@ -84,7 +84,7 @@ class SaveStaff
     {
         $profile->extraSubjects()->delete();
         foreach ($rows as $r) {
-            $profile->extraSubjects()->create(['subject_id' => $r['subject_id'], 'grade_from_id' => $r['grade_from_id'] ?? null, 'grade_to_id' => $r['grade_to_id'] ?? null]);
+            $profile->extraSubjects()->create(['subject_id' => $r['subject_id'], 'grade_ids' => array_values(array_map('intval', $r['grade_ids'] ?? [])) ?: null]);
         }
     }
 
@@ -101,6 +101,12 @@ class SaveStaff
             'grade_from_id' => $type->needsSubject() ? ($data['grade_from_id'] ?? null) : null,
             'grade_to_id' => $type->needsSubject() ? ($data['grade_to_id'] ?? null) : null,
             'teaches_gender' => $type->needsSubject() ? ($data['teaches_gender'] ?? null) : null,
+            'degree' => $data['degree'] ?? null,
+            'specialization' => $data['specialization'] ?? null,
+            'university' => $data['university'] ?? null,
+            'graduation_year' => $data['graduation_year'] ?? null,
+            'experience_years' => $data['experience_years'] ?? null,
+            'courses' => $data['courses'] ?? null,
         ];
     }
 }

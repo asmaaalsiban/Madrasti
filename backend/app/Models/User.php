@@ -137,4 +137,10 @@ class User extends Authenticatable
             ->withPivot(['relation', 'is_primary'])
             ->withTimestamps();
     }
+
+    /** The lessons this teacher is assigned (subject, section, periods a week). */
+    public function teachingAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Modules\Academic\Models\TeachingAssignment::class, 'teacher_id');
+    }
 }

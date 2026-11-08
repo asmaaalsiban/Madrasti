@@ -40,6 +40,7 @@ class TeacherPlanner
                 'classroom_id' => $classroom->id,
                 'classroom' => $classroom->name,
                 'grade_order' => (int) $classroom->gradeLevel->sort_order,
+                'grade_level_id' => (int) $classroom->grade_level_id,
                 'gender' => $classroom->gender ?? 'mixed',
                 'subject_id' => $row->subject_id,
                 'periods' => $row->weekly_periods,

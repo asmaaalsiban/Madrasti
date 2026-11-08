@@ -21,15 +21,16 @@ beforeEach(async () => {
 })
 
 describe('ExtraSubjects', () => {
-  it('adds a subject with its own grades and removes it again', async () => {
+  it('adds a subject, picks its grades one by one, and removes it again', async () => {
     wrap()
     fireEvent.click(screen.getByRole('button', { name: /Add a subject/ }))
     await screen.findByRole('option', { name: 'Science' })
     fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '2' } })
-    await screen.findAllByRole('option', { name: 'Grade 9' })
-    fireEvent.change(screen.getByLabelText('Teaches from grade'), { target: { value: '5' } })
-    fireEvent.change(screen.getByLabelText('Teaches to grade'), { target: { value: '9' } })
-    expect(JSON.parse(screen.getByTestId('out').textContent)).toEqual([{ subject_id: 2, grade_from_id: 5, grade_to_id: 9 }])
+    fireEvent.click(await screen.findByLabelText('Grade 5'))
+    fireEvent.click(screen.getByLabelText('Grade 9'))
+    expect(JSON.parse(screen.getByTestId('out').textContent)).toEqual([{ subject_id: 2, grade_ids: [5, 9] }])
+    fireEvent.click(screen.getByLabelText('Grade 5'))
+    expect(JSON.parse(screen.getByTestId('out').textContent)).toEqual([{ subject_id: 2, grade_ids: [9] }])
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
     expect(JSON.parse(screen.getByTestId('out').textContent)).toEqual([])
   })
