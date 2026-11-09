@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -27,7 +28,7 @@ class TransportController extends Controller
     public function overview(): JsonResponse
     {
         $rounds = TransportRound::orderBy('sort_order')->orderBy('id')->get();
-        $buses = Bus::with(['rounds:id', 'driver:id,name,phone', 'escort:id,name,phone'])->orderByRaw('cast(number as unsigned), number')->get();
+        $buses = Bus::with(['rounds:id', 'driver:id,name,phone'])->orderByRaw('cast(number as unsigned), number')->get();
         $rides = StudentTransport::all(['pickup_round_id', 'pickup_bus_id', 'dropoff_round_id', 'dropoff_bus_id']);
 
         return response()->json([
@@ -47,8 +48,8 @@ class TransportController extends Controller
     public function mine(Request $request): JsonResponse
     {
         $me = $request->user();
-        $buses = Bus::with(['rounds', 'driver:id,name,phone', 'escort:id,name,phone'])->where('is_active', true)
-            ->where(fn ($q) => $q->where('driver_id', $me->id)->orWhere('escort_id', $me->id))->orderByRaw('cast(number as unsigned), number')->get();
+        $buses = Bus::with(['rounds', 'driver:id,name,phone'])->where('is_active', true)
+            ->where(fn ($q) => $q->where('driver_id', $me->id)->orWhereHas('rounds', fn ($r) => $r->where('bus_round.escort_id', $me->id)))->orderByRaw('cast(number as unsigned), number')->get();
         $rides = StudentTransport::with(['student.guardians', 'student.enrollments' => fn ($e) => $e->whereHas('classroom.academicYear', fn ($y) => $y->where('is_current', true))->with('classroom:id,name')])
             ->where(fn ($q) => $q->whereIn('pickup_bus_id', $buses->pluck('id'))->orWhereIn('dropoff_bus_id', $buses->pluck('id')))->get();
         $rider = function (StudentTransport $r): array {
@@ -60,8 +61,10 @@ class TransportController extends Controller
         return response()->json(['data' => $buses->map(fn (Bus $b) => [
             'id' => $b->id, 'number' => $b->number, 'area_from' => $b->area_from, 'area_to' => $b->area_to, 'capacity' => $b->capacity, 'notes' => $b->notes,
             'my_part' => $b->driver_id === $me->id ? 'driver' : 'escort',
-            'driver' => $this->person($b->driver, $b->driver_name, $b->driver_phone), 'escort' => $this->person($b->escort),
-            'rounds' => $b->rounds->sortBy([['period', 'desc'], ['sort_order', 'asc']])->map(fn (TransportRound $round) => $this->round($round, 0) + [
+            'driver' => $this->person($b->driver, $b->driver_name, $b->driver_phone),
+            // The driver sees every round of his bus; an escort only the rounds she is the escort of.
+            'rounds' => $b->rounds->filter(fn (TransportRound $round) => $b->driver_id === $me->id || (int) $round->pivot->escort_id === $me->id)->sortBy([['period', 'desc'], ['sort_order', 'asc']])->map(fn (TransportRound $round) => $this->round($round, 0) + [
+                'escort' => $this->person($b->escortFor((int) $round->id)),
                 'students' => $rides->filter(fn ($r) => ($r->pickup_bus_id === $b->id && $r->pickup_round_id === $round->id) || ($r->dropoff_bus_id === $b->id && $r->dropoff_round_id === $round->id))
                     ->map($rider)->sortBy('name_ar')->values(),
             ])->values(),
@@ -117,10 +120,10 @@ class TransportController extends Controller
     public function storeBus(Request $request): JsonResponse
     {
         $data = $this->withDriverDetails($this->busData($request));
-        $bus = Bus::create(collect($data)->except('round_ids')->all());
-        $bus->rounds()->sync($data['round_ids'] ?? []);
+        $bus = Bus::create(collect($data)->except(['round_ids', 'round_escorts'])->all());
+        $this->syncRounds($bus, $data['round_ids'] ?? [], $data['round_escorts'] ?? []);
 
-        return response()->json(['data' => $this->bus($bus->load(['rounds:id', 'driver:id,name,phone', 'escort:id,name,phone']), collect())], 201);
+        return response()->json(['data' => $this->bus($bus->load(['rounds:id', 'driver:id,name,phone']), collect())], 201);
     }
 
     public function updateBus(Request $request, Bus $bus): JsonResponse
@@ -137,12 +140,12 @@ class TransportController extends Controller
         if (isset($data['capacity']) && $this->busiest($bus->id, $rides) > $data['capacity']) {
             throw ValidationException::withMessages(['capacity' => [__('transport.capacity_below_riders')]]);
         }
-        $bus->update(collect($data)->except('round_ids')->all());
-        if (array_key_exists('round_ids', $data)) {
-            $bus->rounds()->sync($data['round_ids']);
+        $bus->update(collect($data)->except(['round_ids', 'round_escorts'])->all());
+        if (array_key_exists('round_ids', $data) || array_key_exists('round_escorts', $data)) {
+            $this->syncRounds($bus, $data['round_ids'] ?? $bus->rounds()->pluck('transport_rounds.id')->all(), $data['round_escorts'] ?? null);
         }
 
-        return response()->json(['data' => $this->bus($bus->refresh()->load(['rounds:id', 'driver:id,name,phone', 'escort:id,name,phone']), $rides)]);
+        return response()->json(['data' => $this->bus($bus->refresh()->load(['rounds:id', 'driver:id,name,phone']), $rides)]);
     }
 
     public function destroyBus(Bus $bus): Response
@@ -217,7 +220,7 @@ class TransportController extends Controller
     {
         Gate::authorize('view-student-transport', $student);
 
-        return response()->json(['data' => $this->ride(StudentTransport::with(['pickupRound', 'dropoffRound', 'pickupBus.escort', 'dropoffBus.escort'])->where('student_id', $student->id)->first())]);
+        return response()->json(['data' => $this->ride(StudentTransport::with(['pickupRound', 'dropoffRound', 'pickupBus', 'dropoffBus'])->where('student_id', $student->id)->first())]);
     }
 
     /** The round must be of the right period (morning going, evening coming back); the bus must be active and have a free seat (the student's own seat does not count). */
@@ -263,6 +266,22 @@ class TransportController extends Controller
         ]);
     }
 
+    /**
+     * Sets the rounds of the bus and the escort of each. A round with no escort sent keeps the one it has.
+     *
+     * @param  array<int|string, mixed>  $roundIds
+     * @param  array<int|string, mixed>|null  $escorts  {round id: user id|null}
+     */
+    private function syncRounds(Bus $bus, array $roundIds, ?array $escorts): void
+    {
+        $current = DB::table('bus_round')->where('bus_id', $bus->id)->pluck('escort_id', 'transport_round_id');
+        $stray = collect($escorts ?? [])->keys()->map(fn ($k) => (int) $k)->diff(collect($roundIds)->map(fn ($r) => (int) $r));
+        if ($stray->isNotEmpty()) {
+            throw ValidationException::withMessages(['round_escorts' => [__('transport.escort_round_not_on_bus')]]);
+        }
+        $bus->rounds()->sync(collect($roundIds)->mapWithKeys(fn ($id) => [(int) $id => ['escort_id' => $escorts !== null && array_key_exists($id, $escorts) ? ($escorts[$id] ?: null) : ($current[(int) $id] ?? null)]])->all());
+    }
+
     /** @return array<string, mixed> */
     private function busData(Request $request, ?Bus $bus = null): array
     {
@@ -274,8 +293,13 @@ class TransportController extends Controller
             'driver_id' => ['nullable', 'integer', function (string $attribute, mixed $value, \Closure $fail): void {
                 $this->mustBeStaff($value, [StaffType::Driver->value], $fail);
             }],
-            'escort_id' => ['nullable', 'integer', 'different:driver_id', function (string $attribute, mixed $value, \Closure $fail): void {
+            // One escort per round of the bus: {round id: user id or null}. Each round has its own escort.
+            'round_escorts' => ['sometimes', 'array'],
+            'round_escorts.*' => ['nullable', 'integer', function (string $attribute, mixed $value, \Closure $fail) use ($request): void {
                 $this->mustBeStaff($value, [...StaffType::valuesIn('teaching'), StaffType::BusSupervisor->value], $fail);
+                if ($value !== null && $value !== '' && (int) $value === (int) $request->input('driver_id')) {
+                    $fail(__('transport.not_eligible'));
+                }
             }],
             'driver_name' => [$new ? 'required_without:driver_id' : 'sometimes', 'nullable', 'string', 'max:120'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
@@ -322,7 +346,9 @@ class TransportController extends Controller
         $roundIds = $b->rounds->pluck('id')->values();
 
         return [
-            'id' => $b->id, 'number' => $b->number, 'driver_id' => $b->driver_id, 'escort_id' => $b->escort_id, 'driver' => $this->person($b->driver, $b->driver_name, $b->driver_phone), 'escort' => $this->person($b->escort),
+            'id' => $b->id, 'number' => $b->number, 'driver_id' => $b->driver_id, 'driver' => $this->person($b->driver, $b->driver_name, $b->driver_phone),
+            // The escort of each round: {round id: {id, name, phone} or null}.
+            'round_escorts' => $b->rounds->mapWithKeys(fn ($r) => [$r->id => $this->person($b->escortFor((int) $r->id))]),
             'driver_name' => $b->driver_name, 'driver_phone' => $b->driver_phone, 'capacity' => $b->capacity,
             'area_from' => $b->area_from, 'area_to' => $b->area_to, 'notes' => $b->notes, 'is_active' => $b->is_active, 'round_ids' => $roundIds,
             // Seats taken in each round the bus serves (a round is either morning or evening, so one number).
@@ -342,11 +368,11 @@ class TransportController extends Controller
         if ($r === null) {
             return null;
         }
-        $bus = fn (?Bus $b) => $b ? ['id' => $b->id, 'number' => $b->number, 'driver_name' => $b->driver_name, 'driver_phone' => $b->driver_phone, 'escort_name' => $b->escort?->name, 'escort_phone' => $b->escort?->phone, 'area_from' => $b->area_from, 'area_to' => $b->area_to] : null;
+        $bus = fn (?Bus $b, ?int $roundId) => $b ? ['id' => $b->id, 'number' => $b->number, 'driver_name' => $b->driver_name, 'driver_phone' => $b->driver_phone, 'escort_name' => $roundId ? $b->escortFor($roundId)?->name : null, 'escort_phone' => $roundId ? $b->escortFor($roundId)?->phone : null, 'area_from' => $b->area_from, 'area_to' => $b->area_to] : null;
 
         return [
-            'pickup_round' => $r->pickupRound ? $this->round($r->pickupRound, 0) : null, 'pickup_bus' => $bus($r->pickupBus),
-            'dropoff_round' => $r->dropoffRound ? $this->round($r->dropoffRound, 0) : null, 'dropoff_bus' => $bus($r->dropoffBus),
+            'pickup_round' => $r->pickupRound ? $this->round($r->pickupRound, 0) : null, 'pickup_bus' => $bus($r->pickupBus, $r->pickup_round_id),
+            'dropoff_round' => $r->dropoffRound ? $this->round($r->dropoffRound, 0) : null, 'dropoff_bus' => $bus($r->dropoffBus, $r->dropoff_round_id),
         ];
     }
 }

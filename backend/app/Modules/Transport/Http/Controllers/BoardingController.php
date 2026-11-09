@@ -26,7 +26,7 @@ class BoardingController extends Controller
     public function mine(Request $request): JsonResponse
     {
         $date = $request->validate(['date' => ['nullable', 'date_format:Y-m-d']])['date'] ?? now()->toDateString();
-        $buses = Bus::where(fn ($q) => $q->where('driver_id', $request->user()->id)->orWhere('escort_id', $request->user()->id))->pluck('id');
+        $buses = Bus::where(fn ($q) => $q->where('driver_id', $request->user()->id)->orWhereHas('rounds', fn ($r) => $r->where('bus_round.escort_id', $request->user()->id)))->pluck('id');
 
         return response()->json(['data' => [
             'date' => $date, 'today' => now()->toDateString(),
@@ -43,7 +43,7 @@ class BoardingController extends Controller
             'student_id' => ['required', 'integer', 'exists:students,id'], 'status' => ['nullable', Rule::in(['boarded', 'not_boarded'])],
         ]);
         $bus = Bus::findOrFail($d['bus_id']);
-        $this->authorizeFor($request->user(), $bus, $d['date']);
+        $this->authorizeFor($request->user(), $bus, (int) $d['round_id'], $d['date']);
         if (! $this->rides((int) $bus->id, (int) $d['round_id'], (int) $d['student_id'])) {
             throw ValidationException::withMessages(['student_id' => [__('transport.not_on_this_round')]]);
         }
@@ -62,7 +62,7 @@ class BoardingController extends Controller
     {
         $d = $request->validate(['date' => ['required', 'date_format:Y-m-d'], 'bus_id' => ['required', 'integer', 'exists:buses,id'], 'round_id' => ['required', 'integer', 'exists:transport_rounds,id']]);
         $bus = Bus::findOrFail($d['bus_id']);
-        $this->authorizeFor($request->user(), $bus, $d['date']);
+        $this->authorizeFor($request->user(), $bus, (int) $d['round_id'], $d['date']);
         $round = TransportRound::findOrFail($d['round_id']);
         $done = 0;
         foreach ($this->studentIds((int) $bus->id, $round) as $studentId) {
@@ -80,7 +80,7 @@ class BoardingController extends Controller
         $marks = BusBoarding::where('date', $date)->get()->groupBy(fn ($m) => $m->bus_id.'-'.$m->transport_round_id);
         $names = \App\Modules\Academic\Models\Student::whereIn('id', $marks->flatten(1)->pluck('student_id'))->get(['id', 'name_ar', 'name_en'])->keyBy('id');
         $rows = [];
-        foreach (Bus::with(['rounds', 'driver:id,name', 'escort:id,name'])->where('is_active', true)->orderByRaw('cast(number as unsigned), number')->get() as $bus) {
+        foreach (Bus::with(['rounds', 'driver:id,name'])->where('is_active', true)->orderByRaw('cast(number as unsigned), number')->get() as $bus) {
             foreach ($bus->rounds as $round) {
                 $ids = $this->studentIds((int) $bus->id, $round);
                 if ($ids === []) {
@@ -88,7 +88,7 @@ class BoardingController extends Controller
                 }
                 $m = $marks->get($bus->id.'-'.$round->id, collect());
                 $rows[] = [
-                    'bus' => ['id' => $bus->id, 'number' => $bus->number, 'escort' => $bus->escort?->name, 'driver' => $bus->driver?->name],
+                    'bus' => ['id' => $bus->id, 'number' => $bus->number, 'escort' => $bus->escortFor((int) $round->id)?->name, 'driver' => $bus->driver?->name],
                     'round' => ['id' => $round->id, 'name_ar' => $round->name_ar, 'name_en' => $round->name_en, 'period' => $round->period],
                     'total' => count($ids), 'boarded' => $m->where('status', 'boarded')->count(), 'not_boarded' => $m->where('status', 'not_boarded')->count(), 'not_ticked' => count($ids) - $m->count(),
                     'missed' => $m->where('status', 'not_boarded')->map(fn ($x) => $names[$x->student_id]->only(['id', 'name_ar', 'name_en']))->values(),
@@ -99,13 +99,13 @@ class BoardingController extends Controller
         return response()->json(['data' => ['date' => $date, 'rows' => $rows]]);
     }
 
-    /** The escort or the driver of this bus, today only; the admin, any day. */
-    private function authorizeFor(User $user, Bus $bus, string $date): void
+    /** The driver of this bus, or the escort of this round, today only; the admin, any day. */
+    private function authorizeFor(User $user, Bus $bus, int $roundId, string $date): void
     {
         if ($user->hasRole(Role::Admin)) {
             return;
         }
-        abort_unless($bus->driver_id === $user->id || $bus->escort_id === $user->id, 403);
+        abort_unless($bus->driver_id === $user->id || $bus->isEscortOf($roundId, $user->id), 403);
         if ($date !== now()->toDateString()) {
             throw ValidationException::withMessages(['date' => [__('transport.only_today')]]);
         }

@@ -40,7 +40,6 @@ export default function MyBusPage() {
             <p className="flex items-center gap-2 text-sm text-slate-600"><MapPin aria-hidden size={14} />{t('transport.areaFromTo', { from: b.area_from, to: b.area_to })}</p>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
               {b.driver && <p>{t('transport.driver')}: <bdi className="font-medium">{b.driver.name}</bdi> <Call phone={b.driver.phone} /></p>}
-              {b.escort && <p>{t('transport.escort')}: <bdi className="font-medium">{b.escort.name}</bdi> <Call phone={b.escort.phone} /></p>}
             </div>
             {b.notes && <p className="text-sm text-slate-500">{b.notes}</p>}
           </header>
@@ -50,6 +49,7 @@ export default function MyBusPage() {
               <h3 className="text-sm font-bold text-deep-harbor">
                 {t(`transport.periods.${r.period}`)} · {r[`name_${i18n.language}`] || r.name_ar}{r.starts_at && <> · <bdi dir="ltr">{r.starts_at}{r.ends_at ? ` – ${r.ends_at}` : ''}</bdi></>}
                 <span className="ms-2 font-normal text-slate-500">({t('transport.studentsCount', { count: r.students.length })})</span>
+                {r.escort && <span className="ms-2 font-normal text-slate-600">· {t('transport.escort')}: <bdi className="font-medium">{r.escort.name}</bdi> <Call phone={r.escort.phone} /></span>}
               </h3>
               {r.students.length > 0 && (
                 <p className="flex flex-wrap items-center gap-3 text-sm">
