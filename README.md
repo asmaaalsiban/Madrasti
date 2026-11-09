@@ -623,6 +623,13 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **"My bus"** (`/teacher/my-bus`, a tile on the home of a driver and of an escort; `GET /api/transport/mine`): the bus, the driver and the escort with phone links, and for each round the students to pick up or take home with their section and the parent's name and phone. A driver's home shows only his own things (no lessons). Nobody else sees a bus. `GET /api/auth/me` returns `bus_duty` (`driver` / `escort`) for staff.
 - Parents see the escort's name and phone next to the driver on their child's ride card.
 - **Migration** (run `php artisan tenants:migrate`): `buses.driver_id` and `buses.escort_id`.
+
+## Transport: boarding check
+- In **My bus** the escort (or the driver) ticks each student of the round as **Boarded** or **Did not board**, once for the morning round and once for the evening round (they are separate). Pressing the same button again clears the tick; "Everyone boarded" ticks the students not yet ticked.
+- The escort or driver can tick **today only**. The principal can correct any day and sees the report at `/admin/transport/boarding` (per bus and round: boarded, not boarded, not ticked, and who missed).
+- **Parents are NOT notified.** It is an internal record.
+- API: `GET /api/transport/boarding/mine`, `PUT /api/transport/boarding`, `PUT /api/transport/boarding/all`, `GET /api/transport/boarding/report` (admin).
+- **Migration** (run `php artisan tenants:migrate`): `bus_boardings`.
 ## Accounting: year-end carry-over (phase 1)
 `Finance > Year-end carry-over` (`/teacher/finance/year-end` for the accountant, `/admin/finance/year-end` read-only for the principal). Pick the year being closed, the new year, the first due date and the number of installments; the screen lists every student who still owes (with the total, and the overdue part) and the accountant carries all or the chosen ones.
 - The old year is closed with a non-cash **carried forward** entry (a payment with method `carry_forward`; never counted as collected, never chosen by hand, not a receipt) and a new fee of kind **carried** opens in the new year with the same amount, split in installments. The student's statement runs on across years and shows "carried to the next year" apart from "paid".

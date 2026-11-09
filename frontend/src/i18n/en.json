@@ -2207,8 +2207,31 @@
     "mine": {
       "student": "Student",
       "classroom": "Section",
-      "parent": "Parent"
-    }
+      "parent": "Parent",
+      "boarding": "Boarding"
+    },
+    "boarding": {
+      "boarded": "Boarded",
+      "not_boarded": "Did not board",
+      "summary": "{{boarded}} boarded · {{missed}} did not board · {{left}} not ticked yet",
+      "everyone": "Everyone boarded",
+      "private": "For the school's record only: parents are not told."
+    },
+    "report": {
+      "title": "Who boarded the bus",
+      "back": "Back to transport",
+      "date": "Day",
+      "none": "No bus has riders on this day.",
+      "cols": {
+        "bus": "Bus",
+        "round": "Round",
+        "boarded": "Boarded",
+        "not_boarded": "Did not board",
+        "not_ticked": "Not ticked",
+        "missed": "Students who did not board"
+      }
+    },
+    "boardingReport": "Who boarded"
   },
   "tasks": {
     "title": "Tasks",

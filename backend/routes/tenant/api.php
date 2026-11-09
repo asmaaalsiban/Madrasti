@@ -83,6 +83,7 @@ use App\Modules\TeacherTools\Http\Controllers\HomeworkController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkFileController;
 use App\Modules\TeacherTools\Http\Controllers\HomeworkSubmissionController;
 use App\Modules\TeacherTools\Http\Controllers\LessonPlanController;
+use App\Modules\Transport\Http\Controllers\BoardingController;
 use App\Modules\Transport\Http\Controllers\TransportController;
 use App\Shared\Attachments\AttachmentController;
 use Illuminate\Support\Facades\Route;
@@ -559,12 +560,19 @@ Route::middleware(['school-user', 'role:admin'])->prefix('transport')->group(fun
     Route::put('buses/{bus}', [TransportController::class, 'updateBus']);
     Route::delete('buses/{bus}', [TransportController::class, 'destroyBus']);
     Route::get('buses/{bus}/riders', [TransportController::class, 'riders']);
+    Route::get('boarding/report', [BoardingController::class, 'report']);
     Route::get('assignments', [TransportController::class, 'assignments']);
     Route::put('students/{student}', [TransportController::class, 'assign']);
     Route::delete('students/{student}', [TransportController::class, 'unassign']);
 });
 Route::middleware('school-user')->get('students/{student}/transport', [TransportController::class, 'forStudent']);
 Route::middleware('school-user')->get('transport/mine', [TransportController::class, 'mine']); // a driver's or an escort's own buses
+// Who boarded: ticked by the escort or the driver (the admin may correct any day). Nobody is notified.
+Route::middleware(['school-user', 'role:teacher,admin'])->prefix('transport/boarding')->group(function (): void {
+    Route::get('mine', [BoardingController::class, 'mine']);
+    Route::put('/', [BoardingController::class, 'mark']);
+    Route::put('all', [BoardingController::class, 'markAll']);
+});
 
 // Tasks for staff: management gives to any teacher, a head of department to their department; each assignee moves their own part.
 Route::middleware(['school-user', 'role:admin,teacher'])->prefix('tasks')->group(function (): void {

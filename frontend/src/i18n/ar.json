@@ -2222,8 +2222,31 @@
     "mine": {
       "student": "الطالب",
       "classroom": "الشعبة",
-      "parent": "ولي الأمر"
-    }
+      "parent": "ولي الأمر",
+      "boarding": "الركوب"
+    },
+    "boarding": {
+      "boarded": "ركب",
+      "not_boarded": "ما ركب",
+      "summary": "{{boarded}} ركبوا · {{missed}} ما ركبوا · {{left}} لم يُسجَّلوا بعد",
+      "everyone": "الكل ركب",
+      "private": "للسجل المدرسي فقط: لا يُبلَّغ الأهل."
+    },
+    "report": {
+      "title": "من ركب الباص",
+      "back": "العودة إلى المواصلات",
+      "date": "اليوم",
+      "none": "ما في باص عليه ركاب بهذا اليوم.",
+      "cols": {
+        "bus": "الباص",
+        "round": "الجولة",
+        "boarded": "ركبوا",
+        "not_boarded": "ما ركبوا",
+        "not_ticked": "لم يُسجَّل",
+        "missed": "الطلاب الذين لم يركبوا"
+      }
+    },
+    "boardingReport": "من ركب الباص"
   },
   "tasks": {
     "title": "المهام",
