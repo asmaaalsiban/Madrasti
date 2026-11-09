@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import NewWarningDialog from '../components/NewWarningDialog'
 import WarningCard from '../components/WarningCard'
+import RulesTab from '../components/RulesTab'
 
 // The admin's record of warnings: students and staff, what waits for approval, writing a new one, withdrawing one.
 export default function WarningsPage() {
@@ -17,7 +18,7 @@ export default function WarningsPage() {
   const [adding, setAdding] = useState(false)
   const [withdrawing, setWithdrawing] = useState(null)
   const [reason, setReason] = useState('')
-  const { data } = useQuery({ queryKey: ['warnings', 'list', subject, status], queryFn: async () => (await api.get('/warnings', { params: { subject_type: subject, status: status || undefined } })).data })
+  const { data } = useQuery({ queryKey: ['warnings', 'list', subject, status], enabled: subject !== 'rules', queryFn: async () => (await api.get('/warnings', { params: { subject_type: subject, status: status || undefined } })).data })
   const refresh = () => client.invalidateQueries({ queryKey: ['warnings'] })
   const approve = useMutation({ mutationFn: (id) => api.post(`/warnings/${id}/approve`), onSuccess: refresh })
   const withdraw = useMutation({ mutationFn: () => api.post(`/warnings/${withdrawing.id}/withdraw`, { reason }), onSuccess: () => { setWithdrawing(null); setReason(''); refresh() } })
@@ -31,15 +32,15 @@ export default function WarningsPage() {
         <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setAdding(true)}><Plus size={16} aria-hidden />{t('warnings.new')}</button>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <div role="tablist" className="flex gap-2">{['student', 'staff'].map((k) => <button key={k} type="button" role="tab" aria-selected={subject === k} className={tab(k)} onClick={() => setSubject(k)}>{t(`warnings.subject.${k}`)}</button>)}</div>
-        <label className="text-sm">{t('warnings.statusFilter')}
+        <div role="tablist" className="flex gap-2">{['student', 'staff', 'rules'].map((k) => <button key={k} type="button" role="tab" aria-selected={subject === k} className={tab(k)} onClick={() => setSubject(k)}>{k === 'rules' ? t('warnings.rules.tab') : t(`warnings.subject.${k}`)}</button>)}</div>
+        {subject !== 'rules' && <label className="text-sm">{t('warnings.statusFilter')}
           <select className="ms-2 rounded border p-1.5" value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="">{t('finance.all')}</option>
             {['pending', 'active', 'withdrawn'].map((s) => <option key={s} value={s}>{t(`warnings.status.${s}`)}</option>)}
           </select>
-        </label>
+        </label>}
       </div>
-      {!data ? <p className="text-slate-500">{t('common.loading')}</p> : data.data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('warnings.none')}</p> : (
+      {subject === 'rules' ? <RulesTab /> : !data ? <p className="text-slate-500">{t('common.loading')}</p> : data.data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('warnings.none')}</p> : (
         <div className="grid gap-3 lg:grid-cols-2">
           {data.data.map((w) => (
             <WarningCard key={w.id} w={w} who={who(w)}>

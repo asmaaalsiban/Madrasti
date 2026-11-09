@@ -7,7 +7,7 @@ import { api } from '../src/api/client'
 import WarningsPage from '../src/features/Warnings/pages/WarningsPage'
 import ChildWarningsPage from '../src/features/Warnings/pages/ChildWarningsPage'
 
-vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn() } }))
+vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: { role: 'parent', children: [{ id: 4, name_ar: 'سامي', name_en: 'Sami' }] } }) }))
 const client = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
@@ -52,6 +52,43 @@ describe('WarningsPage (admin)', () => {
     fireEvent.change(within(dialog).getByLabelText('Reason'), { target: { value: 'Wrong student' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Withdraw' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/warnings/1/withdraw', { reason: 'Wrong student' }))
+  })
+})
+
+describe('Warning rules (admin)', () => {
+  const rules = [{ id: 1, subject_type: 'student', name: '3 days absent', metric: 'absent_days', threshold: 3, window_days: 30, category: 'absence', level: 2, title: 'Absent', body: null, auto_send: false, is_active: true }]
+  beforeEach(() => {
+    api.get.mockImplementation(async (url) => (url === '/warnings/rules' ? { data: { data: rules } } : { data: { data: [], can_manage: true } }))
+    api.post.mockResolvedValue({ data: { data: { created: 1, pending: 2 } } })
+    api.put.mockResolvedValue({ data: { data: {} } })
+  })
+
+  it('shows the rules as sentences, creates one and runs them now', async () => {
+    api.put = vi.fn().mockResolvedValue({ data: { data: {} } })
+    render(<QueryClientProvider client={client()}><MemoryRouter><WarningsPage /></MemoryRouter></QueryClientProvider>)
+    fireEvent.click(await screen.findByRole('tab', { name: 'Rules' }))
+    expect(await screen.findByText(/When days absent reaches 3 within 30 days: First warning/)).toBeInTheDocument()
+    expect(screen.getByText(/waits for approval/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run the rules now' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('1 warning(s) sent, 2 waiting for your approval')
+
+    fireEvent.click(screen.getByRole('button', { name: 'New rule' }))
+    const dialog = await screen.findByRole('dialog', { name: 'New rule' })
+    fireEvent.change(within(dialog).getByLabelText('Rule name'), { target: { value: 'Late 5 times' } })
+    fireEvent.change(within(dialog).getByLabelText('Measure'), { target: { value: 'late_count' } })
+    fireEvent.change(within(dialog).getByLabelText('reaches'), { target: { value: '5' } })
+    fireEvent.change(within(dialog).getByLabelText('Title'), { target: { value: 'Late too often' } })
+    fireEvent.click(within(dialog).getByLabelText(/Send it at once/))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/warnings/rules', expect.objectContaining({ metric: 'late_count', threshold: 5, auto_send: true, title: 'Late too often' })))
+  })
+
+  it('switches a rule off', async () => {
+    render(<QueryClientProvider client={client()}><MemoryRouter><WarningsPage /></MemoryRouter></QueryClientProvider>)
+    fireEvent.click(await screen.findByRole('tab', { name: 'Rules' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Switch off' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/warnings/rules/1', expect.objectContaining({ is_active: false })))
   })
 })
 
