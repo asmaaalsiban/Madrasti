@@ -1,7 +1,7 @@
 # استخدام صورة PHP رسمية
 FROM php:8.2-fpm
 
-# تثبيت حزم النظام المطلوبة ومكتبات قاعدة بيانات PostgreSQL
+# تثبيت حزم النظام المطلوبة ومكتبات PostgreSQL و zip
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libpq-dev \
+    libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-install pdo pdo_pgsql bcmath
+    && docker-php-ext-install pdo pdo_pgsql bcmath zip
 
 # تثبيت Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -32,5 +33,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # فتح البورت المطلوب
 EXPOSE 8080
 
-# أمر التشغيل الصحيح لإنتاج لارافيل عبر البورت المخصص
+# أمر التشغيل لإنتاج لارافيل
 CMD php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
