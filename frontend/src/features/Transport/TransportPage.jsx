@@ -6,6 +6,7 @@ import { Bus, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { api } from '../../api/client'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
+import { DateInput } from '../../components/shared/DateInput'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const nameOf = (o, lang) => o?.[`name_${lang}`] || o?.name_ar || ''
@@ -40,6 +41,50 @@ function RoundDialog({ round, onClose }) {
           <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
         </div>
       </form>
+    </Modal>
+  )
+}
+
+// A stand-in escort for one day on one round (the usual escort is absent); the usual one is not changed.
+function SubstituteDialog({ bus, round, escorts, current, onClose }) {
+  const { t, i18n } = useTranslation()
+  const client = useQueryClient()
+  const today = new Date().toISOString().slice(0, 10)
+  const [date, setDate] = useState(today)
+  const [escortId, setEscortId] = useState('')
+  const [error, setError] = useState('')
+  const save = useMutation({
+    mutationFn: ({ id, day }) => api.put('/transport/substitutes', { date: day ?? date, bus_id: bus.id, round_id: round.id, escort_id: id }),
+    onSuccess: () => { client.invalidateQueries({ queryKey: ['transport'] }); onClose() },
+    onError: (err) => setError(errorOf(err, t('admin.actions.error'))),
+  })
+  return (
+    <Modal open size="md" title={t('transport.substitute.title', { bus: bus.number, round: nameOf(round, i18n.language) })} onClose={onClose}>
+      <div className="space-y-3">
+        {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+        <p className="text-sm text-slate-600">{t('transport.substitute.hint')}</p>
+        {current.length > 0 && (
+          <ul className="space-y-1 text-sm">
+            {current.map((x) => (
+              <li key={x.id} className="flex items-center justify-between gap-2 rounded bg-slate-50 px-3 py-1.5">
+                <span><bdi dir="ltr">{x.date}</bdi> · <bdi>{x.escort?.name}</bdi></span>
+                <button type="button" className="text-red-700" aria-label={`${t('transport.substitute.remove')} ${x.date}`} onClick={() => save.mutate({ id: null, day: x.date })}>{t('transport.substitute.remove')}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <label className="block text-sm">{t('transport.substitute.date')}<DateInput className="mt-1 block rounded border p-2" value={date} min={today} onChange={(e) => setDate(e.target.value)} /></label>
+        <label className="block text-sm">{t('transport.substitute.escort')}
+          <select className="mt-1 w-full rounded border p-2" value={escortId} onChange={(e) => setEscortId(e.target.value)}>
+            <option value="" disabled>{t('transport.substitute.choose')}</option>
+            {escorts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </label>
+        <div className="flex justify-end gap-2">
+          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <button type="button" disabled={!escortId || save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate({ id: Number(escortId) })}>{t('admin.actions.save')}</button>
+        </div>
+      </div>
     </Modal>
   )
 }
@@ -238,6 +283,10 @@ function BusesTab({ overview }) {
                   <span className="font-bold">{nameOf(r, i18n.language)} <span className="font-normal text-slate-500">· {t(`transport.periods.${r.period}`)}</span></span>
                   <span className="text-slate-600">{t('transport.escort')}: <bdi>{b.round_escorts?.[r.id]?.name ?? t('transport.escortNone')}</bdi></span>
                   <span>{t('transport.loadLine', { count: b.load[r.id] ?? 0, seats: b.capacity })}</span>
+                  <button type="button" className="text-brand" aria-label={`${t('transport.substitute.button')} ${nameOf(r, i18n.language)}`} onClick={() => setDialog({ type: 'substitute', bus: b, round: r })}>{t('transport.substitute.button')}</button>
+                  {(overview.substitutes ?? []).filter((x) => x.bus_id === b.id && x.round_id === r.id).map((x) => (
+                    <span key={x.id} className="w-full text-xs text-slate-600">{t('transport.substitute.line', { date: x.date, name: x.escort?.name })}</span>
+                  ))}
                 </li>
               ))}
               {b.round_ids.length === 0 && <li className="text-slate-500">{t('transport.noRoundsForBus')}</li>}
@@ -247,6 +296,7 @@ function BusesTab({ overview }) {
         ))}
       </div>
       {dialog?.type === 'bus' && <BusDialog bus={dialog.bus} rounds={overview.rounds} drivers={overview.drivers ?? []} escorts={overview.escorts ?? []} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'substitute' && <SubstituteDialog bus={dialog.bus} round={dialog.round} escorts={overview.escorts ?? []} current={(overview.substitutes ?? []).filter((x) => x.bus_id === dialog.bus.id && x.round_id === dialog.round.id)} onClose={() => setDialog(null)} />}
       {dialog?.type === 'riders' && <RidersDialog bus={dialog.bus} rounds={overview.rounds} onClose={() => setDialog(null)} />}
       <ConfirmDialog open={Boolean(del)} message={t('transport.deleteBus', { number: del?.number })} onConfirm={() => remove.mutate(del)} onCancel={() => setDel(null)} busy={remove.isPending} />
     </div>

@@ -559,6 +559,7 @@ Route::middleware(['school-user', 'role:admin'])->prefix('transport')->group(fun
     Route::post('buses', [TransportController::class, 'storeBus']);
     Route::put('buses/{bus}', [TransportController::class, 'updateBus']);
     Route::delete('buses/{bus}', [TransportController::class, 'destroyBus']);
+    Route::put('substitutes', [TransportController::class, 'setSubstitute']); // a stand-in escort for one day
     Route::get('buses/{bus}/riders', [TransportController::class, 'riders']);
     Route::get('boarding/report', [BoardingController::class, 'report']);
     Route::get('assignments', [TransportController::class, 'assignments']);

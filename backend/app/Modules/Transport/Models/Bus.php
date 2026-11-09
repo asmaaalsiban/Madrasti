@@ -36,17 +36,40 @@ class Bus extends Model
         return $this->belongsToMany(TransportRound::class, 'bus_round', 'bus_id', 'transport_round_id')->withPivot('escort_id');
     }
 
-    /** The escort of this bus in one round (each round of a bus has its own escort), or null. */
-    public function escortFor(int $roundId): ?User
+    /** The escort of this bus in one round on a day (default today): the stand-in of that day if there is one, else the usual escort, or null. */
+    public function escortFor(int $roundId, ?string $date = null): ?User
+    {
+        $id = DB::table('bus_round_substitutes')->where('date', $date ?? now()->toDateString())->where('bus_id', $this->id)->where('transport_round_id', $roundId)->value('escort_id')
+            ?? DB::table('bus_round')->where('bus_id', $this->id)->where('transport_round_id', $roundId)->value('escort_id');
+
+        return $id ? User::find($id) : null;
+    }
+
+    /** The usual escort of a round (what the principal set), whoever stands in today. */
+    public function usualEscortFor(int $roundId): ?User
     {
         $id = DB::table('bus_round')->where('bus_id', $this->id)->where('transport_round_id', $roundId)->value('escort_id');
 
         return $id ? User::find($id) : null;
     }
 
-    /** Whether this person is the escort of the bus in that round. */
-    public function isEscortOf(int $roundId, int $userId): bool
+    /** Whether this person is the escort of the bus in that round on that day (the usual escort is not, on a day she has a stand-in). */
+    public function isEscortOf(int $roundId, int $userId, ?string $date = null): bool
     {
-        return DB::table('bus_round')->where('bus_id', $this->id)->where('transport_round_id', $roundId)->where('escort_id', $userId)->exists();
+        return $this->escortFor($roundId, $date)?->id === $userId;
+    }
+
+    /**
+     * Ids of the active buses where this person is the escort of at least one round on that day (default today), counting stand-ins.
+     *
+     * @return list<int>
+     */
+    public static function escortedBusIds(int $userId, ?string $date = null): array
+    {
+        $subs = DB::table('bus_round_substitutes')->where('date', $date ?? now()->toDateString())->get()->keyBy(fn ($r) => $r->bus_id.'-'.$r->transport_round_id);
+
+        return DB::table('bus_round')->get()
+            ->filter(fn ($r) => (int) ($subs->get($r->bus_id.'-'.$r->transport_round_id)->escort_id ?? $r->escort_id) === $userId)
+            ->pluck('bus_id')->unique()->map(fn ($id) => (int) $id)->values()->all();
     }
 }

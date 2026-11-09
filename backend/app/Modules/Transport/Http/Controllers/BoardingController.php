@@ -26,7 +26,7 @@ class BoardingController extends Controller
     public function mine(Request $request): JsonResponse
     {
         $date = $request->validate(['date' => ['nullable', 'date_format:Y-m-d']])['date'] ?? now()->toDateString();
-        $buses = Bus::where(fn ($q) => $q->where('driver_id', $request->user()->id)->orWhereHas('rounds', fn ($r) => $r->where('bus_round.escort_id', $request->user()->id)))->pluck('id');
+        $buses = Bus::where(fn ($q) => $q->where('driver_id', $request->user()->id)->orWhereIn('id', Bus::escortedBusIds((int) $request->user()->id)))->pluck('id');
 
         return response()->json(['data' => [
             'date' => $date, 'today' => now()->toDateString(),
@@ -88,7 +88,7 @@ class BoardingController extends Controller
                 }
                 $m = $marks->get($bus->id.'-'.$round->id, collect());
                 $rows[] = [
-                    'bus' => ['id' => $bus->id, 'number' => $bus->number, 'escort' => $bus->escortFor((int) $round->id)?->name, 'driver' => $bus->driver?->name],
+                    'bus' => ['id' => $bus->id, 'number' => $bus->number, 'escort' => $bus->escortFor((int) $round->id, $date)?->name, 'driver' => $bus->driver?->name],
                     'round' => ['id' => $round->id, 'name_ar' => $round->name_ar, 'name_en' => $round->name_en, 'period' => $round->period],
                     'total' => count($ids), 'boarded' => $m->where('status', 'boarded')->count(), 'not_boarded' => $m->where('status', 'not_boarded')->count(), 'not_ticked' => count($ids) - $m->count(),
                     'missed' => $m->where('status', 'not_boarded')->map(fn ($x) => $names[$x->student_id]->only(['id', 'name_ar', 'name_en']))->values(),
@@ -105,7 +105,7 @@ class BoardingController extends Controller
         if ($user->hasRole(Role::Admin)) {
             return;
         }
-        abort_unless($bus->driver_id === $user->id || $bus->isEscortOf($roundId, $user->id), 403);
+        abort_unless($bus->driver_id === $user->id || $bus->isEscortOf($roundId, $user->id, $date), 403);
         if ($date !== now()->toDateString()) {
             throw ValidationException::withMessages(['date' => [__('transport.only_today')]]);
         }
