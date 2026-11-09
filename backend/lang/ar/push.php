@@ -49,4 +49,5 @@ return [
     'warning_student_parent' => 'إنذار للطالب :student: :title',
     'warning_student_self' => 'عندك إنذار جديد: :title',
     'warning_staff' => 'عندك إنذار جديد: :title',
+    'warnings_pending' => ':count إنذار(ات) من القواعد بانتظار موافقتك',
 ];

@@ -35,6 +35,7 @@ use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\ExpenseController;
 use App\Modules\Discipline\Http\Controllers\WarningController;
+use App\Modules\Discipline\Http\Controllers\WarningRuleController;
 use App\Modules\Finance\Http\Controllers\AccountingReportController;
 use App\Modules\QuestionBank\Http\Controllers\QuestionAuthoringController;
 use App\Modules\QuestionBank\Http\Controllers\QuizController;
@@ -635,6 +636,11 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('warnings')->gr
     Route::post('/', [WarningController::class, 'store']);
 });
 Route::middleware(['school-user', 'role:admin'])->prefix('warnings')->group(function (): void {
+    Route::get('rules', [WarningRuleController::class, 'index']);
+    Route::post('rules', [WarningRuleController::class, 'store']);
+    Route::post('rules/run', [WarningRuleController::class, 'run']);
+    Route::put('rules/{rule}', [WarningRuleController::class, 'update'])->whereNumber('rule');
+    Route::delete('rules/{rule}', [WarningRuleController::class, 'destroy'])->whereNumber('rule');
     Route::post('{warning}/approve', [WarningController::class, 'approve'])->whereNumber('warning');
     Route::post('{warning}/withdraw', [WarningController::class, 'withdraw'])->whereNumber('warning');
 });

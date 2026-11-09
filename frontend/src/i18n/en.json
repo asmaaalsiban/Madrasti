@@ -953,7 +953,8 @@
       "lesson_cover": "Please cover {{classroom}}, period {{period}} ({{date}}): {{subject}}, instead of {{absent}}",
       "warning_student_parent": "A warning for {{student}}: {{title}}",
       "warning_student_self": "You have a new warning: {{title}}",
-      "warning_staff": "You have a new warning: {{title}}"
+      "warning_staff": "You have a new warning: {{title}}",
+      "warnings_pending": "{{count}} warning(s) raised by the rules wait for your approval"
     },
     "push": {
       "enable": "Get notifications on this phone",
@@ -3203,6 +3204,35 @@
       "pending": "Waiting for approval",
       "active": "Active",
       "withdrawn": "Withdrawn"
+    },
+    "rules": {
+      "tab": "Rules",
+      "intro": "Rules are optional. A school that uses none gets no automatic warning. Each day the system counts what students or staff did in the last days and raises one warning for whoever reached the number, once per period (never again after you withdrew one).",
+      "new": "New rule",
+      "edit": "Edit the rule",
+      "runNow": "Run the rules now",
+      "ran": "Done: {{created}} warning(s) sent, {{pending}} waiting for your approval.",
+      "none": "No rules. Nothing is raised automatically.",
+      "forWhom": "For",
+      "name": "Rule name",
+      "when": "When",
+      "measure": "Measure",
+      "reaches": "reaches",
+      "within": "within (days)",
+      "bodyHint": "Optional. {count} and {days} are replaced by the numbers; if empty a plain sentence is written.",
+      "autoSend": "Send it at once",
+      "autoSendHint": "If not ticked, the warning waits for your approval and nobody is told before it.",
+      "sentence": "When {{measure}} reaches {{count}} within {{days}} days: {{level}}",
+      "sentAtOnce": "sent at once",
+      "needsApproval": "waits for approval",
+      "switchOff": "Switch off",
+      "switchOn": "Switch on",
+      "confirmDelete": "Delete this rule? The warnings it raised stay.",
+      "metrics": {
+        "absent_days": "days absent",
+        "late_count": "times late",
+        "negative_notes": "negative behaviour notes"
+      }
     }
   }
 }

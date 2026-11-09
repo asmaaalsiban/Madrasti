@@ -49,4 +49,5 @@ return [
     'warning_student_parent' => 'A warning for :student: :title',
     'warning_student_self' => 'You have a new warning: :title',
     'warning_staff' => 'You have a new warning: :title',
+    'warnings_pending' => ':count warning(s) raised by the rules wait for your approval',
 ];
