@@ -177,7 +177,8 @@
       "branding": "هوية المدرسة",
       "questionBank": "بنك الأسئلة",
       "fullTimetable": "الجدول الكامل",
-      "cover": "تغطية الغياب"
+      "cover": "تغطية الغياب",
+      "warnings": "الإنذارات"
     },
     "actions": {
       "add": "إضافة",
@@ -949,7 +950,10 @@
       "transfer_rejected": "لم يُقبل تحويلك بقيمة {{amount}} للطالب {{child_ar}}: {{note}}",
       "data_request": "طلب {{name}} ({{type}}) بيانات شخصية",
       "data_request_answered": "ردّت المدرسة على طلبك بخصوص البيانات",
-      "lesson_cover": "يرجى تغطية {{classroom}}، الحصة {{period}} ({{date}}): {{subject}}، بدل {{absent}}"
+      "lesson_cover": "يرجى تغطية {{classroom}}، الحصة {{period}} ({{date}}): {{subject}}، بدل {{absent}}",
+      "warning_student_parent": "إنذار للطالب {{student}}: {{title}}",
+      "warning_student_self": "عندك إنذار جديد: {{title}}",
+      "warning_staff": "عندك إنذار جديد: {{title}}"
     },
     "push": {
       "enable": "تفعيل الإشعارات على هذا الهاتف",
@@ -3159,5 +3163,65 @@
     "lessonsToday": "{{n}} حصص ذلك اليوم",
     "coversToday": "يغطي أصلًا {{n}}",
     "choose": "اختيار"
+  },
+  "warnings": {
+    "title2": "الإنذارات",
+    "mineTitle": "الإنذارات",
+    "hint": "إنذاراتك، وتقدر تقترح إنذارًا لطالب",
+    "new": "إنذار جديد",
+    "newTitle": "إنذار جديد",
+    "forWhom": "لمن",
+    "subject": {
+      "student": "الطلاب",
+      "staff": "الكادر"
+    },
+    "searchStudent": "ابحث عن طالب (الاسم أو الرقم)",
+    "pickStaff": "عضو الكادر",
+    "change": "تغيير",
+    "category": "السبب",
+    "level": "المستوى",
+    "date": "التاريخ",
+    "title": "العنوان",
+    "details": "التفاصيل",
+    "issue": "إصدار الإنذار",
+    "propose": "إرسال للموافقة",
+    "proposalNote": "الإنذار اللي بتكتبه ينتظر مدير المدرسة. ما حدا بيتبلّغ قبل الموافقة.",
+    "statusFilter": "الحالة",
+    "none": "لا توجد إنذارات.",
+    "approve": "موافقة",
+    "withdraw": "سحب",
+    "withdrawTitle": "سحب هذا الإنذار",
+    "withdrawHelp": "بيختفي من صفحة أولياء الأمور وبيضل بسجلك مع السبب.",
+    "reason": "السبب",
+    "by": "من {{name}}",
+    "seenOn": "اطّلع عليه بتاريخ {{date}}",
+    "withdrawnBecause": "سُحب: {{reason}}",
+    "byRule": "بحسب قاعدة",
+    "iHaveSeen": "اطّلعت عليه",
+    "childTitle": "إنذارات {{name}}",
+    "noneForChild": "لا توجد إنذارات. جيد.",
+    "noneForMe": "ما عندك إنذارات.",
+    "proposeForStudent": "اقتراح إنذار لطالب",
+    "myProposals": "إنذارات اقترحتها",
+    "levels": {
+      "1": "تنبيه",
+      "2": "إنذار أول",
+      "3": "إنذار ثاني",
+      "4": "إنذار أخير"
+    },
+    "categories": {
+      "absence": "غياب",
+      "late": "تأخر",
+      "behavior": "سلوك",
+      "violence": "عنف",
+      "academic": "دراسي",
+      "uniform": "زي مدرسي",
+      "other": "أخرى"
+    },
+    "status": {
+      "pending": "بانتظار الموافقة",
+      "active": "فعّال",
+      "withdrawn": "مسحوب"
+    }
   }
 }

@@ -34,6 +34,7 @@ use App\Modules\Finance\Http\Controllers\FinanceController;
 use App\Modules\Finance\Http\Controllers\OnlinePaymentController;
 use App\Modules\Finance\Http\Controllers\PaymentSettingsController;
 use App\Modules\Finance\Http\Controllers\ExpenseController;
+use App\Modules\Discipline\Http\Controllers\WarningController;
 use App\Modules\Finance\Http\Controllers\AccountingReportController;
 use App\Modules\QuestionBank\Http\Controllers\QuestionAuthoringController;
 use App\Modules\QuestionBank\Http\Controllers\QuizController;
@@ -627,3 +628,18 @@ Route::middleware(['school-user', 'role:student'])->prefix('quizzes')->group(fun
     Route::get('{quiz}/items/{item}/image/{slot}', [QuizController::class, 'image'])->whereNumber(['quiz', 'item']);
 });
 Route::middleware('school-user')->get('students/{student}/quizzes', [QuizController::class, 'forStudent']);
+
+// Warnings: the admin writes and manages them, a teacher can propose one for a student; parents, students and staff read theirs.
+Route::middleware(['school-user', 'role:admin,teacher'])->prefix('warnings')->group(function (): void {
+    Route::get('/', [WarningController::class, 'index']);
+    Route::post('/', [WarningController::class, 'store']);
+});
+Route::middleware(['school-user', 'role:admin'])->prefix('warnings')->group(function (): void {
+    Route::post('{warning}/approve', [WarningController::class, 'approve'])->whereNumber('warning');
+    Route::post('{warning}/withdraw', [WarningController::class, 'withdraw'])->whereNumber('warning');
+});
+Route::middleware('school-user')->group(function (): void {
+    Route::get('warnings/mine', [WarningController::class, 'mine']);
+    Route::post('warnings/{warning}/acknowledge', [WarningController::class, 'acknowledge'])->whereNumber('warning');
+    Route::get('students/{student}/warnings', [WarningController::class, 'forStudent']);
+});

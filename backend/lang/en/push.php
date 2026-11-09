@@ -46,4 +46,7 @@ return [
     'contract_expiring' => ':name\'s contract ends on :date',
     'unknown' => 'New notification',
     'lesson_cover' => 'Please cover :classroom, period :period (:date): :subject, instead of :absent',
+    'warning_student_parent' => 'A warning for :student: :title',
+    'warning_student_self' => 'You have a new warning: :title',
+    'warning_staff' => 'You have a new warning: :title',
 ];
