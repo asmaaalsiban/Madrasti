@@ -2231,7 +2231,8 @@
         "missed": "Students who did not board"
       }
     },
-    "boardingReport": "Who boarded"
+    "boardingReport": "Who boarded",
+    "escortPerRound": "Escort for each round"
   },
   "tasks": {
     "title": "Tasks",

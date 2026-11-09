@@ -28,7 +28,8 @@ describe('bus: driver and escort from the staff', () => {
     fireEvent.change(within(dialog).getByLabelText('Bus number'), { target: { value: '7' } })
     fireEvent.change(within(dialog).getByLabelText('Driver'), { target: { value: '21' } })
     expect(within(dialog).queryByLabelText('Driver name')).not.toBeInTheDocument() // no need to type a name
-    fireEvent.change(within(dialog).getByLabelText('Escort'), { target: { value: '31' } })
+    fireEvent.click(within(dialog).getByLabelText('Morning 1')) // the bus serves this round, so its escort can be chosen
+    fireEvent.change(within(dialog).getByLabelText('Escort Morning 1'), { target: { value: '31' } })
     fireEvent.change(within(dialog).getByLabelText('Area from'), { target: { value: 'Downtown' } })
     fireEvent.change(within(dialog).getByLabelText('Area to'), { target: { value: 'School' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
@@ -37,7 +38,8 @@ describe('bus: driver and escort from the staff', () => {
     const [url, body] = api.post.mock.calls[0]
     expect(url).toBe('/transport/buses')
     expect(body.driver_id).toBe(21)
-    expect(body.escort_id).toBe(31)
+    expect(body.round_escorts).toEqual({ 1: 31 })
+    expect(body.escort_id).toBeUndefined()
     expect(body.driver_name).toBeUndefined()
   })
 
@@ -54,11 +56,11 @@ describe('bus: driver and escort from the staff', () => {
     fireEvent.change(within(dialog).getByLabelText('Area to'), { target: { value: 'B' } })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())
-    expect(api.post.mock.calls[0][1]).toMatchObject({ driver_id: null, driver_name: 'Abu Ali', escort_id: null })
+    expect(api.post.mock.calls[0][1]).toMatchObject({ driver_id: null, driver_name: 'Abu Ali', round_escorts: {} })
   })
 
   it('shows the driver and the escort on the bus card', async () => {
-    api.get.mockResolvedValue(overview({ buses: [{ id: 5, number: '7', driver_id: 21, escort_id: 31, driver: { id: 21, name: 'Ahmad Al-Sultani', phone: '0790001111' }, escort: { id: 31, name: 'Miss Huda', phone: '0790002222' }, driver_name: 'Ahmad Al-Sultani', driver_phone: '0790001111', capacity: 20, area_from: 'A', area_to: 'B', is_active: true, round_ids: [1], load: {} }] }))
+    api.get.mockResolvedValue(overview({ buses: [{ id: 5, number: '7', driver_id: 21, driver: { id: 21, name: 'Ahmad Al-Sultani', phone: '0790001111' }, round_escorts: { 1: { id: 31, name: 'Miss Huda', phone: '0790002222' } }, driver_name: 'Ahmad Al-Sultani', driver_phone: '0790001111', capacity: 20, area_from: 'A', area_to: 'B', is_active: true, round_ids: [1], load: {} }] }))
     wrap(<TransportPage />)
     expect(await screen.findByText('Ahmad Al-Sultani')).toBeInTheDocument()
     expect(screen.getByText('Miss Huda')).toBeInTheDocument()
@@ -69,8 +71,8 @@ describe('MyBusPage', () => {
   it('shows the bus, the escort, and the students of each round with a parent to call', async () => {
     api.get.mockResolvedValue({ data: { data: [{
       id: 5, number: '7', area_from: 'Downtown', area_to: 'School', capacity: 20, notes: null, my_part: 'driver',
-      driver: { id: 21, name: 'Ahmad Al-Sultani', phone: '0790001111' }, escort: { id: 31, name: 'Miss Huda', phone: '0790002222' },
-      rounds: [{ ...round, students: [{ id: 1, name_ar: 'سارة', name_en: 'Sara', student_number: 'B-1', classroom: '5-A', parent_name: 'Mum Sara', parent_phone: '0795550000' }] }],
+      driver: { id: 21, name: 'Ahmad Al-Sultani', phone: '0790001111' },
+      rounds: [{ ...round, escort: { id: 31, name: 'Miss Huda', phone: '0790002222' }, students: [{ id: 1, name_ar: 'سارة', name_en: 'Sara', student_number: 'B-1', classroom: '5-A', parent_name: 'Mum Sara', parent_phone: '0795550000' }] }],
     }] } })
     wrap(<MyBusPage />)
     expect(await screen.findByText('Bus 7')).toBeInTheDocument()

@@ -11,7 +11,7 @@ vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), put: vi.fn() } }))
 const wrap = (ui) => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter>{ui}</MemoryRouter></QueryClientProvider>)
 
 const kid = (id, name) => ({ id, name_ar: name, name_en: name, student_number: `B-${id}`, classroom: '5-A', parent_name: null, parent_phone: null })
-const bus = { id: 5, number: '7', area_from: 'A', area_to: 'B', capacity: 20, notes: null, my_part: 'escort', driver: null, escort: { id: 31, name: 'Miss Huda', phone: null },
+const bus = { id: 5, number: '7', area_from: 'A', area_to: 'B', capacity: 20, notes: null, my_part: 'escort', driver: null,
   rounds: [{ id: 1, name_ar: 'صباح', name_en: 'Morning round', period: 'morning', starts_at: '06:30', ends_at: '07:30', students: [kid(1, 'Sami'), kid(2, 'Lina')] }] }
 
 beforeEach(async () => {

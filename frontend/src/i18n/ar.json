@@ -2246,7 +2246,8 @@
         "missed": "الطلاب الذين لم يركبوا"
       }
     },
-    "boardingReport": "من ركب الباص"
+    "boardingReport": "من ركب الباص",
+    "escortPerRound": "المرافقة لكل جولة"
   },
   "tasks": {
     "title": "المهام",

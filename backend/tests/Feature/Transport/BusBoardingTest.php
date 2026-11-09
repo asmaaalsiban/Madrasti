@@ -38,7 +38,7 @@ class BusBoardingTest extends AcademicTestCase
         Sanctum::actingAs($this->admin);
         $this->morning = $this->postJson('/api/transport/rounds', ['name_ar' => 'صباح', 'name_en' => 'Morning', 'period' => 'morning'])->json('data.id');
         $this->evening = $this->postJson('/api/transport/rounds', ['name_ar' => 'مساء', 'name_en' => 'Evening', 'period' => 'evening'])->json('data.id');
-        $this->bus = $this->postJson('/api/transport/buses', ['number' => '7', 'capacity' => 20, 'area_from' => 'A', 'area_to' => 'B', 'driver_id' => $this->driver->id, 'escort_id' => $this->escort->id, 'round_ids' => [$this->morning, $this->evening]])->assertCreated()->json('data.id');
+        $this->bus = $this->postJson('/api/transport/buses', ['number' => '7', 'capacity' => 20, 'area_from' => 'A', 'area_to' => 'B', 'driver_id' => $this->driver->id, 'round_ids' => [$this->morning, $this->evening], 'round_escorts' => [$this->morning => $this->escort->id, $this->evening => $this->escort->id]])->assertCreated()->json('data.id');
         foreach (['Sami', 'Lina', 'Omar'] as $i => $n) {
             $s = Student::create(['student_number' => "B-$i", 'name_ar' => $n, 'name_en' => $n, 'gender' => 'male']);
             $ride = ['pickup_round_id' => $this->morning, 'pickup_bus_id' => $this->bus];
@@ -109,6 +109,20 @@ class BusBoardingTest extends AcademicTestCase
         Sanctum::actingAs($this->escort);
         $this->tick($this->kids[2], 'boarded', $this->evening)->assertStatus(422)->assertJsonValidationErrors('student_id'); // Omar has no evening ride
         $this->tick($this->kids[0], 'maybe', $this->morning)->assertStatus(422);
+    }
+
+    public function test_the_escort_of_the_morning_round_cannot_tick_the_evening_round_of_the_same_bus(): void
+    {
+        $evening = User::factory()->staff(StaffType::Teacher)->create(['name' => 'Miss Rana']);
+        Sanctum::actingAs($this->admin);
+        $this->putJson("/api/transport/buses/{$this->bus}", ['round_escorts' => [$this->evening => $evening->id]])->assertOk();
+
+        Sanctum::actingAs($this->escort);
+        $this->tick($this->kids[0], 'boarded', $this->morning)->assertOk();
+        $this->tick($this->kids[0], 'boarded', $this->evening)->assertForbidden();
+        Sanctum::actingAs($evening);
+        $this->tick($this->kids[0], 'boarded', $this->evening)->assertOk();
+        $this->tick($this->kids[0], 'boarded', $this->morning)->assertForbidden();
     }
 
     public function test_the_escort_can_tick_today_only_and_the_admin_can_correct_any_day_and_sees_the_report(): void

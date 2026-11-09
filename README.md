@@ -630,6 +630,13 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Parents are NOT notified.** It is an internal record.
 - API: `GET /api/transport/boarding/mine`, `PUT /api/transport/boarding`, `PUT /api/transport/boarding/all`, `GET /api/transport/boarding/report` (admin).
 - **Migration** (run `php artisan tenants:migrate`): `bus_boardings`.
+
+## Transport: an escort for each round
+- The escort is chosen **per bus and per round**, not one fixed escort for the whole bus. In `Transport > Edit bus`, after choosing the rounds the bus serves (morning 1, morning 2, evening 1, evening 2...), pick the escort of each round (or none).
+- An escort sees in **My bus** only the rounds she escorts, and can tick boarding only for those; the driver sees and ticks every round of his bus. The principal still corrects any round.
+- The family's ride card and the boarding report show the escort of that round.
+- API: `round_escorts` (`{round id: user id|null}`) on `POST/PUT /api/transport/buses`; a round with no escort sent keeps its current one; `escort_id` on the bus is no longer used.
+- **Migration** (run `php artisan tenants:migrate`): `bus_round.escort_id`; the old bus-wide escort is copied to each of the bus's rounds.
 ## Accounting: year-end carry-over (phase 1)
 `Finance > Year-end carry-over` (`/teacher/finance/year-end` for the accountant, `/admin/finance/year-end` read-only for the principal). Pick the year being closed, the new year, the first due date and the number of installments; the screen lists every student who still owes (with the total, and the overdue part) and the accountant carries all or the chosen ones.
 - The old year is closed with a non-cash **carried forward** entry (a payment with method `carry_forward`; never counted as collected, never chosen by hand, not a receipt) and a new fee of kind **carried** opens in the new year with the same amount, split in installments. The student's statement runs on across years and shows "carried to the next year" apart from "paid".

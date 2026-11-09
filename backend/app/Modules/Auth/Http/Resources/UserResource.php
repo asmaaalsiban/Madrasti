@@ -36,7 +36,7 @@ class UserResource extends JsonResource
             // Only for staff: whether they drive a bus or ride as its escort (the app then shows "My bus").
             'bus_duty' => $this->whenLoaded('staffProfile', fn () => array_values(array_filter([
                 Bus::where('is_active', true)->where('driver_id', $this->id)->exists() ? 'driver' : null,
-                Bus::where('is_active', true)->where('escort_id', $this->id)->exists() ? 'escort' : null,
+                Bus::where('is_active', true)->whereHas('rounds', fn ($r) => $r->where('bus_round.escort_id', $this->id))->exists() ? 'escort' : null,
             ]))),
             // Only for staff: the screens the principal switched off for them.
             'hidden_features' => $this->whenLoaded('staffProfile', fn () => $this->staffProfile?->hidden_features ?? []),
