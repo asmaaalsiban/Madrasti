@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'framer-motion'
 import { BookOpen, CalendarRange, DoorOpen, GraduationCap, Layers, Wallet } from 'lucide-react'
 import StatsCard from '../../../components/shared/StatsCard'
+import { Reveal } from '../../../components/shared/motion'
 import { api } from '../../../api/client'
 import { Bars, Columns, LineChart, Ring } from '../components/charts'
 import { levelColor } from '../components/levelColor'
@@ -20,10 +21,12 @@ const CARDS = [
 const Panel = ({ title, children, className = '', i = 0 }) => {
   const still = useReducedMotion()
   return (
-    <motion.section whileHover={still ? undefined : { y: -3 }} style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-2xl border bg-white p-5 shadow-sm border-sky-tint/60 hover:shadow-md ${className}`}>
-      <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
-      {children}
-    </motion.section>
+    <Reveal i={i + 4}>
+      <motion.section whileHover={still ? undefined : { y: -3 }} className={`h-full space-y-3 rounded-2xl border bg-white p-5 shadow-sm border-sky-tint/60 hover:shadow-md ${className}`}>
+        <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
+        {children}
+      </motion.section>
+    </Reveal>
   )
 }
 
@@ -55,12 +58,12 @@ export default function OverviewPage() {
         {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-2xl bg-white/90 p-3 font-bold text-deep-harbor">{t('surveys.waiting', { count: pending.data })}</Link>}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
           {CARDS.map(([key, label, Icon], n) => (
-            <div key={key} style={{ '--i': n + 1 }} className="dash-in">
+            <Reveal key={key} i={n + 1}>
               <StatsCard title={t(label)} value={data?.[key] ?? '–'} icon={Icon} className="!p-4" />
-            </div>
+            </Reveal>
           ))}
-          <div style={{ '--i': 5 }} className="dash-in"><StatsCard title={t('dashboard.students.title')} value={kids === null ? '–' : `${Math.round(kids)}%`} change={kids === null ? null : attendanceChange} icon={GraduationCap} className="!p-4" /></div>
-          <div style={{ '--i': 6 }} className="dash-in"><StatsCard title={t('dashboard.money.collectedOf')} value={fin ? `${Math.round(paidPct)}%` : '–'} icon={Wallet} className="!p-4" /></div>
+          <Reveal i={5}><StatsCard title={t('dashboard.students.title')} value={kids === null ? '–' : Math.round(kids)} suffix={kids === null ? '' : '%'} change={kids === null ? null : attendanceChange} icon={GraduationCap} className="!p-4" /></Reveal>
+          <Reveal i={6}><StatsCard title={t('dashboard.money.collectedOf')} value={fin ? Math.round(paidPct) : '–'} suffix={fin ? '%' : ''} icon={Wallet} className="!p-4" /></Reveal>
         </div>
       </div>
 

@@ -1,16 +1,17 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
+import { CountUp } from './motion'
 
 // A glass stat card for the dashboards: title, a big value, an optional change in % (shown only when it can be computed) and an icon.
 // Lifts a little on hover (not for people who asked for less motion).
-export default function StatsCard({ title, value, change, icon: Icon, className = '' }) {
+export default function StatsCard({ title, value, change, icon: Icon, suffix = '', className = '' }) {
   const still = useReducedMotion()
   return (
     <motion.div whileHover={still ? undefined : { y: -5 }} className={`glass-card rounded-2xl p-6 ${className}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-white/60">{title}</p>
-          <h2 className="text-2xl font-bold text-white">{value}</h2>
+          <h2 className="text-2xl font-bold text-white"><CountUp value={value} suffix={suffix} /></h2>
           {change !== undefined && change !== null && (
             <p className="flex items-center gap-1 text-sm text-emerald-400">
               <ArrowUpRight size={16} aria-hidden className={change < 0 ? 'rotate-90 text-red-300' : ''} />
