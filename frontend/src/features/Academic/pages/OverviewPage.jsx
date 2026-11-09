@@ -6,9 +6,10 @@ import { BookOpen, CalendarRange, DoorOpen, GraduationCap, Layers, Megaphone, Pl
 import { api } from '../../../api/client'
 import useBadges from '../../Badges/useBadges'
 import { PageEnter, PillTabs, Reveal, CountUp } from '../../../components/shared/motion'
+import useLayout from '../../Layout/useLayout'
+import ShortcutsDialog, { CATALOG, DEFAULT_SHORTCUTS } from '../components/ShortcutsDialog'
 import { BlurSwap, CardTitle, GlassCard, PillColumns, SegmentGauge, StatPill } from '../components/glass'
 
-const NAV = [['/admin', 'admin.nav.overview', true], ['/admin/students', 'admin.nav.students'], ['/admin/timetable', 'admin.nav.timetable'], ['/admin/finance', 'admin.nav.finance'], ['/admin/announcements', 'admin.nav.announcements'], ['/admin/staff', 'admin.nav.staff']]
 const COUNTS = [['academic_years', 'admin.nav.academicYears', CalendarRange], ['grade_levels', 'admin.nav.gradeLevels', Layers], ['classrooms', 'admin.nav.classrooms', DoorOpen], ['subjects', 'admin.nav.subjects', BookOpen]]
 
 const rate = (c) => {
@@ -21,6 +22,11 @@ const rate = (c) => {
 export default function OverviewPage() {
   const { t, i18n } = useTranslation()
   const [tab, setTab] = useState('money')
+  const [editing, setEditing] = useState(false)
+  // The shortcuts of the pill menu are the principal's own (saved on his account): the overview is always first, the rest he chooses.
+  const shortcuts = useLayout('admin_shortcuts')
+  const paths = shortcuts.custom ? shortcuts.items : DEFAULT_SHORTCUTS
+  const nav = paths.map((p) => CATALOG.find((c) => c.path === p)).filter(Boolean)
   const surveys = useBadges().surveys
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.get('/admin/overview').then((r) => r.data.data) })
   const { data: d } = useQuery({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/admin/dashboard').then((r) => r.data.data) })
@@ -52,13 +58,13 @@ export default function OverviewPage() {
         <Reveal i={0}>
           <nav aria-label={t('academic.overview.title')} className="flex items-center gap-2 rounded-full bg-white/10 p-1.5 backdrop-blur">
             <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
-              {NAV.map(([to, label, end]) => (
-                <li key={to}>
-                  <NavLink to={to} end={end} className={({ isActive }) => `block whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${isActive ? 'bg-sky-tint font-bold text-deep-harbor' : 'text-white/75 hover:bg-white/10 hover:text-white'}`}>{t(label)}</NavLink>
+              {[{ path: '/admin', key: 'overview', end: true }, ...nav].map(({ path, key, end }) => (
+                <li key={path}>
+                  <NavLink to={path} end={end} className={({ isActive }) => `block whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${isActive ? 'bg-sky-tint font-bold text-deep-harbor' : 'text-white/75 hover:bg-white/10 hover:text-white'}`}>{t(`admin.nav.${key}`)}</NavLink>
                 </li>
               ))}
             </ul>
-            <Link to="/admin/students?new=1" aria-label={t('dashboard.quick.student')} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></Link>
+            <button type="button" aria-label={t('dashboard.shortcuts.edit')} title={t('dashboard.shortcuts.edit')} onClick={() => setEditing(true)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></button>
           </nav>
         </Reveal>
 
@@ -166,6 +172,7 @@ export default function OverviewPage() {
           </GlassCard>
         </div>
       </section>
+      <ShortcutsDialog open={editing} onClose={() => setEditing(false)} paths={paths} custom={shortcuts.custom} onChange={(items) => shortcuts.save({ items })} onReset={shortcuts.reset} />
     </PageEnter>
   )
 }

@@ -45,4 +45,15 @@ class LayoutTest extends AcademicTestCase
         $this->putJson('/api/auth/layout', ['surface' => 'admin_nav', 'order' => ['groups' => ['money', 'people'], 'items' => ['/admin/finance']]])->assertOk();
         $this->postJson('/api/auth/logout')->assertOk();
     }
+
+    public function test_the_principal_keeps_his_own_shortcuts_and_can_go_back_to_the_default(): void
+    {
+        Sanctum::actingAs(User::factory()->role(Role::Admin)->create());
+        $this->putJson('/api/auth/layout', ['surface' => 'admin_shortcuts', 'order' => ['items' => ['/admin/finance', '/admin/students', '/admin/finance']]])->assertOk();
+        $this->getJson('/api/auth/me')->assertJsonPath('data.layout.admin_shortcuts.items', ['/admin/finance', '/admin/students']); // in his order, no repeats
+        $this->putJson('/api/auth/layout', ['surface' => 'admin_shortcuts', 'order' => ['items' => []]])->assertOk();
+        $this->getJson('/api/auth/me')->assertJsonPath('data.layout.admin_shortcuts.items', []); // an empty list is his choice: no shortcuts
+        $this->putJson('/api/auth/layout', ['surface' => 'admin_shortcuts', 'order' => null])->assertOk();
+        $this->assertArrayNotHasKey('admin_shortcuts', (array) $this->getJson('/api/auth/me')->json('data.layout')); // back to the default
+    }
 }

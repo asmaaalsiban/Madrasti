@@ -115,6 +115,21 @@
       "tabLevels": "Levels",
       "tabMarks": "Marks",
       "avg": "Avg"
+    },
+    "shortcuts": {
+      "edit": "Add or remove shortcuts",
+      "title": "Your shortcuts",
+      "hint": "These are the pages in the bar at the top of your overview. They are saved on your account, so they stay for you on any device.",
+      "yours": "In your bar",
+      "none": "No shortcuts yet. Add some below.",
+      "add": "Add a shortcut",
+      "addOne": "Add",
+      "remove": "Remove",
+      "up": "Move earlier",
+      "down": "Move later",
+      "full": "You can have up to {{max}} shortcuts. Remove one to add another.",
+      "reset": "Back to the default",
+      "done": "Done"
     }
   },
   "errors": {

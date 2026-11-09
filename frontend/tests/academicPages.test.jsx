@@ -7,6 +7,8 @@ import { api } from '../src/api/client'
 import OverviewPage from '../src/features/Academic/pages/OverviewPage'
 import SubjectsPage from '../src/features/Academic/pages/SubjectsPage'
 
+const authState = vi.hoisted(() => ({ user: { id: 1, layout: {} }, updateUser: undefined }))
+vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: authState.user, updateUser: authState.updateUser ?? (() => {}) }) }))
 vi.mock('../src/api/client', () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
 }))
