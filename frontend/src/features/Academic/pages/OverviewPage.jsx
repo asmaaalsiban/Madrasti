@@ -45,7 +45,7 @@ export default function OverviewPage() {
 
   return (
     <PageEnter>
-      <section className="dash-stage space-y-4">
+      <section className="dash-stage min-h-[calc(100vh-7rem)] space-y-4">
         <div className="lp-aurora" aria-hidden><i /><i /><i /></div>
 
         {/* The pill menu: the sections the principal opens most. */}
@@ -58,7 +58,7 @@ export default function OverviewPage() {
                 </li>
               ))}
             </ul>
-            <Link to="/admin/students" aria-label={t('dashboard.quick.student')} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></Link>
+            <Link to="/admin/students?new=1" aria-label={t('dashboard.quick.student')} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></Link>
           </nav>
         </Reveal>
 
