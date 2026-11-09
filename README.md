@@ -851,3 +851,8 @@ The overview (`/admin`) is rebuilt after the reference video, in the school's ow
 ## Dashboard: the principal's own shortcuts
 - The pill menu at the top of the overview is **the principal's own**: the overview is always first, and the **"+"** opens *Your shortcuts*, where he **adds** any page of the side menu (grouped like the menu), **removes** one, **moves** one earlier or later (up to 12), or goes **back to the default** (students, timetable, finance, staff, attendance). Different principals keep different bars.
 - Saved on the account (`PUT /api/auth/layout`, surface `admin_shortcuts`, `items` = the menu paths in order), so it stays after a reload and on any device. No migration.
+
+## Bottom tab bar (phones and tablets)
+- A bar fixed to the bottom of the screen with **four destinations of equal weight** (Home, Inbox, News, Feed), an icon above a short label: the current one tinted in the school's colour and the others muted, and **count badges** on Inbox (unread chat) and News (unread announcements). It is a `<nav>` of links; the current page has `aria-current="page"`. Switching is instant (no slide or push).
+- Shown **only on phones and tablets**: a window narrower than 1024px, or a touch screen with no mouse (so an iPad in landscape too). Never on a computer (`.tabbar` in `index.css`).
+- The bar is padded by `env(safe-area-inset-bottom)` so the icons clear the iPhone home indicator (the page already has `viewport-fit=cover`), and the page gets room under it. In every role's layout (`BottomTabBar.jsx`); a destination the principal switched off for a staff member is not shown.

@@ -7,6 +7,7 @@ import { useAuth } from '../features/Auth/AuthProvider'
 import { isHidden } from '../features/StaffAccess/staffFeatures'
 import { useSchool } from '../tenant/useSchool'
 import SchoolLogo from '../components/shared/SchoolLogo'
+import BottomTabBar from '../components/shared/BottomTabBar'
 
 // Mobile-first shell shared by all four roles.
 export default function DashboardLayout() {
@@ -21,7 +22,7 @@ export default function DashboardLayout() {
   const detail = user.role === 'student' ? user.classroom : isHead ? null : subject
 
   return (
-    <div className="min-h-screen">
+    <div className="has-tabbar min-h-screen">
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-fog bg-snow px-4 py-2.5 print:hidden">
         <Link to={`/${user.role}`} className="flex min-w-0 items-center gap-2">
           <SchoolLogo url={school?.logo_url} className="h-9 w-9" />
@@ -36,6 +37,7 @@ export default function DashboardLayout() {
         <BackButton />
         {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Outlet />}
       </main>
+      <BottomTabBar />
     </div>
   )
 }
