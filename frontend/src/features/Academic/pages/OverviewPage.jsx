@@ -1,140 +1,171 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import useBadges from '../../Badges/useBadges'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion, useReducedMotion } from 'framer-motion'
-import { BookOpen, CalendarRange, DoorOpen, GraduationCap, Layers, Wallet } from 'lucide-react'
-import StatsCard from '../../../components/shared/StatsCard'
-import { Reveal } from '../../../components/shared/motion'
+import { BookOpen, CalendarRange, DoorOpen, GraduationCap, Layers, Megaphone, Plus, Upload, UserCheck, Users, Wallet } from 'lucide-react'
 import { api } from '../../../api/client'
-import { Bars, Columns, LineChart, Ring } from '../components/charts'
-import { levelColor } from '../components/levelColor'
+import useBadges from '../../Badges/useBadges'
+import { PageEnter, PillTabs, Reveal, CountUp } from '../../../components/shared/motion'
+import { BlurSwap, CardTitle, GlassCard, PillColumns, SegmentGauge, StatPill } from '../components/glass'
 
-const CARDS = [
-  ['academic_years', 'admin.nav.academicYears', CalendarRange],
-  ['grade_levels', 'admin.nav.gradeLevels', Layers],
-  ['classrooms', 'admin.nav.classrooms', DoorOpen],
-  ['subjects', 'admin.nav.subjects', BookOpen],
-]
-
-// A panel lifts a little on hover, like the stat cards.
-const Panel = ({ title, children, className = '', i = 0 }) => {
-  const still = useReducedMotion()
-  return (
-    <Reveal i={i + 4}>
-      <motion.section whileHover={still ? undefined : { y: -3 }} className={`h-full space-y-3 rounded-2xl border bg-white p-5 shadow-sm border-sky-tint/60 hover:shadow-md ${className}`}>
-        <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
-        {children}
-      </motion.section>
-    </Reveal>
-  )
-}
+const NAV = [['/admin', 'admin.nav.overview', true], ['/admin/students', 'admin.nav.students'], ['/admin/timetable', 'admin.nav.timetable'], ['/admin/finance', 'admin.nav.finance'], ['/admin/announcements', 'admin.nav.announcements'], ['/admin/staff', 'admin.nav.staff']]
+const COUNTS = [['academic_years', 'admin.nav.academicYears', CalendarRange], ['grade_levels', 'admin.nav.gradeLevels', Layers], ['classrooms', 'admin.nav.classrooms', DoorOpen], ['subjects', 'admin.nav.subjects', BookOpen]]
 
 const rate = (c) => {
   const total = c.present + c.late + c.absent + c.excused
   return total ? ((c.present + c.late) / total) * 100 : null
 }
 
-// The principal's home: today at a glance, the last two weeks, the money, and what waits for a decision.
+// The principal's home, on a dark glass stage: a pill menu, the numbers that matter as pills, a gauge for today's attendance,
+// an analytics card with tabs, and what waits for a decision. Everything blurs in, counts up and grows (still for reduced motion).
 export default function OverviewPage() {
   const { t, i18n } = useTranslation()
-  const pending = { data: useBadges().surveys }
+  const [tab, setTab] = useState('money')
+  const surveys = useBadges().surveys
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.get('/admin/overview').then((r) => r.data.data) })
   const { data: d } = useQuery({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/admin/dashboard').then((r) => r.data.data) })
+  const ready = Boolean(d)
   const name = (o) => o[`name_${i18n.language}`] || o.name_ar
   const money = (v) => Number(v).toLocaleString(i18n.language, { maximumFractionDigits: 0 })
   const kids = d ? rate(d.students_today) : null
   const staff = d ? rate(d.staff_today) : null
-  const waiting = d ? [['/admin/procurement', 'dashboard.waiting.procurement', d.waiting.procurement], ['/admin/privacy-requests', 'dashboard.waiting.privacy', d.waiting.privacy]].filter((w) => w[2] > 0) : []
   const fin = d?.finance
-  // Change of the attendance rate: the last day with records against the one before it (only when both exist).
-  const trend = d?.attendance_trend ?? []
-  const attendanceChange = trend.length >= 2 ? Math.round((trend[trend.length - 1].rate - trend[trend.length - 2].rate) * 10) / 10 : null
   const paidPct = fin && fin.billed > 0 ? (fin.collected / fin.billed) * 100 : 0
+  const waiting = d ? [['/admin/procurement', 'dashboard.waiting.procurement', d.waiting.procurement], ['/admin/privacy-requests', 'dashboard.waiting.privacy', d.waiting.privacy]].filter((w) => w[2] > 0) : []
+
+  // The analytics card: one chart per tab.
+  const charts = d && {
+    money: { label: t('dashboard.money.monthly'), items: fin.monthly.map((m) => ({ label: m.month.slice(5), value: m.amount })), format: money },
+    attendance: { label: t('dashboard.trend'), items: d.attendance_trend.map((p) => ({ label: p.date.slice(8), value: p.rate })), format: (v) => `${v}%`, maxValue: 100 },
+    levels: { label: t('dashboard.byLevel'), items: d.students_by_level.map((l) => ({ label: name(l), value: l.count })), format: (v) => v },
+    marks: { label: t('dashboard.marks'), items: d.marks_by_subject.map((s) => ({ label: name(s), value: s.average })), format: (v) => `${v}%`, maxValue: 100 },
+  }
+  const chart = charts?.[tab]
+  const none = { money: 'dashboard.noData', attendance: 'dashboard.notTaken', levels: 'dashboard.noData', marks: 'dashboard.noMarks' }[tab]
+
   return (
-    <section className="space-y-4">
-      <div className="dash-band dash-in space-y-4">
-        <h1 className="text-2xl font-extrabold !text-white">{t('academic.overview.title')}</h1>
-        {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-2xl bg-white/90 p-3 font-bold text-deep-harbor">{t('surveys.waiting', { count: pending.data })}</Link>}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-          {CARDS.map(([key, label, Icon], n) => (
-            <Reveal key={key} i={n + 1}>
-              <StatsCard title={t(label)} value={data?.[key] ?? '–'} icon={Icon} className="!p-4" />
-            </Reveal>
-          ))}
-          <Reveal i={5}><StatsCard title={t('dashboard.students.title')} value={kids === null ? '–' : Math.round(kids)} suffix={kids === null ? '' : '%'} change={kids === null ? null : attendanceChange} icon={GraduationCap} className="!p-4" /></Reveal>
-          <Reveal i={6}><StatsCard title={t('dashboard.money.collectedOf')} value={fin ? Math.round(paidPct) : '–'} suffix={fin ? '%' : ''} icon={Wallet} className="!p-4" /></Reveal>
-        </div>
-      </div>
+    <PageEnter>
+      <section className="dash-stage space-y-4">
+        <div className="lp-aurora" aria-hidden><i /><i /><i /></div>
 
-      {!d ? <p className="text-slate-500">{t('common.loading')}</p> : (
-        <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Panel i={1} title={t('dashboard.students.title')}>
-              <div className="flex items-center gap-4">
-                {kids === null ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <Ring percent={kids} label={t('dashboard.students.title')} color={levelColor(kids)} />}
-                <ul className="space-y-1 text-sm">
-                  <li>{t('dashboard.total', { count: d.people.students })}</li>
-                  {['present', 'late', 'absent', 'excused'].map((k) => <li key={k} className="text-slate-600">{t(k === 'excused' ? 'dashboard.excused' : `attendance.${k}`)}: <b dir="ltr">{d.students_today[k]}</b></li>)}
-                </ul>
-              </div>
-            </Panel>
-            <Panel i={2} title={t('dashboard.staff.title')}>
-              <div className="flex items-center gap-4">
-                {staff === null ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <Ring percent={staff} label={t('dashboard.staff.title')} color={levelColor(staff)} />}
-                <ul className="space-y-1 text-sm">
-                  <li>{t('dashboard.teachers', { count: d.people.teachers })}</li>
-                  {['present', 'late', 'absent'].map((k) => <li key={k} className="text-slate-600">{t(`staffAttendance.status.${k}`)}: <b dir="ltr">{d.staff_today[k]}</b></li>)}
-                </ul>
-              </div>
-            </Panel>
-            <Panel i={3} title={t('dashboard.waiting.title')}>
-              {waiting.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.waiting.none')}</p> : (
-                <ul className="space-y-2">
-                  {waiting.map(([to, label, count]) => <li key={to}><Link to={to} className="flex items-center justify-between rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"><span>{t(label)}</span><b dir="ltr">{count}</b></Link></li>)}
-                </ul>
-              )}
-            </Panel>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Panel i={4} title={t('dashboard.trend')}>
-              {d.attendance_trend.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.notTaken')}</p> : <LineChart label={t('dashboard.trend')} points={d.attendance_trend.map((p) => ({ label: p.date, value: p.rate }))} />}
-            </Panel>
-            <Panel i={5} title={t('dashboard.money.title')}>
-              <div className="flex flex-wrap items-center gap-4">
-                <Ring percent={paidPct} label={t('dashboard.money.collectedOf')} color={levelColor(paidPct)} />
-                <ul className="space-y-1 text-sm">
-                  <li>{t('dashboard.money.billed')}: <b dir="ltr">{money(fin.billed)} {fin.currency}</b></li>
-                  <li>{t('dashboard.money.collected')}: <b dir="ltr">{money(fin.collected)} {fin.currency}</b></li>
-                  <li className={fin.overdue > 0 ? 'text-red-700' : 'text-slate-600'}>{t('dashboard.money.overdue')}: <b dir="ltr">{money(fin.overdue)} {fin.currency}</b></li>
-                </ul>
-              </div>
-              <Columns label={t('dashboard.money.monthly')} items={fin.monthly.map((m) => ({ label: m.month.slice(5), value: m.amount }))} format={money} />
-            </Panel>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            <Panel i={6} title={t('dashboard.byLevel')}>
-              {d.students_by_level.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.noData')}</p> : <Bars label={t('dashboard.byLevel')} items={d.students_by_level.map((l) => ({ label: name(l), value: l.count }))} />}
-            </Panel>
-            <Panel i={7} title={t('dashboard.marks')}>
-              {d.marks_by_subject.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.noMarks')}</p> : <Bars label={t('dashboard.marks')} suffix="%" items={d.marks_by_subject.map((s) => ({ label: name(s), value: s.average, max: 100, color: levelColor(s.average) }))} />}
-            </Panel>
-            <Panel i={8} title={t('dashboard.absences.title')}>
-              {d.frequent_absences.length === 0 ? <p className="text-sm text-slate-500">{t('dashboard.absences.none')}</p> : (
-                <ul className="space-y-2 text-sm">
-                  {d.frequent_absences.map((s) => <li key={s.id} className="flex justify-between rounded bg-red-50 px-3 py-2 text-red-800"><bdi>{name(s)}</bdi><b>{t('dashboard.absences.days', { count: s.days })}</b></li>)}
-                </ul>
-              )}
-            </Panel>
-          </div>
-
-          <nav aria-label={t('dashboard.quick.title')} className="flex flex-wrap gap-2">
-            {[['/admin/students', 'dashboard.quick.student'], ['/admin/announcements', 'dashboard.quick.announce'], ['/admin/import', 'dashboard.quick.import']].map(([to, label]) => <Link key={to} to={to} className="rounded-full border border-brand px-4 py-1.5 text-sm text-brand hover:bg-blue-50">{t(label)}</Link>)}
+        {/* The pill menu: the sections the principal opens most. */}
+        <Reveal i={0}>
+          <nav aria-label={t('academic.overview.title')} className="flex items-center gap-2 rounded-full bg-white/10 p-1.5 backdrop-blur">
+            <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+              {NAV.map(([to, label, end]) => (
+                <li key={to}>
+                  <NavLink to={to} end={end} className={({ isActive }) => `block whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${isActive ? 'bg-sky-tint font-bold text-deep-harbor' : 'text-white/75 hover:bg-white/10 hover:text-white'}`}>{t(label)}</NavLink>
+                </li>
+              ))}
+            </ul>
+            <Link to="/admin/students" aria-label={t('dashboard.quick.student')} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></Link>
           </nav>
-        </>
-      )}
-    </section>
+        </Reveal>
+
+        {/* The title and the pills with the numbers that matter. */}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <Reveal i={1}>
+            <h1 className="text-3xl font-extrabold !text-white">{t('academic.overview.title')}</h1>
+            <p className="mt-1 text-sm text-white/60">{t('dashboard.glass.subtitle')}</p>
+          </Reveal>
+          <div className="flex flex-wrap gap-2">
+            <StatPill i={2} icon={GraduationCap} value={kids === null ? '–' : Math.round(kids)} suffix="%" label={t('dashboard.students.title')} />
+            <StatPill i={3} icon={Wallet} value={fin ? Math.round(paidPct) : '–'} suffix="%" label={t('dashboard.money.collectedOf')} />
+            <StatPill i={4} icon={Users} value={d ? d.people.students : '–'} label={t('dashboard.glass.students')} />
+          </div>
+        </div>
+
+        {surveys > 0 && <Link to="/admin/my-surveys" className="block rounded-2xl bg-white/90 p-3 font-bold text-deep-harbor">{t('surveys.waiting', { count: surveys })}</Link>}
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {/* At a glance (tall, like the spotlight card). */}
+          <GlassCard i={5} ready={ready} className="lg:row-span-2">
+            <CardTitle>{t('dashboard.glass.glance')}</CardTitle>
+            <div className="mb-4 flex items-center gap-3">
+              <span aria-hidden className="grid h-14 w-14 place-items-center rounded-2xl bg-sky-tint text-deep-harbor"><UserCheck size={26} /></span>
+              <div><p className="text-sm text-white/60">{t('dashboard.glass.teachersLabel')}</p><p className="text-lg font-bold text-white">{t('dashboard.teachers', { count: d?.people.teachers ?? 0 })}</p></div>
+            </div>
+            {d && (
+              <ul className="divide-y divide-white/10 text-sm">
+                <li className="flex justify-between py-2"><span className="text-white/60">{t('dashboard.total', { count: d.people.students })}</span></li>
+                {['present', 'late', 'absent', 'excused'].map((k) => <li key={k} className="flex justify-between py-2"><span className="text-white/60">{t(k === 'excused' ? 'dashboard.excused' : `attendance.${k}`)}</span><b dir="ltr"><CountUp value={d.students_today[k]} /></b></li>)}
+                {['present', 'late', 'absent'].map((k) => <li key={`s${k}`} className="flex justify-between py-2"><span className="text-white/60">{t('dashboard.glass.staffLine', { status: t(`staffAttendance.status.${k}`) })}</span><b dir="ltr"><CountUp value={d.staff_today[k]} /></b></li>)}
+              </ul>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {COUNTS.map(([key, label, Icon]) => (
+                <div key={key} className="rounded-2xl bg-white/8 p-3">
+                  <Icon size={16} aria-hidden className="text-sky-100" />
+                  <p className="mt-1 text-xl font-bold text-white" dir="ltr"><CountUp value={data?.[key] ?? '–'} /></p>
+                  <p className="text-[11px] text-white/60">{t(label)}</p>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+
+          <div className="grid gap-4 lg:row-span-2 [grid-template-rows:auto_1fr]">
+            {/* Today's attendance as a segmented gauge. */}
+            <GlassCard i={6} ready={ready}>
+              <CardTitle>{t('dashboard.students.title')}</CardTitle>
+              {kids === null ? <p className="py-8 text-center text-sm text-white/60">{t('dashboard.notTaken')}</p> : <SegmentGauge percent={kids} label={t('dashboard.students.title')} caption={t('dashboard.glass.ofStudents')} />}
+              {staff !== null && <p className="mt-3 text-center text-xs text-white/60">{t('dashboard.staff.title')}: <b dir="ltr" className="text-white">{Math.round(staff)}%</b></p>}
+            </GlassCard>
+            {/* The dark card: quick actions. */}
+            <GlassCard i={7} ready dark>
+              <p className="text-2xl font-extrabold leading-tight text-white">{t('dashboard.quick.title')}</p>
+              {waiting.length > 0 && <p className="mt-1 text-xs text-white/50">{t('dashboard.glass.waitingCount', { count: waiting.reduce((s, w) => s + w[2], 0) })}</p>}
+              <ul className="mt-4 space-y-2">
+                {[['/admin/students', 'dashboard.quick.student', Users], ['/admin/announcements', 'dashboard.quick.announce', Megaphone], ['/admin/import', 'dashboard.quick.import', Upload]].map(([to, label, Icon]) => (
+                  <li key={to}>
+                    <Link to={to} className="group flex items-center gap-3 rounded-full bg-white/10 p-1.5 pe-4 text-sm text-white transition hover:bg-white hover:text-deep-harbor">
+                      <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 group-hover:bg-sky-tint"><Icon size={16} /></span>{t(label)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+          </div>
+
+          {/* Analytics with tabs. */}
+          <GlassCard i={8} ready={ready} className="lg:row-span-2">
+            <CardTitle>{t('dashboard.glass.analytics')}</CardTitle>
+            <PillTabs layoutId="overview-analytics" label={t('dashboard.glass.analytics')} value={tab} onChange={setTab} tabs={[['money', t('dashboard.money.title')], ['attendance', t('dashboard.glass.tabAttendance')], ['levels', t('dashboard.glass.tabLevels')], ['marks', t('dashboard.glass.tabMarks')]]} />
+            <div className="mt-6 min-h-64">
+              {chart && (
+                <BlurSwap id={tab}>
+                  {chart.items.length === 0 ? <p className="py-16 text-center text-sm text-white/60">{t(none)}</p> : <PillColumns label={chart.label} items={chart.items} format={chart.format} maxValue={chart.maxValue} avgLabel={t('dashboard.glass.avg')} />}
+                </BlurSwap>
+              )}
+            </div>
+            {fin && (
+              <ul className="mt-4 grid grid-cols-3 gap-2 text-center">
+                {[['dashboard.money.billed', fin.billed, ''], ['dashboard.money.collected', fin.collected, ''], ['dashboard.money.overdue', fin.overdue, fin.overdue > 0 ? 'text-red-200' : '']].map(([label, value, tone]) => (
+                  <li key={label} className="rounded-2xl bg-white/8 p-2"><p className="text-[11px] text-white/60">{t(label)}</p><b className={`text-sm ${tone || 'text-white'}`} dir="ltr">{money(value)} {fin.currency}</b></li>
+                ))}
+              </ul>
+            )}
+          </GlassCard>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <GlassCard i={9} ready={ready}>
+            <CardTitle>{t('dashboard.waiting.title')}</CardTitle>
+            {waiting.length === 0 ? <p className="text-sm text-white/60">{t('dashboard.waiting.none')}</p> : (
+              <ul className="space-y-2">
+                {waiting.map(([to, label, count]) => <li key={to}><Link to={to} className="flex items-center justify-between rounded-2xl bg-amber-300/20 px-3 py-2 text-sm text-amber-100 transition hover:bg-amber-300/30"><span>{t(label)}</span><b dir="ltr">{count}</b></Link></li>)}
+              </ul>
+            )}
+          </GlassCard>
+          <GlassCard i={10} ready={ready} className="lg:col-span-2">
+            <CardTitle>{t('dashboard.absences.title')}</CardTitle>
+            {d && (d.frequent_absences.length === 0 ? <p className="text-sm text-white/60">{t('dashboard.absences.none')}</p> : (
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {d.frequent_absences.map((s) => <li key={s.id} className="flex justify-between rounded-2xl bg-red-300/15 px-3 py-2 text-sm text-red-100"><bdi>{name(s)}</bdi><b>{t('dashboard.absences.days', { count: s.days })}</b></li>)}
+              </ul>
+            ))}
+          </GlassCard>
+        </div>
+      </section>
+    </PageEnter>
   )
 }
