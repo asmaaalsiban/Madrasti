@@ -118,7 +118,7 @@ export default function AdminLayout() {
             <UserMenu detail={t('roles.admin')} />
           </div>
         </header>
-        <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none"><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
+        <main id="main" tabIndex={-1} className={`mx-auto p-4 outline-none ${pathname === '/admin' ? 'max-w-none' : 'max-w-5xl'}`}><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import DataTable from '../../../components/shared/DataTable'
@@ -49,6 +50,16 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const [status, setStatus] = useState('')
 
   const { data, isLoading } = useList({ search: search || undefined, page, ...filters })
+
+  // `?new=1` (the "+" button of the overview) opens the add form at once.
+  const [searchParams, setSearchParams] = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setErrors({}); setFormError(''); setForm({ ...empty }); setEditing({})
+      const next = new URLSearchParams(searchParams); next.delete('new'); setSearchParams(next, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const openForm = (row) => {
     setErrors({})
