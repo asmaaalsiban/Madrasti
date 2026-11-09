@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Bus, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { api } from '../../api/client'
@@ -331,7 +332,10 @@ export default function TransportPage() {
   const { data } = useQuery({ queryKey: ['transport', 'overview'], queryFn: async () => (await api.get('/transport')).data })
   return (
     <section className="space-y-4">
-      <h1 className="text-xl font-bold">{t('transport.title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">{t('transport.title')}</h1>
+        <Link to="/admin/transport/boarding" className="rounded border px-4 py-1.5 text-sm text-brand">{t('transport.boardingReport')}</Link>
+      </div>
       {!data ? <p className="text-slate-500">{t('common.loading')}</p> : (
         <>
           <p className="text-sm text-slate-600">{t('transport.summary', { buses: data.buses.length, rounds: data.rounds.length, riders: data.riders })}</p>

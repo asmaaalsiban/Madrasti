@@ -110,6 +110,7 @@ import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
 import TasksPage from '../features/Tasks/TasksPage'
 import TransportPage from '../features/Transport/TransportPage'
 import MyTransportPage from '../features/Transport/MyTransportPage'
+import BoardingReportPage from '../features/Transport/BoardingReportPage'
 import MyBusPage from '../features/Transport/MyBusPage'
 import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
 import ChatPage from '../features/Chat/pages/ChatPage'
@@ -276,6 +277,7 @@ export const routes = [
               { path: '/admin/finance/money', element: <MoneyAccountsPage base="/admin" /> },
               { path: '/admin/question-bank', element: <QuestionBankPage /> },
               { path: '/admin/warnings', element: <WarningsPage /> },
+              { path: '/admin/transport/boarding', element: <BoardingReportPage /> },
               { path: '/admin/finance/journal', element: <JournalPage /> },
               { path: '/admin/finance/tax', element: <TaxPage /> },
               { path: '/admin/finance/budgets', element: <BudgetsPage /> },

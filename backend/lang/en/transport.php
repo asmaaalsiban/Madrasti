@@ -11,4 +11,6 @@ return [
     'wrong_period_morning' => 'The way to school needs a morning round.',
     'wrong_period_evening' => 'The way home needs an evening round.',
     'not_eligible' => 'Choose an active member of the school staff with the right position (a driver for the driver; a teacher or bus supervisor for the escort).',
+    'not_on_this_round' => 'This student is not on this bus in this round.',
+    'only_today' => 'You can tick only today. Ask the school admin to correct another day.',
 ];
