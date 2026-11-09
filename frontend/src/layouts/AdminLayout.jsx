@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { PageEnter } from '../components/shared/motion'
 import { TriangleAlert, ChevronDown, ArrowLeftRight, LayoutGrid, Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
@@ -117,7 +118,7 @@ export default function AdminLayout() {
             <UserMenu detail={t('roles.admin')} />
           </div>
         </header>
-        <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none"><BackButton /><Outlet /></main>
+        <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none"><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
       </div>
     </div>
   )
