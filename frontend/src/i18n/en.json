@@ -2232,7 +2232,17 @@
       }
     },
     "boardingReport": "Who boarded",
-    "escortPerRound": "Escort for each round"
+    "escortPerRound": "Escort for each round",
+    "substitute": {
+      "button": "Stand-in",
+      "title": "Stand-in escort: bus {{bus}}, {{round}}",
+      "hint": "The usual escort is absent on this day: the stand-in sees this round in My bus and ticks it, and the usual escort does not. The usual escort is not changed.",
+      "date": "Day",
+      "escort": "Stand-in escort",
+      "choose": "Choose an escort",
+      "remove": "Remove",
+      "line": "{{date}}: stand-in {{name}}"
+    }
   },
   "tasks": {
     "title": "Tasks",

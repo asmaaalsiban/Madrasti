@@ -637,6 +637,12 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - The family's ride card and the boarding report show the escort of that round.
 - API: `round_escorts` (`{round id: user id|null}`) on `POST/PUT /api/transport/buses`; a round with no escort sent keeps its current one; `escort_id` on the bus is no longer used.
 - **Migration** (run `php artisan tenants:migrate`): `bus_round.escort_id`; the old bus-wide escort is copied to each of the bus's rounds.
+
+## Transport: a stand-in escort for a day
+- When the escort of a round is absent, the principal presses **Stand-in** on that round of the bus card, picks the day and the stand-in. For that day only, the stand-in sees the round in **My bus** and can tick it, and the usual escort cannot; the usual escort is not changed. Removing the stand-in brings her back. The boarding report and the family's ride card show who escorts that day.
+- API (admin): `PUT /api/transport/substitutes` `{date, bus_id, round_id, escort_id|null}` (today or later, a round the bus serves, an eligible person who is not the driver); `GET /api/transport` returns the coming `substitutes`.
+- The stand-in is not notified yet; tell her directly.
+- **Migration** (run `php artisan tenants:migrate`): `bus_round_substitutes`.
 ## Accounting: year-end carry-over (phase 1)
 `Finance > Year-end carry-over` (`/teacher/finance/year-end` for the accountant, `/admin/finance/year-end` read-only for the principal). Pick the year being closed, the new year, the first due date and the number of installments; the screen lists every student who still owes (with the total, and the overdue part) and the accountant carries all or the chosen ones.
 - The old year is closed with a non-cash **carried forward** entry (a payment with method `carry_forward`; never counted as collected, never chosen by hand, not a receipt) and a new fee of kind **carried** opens in the new year with the same amount, split in installments. The student's statement runs on across years and shows "carried to the next year" apart from "paid".
