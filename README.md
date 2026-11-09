@@ -826,3 +826,7 @@ The site keeps its default look. The principal opens **School look** (`/admin/br
 - **Nothing happens without a rule.** A school that wants no automatic warning simply adds none. Rules can be switched off, edited or deleted (the warnings they raised stay).
 - Every morning at 07:45 the system runs the rules of every school (`php artisan tenants:run warnings:evaluate`); the admin can also press **Run the rules now**. A rule raises **one** warning per person for the period: it is not repeated while the same days are still in the window, and never again after the admin withdrew one.
 - Needs the Laravel scheduler running (`php artisan schedule:work`, or the cron entry in production) like the other morning reminders. After pulling: `php artisan tenants:migrate`.
+
+## Dashboard: glass stat cards
+- The principal's overview (`/admin`) now opens with a row of six **glass stat cards** (years, grades, sections, subjects, today's student attendance with its change against the previous day, and the collection rate) built with the shared `components/shared/StatsCard.jsx` (title, value, change %, icon). Cards and panels lift a little on hover with `framer-motion` (off for people who prefer reduced motion). The change shows only when there is something to compare. Colours are unchanged; the card uses the existing `.glass-card` class (translucent, blurred).
+- New dependency: `framer-motion` (run `npm install` in `frontend` after pulling).

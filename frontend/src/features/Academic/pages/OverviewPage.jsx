@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import useBadges from '../../Badges/useBadges'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BookOpen, CalendarRange, DoorOpen, Layers } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { BookOpen, CalendarRange, DoorOpen, GraduationCap, Layers, Wallet } from 'lucide-react'
+import StatsCard from '../../../components/shared/StatsCard'
 import { api } from '../../../api/client'
 import { Bars, Columns, LineChart, Ring } from '../components/charts'
 import { levelColor } from '../components/levelColor'
@@ -14,12 +16,16 @@ const CARDS = [
   ['subjects', 'admin.nav.subjects', BookOpen],
 ]
 
-const Panel = ({ title, children, className = '', i = 0 }) => (
-  <section style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-lg border bg-white p-4 shadow-sm border-sky-tint/60 ${className}`}>
-    <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
-    {children}
-  </section>
-)
+// A panel lifts a little on hover, like the stat cards.
+const Panel = ({ title, children, className = '', i = 0 }) => {
+  const still = useReducedMotion()
+  return (
+    <motion.section whileHover={still ? undefined : { y: -3 }} style={{ '--i': i + 4 }} className={`dash-in space-y-3 rounded-2xl border bg-white p-5 shadow-sm border-sky-tint/60 hover:shadow-md ${className}`}>
+      <h2 className="text-sm font-bold text-deep-harbor">{title}</h2>
+      {children}
+    </motion.section>
+  )
+}
 
 const rate = (c) => {
   const total = c.present + c.late + c.absent + c.excused
@@ -38,20 +44,23 @@ export default function OverviewPage() {
   const staff = d ? rate(d.staff_today) : null
   const waiting = d ? [['/admin/procurement', 'dashboard.waiting.procurement', d.waiting.procurement], ['/admin/privacy-requests', 'dashboard.waiting.privacy', d.waiting.privacy]].filter((w) => w[2] > 0) : []
   const fin = d?.finance
+  // Change of the attendance rate: the last day with records against the one before it (only when both exist).
+  const trend = d?.attendance_trend ?? []
+  const attendanceChange = trend.length >= 2 ? Math.round((trend[trend.length - 1].rate - trend[trend.length - 2].rate) * 10) / 10 : null
   const paidPct = fin && fin.billed > 0 ? (fin.collected / fin.billed) * 100 : 0
   return (
     <section className="space-y-4">
       <div className="dash-band dash-in space-y-4">
         <h1 className="text-2xl font-extrabold !text-white">{t('academic.overview.title')}</h1>
         {pending.data > 0 && <Link to="/admin/my-surveys" className="block rounded-2xl bg-white/90 p-3 font-bold text-deep-harbor">{t('surveys.waiting', { count: pending.data })}</Link>}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
           {CARDS.map(([key, label, Icon], n) => (
-            <div key={key} style={{ '--i': n + 1 }} className="dash-in dash-stat">
-              <span aria-hidden className="grid h-9 w-9 place-items-center rounded-xl bg-white/12 text-sky-100"><Icon size={18} /></span>
-              <p className="mt-3 text-3xl font-extrabold leading-none text-white">{data?.[key] ?? '–'}</p>
-              <p className="mt-1 text-sm text-sky-100/90">{t(label)}</p>
+            <div key={key} style={{ '--i': n + 1 }} className="dash-in">
+              <StatsCard title={t(label)} value={data?.[key] ?? '–'} icon={Icon} className="!p-4" />
             </div>
           ))}
+          <div style={{ '--i': 5 }} className="dash-in"><StatsCard title={t('dashboard.students.title')} value={kids === null ? '–' : `${Math.round(kids)}%`} change={kids === null ? null : attendanceChange} icon={GraduationCap} className="!p-4" /></div>
+          <div style={{ '--i': 6 }} className="dash-in"><StatsCard title={t('dashboard.money.collectedOf')} value={fin ? `${Math.round(paidPct)}%` : '–'} icon={Wallet} className="!p-4" /></div>
         </div>
       </div>
 
