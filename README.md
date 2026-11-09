@@ -846,4 +846,8 @@ The overview (`/admin`) is rebuilt after the reference video, in the school's ow
 - **Motion**: each card first shows as empty glass with a shimmer, then its content sharpens out of a blur; numbers count up; the gauge fills; the columns grow one after another; changing tab cross-fades through a blur; the active pill slides; cards lift on hover; a change of page blurs in. All of it stands still for people who asked for reduced motion.
 - Code: `features/Academic/components/glass.jsx` (GlassCard, SegmentGauge, PillColumns, StatPill, BlurSwap) and `components/shared/motion.jsx` (Reveal, CountUp, PillTabs, PageEnter, useGrown). Frontend only.
 
-- The overview now **fills the whole page** (the other admin pages keep their readable width), and the **"+"** in its pill menu opens the *add student* form straight away: any list page built on `ResourcePage` opens its add form when the address has `?new=1`.
+- The overview now **fills the whole page** (the other admin pages keep their readable width). Any list page built on `ResourcePage` opens its add form when the address has `?new=1`.
+
+## Dashboard: the principal's own shortcuts
+- The pill menu at the top of the overview is **the principal's own**: the overview is always first, and the **"+"** opens *Your shortcuts*, where he **adds** any page of the side menu (grouped like the menu), **removes** one, **moves** one earlier or later (up to 12), or goes **back to the default** (students, timetable, finance, staff, attendance). Different principals keep different bars.
+- Saved on the account (`PUT /api/auth/layout`, surface `admin_shortcuts`, `items` = the menu paths in order), so it stays after a reload and on any device. No migration.

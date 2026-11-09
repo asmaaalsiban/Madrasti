@@ -11,12 +11,12 @@ use Illuminate\Http\Request;
 
 /**
  * How a person arranged their own screens: the order of the groups and of the items (menu entries, home tiles) on a surface, the size of the
- * icons (`small`, `medium`, `large`) and a colour (#rrggbb) for any icon.
+ * icons (`small`, `medium`, `large`), the shortcuts of the principal's overview (`admin_shortcuts`: `items` are the menu paths, in order) and a colour (#rrggbb) for any icon.
  * `order: null` puts a surface back to the default. Only the person themselves can change it.
  */
 class LayoutController extends Controller
 {
-    public const SURFACES = ['admin_nav', 'teacher_home', 'parent_home', 'student_home'];
+    public const SURFACES = ['admin_nav', 'admin_shortcuts', 'teacher_home', 'parent_home', 'student_home'];
 
     public function update(Request $request): JsonResponse
     {

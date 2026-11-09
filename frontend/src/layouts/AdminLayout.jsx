@@ -13,7 +13,7 @@ import { useSchool } from '../tenant/useSchool'
 import SchoolLogo from '../components/shared/SchoolLogo'
 
 // The menu in groups, each item with its icon: what the principal reaches for most is at the top.
-const GROUPS = [
+export const GROUPS = [
   { key: null, items: [['/admin', 'overview', LayoutDashboard, true]] },
   { key: 'people', items: [['/admin/students', 'students', GraduationCap], ['/admin/student-files', 'studentFiles', FolderOpen], ['/admin/renewals', 'renewals', RefreshCw], ['/admin/staff', 'staff', Briefcase], ['/admin/tasks', 'tasks', ListTodo], ['/admin/staff-access', 'staffAccess', EyeOff], ['/admin/import', 'import', FileUp]] },
   { key: 'learning', items: [['/admin/attendance', 'attendance', CircleCheck], ['/admin/attendance-report', 'attendanceReport', FileBarChart], ['/admin/grades', 'grades', ClipboardList], ['/admin/question-bank', 'questionBank', ListChecks], ['/admin/behavior', 'behavior', Smile], ['/admin/warnings', 'warnings', TriangleAlert], ['/admin/motivation', 'motivation', Award], ['/admin/surveys', 'surveys', Vote], ['/admin/signatures', 'signatures', PenLine]] },
