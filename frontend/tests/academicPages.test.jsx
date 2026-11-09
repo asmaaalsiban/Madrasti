@@ -49,8 +49,9 @@ describe('OverviewPage', () => {
   it('draws today, the money, and what waits', async () => {
     mockApi()
     renderPage(<OverviewPage />)
-    expect(await screen.findByText('Student attendance today')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument()
+    expect(await screen.findByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument()
+    expect(screen.getAllByText('Student attendance today').length).toBeGreaterThan(1) // the stat card and the panel
+    expect(screen.getAllByText('90%').length).toBeGreaterThan(0) // the stat card value
     expect(screen.getByRole('img', { name: 'Student attendance rate (last 14 days)' })).toBeInTheDocument()
     expect(screen.getByText('Purchase requests')).toBeInTheDocument()
     expect(screen.queryByText('Data privacy requests')).not.toBeInTheDocument()
