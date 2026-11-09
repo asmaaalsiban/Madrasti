@@ -101,6 +101,20 @@
       "student": "إدارة الطلاب",
       "announce": "إرسال تعميم",
       "import": "استيراد من Excel"
+    },
+    "glass": {
+      "subtitle": "اليوم في المدرسة، والمالية، وما ينتظر قرارك.",
+      "students": "الطلاب",
+      "glance": "نظرة سريعة",
+      "teachersLabel": "الكادر التعليمي",
+      "ofStudents": "من الطلاب حاضرون اليوم",
+      "staffLine": "الكادر: {{status}}",
+      "waitingCount": "{{count}} بانتظار قرارك",
+      "analytics": "التحليلات",
+      "tabAttendance": "الحضور",
+      "tabLevels": "المراحل",
+      "tabMarks": "العلامات",
+      "avg": "المتوسط"
     }
   },
   "errors": {

@@ -53,3 +53,21 @@ export function PageEnter({ children }) {
   if (still) return <>{children}</>
   return <motion.div initial={{ opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }} transition={{ duration: 0.35, ease: 'easeOut' }}>{children}</motion.div>
 }
+
+/** Pill tabs with a pill that slides from one tab to the next (`layoutId` must be unique per group). */
+export function PillTabs({ tabs, value, onChange, layoutId, label, className = '' }) {
+  const still = useReducedMotion()
+  return (
+    <div role="tablist" aria-label={label} className={`flex w-full gap-0.5 rounded-full bg-white/10 p-1 ${className}`}>
+      {tabs.map(([key, text]) => {
+        const on = key === value
+        return (
+          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => onChange(key)} className={`relative min-w-0 flex-1 truncate rounded-full px-1 py-1.5 text-[11px] transition-colors sm:text-xs ${on ? 'font-bold text-deep-harbor' : 'text-white/70 hover:text-white'}`}>
+            {on && (still ? <span className="absolute inset-0 rounded-full bg-sky-tint" /> : <motion.span layoutId={layoutId} transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-full bg-sky-tint" />)}
+            <span className="relative">{text}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}

@@ -838,3 +838,10 @@ Same feel as the reference video, same colours. Shared in `frontend/src/componen
 - **CountUp**: the numbers on the stat cards count up.
 - **Charts grow from zero** (`useGrown`): the ring fills, the columns (now rounded pills, the biggest in full colour and the others softer) and the bars grow one after another.
 - Everything stands still, showing the final state at once, for people who asked for reduced motion.
+
+## Dashboard: glass stage (principal's overview)
+The overview (`/admin`) is rebuilt after the reference video, in the school's own colours (navy, brand blue, sky tint):
+- **Stage**: a dark glass panel with the slow drifting light of the sign-in page, a **pill menu** (Overview, Students, Timetable, Finance, Announcements, Staff and a white "+"), the big title and **three stat pills** that count up.
+- **Cards** (frosted glass): *At a glance* (tall, with the counts), *attendance gauge* (a half circle of segments that light up one after another, the percent counting up), a dark *Quick actions* card, and *Analytics* with **sliding pill tabs** (Finance, Presence, Levels, Marks) over **pill columns**: the biggest is lit with its value in a chip, the others are soft, and a dashed line marks the average. Below: waiting decisions and frequent absences.
+- **Motion**: each card first shows as empty glass with a shimmer, then its content sharpens out of a blur; numbers count up; the gauge fills; the columns grow one after another; changing tab cross-fades through a blur; the active pill slides; cards lift on hover; a change of page blurs in. All of it stands still for people who asked for reduced motion.
+- Code: `features/Academic/components/glass.jsx` (GlassCard, SegmentGauge, PillColumns, StatPill, BlurSwap) and `components/shared/motion.jsx` (Reveal, CountUp, PillTabs, PageEnter, useGrown). Frontend only.

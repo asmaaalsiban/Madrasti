@@ -101,6 +101,20 @@
       "student": "Manage students",
       "announce": "Send an announcement",
       "import": "Import from Excel"
+    },
+    "glass": {
+      "subtitle": "Today at school, the money, and what waits for you.",
+      "students": "Students",
+      "glance": "At a glance",
+      "teachersLabel": "Teaching staff",
+      "ofStudents": "of students present today",
+      "staffLine": "Staff: {{status}}",
+      "waitingCount": "{{count}} waiting for your decision",
+      "analytics": "Analytics",
+      "tabAttendance": "Presence",
+      "tabLevels": "Levels",
+      "tabMarks": "Marks",
+      "avg": "Avg"
     }
   },
   "errors": {

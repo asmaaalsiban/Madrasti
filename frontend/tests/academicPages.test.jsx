@@ -41,29 +41,40 @@ describe('OverviewPage', () => {
   it('renders the four counts', async () => {
     mockApi()
     renderPage(<OverviewPage />)
-    expect(await screen.findByText('30')).toBeInTheDocument()
-    expect(screen.getByText('12')).toBeInTheDocument()
+    for (const n of ['30', '12']) await waitFor(() => expect(screen.getByText(n)).toBeInTheDocument()) // the numbers count up to it
     expect(api.get).toHaveBeenCalledWith('/admin/overview')
   })
 
   it('draws today, the money, and what waits', async () => {
     mockApi()
     renderPage(<OverviewPage />)
-    expect(await screen.findByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument()
-    expect(screen.getAllByText('Student attendance today').length).toBeGreaterThan(1) // the stat card and the panel
-    expect(screen.getAllByText('90%').length).toBeGreaterThan(0) // the stat card value
-    expect(screen.getByRole('img', { name: 'Student attendance rate (last 14 days)' })).toBeInTheDocument()
+    expect(await screen.findByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument() // the gauge
+    await waitFor(() => expect(screen.getAllByText('90%').length).toBeGreaterThan(0)) // the pill and the gauge count up to it
+    expect(screen.getByRole('img', { name: 'Collected per month' })).toBeInTheDocument() // the analytics card opens on the money tab
     expect(screen.getByText('Purchase requests')).toBeInTheDocument()
     expect(screen.queryByText('Data privacy requests')).not.toBeInTheDocument()
     expect(screen.getByText('Sami')).toBeInTheDocument()
     expect(screen.getByText('10,000 JOD')).toBeInTheDocument()
   })
 
+  it('switches the analytics tabs', async () => {
+    mockApi()
+    renderPage(<OverviewPage />)
+    await screen.findByRole('img', { name: 'Collected per month' })
+    fireEvent.click(screen.getByRole('tab', { name: 'Presence' }))
+    expect(await screen.findByRole('img', { name: 'Student attendance rate (last 14 days)' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Presence' })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(screen.getByRole('tab', { name: 'Marks' }))
+    expect(await screen.findByRole('img', { name: 'Average mark per subject' })).toBeInTheDocument()
+  })
+
   it('says so when nothing was recorded today', async () => {
-    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/admin/dashboard' ? { ...dash, students_today: { present: 0, late: 0, absent: 0, excused: 0 }, attendance_trend: [], frequent_absences: [], marks_by_subject: [], waiting: { procurement: 0, privacy: 0 } } : {} } }))
+    api.get.mockImplementation((url) => Promise.resolve({ data: { data: url === '/admin/dashboard' ? { ...dash, students_today: { present: 0, late: 0, absent: 0, excused: 0 }, attendance_trend: [], frequent_absences: [], marks_by_subject: [], waiting: { procurement: 0, privacy: 0 } } : { academic_years: 2, grade_levels: 12, classrooms: 30, subjects: 9 } } }))
     renderPage(<OverviewPage />)
     expect(await screen.findByText('Nothing is waiting. 👍')).toBeInTheDocument()
-    expect(screen.getByText('No published marks yet.')).toBeInTheDocument()
+    expect(screen.getByText('No attendance taken today.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Marks' }))
+    expect(await screen.findByText('No published marks yet.')).toBeInTheDocument()
   })
 })
 
