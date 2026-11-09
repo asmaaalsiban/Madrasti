@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -31,7 +31,7 @@ describe('AdminLayout', () => {
   it('shows how many announcements are unread', async () => {
     await i18n.changeLanguage('en')
     render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><AdminLayout /></MemoryRouter></QueryClientProvider>)
-    expect(await screen.findByText('3')).toBeInTheDocument()
+    await waitFor(() => expect(within(screen.getByRole('banner')).getByText('3')).toBeInTheDocument()) // in the header; the bottom tab bar shows it too
   })
 
   it('puts chat, announcements, class feed and notifications as icons at the top, not in the menu', async () => {
@@ -43,8 +43,8 @@ describe('AdminLayout', () => {
       expect(link).toHaveAttribute('href', href)
     }
     expect(within(header).getByRole('button', { name: /Notifications/ })).toBeInTheDocument()
-    expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /Class feed/ })).not.toBeInTheDocument()
-    expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /Chat/ })).not.toBeInTheDocument()
+    expect(within(screen.getByRole('navigation', { name: 'Menu' })).queryByRole('link', { name: /Class feed/ })).not.toBeInTheDocument()
+    expect(within(screen.getByRole('navigation', { name: 'Menu' })).queryByRole('link', { name: /Chat/ })).not.toBeInTheDocument()
   })
 
   it('keeps the menu groups closed except the one of the current page, and opens and closes them', async () => {

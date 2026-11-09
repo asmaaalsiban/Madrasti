@@ -57,7 +57,7 @@ describe('arranging', () => {
   it('the principal\'s menu follows their order and groups can be moved', async () => {
     auth.user = { role: 'admin', name: 'A', layout: { admin_nav: { groups: ['school', 'money'], items: [] } } }
     wrap(<AdminLayout />)
-    const heads = within(screen.getByRole('navigation')).getAllByText(/^(School setup|Money & staff|People|Learning|Schedules|System)$/i).map((x) => x.textContent)
+    const heads = within(screen.getByRole('navigation', { name: 'Menu' })).getAllByText(/^(School setup|Money & staff|People|Learning|Schedules|System)$/i).map((x) => x.textContent)
     expect(heads.indexOf('School setup')).toBeLessThan(heads.indexOf('Money & staff'))
     fireEvent.click(screen.getByRole('button', { name: 'Arrange' }))
     fireEvent.click(screen.getAllByRole('button', { name: /Move Money & staff earlier/ })[0])

@@ -70,7 +70,7 @@ export default function AdminLayout() {
             <Menu aria-hidden size={16} />{t('admin.menu')}
           </button>
         </div>
-        <nav className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
+        <nav aria-label={t('tabbar.sideMenu')} className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
           <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} size={layout.size} onSize={(size) => layout.save({ size })} /></div>
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">

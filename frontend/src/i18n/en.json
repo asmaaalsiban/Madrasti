@@ -3304,6 +3304,7 @@
     "inbox": "Inbox",
     "news": "News",
     "feed": "Feed",
-    "unread": "{{count}} unread"
+    "unread": "{{count}} unread",
+    "sideMenu": "Menu"
   }
 }
