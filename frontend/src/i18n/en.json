@@ -3297,5 +3297,14 @@
         "negative_notes": "negative behaviour notes"
       }
     }
+  },
+  "tabbar": {
+    "label": "Main tabs",
+    "home": "Home",
+    "inbox": "Inbox",
+    "news": "News",
+    "feed": "Feed",
+    "unread": "{{count}} unread",
+    "sideMenu": "Menu"
   }
 }

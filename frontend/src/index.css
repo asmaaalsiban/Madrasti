@@ -256,3 +256,12 @@ html[data-lite] .lp-tilt { transition: none; }
 .glass-card { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(8px); box-shadow: 0 8px 24px -12px rgba(0,0,0,.35); transition: box-shadow .2s; }
 .glass-card:hover { box-shadow: 0 16px 32px -12px rgba(0,0,0,.45); }
 .dash-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }
+
+/* The bottom tab bar: only on phones and tablets (a narrow window, or a touch screen with no mouse), never on a computer. Fixed to the bottom,
+   padded by the safe area so the icons clear the iPhone home indicator; the page gets room under it. */
+.tabbar { display: none; }
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  .tabbar { display: block; position: fixed; inset-inline: 0; bottom: 0; z-index: 40; padding-bottom: env(safe-area-inset-bottom); background: color-mix(in srgb, var(--color-snow) 92%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--color-fog); }
+  .has-tabbar main { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+}
+@media print { .tabbar { display: none !important; } }

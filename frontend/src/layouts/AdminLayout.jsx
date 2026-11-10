@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { PageEnter } from '../components/shared/motion'
+import BottomTabBar from '../components/shared/BottomTabBar'
 import { TriangleAlert, ChevronDown, ArrowLeftRight, LayoutGrid, Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
@@ -58,7 +59,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen md:flex">
+    <div className="has-tabbar min-h-screen md:flex">
       <aside className="bg-deep-harbor text-white md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto print:hidden">
         <div className="flex items-center justify-between gap-2 p-4">
           <span className="flex min-w-0 items-center gap-2">
@@ -69,7 +70,7 @@ export default function AdminLayout() {
             <Menu aria-hidden size={16} />{t('admin.menu')}
           </button>
         </div>
-        <nav className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
+        <nav aria-label={t('tabbar.sideMenu')} className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
           <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} size={layout.size} onSize={(size) => layout.save({ size })} /></div>
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
@@ -119,6 +120,7 @@ export default function AdminLayout() {
           </div>
         </header>
         <main id="main" tabIndex={-1} className={`mx-auto p-4 outline-none ${pathname === '/admin' ? 'max-w-none' : 'max-w-5xl'}`}><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
+        <BottomTabBar />
       </div>
     </div>
   )
