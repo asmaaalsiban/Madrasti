@@ -266,3 +266,33 @@ html[data-lite] .lp-tilt { transition: none; }
   .header-comm { display: none; } /* chat, announcements and the feed live in the bar, not at the top too */
 }
 @media print { .tabbar { display: none !important; } }
+
+/* ---- Tables on a phone ------------------------------------------------------------------------------------------------------------------ */
+/* A table never scrolls sideways (or up and down inside its box) on a phone: the page scrolls, not the table.
+   - A wide table (5+ columns, marked `data-stack` by ResponsiveTables) becomes cards: one per row, each cell beside its column name.
+   - Any other table shrinks to fit: smaller type and padding, text wraps in its cell. Money and other `whitespace-nowrap` spans stay whole. */
+@media (max-width: 640px) {
+  .overflow-x-auto:has(table):not(:has(table[data-scroll])) { overflow-x: visible; } /* data-scroll: the school-wide timetable has a column per class and keeps its sideways scroll */
+  .overflow-y-auto:has(> table) { max-height: none; overflow-y: visible; }
+  table { width: 100%; max-width: 100%; font-size: 0.75rem; line-height: 1.25; }
+  table th, table td { padding: 0.3rem 0.35rem !important; white-space: normal !important; overflow-wrap: anywhere; }
+  table .sticky { position: static; }
+  table [class*="min-w-"], table th[class*="w-"], table td[class*="w-"] { min-width: 0 !important; width: auto !important; }
+  table button, table select, table input { max-width: 100%; }
+
+  /* A real grid (the week's timetable) keeps its columns: smaller type and tighter cells so a subject name stays on one line. */
+  table[data-grid] th, table[data-grid] td { padding: 0.15rem 0.1rem !important; font-size: 0.625rem; }
+  table[data-grid] td * { font-size: inherit; }
+  table[data-grid] td > div, table[data-grid] td button > div { padding: 0.15rem; }
+
+  table[data-stack], table[data-stack] tbody, table[data-stack] tr, table[data-stack] td { display: block; width: 100% !important; }
+  table[data-stack] { font-size: 0.8125rem; }
+  /* The header row stays for screen readers but is not drawn: every cell already carries its column name. */
+  table[data-stack] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  table[data-stack] tr { margin: 0 0 0.5rem; padding: 0.25rem 0.6rem; border: 1px solid var(--color-fog); border-radius: 0.6rem; background: #fff; }
+  table[data-stack] td { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; border: 0 !important; padding: 0.3rem 0 !important; text-align: end; }
+  table[data-stack] td + td { border-top: 1px solid var(--color-fog) !important; }
+  table[data-stack] td[data-label]::before { content: attr(data-label); flex: none; max-width: 45%; font-weight: 600; color: #475569; text-align: start; }
+  table[data-stack] td:not([data-label]) { display: block; text-align: start; }
+  table[data-stack] td:empty { display: none; }
+}

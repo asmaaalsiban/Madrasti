@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { PageEnter } from '../components/shared/motion'
 import BottomTabBar from '../components/shared/BottomTabBar'
+import ResponsiveTables from '../components/shared/ResponsiveTables'
 import { TriangleAlert, ChevronDown, ArrowLeftRight, LayoutGrid, Award, Banknote, BookOpen, Briefcase, Building2, CalendarClock, CalendarDays, CalendarRange, CircleCheck, ClipboardList, Clock, DoorOpen, FileBarChart, FileCheck2, FileUp, FolderOpen, Fingerprint, GraduationCap, LayoutDashboard, Layers, Palette, ListChecks, Menu, PenLine, RefreshCw, ScrollText, ShieldCheck, Camera, FileLock2, ListTodo, EyeOff, ShoppingCart, Smile, Bus, UserCheck, Users, Vote, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
@@ -121,6 +122,7 @@ export default function AdminLayout() {
         </header>
         <main id="main" tabIndex={-1} className={`mx-auto p-4 outline-none ${pathname === '/admin' ? 'max-w-none' : 'max-w-5xl'}`}><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
         <BottomTabBar />
+      <ResponsiveTables />
       </div>
     </div>
   )
