@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 export default function DataTable({ columns, rows, loading, search, onSearch, onEdit, onDelete, extraActions = [], page = 1, lastPage = 1, onPage }) {
   const { t } = useTranslation()
   const hasActions = Boolean(onEdit || onDelete || extraActions.length)
+  // On a phone a row is a card: the name column is its title and the actions a row of buttons (CSS in index.css, `data-title` / `data-actions`).
+  const titleKey = columns.find((c) => /^name/.test(c.key))?.key
   return (
     <div className="space-y-3">
       <input
@@ -24,9 +26,9 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-t">
-                {columns.map((c) => <td key={c.key} className="p-2 sm:p-3">{c.render ? c.render(row) : row[c.key]}</td>)}
+                {columns.map((c) => <td key={c.key} className="p-2 sm:p-3" data-title={c.key === titleKey ? '' : undefined}>{c.render ? c.render(row) : row[c.key]}</td>)}
                 {hasActions && (
-                  <td className="p-2 sm:p-3"><div className="flex flex-wrap gap-2">
+                  <td className="p-2 sm:p-3" data-actions=""><div className="flex flex-wrap gap-2">
                     {onEdit && <button type="button" className="text-brand" onClick={() => onEdit(row)}>{t('admin.actions.edit')}</button>}
                     {extraActions.filter((a) => !a.when || a.when(row)).map((a) => (
                       <button key={a.key} type="button" className="text-slate-700 underline" onClick={() => a.onClick(row)}>{a.label}</button>

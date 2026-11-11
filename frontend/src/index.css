@@ -295,4 +295,14 @@ html[data-lite] .lp-tilt { transition: none; }
   table[data-stack] td[data-label]::before { content: attr(data-label); flex: none; max-width: 45%; font-weight: 600; color: #475569; text-align: start; }
   table[data-stack] td:not([data-label]) { display: block; text-align: start; }
   table[data-stack] td:empty { display: none; }
+
+  /* A card in the style of the design: the name as a bold title on top, the rest as rows, the actions as a grid of buttons at the bottom. */
+  table[data-stack] tr { display: flex; flex-direction: column; }
+  table[data-stack] td[data-title] { order: -1; display: block; padding: 0.35rem 0 0.15rem !important; border: 0 !important; font-size: 1rem; font-weight: 700; text-align: start; color: var(--color-deep-harbor); }
+  table[data-stack] td[data-title]::before, table[data-stack] td[data-actions]::before { display: none; }
+  table[data-stack] td[data-title] + td { border-top: 0 !important; }
+  table[data-stack] td[data-actions] { display: block; order: 99; padding: 0.5rem 0 0.25rem !important; }
+  table[data-stack] td[data-actions] > div { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
+  table[data-stack] td[data-actions] button { min-height: 2.5rem; padding: 0.4rem 0.5rem; border-radius: 0.6rem; background: var(--color-brand); color: #fff !important; text-decoration: none; font-weight: 600; text-align: center; }
+  table[data-stack] td[data-actions] button.text-red-600 { background: #fef2f2; color: #dc2626 !important; }
 }
