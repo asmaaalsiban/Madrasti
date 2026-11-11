@@ -43,6 +43,9 @@ describe('AdminLayout', () => {
       expect(link).toHaveAttribute('href', href)
     }
     expect(within(header).getByRole('button', { name: /Notifications/ })).toBeInTheDocument()
+    // On phones the CSS hides `.header-comm` (the bottom bar has these three); the bell is outside it, so it stays at the top.
+    expect(header.querySelector('.header-comm')).toContainElement(within(header).getByRole('link', { name: /Chat/ }))
+    expect(header.querySelector('.header-comm')).not.toContainElement(within(header).getByRole('button', { name: /Notifications/ }))
     expect(within(screen.getByRole('navigation', { name: 'Menu' })).queryByRole('link', { name: /Class feed/ })).not.toBeInTheDocument()
     expect(within(screen.getByRole('navigation', { name: 'Menu' })).queryByRole('link', { name: /Chat/ })).not.toBeInTheDocument()
   })

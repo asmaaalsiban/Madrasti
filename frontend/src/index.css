@@ -263,5 +263,6 @@ html[data-lite] .lp-tilt { transition: none; }
 @media (max-width: 1023px), (hover: none) and (pointer: coarse) {
   .tabbar { display: block; position: fixed; inset-inline: 0; bottom: 0; z-index: 40; padding-bottom: env(safe-area-inset-bottom); background: color-mix(in srgb, var(--color-snow) 92%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--color-fog); }
   .has-tabbar main { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+  .header-comm { display: none; } /* chat, announcements and the feed live in the bar, not at the top too */
 }
 @media print { .tabbar { display: none !important; } }
