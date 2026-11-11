@@ -16,7 +16,7 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
         onChange={(e) => onSearch(e.target.value)}
       />
       <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
-        <table className="w-full text-start text-sm">
+        <table data-own-cards="" className="w-full text-start text-sm">
           <thead className="bg-slate-100">
             <tr>
               {columns.map((c) => <th key={c.key} className="p-2 text-start font-medium sm:p-3">{c.label}</th>)}
