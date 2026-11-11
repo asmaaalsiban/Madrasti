@@ -119,7 +119,7 @@ export default function FullTimetablePage() {
 
       {shownDays.map((dayNo) => (
         <div key={dayNo} className="overflow-x-auto rounded-lg border bg-white">
-          <table className="w-full border-collapse text-center text-xs">
+          <table data-grid data-scroll className="w-full border-collapse text-center text-xs">
             <caption className="bg-deep-harbor p-2 text-start text-sm font-bold text-white">{t(`days.${dayNo}`)}</caption>
             <thead className="bg-slate-100">
               <tr>

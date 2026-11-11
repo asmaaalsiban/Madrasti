@@ -26,7 +26,7 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
 
   return (
     <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
-      <table className="w-full border-collapse text-start text-sm">
+      <table data-grid className="w-full border-collapse text-start text-sm">
         <thead className="bg-slate-100">
           <tr>
             <th><span className="sr-only">{t('a11y.corner')}</span></th>

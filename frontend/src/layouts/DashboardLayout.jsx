@@ -8,6 +8,7 @@ import { isHidden } from '../features/StaffAccess/staffFeatures'
 import { useSchool } from '../tenant/useSchool'
 import SchoolLogo from '../components/shared/SchoolLogo'
 import BottomTabBar from '../components/shared/BottomTabBar'
+import ResponsiveTables from '../components/shared/ResponsiveTables'
 
 // Mobile-first shell shared by all four roles.
 export default function DashboardLayout() {
@@ -38,6 +39,7 @@ export default function DashboardLayout() {
         {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Outlet />}
       </main>
       <BottomTabBar />
+      <ResponsiveTables />
     </div>
   )
 }
