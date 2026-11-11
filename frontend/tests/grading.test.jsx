@@ -59,6 +59,26 @@ describe('AssessmentsPage', () => {
     expect(within(row).getByRole('link', { name: 'Enter scores' })).toHaveAttribute('href', '/teacher/grades/11')
   })
 
+  it('has a card per assessment for a phone: title, type, status, the details, and the actions at the bottom', async () => {
+    serve()
+    api.post.mockResolvedValue({ data: { data: {} } })
+    renderAt('/teacher/grades', <AssessmentsPage />)
+    const cards = within(screen.getByTestId('assessment-cards'))
+    const quizCard = (await cards.findByRole('heading', { name: 'Quiz 1' })).closest('li')
+    expect(within(quizCard).getByText('Quiz')).toBeInTheDocument()
+    expect(within(quizCard).getByText('Draft')).toBeInTheDocument()
+    expect(within(quizCard).getByText('2 / 3')).toBeInTheDocument()
+    expect(within(quizCard).getByText('10%')).toBeInTheDocument()
+    expect(within(quizCard).getByText('2026-10-05')).toBeInTheDocument()
+    expect(within(quizCard).getByRole('link', { name: 'Enter scores' })).toHaveAttribute('href', '/teacher/grades/11')
+    expect(within(quizCard).getByRole('button', { name: 'Delete' })).toBeInTheDocument() // only a draft can be deleted
+    const examCard = cards.getByRole('heading', { name: 'Midterm' }).closest('li')
+    expect(within(examCard).getByText('Published')).toBeInTheDocument()
+    expect(within(examCard).queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
+    fireEvent.click(within(examCard).getByRole('button', { name: 'Unpublish' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/assessments/12/unpublish'))
+  })
+
   it('picks the classroom first, then one of the subjects taught in it', async () => {
     serve()
     renderAt('/teacher/grades', <AssessmentsPage />)
