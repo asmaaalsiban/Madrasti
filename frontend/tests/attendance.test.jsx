@@ -81,6 +81,16 @@ describe('TakeAttendancePage', () => {
     expect(await screen.findByText('Saved. The parents of absent students are being notified.')).toBeInTheDocument()
   })
 
+  it('shows the counts of the day as three boxes for a phone, following the taps', async () => {
+    serveRoster()
+    renderPage(<TakeAttendancePage />)
+    const counts = within(await screen.findByTestId('attendance-counts'))
+    expect(counts.getByText('Present').previousSibling).toHaveTextContent(String(students.length))
+    fireEvent.click(within(row(students[0].name_en)).getByRole('button', { name: 'Absent' }))
+    expect(counts.getByText('Absent').previousSibling).toHaveTextContent('1')
+    expect(counts.getByText('Present').previousSibling).toHaveTextContent(String(students.length - 1))
+  })
+
   it('shows what was already recorded for the day', async () => {
     serveRoster({ recorded: true, students: [{ ...students[0], status: 'absent' }, { ...students[1], status: 'late' }, { ...students[2], status: 'present' }] })
     renderPage(<TakeAttendancePage />)

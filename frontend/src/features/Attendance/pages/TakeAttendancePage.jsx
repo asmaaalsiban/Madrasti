@@ -7,6 +7,7 @@ import { useStudentName } from '../components/useStudentName'
 import { DateInput } from '../../../components/shared/DateInput'
 
 const STATUSES = ['present', 'late', 'absent']
+const COUNT_BOX = { present: 'bg-green-50 text-green-800', late: 'bg-yellow-50 text-yellow-800', absent: 'bg-red-50 text-red-800' }
 const ACTIVE = { present: 'bg-green-700 text-white', late: 'bg-yellow-400 text-black', absent: 'bg-red-600 text-white' }
 
 // The homeroom teacher (or admin) records the day: everybody starts present, only the exceptions are touched.
@@ -61,18 +62,18 @@ export default function TakeAttendancePage() {
   const label = (r) => r.grade_level?.[`name_${i18n.language}`]
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pb-24 md:pb-0">
       <h1 className="text-xl font-bold">{t('attendance.takeTitle')}</h1>
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">
+      <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap md:items-end">
+        <label className="col-span-2 text-sm md:col-span-1">
           {t('attendance.classroom')}
-          <select className="mt-1 block rounded border p-2" value={activeRoom ?? ''} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setClassroomId(Number(e.target.value)) }}>
+          <select className="mt-1 block w-full rounded border p-2 md:w-auto" value={activeRoom ?? ''} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setClassroomId(Number(e.target.value)) }}>
             {(rooms.data ?? []).map((r) => <option key={r.id} value={r.id}>{[r.name, label(r)].filter(Boolean).join(' · ')}</option>)}
           </select>
         </label>
         <label className="text-sm">
           {t('attendance.date')}
-          <DateInput className="mt-1 block rounded border p-2" value={date} max={today()} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setDate(e.target.value) }} />
+          <DateInput className="mt-1 block w-full rounded border p-2 md:w-auto" value={date} max={today()} onChange={(e) => { dirty.current = false; setSaved(false); setError(''); setDate(e.target.value) }} />
         </label>
       </div>
 
@@ -80,15 +81,24 @@ export default function TakeAttendancePage() {
       {error && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{error}</p>}
       {saved && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{t('attendance.saved')}</p>}
 
-      <ul className="divide-y rounded-lg bg-white shadow-sm">
+      {/* A phone: the day's counts as three boxes, then a card per student with three big buttons; the theme sets rounded/shadow/bg without a
+          breakpoint, so the cards use max-md: classes and the list box is `contents` below md. */}
+      {students.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 md:hidden" data-testid="attendance-counts">
+          {STATUSES.map((status) => (
+            <div key={status} className={`rounded-xl p-2 text-center ${COUNT_BOX[status]}`}><div className="text-2xl font-bold">{count(status)}</div><div className="text-xs">{t(`attendance.${status}`)}</div></div>
+          ))}
+        </div>
+      )}
+      <ul className="rounded-lg bg-white shadow-sm max-md:contents md:divide-y">
         {students.map((s, i) => (
-          <li key={s.id}>
-            <div role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center justify-between gap-2 p-3">
+          <li key={s.id} className="max-md:mb-3 max-md:rounded-[26px] max-md:border max-md:bg-white max-md:shadow-[var(--shadow-flat)]">
+            <div role="group" aria-label={nameOf(s)} className="flex flex-col gap-3 p-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-2">
               <span className="flex items-center gap-3">
                 <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
-                <span>{nameOf(s)}</span>
+                <span className="font-medium md:font-normal">{nameOf(s)}</span>
               </span>
-              <span className="flex gap-1">
+              <span className="grid grid-cols-3 gap-2 md:flex md:gap-1">
                 {STATUSES.map((status) => {
                   const on = (statuses[s.id] ?? 'present') === status
                   return (
@@ -96,7 +106,7 @@ export default function TakeAttendancePage() {
                       key={status}
                       type="button"
                       aria-pressed={on}
-                      className={`rounded border px-3 py-1.5 text-sm ${on ? ACTIVE[status] : 'bg-white'}`}
+                      className={`rounded border px-3 py-1.5 text-sm max-md:min-h-12 max-md:text-base max-md:font-medium ${on ? ACTIVE[status] : 'bg-white'}`}
                       onClick={() => { dirty.current = true; setSaved(false); setStatuses({ ...statuses, [s.id]: status }) }}
                     >
                       {t(`attendance.${status}`)}
@@ -110,11 +120,11 @@ export default function TakeAttendancePage() {
       </ul>
 
       {students.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-slate-600">
+        <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 border-t bg-white/95 p-3 backdrop-blur md:static md:flex-wrap md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+          <p className="min-w-0 flex-1 text-xs text-slate-600 md:text-sm">
             {t('attendance.summary', { present: count('present'), late: count('late'), absent: count('absent') })}
           </p>
-          <button type="button" disabled={save.isPending} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-60" onClick={() => save.mutate()}>
+          <button type="button" disabled={save.isPending} className="min-h-11 shrink-0 rounded-lg bg-brand px-6 py-2 font-semibold text-white disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={() => save.mutate()}>
             {t('admin.actions.save')}
           </button>
         </div>
