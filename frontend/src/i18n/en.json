@@ -3150,6 +3150,8 @@
     "onlyProblems": "Show only lessons with problems",
     "problems": "What the checker found",
     "none": "Nothing to report.",
+    "freePeriod": "Free period",
+    "noLessons": "No lessons to show.",
     "severity": {
       "error": "Error",
       "warning": "Warning",

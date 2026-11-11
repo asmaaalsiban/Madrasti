@@ -164,12 +164,12 @@ class TimetableController extends Controller
         Gate::authorize('viewAny', Period::class);
         $year = AcademicYear::where('is_current', true)->first();
         $classrooms = $year ? Classroom::where('academic_year_id', $year->id)->with(['gradeLevel', 'homeroomTeacher:id,name'])->get()->sortBy(fn (Classroom $c) => sprintf('%05d|%s', $c->gradeLevel?->sort_order ?? 0, $c->name))->values() : collect();
-        $entries = $year ? TimetableEntry::where('academic_year_id', $year->id)->with(['subject:id,name_ar,name_en', 'teacher:id,name'])->get() : collect();
+        $entries = $year ? TimetableEntry::where('academic_year_id', $year->id)->with(['subject:id,name_ar,name_en', 'teacher:id,name', 'room:id,name'])->get() : collect();
 
         return response()->json(['data' => [
             'periods' => Period::orderBy('day_of_week')->orderBy('number')->get()->map(fn (Period $p) => ['id' => $p->id, 'day_of_week' => $p->day_of_week, 'number' => $p->number, 'starts_at' => substr($p->starts_at, 0, 5), 'ends_at' => substr($p->ends_at, 0, 5)])->values(),
             'classrooms' => $classrooms->map(fn (Classroom $c) => ['id' => $c->id, 'name' => $c->name, 'grade_level_id' => $c->grade_level_id, 'grade_ar' => $c->gradeLevel?->name_ar, 'grade_en' => $c->gradeLevel?->name_en, 'periods_per_day' => $c->gradeLevel?->periods_per_day, 'homeroom' => $c->homeroomTeacher?->name])->values(),
-            'entries' => $entries->map(fn (TimetableEntry $e) => ['id' => $e->id, 'classroom_id' => $e->classroom_id, 'period_id' => $e->period_id, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']), 'teacher' => $e->teacher->only(['id', 'name']), 'is_locked' => $e->is_locked, 'is_joint' => $e->is_joint])->values(),
+            'entries' => $entries->map(fn (TimetableEntry $e) => ['id' => $e->id, 'classroom_id' => $e->classroom_id, 'period_id' => $e->period_id, 'subject' => $e->subject->only(['id', 'name_ar', 'name_en']), 'teacher' => $e->teacher->only(['id', 'name']), 'room' => $e->room?->name, 'is_locked' => $e->is_locked, 'is_joint' => $e->is_joint])->values(),
         ]]);
     }
 

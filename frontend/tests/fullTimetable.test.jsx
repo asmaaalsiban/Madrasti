@@ -40,7 +40,7 @@ describe('FullTimetablePage', () => {
   it('shows one day, swaps to teachers as columns and highlights a teacher', async () => {
     wrap()
     await screen.findAllByRole('table')
-    fireEvent.click(screen.getByRole('tab', { name: 'Sunday' }))
+    fireEvent.click(screen.getAllByRole('tab', { name: 'Sunday' })[0]) // the first is the grid's own day tab; the phone view has one too
     expect(screen.getAllByRole('table')).toHaveLength(1)
     fireEvent.click(screen.getByRole('tab', { name: 'By teachers' }))
     const table = screen.getByRole('table')
@@ -48,5 +48,40 @@ describe('FullTimetablePage', () => {
     expect(within(table).getByText('Sara')).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Highlight a teacher'), { target: { value: '6' } })
     expect(screen.getByLabelText('Highlight a teacher')).toHaveValue('6')
+  })
+
+  describe('on a phone', () => {
+    it('picks a section in a row of pills and a day, and lists that day as one card per period with time, subject, teacher and room', async () => {
+      overview.data.data.entries[0].room = 'R-12'
+      wrap()
+      const phone = within(await screen.findByTestId('phone-timetable'))
+      fireEvent.click(phone.getByRole('tab', { name: 'Sunday' }))
+      // The first section (7-A) is chosen by default: period 1 is Math with Sara in room R-12, period 2 is free.
+      const lessons = phone.getAllByRole('listitem')
+      expect(lessons).toHaveLength(2)
+      expect(within(lessons[0]).getByText('Math')).toBeInTheDocument()
+      expect(within(lessons[0]).getByText('Sara')).toBeInTheDocument()
+      expect(within(lessons[0]).getByText('R-12')).toBeInTheDocument()
+      expect(within(lessons[0]).getByText('08:00')).toBeInTheDocument()
+      expect(within(lessons[0]).getByText('08:45')).toBeInTheDocument()
+      expect(within(lessons[1]).getByText('Free period')).toBeInTheDocument()
+      // Another section: 8-A has Science (Omar) in period 1 and Art (Sara) in period 2.
+      fireEvent.click(phone.getByRole('tab', { name: '8-A' }))
+      expect(within(phone.getAllByRole('listitem')[0]).getByText('Science')).toBeInTheDocument()
+      expect(within(phone.getAllByRole('listitem')[1]).getByText('Art')).toBeInTheDocument()
+      delete overview.data.data.entries[0].room
+    })
+
+    it('marks a lesson that has a problem, swaps to teachers, and can show only the lessons with problems', async () => {
+      wrap()
+      const phone = within(await screen.findByTestId('phone-timetable'))
+      fireEvent.click(phone.getByRole('tab', { name: 'Sunday' }))
+      expect(phone.getAllByRole('listitem')[0]).toHaveClass('border-s-red-500') // Sara is unavailable in 7-A period 1
+      fireEvent.click(screen.getByRole('tab', { name: 'By teachers' }))
+      fireEvent.click(phone.getByRole('tab', { name: 'Sara' }))
+      expect(within(phone.getAllByRole('listitem')[0]).getByText('7-A')).toBeInTheDocument() // a teacher's card names the section
+      fireEvent.click(screen.getByLabelText('Show only lessons with problems'))
+      expect(phone.getAllByRole('listitem')).toHaveLength(1)
+    })
   })
 })

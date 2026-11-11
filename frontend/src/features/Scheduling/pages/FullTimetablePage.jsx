@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Printer } from 'lucide-react'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
+import PhoneTimetable from '../components/PhoneTimetable'
 
 const SEVERITY = {
   error: { dot: 'bg-red-600', box: 'border-red-400 bg-red-50', cell: 'outline outline-2 -outline-offset-2 outline-red-500' },
@@ -22,6 +23,9 @@ export default function FullTimetablePage() {
   const [gradeId, setGradeId] = useState('')
   const [teacherId, setTeacherId] = useState('')
   const [onlyProblems, setOnlyProblems] = useState(false)
+  const [phoneColumn, setPhoneColumn] = useState('') // the section or teacher chosen on a phone
+  const [today] = useState(() => new Date().getDay()) // 0 = Sunday, like the periods
+  const [phoneDay, setPhoneDay] = useState(null) // the day chosen on a phone (the grid shows several days; a phone shows one)
   const overview = useQuery({ queryKey: ['timetable', 'overview'], queryFn: async () => (await api.get('/timetable/overview')).data.data })
   const check = useQuery({ queryKey: ['timetable', 'check'], queryFn: async () => (await api.get('/timetable/check')).data.data })
 
@@ -58,6 +62,9 @@ export default function FullTimetablePage() {
   const grades = [...new Map(d.classrooms.map((c) => [c.grade_level_id, c])).values()]
   const shownDays = day === 'all' ? days : [Number(day)]
   const counts = check.data?.counts
+  const periodAt = (dayNo, number) => d.periods.find((p) => p.day_of_week === dayNo && p.number === number)
+  // On a phone: today if the school has lessons that day, otherwise the first school day.
+  const phoneDayNo = phoneDay !== null && days.includes(phoneDay) ? phoneDay : days.includes(today) ? today : days[0]
 
   const columns = axis === 'sections' ? rooms.map((c) => ({ id: c.id, label: c.name, sub: c.homeroom })) : teachers.map((x) => ({ id: x.id, label: x.name }))
   const cellOf = (col, dayNo, number) => {
@@ -67,11 +74,11 @@ export default function FullTimetablePage() {
       const room = d.classrooms.find((c) => c.id === col.id)
       if (room.periods_per_day && number > room.periods_per_day) return { gone: true }
       const e = byCell.get(`${col.id}-${pid}`)
-      return { entry: e, mark: marks.get(`c${col.id}-${pid}`), teacher: e?.teacher.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: e?.teacher.name }
+      return { entry: e, mark: marks.get(`c${col.id}-${pid}`), teacher: e?.teacher.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: e?.teacher.name, room: e?.room }
     }
     const list = byTeacher.get(`${col.id}-${pid}`) ?? []
     const e = list[0]
-    return { entry: e, mark: marks.get(`t${col.id}-${pid}`), teacher: col.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: list.map((x) => d.classrooms.find((c) => c.id === x.classroom_id)?.name).join(' + ') }
+    return { entry: e, mark: marks.get(`t${col.id}-${pid}`), teacher: col.id, text: e && `${name(e.subject)}${e.is_joint ? ' ⇄' : ''}`, sub: list.map((x) => d.classrooms.find((c) => c.id === x.classroom_id)?.name).join(' + '), room: e?.room }
   }
 
   const tab = (key, label) => <button key={key} type="button" role="tab" aria-selected={String(day) === String(key)} className={`rounded-full border px-3 py-1 text-sm ${String(day) === String(key) ? 'bg-brand text-white' : 'bg-white'}`} onClick={() => setDay(key)}>{label}</button>
@@ -96,7 +103,7 @@ export default function FullTimetablePage() {
       )}
 
       <div className="flex flex-wrap items-end gap-3 print:hidden">
-        <div role="tablist" aria-label={t('fullTimetable.days')} className="flex flex-wrap gap-2">{tab('all', t('fullTimetable.wholeWeek'))}{days.map((x) => tab(x, t(`days.${x}`)))}</div>
+        <div role="tablist" aria-label={t('fullTimetable.days')} className="hidden flex-wrap gap-2 md:flex">{tab('all', t('fullTimetable.wholeWeek'))}{days.map((x) => tab(x, t(`days.${x}`)))}</div>
         <div role="tablist" aria-label={t('fullTimetable.axis')} className="flex gap-2">
           <button type="button" role="tab" aria-selected={axis === 'sections'} className={`rounded-full border px-3 py-1 text-sm ${axis === 'sections' ? 'bg-deep-harbor text-white' : 'bg-white'}`} onClick={() => setAxis('sections')}>{t('fullTimetable.bySections')}</button>
           <button type="button" role="tab" aria-selected={axis === 'teachers'} className={`rounded-full border px-3 py-1 text-sm ${axis === 'teachers' ? 'bg-deep-harbor text-white' : 'bg-white'}`} onClick={() => setAxis('teachers')}>{t('fullTimetable.byTeachers')}</button>
@@ -117,6 +124,12 @@ export default function FullTimetablePage() {
         </label>
       </div>
 
+      <PhoneTimetable columns={columns} columnLabel={t(axis === 'sections' ? 'fullTimetable.bySections' : 'fullTimetable.byTeachers')} days={days} numbers={numbers} cellOf={cellOf} periodAt={periodAt}
+        teacherId={teacherId} onlyProblems={onlyProblems} onPickTeacher={(id) => setTeacherId(id === teacherId ? '' : id)}
+        columnId={phoneColumn} onColumn={setPhoneColumn} day={phoneDayNo} onDay={setPhoneDay} />
+
+      {/* A tablet, a computer and the printer keep the grid; a phone has the cards above. */}
+      <div className="hidden space-y-4 md:block print:block">
       {shownDays.map((dayNo) => (
         <div key={dayNo} className="overflow-x-auto rounded-lg border bg-white">
           <table data-grid data-scroll className="w-full border-collapse text-center text-xs">
@@ -154,6 +167,7 @@ export default function FullTimetablePage() {
           </table>
         </div>
       ))}
+      </div>
 
       <label className="flex items-center gap-2 text-sm print:hidden"><input type="checkbox" checked={onlyProblems} onChange={(e) => setOnlyProblems(e.target.checked)} />{t('fullTimetable.onlyProblems')}</label>
 
