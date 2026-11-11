@@ -5,8 +5,11 @@ namespace Tests\Feature\Scheduling;
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
 use App\Modules\Academic\Models\Classroom;
+use App\Modules\Academic\Models\Building;
+use App\Modules\Academic\Models\Floor;
 use App\Modules\Academic\Models\GradeLevel;
 use App\Modules\Academic\Models\GradeLevelSubject;
+use App\Modules\Academic\Models\Room;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Academic\Models\TeachingAssignment;
 use App\Modules\Scheduling\Models\Period;
@@ -69,6 +72,19 @@ class FullTimetableTest extends AcademicTestCase
         $this->assertSame(['7-A', '7-B'], array_column($r['classrooms'], 'name'));
         $this->assertCount(14, $r['periods']);
         $this->assertSame('Sara', $r['entries'][0]['teacher']['name']);
+    }
+
+    public function test_the_overview_gives_the_room_of_a_lesson_or_null_when_it_has_none(): void
+    {
+        $floor = Floor::create(['building_id' => Building::create(['name' => 'Main', 'gender' => 'mixed'])->id, 'name' => 'Ground', 'level' => 0]);
+        $room = Room::create(['floor_id' => $floor->id, 'name' => 'R-12', 'kind' => 'classroom', 'type' => 'classroom']);
+        $withRoom = $this->place($this->a, 0, 1, $this->math, $this->sara);
+        $withRoom->update(['room_id' => $room->id]);
+        $this->place($this->a, 0, 2, $this->math, $this->sara);
+
+        $entries = collect($this->getJson('/api/timetable/overview')->assertOk()->json('data.entries'));
+        $this->assertSame('R-12', $entries->firstWhere('id', $withRoom->id)['room']);
+        $this->assertNull($entries->where('id', '!=', $withRoom->id)->first()['room']);
     }
 
     public function test_the_checker_finds_missing_lessons_and_subjects_without_a_teacher(): void
