@@ -23,17 +23,18 @@ export default function FinanceDashboardPage({ base }) {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('finance.title')}</h1>
-        <div className="flex gap-2">
-          <Link to={`${base}/finance/accounts`} className="rounded bg-brand px-4 py-1.5 text-white">{t('finance.accounts')}</Link>
-          <Link to={`${base}/finance/transfers`} className="rounded border px-4 py-1.5 text-brand">{t('transfers.title')}</Link>
-          <Link to={`${base}/finance/structures`} className="rounded border px-4 py-1.5 text-brand">{t('finance.structures')}</Link>
-          <Link to={`${base}/finance/expenses`} className="rounded border px-4 py-1.5 text-brand">{t('expenses.title')}</Link>
-          <Link to={`${base}/finance/money`} className="rounded border px-4 py-1.5 text-brand">{t('money.title')}</Link>
-          <Link to={`${base}/finance/journal`} className="rounded border px-4 py-1.5 text-brand">{t('journal.title')}</Link>
-          <Link to={`${base}/finance/accounting-reports`} className="rounded border px-4 py-1.5 text-brand">{t('acctReports.title')}</Link>
-          <Link to={`${base}/finance/budgets`} className="rounded border px-4 py-1.5 text-brand">{t('budgets.title')}</Link>
-          <Link to={`${base}/finance/tax`} className="rounded border px-4 py-1.5 text-brand">{t('tax.title')}</Link>
-          <Link to={`${base}/finance/year-end`} className="rounded border px-4 py-1.5 text-brand">{t('yearEnd.title')}</Link>
+        {/* Ten shortcuts: two columns on a phone, a wrapping row from sm up (a single row was 1000px wide). */}
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+          <Link to={`${base}/finance/accounts`} className="rounded bg-brand px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-white">{t('finance.accounts')}</Link>
+          <Link to={`${base}/finance/transfers`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('transfers.title')}</Link>
+          <Link to={`${base}/finance/structures`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('finance.structures')}</Link>
+          <Link to={`${base}/finance/expenses`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('expenses.title')}</Link>
+          <Link to={`${base}/finance/money`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('money.title')}</Link>
+          <Link to={`${base}/finance/journal`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('journal.title')}</Link>
+          <Link to={`${base}/finance/accounting-reports`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('acctReports.title')}</Link>
+          <Link to={`${base}/finance/budgets`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('budgets.title')}</Link>
+          <Link to={`${base}/finance/tax`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('tax.title')}</Link>
+          <Link to={`${base}/finance/year-end`} className="rounded border px-3 py-2.5 text-center sm:px-4 sm:py-1.5 text-brand">{t('yearEnd.title')}</Link>
         </div>
       </div>
       {data && (
