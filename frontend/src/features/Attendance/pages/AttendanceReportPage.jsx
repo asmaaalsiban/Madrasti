@@ -44,21 +44,21 @@ export default function AttendanceReportPage() {
         <h1 className="text-xl font-bold">{t('attendance.reportTitle')}</h1>
         <ExportButton path="/attendance/report/export" params={Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== ''))} fallbackName="attendance.xlsx" />
       </div>
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">
+      <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap md:items-end">
+        <label className="col-span-2 text-sm md:col-span-1">
           {t('attendance.classroom')}
-          <select className="mt-1 block rounded border p-2" value={filters.classroom_id} onChange={set('classroom_id')}>
+          <select className="mt-1 block w-full rounded border p-2 md:w-auto" value={filters.classroom_id} onChange={set('classroom_id')}>
             <option value="">{t('attendance.allClassrooms')}</option>
             {(rooms.data ?? []).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
         </label>
         <label className="text-sm">
           {t('attendance.from')}
-          <DateInput className="mt-1 block rounded border p-2" value={filters.from} onChange={set('from')} />
+          <DateInput className="mt-1 block w-full rounded border p-2 md:w-auto" value={filters.from} onChange={set('from')} />
         </label>
         <label className="text-sm">
           {t('attendance.to')}
-          <DateInput className="mt-1 block rounded border p-2" value={filters.to} onChange={set('to')} />
+          <DateInput className="mt-1 block w-full rounded border p-2 md:w-auto" value={filters.to} onChange={set('to')} />
         </label>
       </div>
       {meta && <p className="text-sm text-slate-500" dir="ltr">{meta.from} → {meta.to}</p>}

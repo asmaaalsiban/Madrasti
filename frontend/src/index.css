@@ -304,6 +304,8 @@ html[data-lite] .lp-tilt { transition: none; }
   table[data-stack] td[data-title] { order: -1; display: block; padding: 0.35rem 0 0.15rem !important; border: 0 !important; font-size: 1rem; font-weight: 700; text-align: start; color: var(--color-deep-harbor); }
   table[data-stack] td[data-title]::before, table[data-stack] td[data-actions]::before { display: none; }
   table[data-stack] td[data-title] + td { border-top: 0 !important; }
+  /* A link-like button inside a value (a count that opens the dates) must not make its row taller than the others. */
+  table[data-stack] td:not([data-actions]) > button { min-height: 0; padding-block: 0; }
   table[data-stack] td[data-actions] { display: block; order: 99; padding: 0.5rem 0 0.25rem !important; }
   table[data-stack] td[data-actions] > div, table[data-stack] td[data-actions]:not(:has(> div)) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
   table[data-stack] td[data-actions] button, table[data-stack] td[data-actions] a { display: flex; align-items: center; justify-content: center; min-height: 2.5rem; padding: 0.4rem 0.5rem; border-radius: 0.6rem; background: var(--color-brand); color: #fff !important; text-decoration: none; font-weight: 600; text-align: center; }
