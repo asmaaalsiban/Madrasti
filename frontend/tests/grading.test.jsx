@@ -378,6 +378,20 @@ describe('ResultsPage', () => {
     expect(screen.getByRole('heading', { name: 'Student results: 5-A · Math' })).toBeInTheDocument()
   })
 
+  it('has a card per student for a phone: rank, name, the percentage, the badges, and the passed and failed boxes', async () => {
+    renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)
+    const summary = within(await screen.findByTestId('results-summary'))
+    expect(summary.getByText('2')).toBeInTheDocument()
+    expect(summary.getByText('1')).toBeInTheDocument()
+    const cards = within(screen.getByTestId('result-cards')).getAllByRole('listitem')
+    expect(cards).toHaveLength(4)
+    expect(within(cards[0]).getByText('1')).toBeInTheDocument() // the rank
+    expect(within(cards[1]).getByText('30.5%')).toBeInTheDocument()
+    expect(within(cards[1]).getByText('Fail')).toBeInTheDocument()
+    expect(within(cards[2]).getByText('Makeup pending')).toBeInTheDocument()
+    expect(within(cards[3]).getByText('Not graded yet')).toBeInTheDocument()
+  })
+
   it('has Arabic labels', async () => {
     await i18n.changeLanguage('ar')
     renderAt('/teacher/grades/results?classroom=3&subject=7&term=1', <ResultsPage />)

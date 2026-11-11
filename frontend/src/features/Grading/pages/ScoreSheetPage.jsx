@@ -80,7 +80,7 @@ export default function ScoreSheetPage() {
   const average = entered.length ? round(entered.reduce((a, v) => a + Number(v), 0) / entered.length) : 0
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pb-24 md:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-xl font-bold">{assessment.title}</h1>
@@ -89,7 +89,7 @@ export default function ScoreSheetPage() {
             {' · '}{t('grading.maxScore')}: {assessment.max_score}
           </p>
         </div>
-        <button type="button" className="rounded border px-3 py-1.5" disabled={publish.isPending} onClick={() => publish.mutate()}>
+        <button type="button" className="min-h-11 w-full rounded border px-3 py-1.5 font-medium sm:min-h-0 sm:w-auto sm:font-normal" disabled={publish.isPending} onClick={() => publish.mutate()}>
           {t(assessment.is_published ? 'grading.unpublish' : 'grading.publish')}
         </button>
       </div>
@@ -97,39 +97,44 @@ export default function ScoreSheetPage() {
       {message.kind === 'error' && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{message.text}</p>}
       {message.kind === 'ok' && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{message.text}</p>}
 
-      <ul className="divide-y rounded-lg bg-white shadow-sm">
+      {/* A phone: one card per student (number, name and result on top; the status and the score side by side, the score big; the remark under them).
+          From md up the same elements are one row. */}
+      {/* The theme sets rounded-*, shadow-* and bg-* without a breakpoint, so below md the list box is `contents` (no box) and the cards carry their own look. */}
+      <ul className="rounded-lg bg-white shadow-sm max-md:contents md:divide-y">
         {students.map((s, i) => {
           const v = values[s.id] ?? { score: '', status: '', remark: '' }
           const result = resultOf(s)
           const first = s.first_score ?? (v.status === 'retake' && s.status !== 'retake' && s.score !== null ? s.score : null)
           return (
-            <li key={s.id}>
-              <div role="group" aria-label={nameOf(s)} className="flex flex-wrap items-center gap-3 p-3">
-                <span className="w-6 text-center text-sm text-slate-500">{i + 1}</span>
-                <span className="min-w-32 flex-1">
-                  {nameOf(s)}
-                  {first !== null && <span className="block text-xs text-slate-500">{t('studentGrades.firstAttempt', { score: first })}</span>}
-                  {s.was_absent && v.status === '' && v.score === '' && (
-                    <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-amber-700">
-                      {t('grading.absentThatDay')}
-                      <button type="button" className="rounded border border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</button>
-                    </span>
-                  )}
-                </span>
-                <select aria-label={t('grading.statusLabel')} className="rounded border p-2 text-sm" value={v.status} onChange={(e) => setStatus(s.id, e.target.value)}>
+            <li key={s.id} className="max-md:mb-3 max-md:rounded-[26px] max-md:border max-md:bg-white max-md:shadow-[var(--shadow-flat)]">
+              <div role="group" aria-label={nameOf(s)} className="grid grid-cols-2 items-center gap-2 p-3 md:flex md:flex-wrap md:gap-3">
+                <div className="col-span-2 flex items-start gap-2 md:contents">
+                  <span className="mt-0.5 w-6 shrink-0 text-center text-sm text-slate-500">{i + 1}</span>
+                  <span className="min-w-0 flex-1 font-medium md:min-w-32 md:font-normal">
+                    {nameOf(s)}
+                    {first !== null && <span className="block text-xs font-normal text-slate-500">{t('studentGrades.firstAttempt', { score: first })}</span>}
+                    {s.was_absent && v.status === '' && v.score === '' && (
+                      <span className="mt-1 flex flex-wrap items-center gap-2 text-xs font-normal text-amber-700">
+                        {t('grading.absentThatDay')}
+                        <button type="button" className="rounded border border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</button>
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 text-center md:order-1 md:w-28">{result && <ResultBadge kind={result} />}</span>
+                </div>
+                <select aria-label={t('grading.statusLabel')} className="min-h-12 w-full rounded border p-2 text-sm md:min-h-0 md:w-auto" value={v.status} onChange={(e) => setStatus(s.id, e.target.value)}>
                   <option value="">{t('grading.statusNormal')}</option>
                   <option value="absent">{t('grading.statusAbsent')}</option>
                   <option value="makeup">{t('grading.statusMakeup')}</option>
                   <option value="retake">{t('grading.statusRetake')}</option>
                 </select>
                 <input
-                  type="number" min="0" max={assessment.max_score} step="any" dir="ltr" aria-label={t('grading.score')} disabled={v.status === 'absent'}
-                  className="w-24 rounded border p-2 disabled:bg-slate-100" value={v.score ?? ''} onChange={edit(s.id, 'score')}
+                  type="number" inputMode="decimal" min="0" max={assessment.max_score} step="any" dir="ltr" aria-label={t('grading.score')} disabled={v.status === 'absent'}
+                  className="min-h-12 w-full rounded border p-2 text-lg font-semibold disabled:bg-slate-100 md:min-h-0 md:w-24 md:text-base md:font-normal" value={v.score ?? ''} onChange={edit(s.id, 'score')}
                 />
-                <span className="w-28 text-center">{result && <ResultBadge kind={result} />}</span>
                 <input
                   aria-label={t('grading.remark')} placeholder={t('grading.remark')}
-                  className="min-w-32 flex-1 rounded border p-2" value={v.remark ?? ''} onChange={edit(s.id, 'remark')}
+                  className="col-span-2 min-h-12 w-full rounded border p-2 md:order-2 md:min-h-0 md:min-w-32 md:flex-1" value={v.remark ?? ''} onChange={edit(s.id, 'remark')}
                 />
               </div>
             </li>
@@ -137,11 +142,12 @@ export default function ScoreSheetPage() {
         })}
       </ul>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-600">{t('grading.summary', { n: entered.length, total: students.length, avg: average, max: assessment.max_score })}
+      {/* On a phone the summary and Save stay on screen above the tab bar while the teacher scrolls the students. */}
+      <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 border-t bg-white/95 p-3 backdrop-blur md:static md:flex-wrap md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        <p className="min-w-0 flex-1 text-xs text-slate-600 md:text-sm">{t('grading.summary', { n: entered.length, total: students.length, avg: average, max: assessment.max_score })}
           {pending > 0 && ` · ${t('grading.pendingCount', { n: pending })}`}
         </p>
-        <button type="button" disabled={save.isPending} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-60" onClick={submit}>
+        <button type="button" disabled={save.isPending} className="min-h-11 shrink-0 rounded-lg bg-brand px-6 py-2 font-semibold text-white disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={submit}>
           {t('admin.actions.save')}
         </button>
       </div>
