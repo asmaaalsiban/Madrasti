@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -34,7 +34,7 @@ describe('editing a lesson', () => {
   it('places the chosen subject in an empty cell and shows the teacher', async () => {
     api.put.mockResolvedValue({ data: { data: lesson } })
     renderPage(<TimetablePage />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Monday Period 1' }))
+    fireEvent.click(within(await screen.findByRole('table')).getByRole('button', { name: 'Monday Period 1' })) // in the grid: the phone cards show one day, which depends on today
     await screen.findByRole('option', { name: 'Art' })
     fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '6' } })
     expect(screen.getByText('Teacher: Omar')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('editing a lesson', () => {
   it('places a joint lesson when the option is ticked', async () => {
     api.put.mockResolvedValue({ data: { data: { ...lesson, is_joint: true } } })
     renderPage(<TimetablePage />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Monday Period 1' }))
+    fireEvent.click(within(await screen.findByRole('table')).getByRole('button', { name: 'Monday Period 1' })) // in the grid: the phone cards show one day, which depends on today
     await screen.findByRole('option', { name: 'Art' })
     fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '6' } })
     fireEvent.click(screen.getByLabelText(/Joint lesson/))
@@ -56,7 +56,7 @@ describe('editing a lesson', () => {
   it('shows the reason when the lesson is refused', async () => {
     api.put.mockRejectedValue({ response: { data: { errors: { period_id: ['The teacher is already teaching 5-B in this period.'] } } } })
     renderPage(<TimetablePage />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Monday Period 1' }))
+    fireEvent.click(within(await screen.findByRole('table')).getByRole('button', { name: 'Monday Period 1' })) // in the grid: the phone cards show one day, which depends on today
     await screen.findByRole('option', { name: 'Art' })
     fireEvent.change(screen.getByLabelText('Subject'), { target: { value: '6' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
@@ -87,9 +87,10 @@ describe('TeacherAvailabilityPage', () => {
   it('shows the saved periods, saves the changed ones and reports clashes', async () => {
     api.put.mockResolvedValue({ data: { data: { period_ids: [2, 3], clashes: [{ id: 1, classroom: '5-A' }] } } })
     renderPage(<TeacherAvailabilityPage />)
-    expect(await screen.findAllByText(/Unavailable/)).toHaveLength(1)
-    fireEvent.click(screen.getByRole('button', { name: 'Monday Period 1' }))
-    expect(screen.getAllByText(/Unavailable/)).toHaveLength(2)
+    const grid = within(await screen.findByRole('table'))
+    expect(grid.getAllByText(/Unavailable/)).toHaveLength(1)
+    fireEvent.click(grid.getByRole('button', { name: 'Monday Period 1' }))
+    expect(grid.getAllByText(/Unavailable/)).toHaveLength(2)
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/teachers/91/unavailability', { period_ids: [2, 3] }))
     expect(await screen.findByText('5-A')).toBeInTheDocument()

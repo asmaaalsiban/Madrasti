@@ -285,6 +285,9 @@ html[data-lite] .lp-tilt { transition: none; }
   table[data-grid] td * { font-size: inherit; }
   table[data-grid] td > div, table[data-grid] td button > div { padding: 0.15rem; }
 
+  /* The box that framed the table would sit behind the cards like a second frame: take its border and background away. */
+  :is(.overflow-x-auto, .overflow-y-auto):has(> table[data-stack]) { border-width: 0; border-radius: 0; background: transparent; box-shadow: none; }
+
   table[data-stack], table[data-stack] tbody, table[data-stack] tr, table[data-stack] td { display: block; width: 100% !important; }
   table[data-stack] { font-size: 0.8125rem; }
   /* The header row stays for screen readers but is not drawn: every cell already carries its column name. */
@@ -302,7 +305,7 @@ html[data-lite] .lp-tilt { transition: none; }
   table[data-stack] td[data-title]::before, table[data-stack] td[data-actions]::before { display: none; }
   table[data-stack] td[data-title] + td { border-top: 0 !important; }
   table[data-stack] td[data-actions] { display: block; order: 99; padding: 0.5rem 0 0.25rem !important; }
-  table[data-stack] td[data-actions] > div { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
-  table[data-stack] td[data-actions] button { min-height: 2.5rem; padding: 0.4rem 0.5rem; border-radius: 0.6rem; background: var(--color-brand); color: #fff !important; text-decoration: none; font-weight: 600; text-align: center; }
-  table[data-stack] td[data-actions] button.text-red-600 { background: #fef2f2; color: #dc2626 !important; }
+  table[data-stack] td[data-actions] > div, table[data-stack] td[data-actions]:not(:has(> div)) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
+  table[data-stack] td[data-actions] button, table[data-stack] td[data-actions] a { display: flex; align-items: center; justify-content: center; min-height: 2.5rem; padding: 0.4rem 0.5rem; border-radius: 0.6rem; background: var(--color-brand); color: #fff !important; text-decoration: none; font-weight: 600; text-align: center; }
+  table[data-stack] td[data-actions] button.text-red-600, table[data-stack] td[data-actions] a.text-red-600 { background: #fef2f2; color: #dc2626 !important; }
 }

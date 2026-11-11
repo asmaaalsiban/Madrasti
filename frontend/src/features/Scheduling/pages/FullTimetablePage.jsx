@@ -23,9 +23,6 @@ export default function FullTimetablePage() {
   const [gradeId, setGradeId] = useState('')
   const [teacherId, setTeacherId] = useState('')
   const [onlyProblems, setOnlyProblems] = useState(false)
-  const [phoneColumn, setPhoneColumn] = useState('') // the section or teacher chosen on a phone
-  const [today] = useState(() => new Date().getDay()) // 0 = Sunday, like the periods
-  const [phoneDay, setPhoneDay] = useState(null) // the day chosen on a phone (the grid shows several days; a phone shows one)
   const overview = useQuery({ queryKey: ['timetable', 'overview'], queryFn: async () => (await api.get('/timetable/overview')).data.data })
   const check = useQuery({ queryKey: ['timetable', 'check'], queryFn: async () => (await api.get('/timetable/check')).data.data })
 
@@ -63,8 +60,6 @@ export default function FullTimetablePage() {
   const shownDays = day === 'all' ? days : [Number(day)]
   const counts = check.data?.counts
   const periodAt = (dayNo, number) => d.periods.find((p) => p.day_of_week === dayNo && p.number === number)
-  // On a phone: today if the school has lessons that day, otherwise the first school day.
-  const phoneDayNo = phoneDay !== null && days.includes(phoneDay) ? phoneDay : days.includes(today) ? today : days[0]
 
   const columns = axis === 'sections' ? rooms.map((c) => ({ id: c.id, label: c.name, sub: c.homeroom })) : teachers.map((x) => ({ id: x.id, label: x.name }))
   const cellOf = (col, dayNo, number) => {
@@ -125,8 +120,7 @@ export default function FullTimetablePage() {
       </div>
 
       <PhoneTimetable columns={columns} columnLabel={t(axis === 'sections' ? 'fullTimetable.bySections' : 'fullTimetable.byTeachers')} days={days} numbers={numbers} cellOf={cellOf} periodAt={periodAt}
-        teacherId={teacherId} onlyProblems={onlyProblems} onPickTeacher={(id) => setTeacherId(id === teacherId ? '' : id)}
-        columnId={phoneColumn} onColumn={setPhoneColumn} day={phoneDayNo} onDay={setPhoneDay} />
+        highlightTeacher={teacherId} onlyProblems={onlyProblems} onPick={(cell) => setTeacherId(String(cell.teacher) === teacherId ? '' : String(cell.teacher))} />
 
       {/* A tablet, a computer and the printer keep the grid; a phone has the cards above. */}
       <div className="hidden space-y-4 md:block print:block">

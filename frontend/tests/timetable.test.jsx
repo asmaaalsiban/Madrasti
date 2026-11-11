@@ -122,7 +122,8 @@ describe('TimetablePage', () => {
   it('shows the week of the first classroom: periods as rows and days as columns', async () => {
     serve()
     renderPage(<TimetablePage />)
-    expect(await screen.findByText('Math')).toBeInTheDocument()
+    // The week is drawn twice (cards for a phone, the grid for the rest; CSS shows one), so the grid is looked up by its role.
+    expect(within(await screen.findByRole('table')).getByText('Math')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/timetable', { params: { classroom_id: 3 } })
     expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['Periods and days', 'Sunday', 'Monday'])
     const first = screen.getByRole('row', { name: /Period 1/ })
@@ -130,13 +131,13 @@ describe('TimetablePage', () => {
     expect(within(first).getByText('Math')).toBeInTheDocument()
     expect(within(first).getByText('Sara')).toBeInTheDocument()
     expect(within(screen.getByRole('row', { name: /Period 2/ })).getByText('Arabic')).toBeInTheDocument()
-    expect(screen.getByLabelText('Locked')).toBeInTheDocument()
+    expect(within(screen.getByRole('table')).getByLabelText('Locked')).toBeInTheDocument()
   })
 
   it('switches to the week of a teacher', async () => {
     serve()
     renderPage(<TimetablePage />)
-    await screen.findByText('Math')
+    await screen.findByRole('table')
     fireEvent.click(screen.getByRole('tab', { name: 'By teacher' }))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/timetable', { params: { teacher_id: 91 } }))
     expect(screen.getByLabelText('Teacher')).toHaveValue('91')
@@ -147,7 +148,7 @@ describe('TimetablePage', () => {
     const preview = { dry_run: true, seed: 5, attempts: 3, total: 315, placed: 313, locked: 0, incomplete: [{ classroom: '1-A', lessons: 28, slots: 30, empty: 2 }], unplaced: [{ classroom: '5-A', subject: 'Art', subject_ar: 'فنية', count: 2 }], without_teacher: [{ classroom: '5-B', subject: 'Music', subject_ar: 'موسيقى', periods: 1 }] }
     api.post.mockResolvedValueOnce({ data: { data: preview } }).mockResolvedValueOnce({ data: { data: { ...preview, dry_run: false } } })
     renderPage(<TimetablePage />)
-    await screen.findByText('Math')
+    await screen.findByRole('table')
     fireEvent.click(screen.getByRole('button', { name: 'Generate the timetable' }))
     const dialog = screen.getByRole('dialog')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Preview' }))
@@ -166,7 +167,7 @@ describe('TimetablePage', () => {
     serve()
     api.post.mockRejectedValue({ response: { status: 422, data: { message: 'Set up the school day first (days, periods and times).' } } })
     renderPage(<TimetablePage />)
-    await screen.findByText('Math')
+    await screen.findByRole('table')
     fireEvent.click(screen.getByRole('button', { name: 'Generate the timetable' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Preview' }))
     expect(await within(screen.getByRole('dialog')).findByRole('alert')).toHaveTextContent('Set up the school day first')
@@ -176,7 +177,7 @@ describe('TimetablePage', () => {
     await i18n.changeLanguage('ar')
     serve()
     renderPage(<TimetablePage />)
-    expect(await screen.findByText('Math-ar')).toBeInTheDocument()
+    expect(within(await screen.findByRole('table')).getByText('Math-ar')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['الحصص والأيام', 'الأحد', 'الإثنين'])
   })
 })
@@ -205,10 +206,28 @@ describe('Week views of the teacher, the student and the parent', () => {
     expect(within(screen.getByRole('row', { name: /Period 2/ })).getAllByText('Free').length).toBeGreaterThan(0)
   })
 
+  it('shows the same week on a phone as day pills and one card per period, with the room, free periods and the other days', async () => {
+    api.get.mockResolvedValue({ data: { data: { ...week, entries: [{ ...week.entries[0], room: { id: 7, name: 'R-5' } }, week.entries[1]] } } })
+    renderPage(<TeacherTimetablePage />)
+    const phone = within(await screen.findByTestId('phone-timetable'))
+    fireEvent.click(phone.getByRole('tab', { name: 'Sunday' }))
+    const sunday = phone.getAllByRole('listitem')
+    expect(sunday).toHaveLength(2)
+    expect(within(sunday[0]).getByText('Math')).toBeInTheDocument()
+    expect(within(sunday[0]).getByText('5-A')).toBeInTheDocument() // a teacher's card names the section
+    expect(within(sunday[0]).getByText('R-5')).toBeInTheDocument()
+    expect(within(sunday[0]).getByText('07:45')).toBeInTheDocument()
+    expect(within(sunday[1]).getByText('Free')).toBeInTheDocument()
+    fireEvent.click(phone.getByRole('tab', { name: 'Monday' }))
+    expect(within(phone.getAllByRole('listitem')[0]).getByText('Art')).toBeInTheDocument()
+    expect(phone.queryByRole('tab', { name: '5-A' })).not.toBeInTheDocument() // one week only: no row of sections to pick from
+  })
+
   it('shows the student the week of the section with the teacher of every lesson', async () => {
     renderPage(<StudentTimetablePage />)
     expect(await screen.findByRole('heading', { name: 'My timetable' })).toBeInTheDocument()
-    expect(await screen.findByText('Math')).toBeInTheDocument()
+    // The week is drawn twice (cards for a phone, the grid for the rest; CSS shows one), so the grid is looked up by its role.
+    expect(within(await screen.findByRole('table')).getByText('Math')).toBeInTheDocument()
     expect(screen.getAllByText('Sara', { selector: 'span' }).length).toBeGreaterThan(0)
   })
 

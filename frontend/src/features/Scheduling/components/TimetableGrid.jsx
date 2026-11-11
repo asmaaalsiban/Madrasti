@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import PhoneTimetable from './PhoneTimetable'
 
 // The week as a grid: periods are rows, school days are columns. Today's column is highlighted.
 // onCellClick(period, entry): makes every cell a button (the admin edits a lesson); marked: Set of period ids shown as taken (a teacher's unavailable periods).
@@ -24,8 +25,22 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
   const subjectName = (s) => s[`name_${i18n.language}`] || s.name_ar
   const today = new Date().getDay() // 0 = Sunday, like the periods
 
+  // The same week as cards for a phone (day pills, one card per period); the grid below is for tablets, computers and the printer.
+  const phoneCell = (_column, d, n) => {
+    const period = periodAt(d, n)
+    if (!period) return { gone: true }
+    const e = entryAt(d, n)
+    return {
+      entry: e, teacher: e?.teacher?.id, text: e && subjectName(e.subject), sub: e && (show === 'teacher' ? e.teacher.name : sectionsAt(d, n)),
+      room: typeof e?.room === 'string' ? e.room : e?.room?.name, locked: e?.is_locked, joint: e?.is_joint, unavailable: Boolean(marked?.has(period.id)),
+    }
+  }
+  const pick = onCellClick ? Object.assign((cell, n, period) => onCellClick(period, cell.entry ?? null), { always: true }) : null
+
   return (
-    <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
+    <>
+    <PhoneTimetable columns={[{ id: 'week', label: '' }]} days={days} numbers={numbers} cellOf={phoneCell} periodAt={periodAt} onPick={pick} emptyLabel={emptyLabel} />
+    <div className="hidden overflow-x-auto rounded-lg bg-white shadow-sm md:block print:block">
       <table data-grid className="w-full border-collapse text-start text-sm">
         <thead className="bg-slate-100">
           <tr>
@@ -71,5 +86,6 @@ export default function TimetableGrid({ periods, entries, show = 'teacher', empt
         </tbody>
       </table>
     </div>
+    </>
   )
 }
