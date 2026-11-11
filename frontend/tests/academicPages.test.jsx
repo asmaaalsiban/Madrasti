@@ -43,7 +43,8 @@ describe('OverviewPage', () => {
   it('renders the four counts', async () => {
     mockApi()
     renderPage(<OverviewPage />)
-    for (const n of ['30', '12']) await waitFor(() => expect(screen.getByText(n)).toBeInTheDocument()) // the numbers count up to it
+    // The numbers count up for 0.9 s (CountUp), so give the wait more than the 1 s default: on a busy machine the animation ends later.
+    for (const n of ['30', '12']) await waitFor(() => expect(screen.getByText(n)).toBeInTheDocument(), { timeout: 5000 })
     expect(api.get).toHaveBeenCalledWith('/admin/overview')
   })
 
@@ -51,7 +52,7 @@ describe('OverviewPage', () => {
     mockApi()
     renderPage(<OverviewPage />)
     expect(await screen.findByRole('img', { name: 'Student attendance today: 90%' })).toBeInTheDocument() // the gauge
-    await waitFor(() => expect(screen.getAllByText('90%').length).toBeGreaterThan(0)) // the pill and the gauge count up to it
+    await waitFor(() => expect(screen.getAllByText('90%').length).toBeGreaterThan(0), { timeout: 5000 }) // the pill and the gauge count up to it
     expect(screen.getByRole('img', { name: 'Collected per month' })).toBeInTheDocument() // the analytics card opens on the money tab
     expect(screen.getByText('Purchase requests')).toBeInTheDocument()
     expect(screen.queryByText('Data privacy requests')).not.toBeInTheDocument()
