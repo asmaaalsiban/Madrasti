@@ -41,19 +41,21 @@ describe('ReportCard', () => {
     expect(screen.getByText('Ahmad')).toBeInTheDocument()
     expect(screen.getByText('Grade 5 · 5-A')).toBeInTheDocument()
 
-    const math = screen.getByText('Math').closest('tr')
+    // The page holds the phone cards and the table (CSS shows one of them), so the table's rows are looked up inside the table.
+    const table = within(screen.getByRole('table'))
+    const math = table.getByText('Math').closest('tr')
     expect(within(math).getByText('90%')).toBeInTheDocument()
     expect(within(math).getByText('80%')).toBeInTheDocument()
     expect(within(math).getByText('Pass')).toBeInTheDocument()
-    const arabic = screen.getByText('Arabic').closest('tr')
+    const arabic = table.getByText('Arabic').closest('tr')
     expect(within(arabic).getByText('—')).toBeInTheDocument() // no second-term grade yet
     expect(within(arabic).getByText('Fail')).toBeInTheDocument()
 
-    const average = screen.getByText('Average').closest('tr')
+    const average = table.getByText('Average').closest('tr')
     expect(within(average).getByText('65%')).toBeInTheDocument()
     expect(within(average).getByText('60%')).toBeInTheDocument()
-    expect(within(screen.getByText('Days absent').closest('tr')).getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('Behaviour').closest('tr')).toHaveTextContent('Excellent')
+    expect(within(table.getByText('Days absent').closest('tr')).getByText('3')).toBeInTheDocument()
+    expect(table.getByText('Behaviour').closest('tr')).toHaveTextContent('Excellent')
     expect(screen.getByText(/Pass mark: 50%/)).toBeInTheDocument()
     for (const who of ['Homeroom teacher', 'Principal', 'Parent']) expect(screen.getByText(who)).toBeInTheDocument()
   })
@@ -92,12 +94,29 @@ describe('ReportCard', () => {
     expect(await screen.findByText('No published grades yet.')).toBeInTheDocument()
   })
 
+  it('has a card per subject for a phone: the marks, the result and a bar coloured by the annual mark', async () => {
+    await i18n.changeLanguage('en')
+    api.get.mockResolvedValue({ data: { data: card() } })
+    wrap()
+    await screen.findByText('Bright School')
+    const cards = within(screen.getByTestId('report-cards'))
+    const math = cards.getByText('Math').closest('section')
+    expect(within(math).getByText('90%')).toBeInTheDocument()
+    expect(within(math).getByText('Pass')).toBeInTheDocument()
+    expect(within(math).getByRole('progressbar', { name: 'Math' })).toHaveAttribute('aria-valuenow', '80')
+    expect(within(math).getByRole('progressbar').firstChild).toHaveClass('bg-amber-400') // a pass, not yet 85
+    const arabic = cards.getByText('Arabic').closest('section')
+    expect(within(arabic).getByText('Fail')).toBeInTheDocument()
+    expect(within(arabic).getByRole('progressbar').firstChild).toHaveClass('bg-red-500') // under the pass mark
+    expect(cards.getByText('Average')).toBeInTheDocument()
+  })
+
   it('is written in Arabic when the language is Arabic', async () => {
     await i18n.changeLanguage('ar')
     api.get.mockResolvedValue({ data: { data: card() } })
     wrap()
     expect(await screen.findByLabelText('شهادة الطالب')).toBeInTheDocument()
-    expect(screen.getByText('الرياضيات')).toBeInTheDocument()
+    expect(within(screen.getByRole('table')).getByText('الرياضيات')).toBeInTheDocument()
     expect(screen.getByText('الصف الخامس · 5-A')).toBeInTheDocument()
   })
 })
