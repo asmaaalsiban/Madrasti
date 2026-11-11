@@ -11,11 +11,12 @@ export default function Modal({ open, title, onClose, children, size = 'md', hid
 
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/40 sm:items-center sm:p-4">
       <div
         role="dialog" aria-modal="true" aria-label={title}
-        className={`max-h-[calc(100dvh-2rem)] w-full overflow-y-auto rounded-lg bg-white p-5 shadow-lg ${size === 'lg' ? 'max-w-2xl' : 'max-w-md'}`}
+        className={`max-h-[90dvh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-lg sm:max-h-[calc(100dvh-2rem)] sm:rounded-lg ${size === 'lg' ? 'max-w-2xl' : 'max-w-md'}`}
       >
+        <div aria-hidden className="mx-auto -mt-2 mb-3 h-1 w-10 rounded-full bg-slate-300 sm:hidden" />
         {!hideTitle && <h2 className="mb-4 text-lg font-bold">{title}</h2>}
         {children}
       </div>
