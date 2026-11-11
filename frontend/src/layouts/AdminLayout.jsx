@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
 import HeaderIcons from '../components/shared/HeaderIcons'
+import useIsPhone from '../lib/useIsPhone'
 import { ArrangeBar, ColorButton, MoveButtons } from '../components/shared/Arrange'
 import useLayout from '../features/Layout/useLayout'
 import { iconPaint, iconSize, orderBy, swap } from '../features/Layout/arrange'
@@ -31,6 +32,7 @@ const readToggled = () => {
 }
 
 export default function AdminLayout() {
+  const phone = useIsPhone()
   const { t } = useTranslation()
   const { pathname } = useLocation()
   // Each group of the menu opens and closes. By default only the group of the current page is open; what the principal opens or closes is remembered on this device.
@@ -61,17 +63,21 @@ export default function AdminLayout() {
 
   return (
     <div className="has-tabbar min-h-screen md:flex">
-      <aside className="bg-deep-harbor text-white md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto print:hidden">
+      <aside className="bg-deep-harbor text-white max-md:sticky max-md:top-0 max-md:z-30 md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto print:hidden">
         <div className="flex items-center justify-between gap-2 p-4">
           <span className="flex min-w-0 items-center gap-2">
             <SchoolLogo url={school?.logo_url} className="h-9 w-9" />
             <span className="truncate text-lg font-extrabold">{school?.name ?? t('common.appName')}</span>
           </span>
-          <button type="button" className="flex items-center gap-1 rounded border px-3 py-1 text-sm md:hidden" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-            <Menu aria-hidden size={16} />{t('admin.menu')}
-          </button>
+          {/* On a phone there is one bar: the school, the bell and the account, then the menu button (a computer has the header on the right). */}
+          <span className="flex shrink-0 items-center gap-1.5 md:hidden">
+            {phone && <><HeaderIcons /><UserMenu detail={t('roles.admin')} /></>}
+            <button type="button" className="flex items-center gap-1 rounded border px-3 py-1 text-sm" aria-label={t('admin.menu')} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+              <Menu aria-hidden size={16} /><span className="max-[400px]:sr-only">{t('admin.menu')}</span>
+            </button>
+          </span>
         </div>
-        <nav aria-label={t('tabbar.sideMenu')} className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 md:block`}>
+        <nav aria-label={t('tabbar.sideMenu')} className={`${open ? 'block' : 'hidden'} space-y-4 px-3 pb-6 max-md:max-h-[calc(100dvh-5rem)] max-md:overflow-y-auto md:block`}>
           <div className="px-1"><ArrangeBar className="[&_button]:!border-white/30 [&_span]:!text-white/70" editing={editing} onToggle={() => setEditing(!editing)} onReset={layout.reset} custom={layout.custom} size={layout.size} onSize={(size) => layout.save({ size })} /></div>
           {groups.map((group, gi) => (
             <div key={group.key ?? 'top'} className="space-y-0.5">
@@ -114,12 +120,14 @@ export default function AdminLayout() {
         </nav>
       </aside>
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 flex items-center justify-end gap-2 border-b border-fog bg-snow px-4 py-2.5 print:hidden">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <HeaderIcons />
-            <UserMenu detail={t('roles.admin')} />
-          </div>
-        </header>
+        {!phone && (
+          <header className="sticky top-0 z-30 flex items-center justify-end gap-2 border-b border-fog bg-snow px-4 py-2.5 print:hidden">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <HeaderIcons />
+              <UserMenu detail={t('roles.admin')} />
+            </div>
+          </header>
+        )}
         <main id="main" tabIndex={-1} className={`mx-auto p-4 outline-none ${pathname === '/admin' ? 'max-w-none' : 'max-w-5xl'}`}><BackButton /><PageEnter key={pathname}><Outlet /></PageEnter></main>
         <BottomTabBar />
       <ResponsiveTables />

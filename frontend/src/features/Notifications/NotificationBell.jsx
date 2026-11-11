@@ -63,7 +63,7 @@ export default function NotificationBell() {
         {unread > 0 && <span aria-hidden className="absolute -end-1 -top-1 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold leading-5 text-white">{unread}</span>}
       </button>
       {open && (
-        <div role="dialog" aria-label={t('notifications.title')} className="absolute end-0 z-40 mt-2 w-80 max-w-[90vw] rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg">
+        <div role="dialog" aria-label={t('notifications.title')} className="z-40 rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg max-md:fixed max-md:inset-x-3 max-md:top-[4.75rem] md:absolute md:end-0 md:mt-2 md:w-80 md:max-w-[90vw]">
           <div className="flex items-center justify-between px-2 pb-2">
             <span className="font-bold">{t('notifications.title')}</span>
             {unread > 0 && <button type="button" className="text-xs text-brand underline" onClick={() => readAll.mutate()}>{t('notifications.readAll')}</button>}
