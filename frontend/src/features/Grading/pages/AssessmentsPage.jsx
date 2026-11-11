@@ -83,36 +83,37 @@ export default function AssessmentsPage() {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="space-y-3 sm:flex sm:items-center sm:justify-between sm:space-y-0">
         <h1 className="text-xl font-bold">{t('grading.title')}</h1>
-        <div className="flex items-center gap-2">
+        {/* On a phone the two main buttons sit under the title, side by side and big enough to hit. */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+          <button type="button" className="min-h-11 rounded bg-brand px-4 py-1.5 font-semibold text-white disabled:opacity-60 sm:order-2 sm:min-h-0 sm:font-normal" disabled={params === null} onClick={() => openForm(null)}>
+            {t('grading.add')}
+          </button>
           {params && (
-            <Link className="rounded border px-3 py-1.5" to={`${base}/results?${new URLSearchParams({ classroom: params.classroom_id, subject: params.subject_id, term: params.term_id })}`}>
+            <Link className="flex min-h-11 items-center justify-center rounded border px-3 py-1.5 font-semibold text-brand sm:order-1 sm:min-h-0 sm:font-normal sm:text-inherit" to={`${base}/results?${new URLSearchParams({ classroom: params.classroom_id, subject: params.subject_id, term: params.term_id })}`}>
               {t('grading.results')}
             </Link>
           )}
-          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" disabled={params === null} onClick={() => openForm(null)}>
-            {t('grading.add')}
-          </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
         <label className="text-sm">
           {t('grading.classroom')}
-          <select className="mt-1 block rounded border p-2" value={classroomId ?? ''} onChange={(e) => choose({ classroom: e.target.value, subject: '' })}>
+          <select className="mt-1 block w-full rounded border p-2 sm:w-auto" value={classroomId ?? ''} onChange={(e) => choose({ classroom: e.target.value, subject: '' })}>
             {classrooms.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </label>
         <label className="text-sm">
           {t('grading.subject')}
-          <select className="mt-1 block rounded border p-2" value={subjectId ?? ''} onChange={(e) => choose({ subject: e.target.value })}>
+          <select className="mt-1 block w-full rounded border p-2 sm:w-auto" value={subjectId ?? ''} onChange={(e) => choose({ subject: e.target.value })}>
             {subjects.map((s) => <option key={s.id} value={s.id}>{s[`name_${i18n.language}`]}</option>)}
           </select>
         </label>
-        <label className="text-sm">
+        <label className="col-span-2 text-sm sm:col-span-1">
           {t('grading.term')}
-          <select className="mt-1 block rounded border p-2" value={termId ?? ''} onChange={(e) => choose({ term: e.target.value })}>
+          <select className="mt-1 block w-full rounded border p-2 sm:w-auto" value={termId ?? ''} onChange={(e) => choose({ term: e.target.value })}>
             {terms.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
           </select>
         </label>
@@ -121,32 +122,68 @@ export default function AssessmentsPage() {
       {notice && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{notice}</p>}
       <p className={`text-sm ${used > 100 ? 'text-red-700' : 'text-slate-600'}`}>{t('grading.weightsUsed', { used: Math.round(used * 100) / 100 })}</p>
 
-      <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
+      {/* A phone: one card per assessment. The title, its type and the status on top, the details in a grid, the actions at the bottom. */}
+      <ul className="space-y-3 md:hidden" data-testid="assessment-cards">
+        {rows.map((r) => (
+          <li key={r.id} className="rounded-xl border bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="break-words text-base font-bold">{r.title}</h2>
+                <p className="text-xs text-slate-500">{t(`grading.types.${r.type}`)}</p>
+              </div>
+              <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${r.is_published ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                {t(r.is_published ? 'grading.published' : 'grading.draft')}
+              </span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div className="rounded-lg bg-slate-50 p-2"><dt className="text-xs text-slate-500">{t('grading.dateCol')}</dt><dd dir="ltr" className="text-start font-medium">{r.held_on ?? '—'}</dd></div>
+              <div className="rounded-lg bg-slate-50 p-2"><dt className="text-xs text-slate-500">{t('grading.maxCol')}</dt><dd className="font-medium">{r.max_score}</dd></div>
+              <div className="rounded-lg bg-slate-50 p-2"><dt className="text-xs text-slate-500">{t('grading.weightCol')}</dt><dd className="font-medium">{r.weight}%</dd></div>
+              <div className="rounded-lg bg-slate-50 p-2">
+                <dt className="text-xs text-slate-500">{t('grading.progress')}</dt>
+                <dd className="font-medium"><span dir="ltr" className="inline-block">{r.scored} / {r.students}</span></dd>
+                {r.absent > 0 && <dd className="text-xs text-amber-700">{t('grading.pendingCount', { n: r.absent })}</dd>}
+              </div>
+            </dl>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link className="col-span-2 flex min-h-11 items-center justify-center rounded-lg bg-brand px-3 font-semibold text-white" to={`${base}/${r.id}`}>{t('grading.enterScores')}</Link>
+              <button type="button" className="min-h-11 rounded-lg border px-3 font-medium text-slate-700" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))}>
+                {t(r.is_published ? 'grading.unpublish' : 'grading.publish')}
+              </button>
+              <button type="button" className="min-h-11 rounded-lg border px-3 font-medium text-brand" onClick={() => openForm(r)}>{t('admin.actions.edit')}</button>
+              {!r.is_published && <button type="button" className="col-span-2 min-h-11 rounded-lg bg-red-50 px-3 font-medium text-red-600" onClick={() => setToDelete(r)}>{t('admin.actions.delete')}</button>}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* A tablet and a computer keep the table (in a box that scrolls sideways when it must); tighter cells on a tablet. */}
+      <div className="hidden overflow-x-auto rounded-lg bg-white shadow-sm md:block">
         <table className="w-full text-start text-sm">
           <thead className="bg-slate-100">
             <tr>
-              {['titleCol', 'typeCol', 'dateCol', 'maxCol', 'weightCol', 'progress', 'status'].map((k) => <th key={k} className="p-2 text-start font-medium sm:p-3">{t(`grading.${k}`)}</th>)}
-              <th className="p-2 text-start font-medium sm:p-3">{t('admin.actions.actions')}</th>
+              {['titleCol', 'typeCol', 'dateCol', 'maxCol', 'weightCol', 'progress', 'status'].map((k) => <th key={k} className="p-2 text-start font-medium lg:p-3">{t(`grading.${k}`)}</th>)}
+              <th className="p-2 text-start font-medium lg:p-3">{t('admin.actions.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t">
-                <td className="p-2 font-medium sm:p-3">{r.title}</td>
-                <td className="p-2 sm:p-3">{t(`grading.types.${r.type}`)}</td>
-                <td dir="ltr" className="p-2 text-start sm:p-3">{r.held_on ?? '—'}</td>
-                <td className="p-2 sm:p-3">{r.max_score}</td>
-                <td className="p-2 sm:p-3">{r.weight}%</td>
-                <td className="p-2 sm:p-3">
+                <td className="p-2 font-medium lg:p-3">{r.title}</td>
+                <td className="p-2 lg:p-3">{t(`grading.types.${r.type}`)}</td>
+                <td dir="ltr" className="whitespace-nowrap p-2 text-start lg:p-3">{r.held_on ?? '—'}</td>
+                <td className="p-2 lg:p-3">{r.max_score}</td>
+                <td className="p-2 lg:p-3">{r.weight}%</td>
+                <td className="p-2 lg:p-3">
                   <span dir="ltr" className="inline-block">{r.scored} / {r.students}</span>
                   {r.absent > 0 && <span className="block text-xs text-amber-700">{t('grading.pendingCount', { n: r.absent })}</span>}
                 </td>
-                <td className="p-2 sm:p-3">
+                <td className="p-2 lg:p-3">
                   <span className={`rounded px-2 py-0.5 text-xs ${r.is_published ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                     {t(r.is_published ? 'grading.published' : 'grading.draft')}
                   </span>
                 </td>
-                <td className="p-2 sm:p-3">
+                <td className="p-2 lg:p-3">
                   <div className="flex flex-wrap gap-3">
                     <Link className="text-brand underline" to={`${base}/${r.id}`}>{t('grading.enterScores')}</Link>
                     <button type="button" className="text-slate-700 underline" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))}>
@@ -160,8 +197,8 @@ export default function AssessmentsPage() {
             ))}
           </tbody>
         </table>
-        {list.isSuccess && rows.length === 0 && <p className="p-6 text-center text-slate-500">{t('admin.actions.empty')}</p>}
       </div>
+      {list.isSuccess && rows.length === 0 && <p className="rounded-lg bg-white p-6 text-center text-slate-500 shadow-sm">{t('admin.actions.empty')}</p>}
 
       <Modal open={editing !== null} title={t('grading.formTitle')} onClose={() => setEditing(null)}>
         <form onSubmit={(e) => { e.preventDefault(); save.mutate() }} className="space-y-3">
