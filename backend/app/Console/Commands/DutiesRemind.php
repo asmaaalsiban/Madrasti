@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\Scheduling\Services\DutyScheduler;
 use Illuminate\Console\Command;
 
@@ -16,6 +17,11 @@ class DutiesRemind extends Command
 
     public function handle(DutyScheduler $duties): int
     {
+        // A suspended, expired or closed school gets no reminders.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return self::SUCCESS;
+        }
+
         $this->info($duties->remind($this->option('date') ?: null).' person(s) reminded');
 
         return self::SUCCESS;

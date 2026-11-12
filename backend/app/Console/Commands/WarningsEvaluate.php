@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\Discipline\Services\WarningRules;
 use Illuminate\Console\Command;
 
@@ -16,6 +17,11 @@ class WarningsEvaluate extends Command
 
     public function handle(WarningRules $rules): int
     {
+        // A suspended, expired or closed school gets no reminders.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return self::SUCCESS;
+        }
+
         $r = $rules->evaluate();
         $this->info("{$r['created']} warning(s) sent, {$r['pending']} waiting for approval");
 
