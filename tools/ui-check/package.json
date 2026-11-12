@@ -1,0 +1,13 @@
+{
+  "name": "madrasati-ui-check",
+  "private": true,
+  "description": "Opens every screen of the app at phone, tablet and computer widths against a local demo school and reports what is wrong.",
+  "scripts": {
+    "sweep": "node run.cjs sweep",
+    "shots": "node run.cjs shots",
+    "up": "node run.cjs up"
+  },
+  "dependencies": {
+    "playwright": "^1.56.1"
+  }
+}
