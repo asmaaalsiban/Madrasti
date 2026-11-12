@@ -45,6 +45,29 @@ php artisan tenants:list
 
 Other tools: `a11y/axe-check.js` (accessibility check, instructions at its top), `loadtest/` (see its README), `php artisan backup:run|status|list|restore`.
 
+## Checking screens (do this before calling a UI change done)
+
+`tools/ui-check/` opens every screen of the app against a throw-away local demo school (SQLite in the temp folder, so no MySQL is needed; it creates the school, starts the API and Vite, signs in as an admin, a teacher, a student and a parent, and stops everything at the end). Works on Windows, macOS and Linux; needs `php` and `node`.
+
+```
+cd tools/ui-check && npm install && npx playwright install chromium    # once
+node run.cjs sweep                                                       # every route, phone width, Arabic and English: sideways scroll, crashes, 5xx answers (exit 1 on any)
+node run.cjs sweep --viewports=phone,tablet,laptop --lang=ar            # more widths
+node run.cjs shots --pages=/admin/students,/teacher/attendance --viewports=phone,tablet   # full-page screenshots into tools/ui-check/out/
+node run.cjs up                                                          # only start the demo (http://127.0.0.1:5199, school code school2) and wait
+```
+
+Demo logins (school code `school2`): `admin@school2.test`, `head1@school2.test` (teacher), `ahmad.d1001@school2.edu` (student), `parent1@school2.test` (parent), password `Test12345`. The sweep finds layout breakage, not ugliness: look at the screenshots for that. Its data is the demo data, not a real school.
+
+When running the demo by hand instead: `php artisan serve` ignores variables you set (it re-reads `.env`), so start the API with `php -S 127.0.0.1:8000 index.php` from `backend/public`; set `BCRYPT_ROUNDS` (an empty value makes hashing fail) and `APP_MAINTENANCE_DRIVER=file`.
+
+### Before saying a UI change is done
+
+- See it on a phone (390px), a tablet (820px) and a computer (1280px), in Arabic and English. Use `shots` for the pages you changed and `sweep` for the rest.
+- On a phone nothing scrolls sideways: tables become cards (see "Design system (Relief) and phone layout" below), timetables use day pills, long lists keep their Save button in reach.
+- Run `npm test` and `npm run build` (and `php artisan test` for backend changes).
+- Say what you could not check. Never claim a screen works that you did not look at.
+
 ## Architecture
 
 ### Tenancy: one URL, the school travels in a header
