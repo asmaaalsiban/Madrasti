@@ -21,6 +21,7 @@ Route::post('payments/webhook/{school}/{provider}', PaymentWebhookController::cl
 
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [CentralAuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('verify', [CentralAuthController::class, 'verify'])->middleware('throttle:central-code');
 
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('logout', [CentralAuthController::class, 'logout']);

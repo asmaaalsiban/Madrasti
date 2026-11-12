@@ -25,4 +25,10 @@ return [
     'email_requested' => 'If this email can be used, a code was sent to it.',
     'email_mail_subject' => 'Confirm your email',
     'email_mail_intro' => 'Hello :name, use this code to confirm your email on your school account:',
+    'admin_code_subject' => 'Your sign-in code',
+    'admin_code_intro' => 'Hello :name, your Super Admin sign-in code is:',
+    'admin_code_valid' => 'The code is valid for :minutes minutes and can be used once.',
+    'admin_code_ignore' => 'If you did not try to sign in, ignore this e-mail and change your password.',
+    'admin_code_invalid' => 'The code is wrong or expired. Sign in again to get a new one.',
+    'admin_password_short' => 'The password must be at least :min characters.',
 ];

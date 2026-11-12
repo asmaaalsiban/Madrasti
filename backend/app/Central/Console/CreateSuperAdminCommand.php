@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Central\Console;
 
 use App\Central\Models\SuperAdmin;
+use App\Central\Rules\LongPassword;
 use Illuminate\Console\Command;
 
 class CreateSuperAdminCommand extends Command
@@ -15,10 +16,10 @@ class CreateSuperAdminCommand extends Command
 
     public function handle(): int
     {
-        $password = $this->option('password') ?: $this->secret('Password (min 8 chars)');
+        $password = $this->option('password') ?: $this->secret('Password (min 14 chars)');
 
-        if (strlen((string) $password) < 8) {
-            $this->error('Password must be at least 8 characters.');
+        if (mb_strlen((string) $password) < LongPassword::MIN) {
+            $this->error('Password must be at least '.LongPassword::MIN.' characters.');
 
             return self::FAILURE;
         }
