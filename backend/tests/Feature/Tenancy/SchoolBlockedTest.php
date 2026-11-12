@@ -164,4 +164,15 @@ class SchoolBlockedTest extends TestCase
             ->assertForbidden()->assertJsonPath('code', 'school_suspended');
         $this->schoolAnswer('schoola')->assertOk()->assertJsonPath('suspended', true);
     }
+
+    public function test_the_logo_of_a_blocked_school_is_not_blocked(): void
+    {
+        $this->school('schoola');
+        $this->change('schoola', ['is_active' => false, 'closed_at' => Carbon::now()]);
+
+        $this->fresh();
+        $response = $this->get('/api/school/logo', ['X-School' => 'schoola']);
+
+        $this->assertNotSame(403, $response->getStatusCode());
+    }
 }

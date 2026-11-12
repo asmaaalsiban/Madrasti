@@ -9,6 +9,11 @@
     "exportFailed": "The file could not be downloaded.",
     "account": "Account"
   },
+  "suspended": {
+    "title": "This school is not available",
+    "message": "The school's subscription has ended, so access is closed for now. Please contact the platform owner to renew it.",
+    "signIn": "Sign in again"
+  },
   "auth": {
     "title": "Sign in",
     "login": "Email or phone number",

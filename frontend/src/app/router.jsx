@@ -2,6 +2,7 @@ import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
+import SuspendedPage from '../features/Auth/SuspendedPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import ForgotPasswordPage from '../features/Auth/pages/ForgotPasswordPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
@@ -230,6 +231,7 @@ const HOME_ROUTES = {
 export const routes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/suspended', element: <SuspendedPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/chat', element: <ChatRedirect /> },
   {

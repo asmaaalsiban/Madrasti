@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Blocks a suspended, expired or closed school on every request, including people who are already signed in.
  * Runs after the school is initialised. In an exit window only sign-in, "who am I", sign-out and the data export stay open;
- * in every other blocked state only the public school answer does.
+ * in every other blocked state only the public school answer and logo do.
  */
 class EnsureSchoolActive
 {
@@ -49,7 +49,8 @@ class EnsureSchoolActive
         $method = $request->getMethod();
         $path = trim($request->getPathInfo(), '/');
 
-        if ($method === 'GET' && $path === 'api/school') {
+        // The school answer and its logo are public: the "school is blocked" page shows the school's branding.
+        if ($method === 'GET' && in_array($path, ['api/school', 'api/school/logo'], true)) {
             return true;
         }
 

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import i18n from '../i18n'
-import { getSchool } from '../tenant/school'
+import { getSchool, goTo } from '../tenant/school'
 
 // One token per school, so switching school never sends another school's token.
 export const tokenKey = () => `token:${getSchool() ?? ''}`
@@ -12,6 +12,8 @@ export const setToken = (t) => {
     else localStorage.removeItem(tokenKey())
   } catch { /* ignore */ }
 }
+
+const SUSPENDED_PATH = '/suspended'
 
 // Same origin: the Vite dev proxy and the production web server forward /api to Laravel.
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -37,6 +39,12 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && getToken()) {
       setToken(null)
       window.dispatchEvent(new Event('auth:expired'))
+    }
+    // The platform blocked this school: forget the token and explain, instead of showing broken screens.
+    if (error.response?.status === 403 && error.response.data?.code === 'school_suspended') {
+      setToken(null)
+      window.dispatchEvent(new Event('auth:expired'))
+      if (window.location.pathname !== SUSPENDED_PATH) goTo(SUSPENDED_PATH)
     }
     return Promise.reject(error)
   },
