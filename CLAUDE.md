@@ -121,3 +121,14 @@ When running the demo by hand instead: `php artisan serve` ignores variables you
 - A parent can only reach their own children; a teacher only what they teach or manage.
 - Heavy or async work (notifications, reports, scheduling) goes through queues.
 - Changes go through a branch and a pull request, not a direct push to `main`.
+
+## Lessons learned (do not repeat)
+
+When a mistake could happen again, add one line here: the rule and why. Remove a line once code or a test makes the mistake impossible.
+
+- `md:rounded-none`, `md:shadow-none` and the like do nothing in this project: `index.css` sets `.rounded*` / `.shadow*` with no breakpoint. Use `max-md:` classes for a phone-only look.
+- `php artisan serve` ignores the variables you set (it re-reads `.env`). Start the demo API with `php -S 127.0.0.1:8000 index.php` from `backend/public`, or use `tools/ui-check`.
+- A Playwright route `**/api/**` also catches Vite's own `src/api/client.js` and the page renders blank. Use the full origin: `http://127.0.0.1:5199/api/**`.
+- Do not review screens with hand-made fake API data: pages crash on the wrong shape and the result means nothing. Use the demo school (`tools/ui-check`).
+- `PasswordInput` keeps its eye button on the physical right (`right-0`, `pr-10`) on purpose: the field is `dir="ltr"`. Do not "fix" it to `end-0`.
+- A merged pull request is finished. New work goes on a new branch from `main`, never as more commits on the old branch (that is how a change ended up not in `main`).
