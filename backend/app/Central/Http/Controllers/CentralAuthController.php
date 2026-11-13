@@ -7,6 +7,7 @@ namespace App\Central\Http\Controllers;
 use App\Central\Models\SuperAdmin;
 use App\Central\Services\AdminLoginCode;
 use App\Http\Controllers\Controller;
+use App\Shared\Security\LoginMonitor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,7 @@ class CentralAuthController extends Controller
             return response()->json(['challenge' => true]);
         }
         if (! Hash::check($data['password'], $admin->password)) {
+            LoginMonitor::failed('central', $data['email'], $request->ip());
             throw ValidationException::withMessages(['email' => [__('auth.failed')]]);
         }
 
@@ -53,6 +55,7 @@ class CentralAuthController extends Controller
         $admin = SuperAdmin::where('email', $data['email'])->first();
 
         if (! $admin || ! $codes->verify($admin, $data['code'])) {
+            LoginMonitor::failed('central', $data['email'], $request->ip(), 'code');
             throw ValidationException::withMessages(['code' => [__('auth.admin_code_invalid')]]);
         }
 
