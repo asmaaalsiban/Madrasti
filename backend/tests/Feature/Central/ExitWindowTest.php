@@ -338,4 +338,78 @@ class ExitWindowTest extends TestCase
         $this->asSchool($teacher, 'alpha', 'GET', '/api/auth/me')->assertOk();
         $this->token('alpha', 'teacher');
     }
+
+    public function test_running_the_job_again_does_not_move_an_open_window_or_audit_twice(): void
+    {
+        $school = $this->school();
+        $this->openAndRun($school, 10);
+        $ends = Tenant::find('alpha')->exit_window_ends_at;
+        $this->travel(3)->days();
+
+        $this->runJob($school);
+
+        $this->assertTrue(Tenant::find('alpha')->exit_window_ends_at->equalTo($ends));
+        $this->assertSame(1, DB::connection(config('tenancy.database.central_connection'))->table('central_audit_logs')->where('action', 'exit_window.open')->count());
+    }
+
+    public function test_opening_is_refused_while_a_step_is_pending_or_running_or_the_window_is_open(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+
+        $this->assertThrows(fn () => app(ExitWindow::class)->open($school), \DomainException::class); // pending
+        SchoolExitStep::where('step', 'archive')->update(['status' => 'running']);
+        $this->assertThrows(fn () => app(ExitWindow::class)->open($school), \DomainException::class); // running
+        SchoolExitStep::query()->update(['status' => 'done']);
+        $school->update(['exit_window_ends_at' => now()->addDay()]);
+        $this->assertThrows(fn () => app(ExitWindow::class)->open($school), \DomainException::class); // window open
+        Queue::assertPushed(PrepareExit::class, 1);
+
+        $this->owner();
+        SchoolExitStep::query()->update(['status' => 'running']);
+        Tenant::find('alpha')->forceFill(['exit_window_ends_at' => null])->save();
+        $this->postJson('/api/central/tenants/alpha/exit-window', [])->assertStatus(422);
+    }
+
+    public function test_a_second_job_does_not_redo_a_step_that_is_running_or_done(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+        SchoolExitStep::where('step', 'archive')->update(['status' => 'running']);
+        $this->app->bind(BackupService::class, fn () => new class extends BackupService
+        {
+            public function build(string $label, array $fileDisks = [], ?string $password = null): string
+            {
+                throw new \RuntimeException('must not build a second archive');
+            }
+        });
+
+        $this->runJob($school);
+
+        $this->assertSame('running', $this->stepStatus('alpha', 'archive'));
+        $this->assertSame('done', $this->stepStatus('alpha', 'package'));
+        $this->assertNull(Tenant::find('alpha')->exit_window_ends_at);
+        $this->assertInstanceOf(\Illuminate\Contracts\Queue\ShouldBeUnique::class, new PrepareExit('alpha'));
+        $this->assertSame('alpha', (new PrepareExit('alpha'))->uniqueId());
+    }
+
+    public function test_a_job_that_dies_marks_unfinished_steps_failed_so_they_can_be_retried(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+        SchoolExitStep::where('step', 'archive')->update(['status' => 'done', 'path' => 'archive/alpha/x.zip']);
+        SchoolExitStep::where('step', 'package')->update(['status' => 'running']);
+
+        (new PrepareExit('alpha'))->failed(new \RuntimeException('worker killed'));
+
+        $this->assertSame('done', $this->stepStatus('alpha', 'archive'));
+        $this->assertSame('failed', $this->stepStatus('alpha', 'package'));
+        $this->owner();
+        $this->postJson('/api/central/tenants/alpha/exit-steps/package/retry')->assertOk();
+        $this->postJson('/api/central/tenants/alpha/exit-steps/archive/retry')->assertStatus(422); // a done step is never redone
+        $this->assertSame('x.zip', basename(SchoolExitStep::where('step', 'archive')->value('path')));
+    }
 }

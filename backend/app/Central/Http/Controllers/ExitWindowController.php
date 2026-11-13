@@ -12,6 +12,7 @@ use App\Central\Services\ExitWindow;
 use App\Central\Support\SchoolState;
 use App\Central\Support\SchoolStatus;
 use App\Http\Controllers\Controller;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,9 +24,11 @@ class ExitWindowController extends Controller
     public function open(Request $request, Tenant $tenant, ExitWindow $window): JsonResponse
     {
         $days = $this->days($request, ExitWindow::DEFAULT_DAYS);
-        abort_if(SchoolStatus::of($tenant) === SchoolState::ExitWindow, 422, __('exit.already_open'));
-
-        $window->open($tenant, $days);
+        try {
+            $window->open($tenant, $days);
+        } catch (DomainException) {
+            abort(422, __('exit.already_open'));
+        }
 
         return response()->json(['data' => $this->stepRows($tenant)], 202);
     }
@@ -61,6 +64,8 @@ class ExitWindowController extends Controller
         $row = SchoolExitStep::where('tenant_id', $tenant->getTenantKey())->where('step', $step)->first();
         abort_if($row === null, 404);
         abort_unless($row->status === 'failed', 422, __('exit.not_failed'));
+        // Another step still being prepared owns the job: retrying now could leave this step waiting with no job to run it.
+        abort_if(SchoolExitStep::where('tenant_id', $tenant->getTenantKey())->whereIn('status', ['pending', 'running'])->exists(), 422, __('exit.already_open'));
 
         $row->update(['status' => 'pending', 'error' => null]);
         PrepareExit::dispatch((string) $tenant->getTenantKey());

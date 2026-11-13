@@ -7,6 +7,9 @@ namespace App\Central\Services;
 use App\Central\Jobs\PrepareExit;
 use App\Central\Models\SchoolExitStep;
 use App\Central\Models\Tenant;
+use App\Central\Support\SchoolState;
+use App\Central\Support\SchoolStatus;
+use DomainException;
 use RuntimeException;
 
 /**
@@ -19,8 +22,15 @@ class ExitWindow
 
     public function __construct(private readonly CentralAudit $audit) {}
 
+    /** @throws DomainException while a window is open or a step is still pending or running */
     public function open(Tenant $school, int $days = self::DEFAULT_DAYS): void
     {
+        $busy = SchoolStatus::of($school) === SchoolState::ExitWindow
+            || SchoolExitStep::where('tenant_id', $school->getTenantKey())->whereIn('status', ['pending', 'running'])->exists();
+        if ($busy) {
+            throw new DomainException('An exit window is already open or being prepared.');
+        }
+
         foreach (SchoolExitStep::STEPS as $step) {
             SchoolExitStep::updateOrCreate(
                 ['tenant_id' => $school->getTenantKey(), 'step' => $step],
