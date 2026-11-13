@@ -10,6 +10,8 @@ use App\Central\Models\Tenant;
 use App\Central\Support\SchoolState;
 use App\Central\Support\SchoolStatus;
 use DomainException;
+use Illuminate\Bus\UniqueLock;
+use Illuminate\Contracts\Cache\Repository as Cache;
 use RuntimeException;
 use Throwable;
 
@@ -51,6 +53,8 @@ class ExitWindow
         try {
             PrepareExit::dispatch((string) $school->getTenantKey());
         } catch (Throwable $e) {
+            // The unique lock is taken before the push and not released when the push throws: release it, or the next dispatch is dropped.
+            (new UniqueLock(app(Cache::class)))->release(new PrepareExit((string) $school->getTenantKey()));
             SchoolExitStep::where('tenant_id', $school->getTenantKey())->whereIn('status', ['pending', 'running'])
                 ->update(['status' => 'failed', 'error' => mb_substr('Could not queue the job: '.$e->getMessage(), 0, 1000), 'finished_at' => now()]);
 

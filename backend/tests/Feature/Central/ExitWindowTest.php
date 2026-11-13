@@ -425,6 +425,7 @@ class ExitWindowTest extends TestCase
         Queue::fake();
         app(ExitWindow::class)->open($school);
         $this->assertSame('pending', $this->stepStatus('alpha', 'archive'));
+        Queue::assertPushed(PrepareExit::class); // not dropped by a unique lock left behind by the failed push
     }
 
     public function test_a_stale_running_or_pending_step_can_be_retried_but_a_fresh_one_cannot(): void
@@ -469,5 +470,34 @@ class ExitWindowTest extends TestCase
             $this->assertGreaterThan($job->timeout, config("queue.connections.$connection.retry_after"));
         }
         $this->assertGreaterThan($job->timeout, $job->uniqueFor);
+    }
+
+    public function test_the_owner_resumes_a_run_that_died_after_the_last_step_without_rebuilding(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school, 6);
+        SchoolExitStep::query()->update(['status' => 'done', 'path' => 'x.zip']);
+        $this->app->bind(BackupService::class, fn () => new class extends BackupService
+        {
+            public function build(string $label, array $fileDisks = [], ?string $password = null): string
+            {
+                throw new \RuntimeException('must not rebuild');
+            }
+        });
+        $this->owner();
+        (new \Illuminate\Bus\UniqueLock(app(\Illuminate\Contracts\Cache\Repository::class)))->release(new PrepareExit('alpha')); // the dead job's lock
+
+        $this->postJson('/api/central/tenants/alpha/exit-steps/archive/retry')->assertOk();
+        Queue::assertPushed(PrepareExit::class, 2);
+        $this->assertSame('done', $this->stepStatus('alpha', 'archive'));
+        $this->assertNull(Tenant::find('alpha')->exit_window_ends_at);
+
+        $this->runJob($school);
+        $ends = Tenant::find('alpha')->exit_window_ends_at;
+        $this->assertEqualsWithDelta(now()->addDays(6)->timestamp, $ends->timestamp, 5);
+        $this->runJob($school);
+        $this->assertTrue(Tenant::find('alpha')->exit_window_ends_at->equalTo($ends));
+        $this->assertSame(1, DB::connection(config('tenancy.database.central_connection'))->table('central_audit_logs')->where('action', 'exit_window.open')->count());
     }
 }
