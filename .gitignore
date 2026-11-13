@@ -20,6 +20,9 @@ frontend/.env.local
 .vscode/
 *.log
 
-# Claude Code local/session files (contain tokens, never commit)
-.claude/
+# Claude Code: the team's shared settings and hooks are tracked (they hold no secrets); personal and session files
+# (settings.local.json, anything that can contain tokens) are not.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 loadtest/tokens.json
