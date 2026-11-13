@@ -3467,5 +3467,15 @@
     "loadFailed": "Could not load the download window.",
     "contact": "Questions? Contact the platform owner:",
     "signOut": "Sign out"
+  },
+  "footer": {
+    "tagline": "One platform for the whole school: marks, attendance, timetables and direct contact between the school, teachers, students and parents.",
+    "platform": "Platform",
+    "legal": "Legal",
+    "contact": "Contact",
+    "home": "Home",
+    "register": "Register a school",
+    "findSchool": "Find your school",
+    "rights": "© {{year}} {{name}}. All rights reserved."
   }
 }
