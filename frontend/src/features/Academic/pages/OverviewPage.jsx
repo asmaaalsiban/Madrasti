@@ -8,6 +8,7 @@ import { api } from '../../../api/client'
 import useBadges from '../../Badges/useBadges'
 import { PageEnter, PillTabs, Reveal, CountUp } from '../../../components/shared/motion'
 import useLayout from '../../Layout/useLayout'
+import GlassSettings, { useGlassSettings } from '../components/GlassSettings'
 import ShortcutsDialog, { CATALOG, DEFAULT_SHORTCUTS } from '../components/ShortcutsDialog'
 import { BlurSwap, CardTitle, GlassCard, PillColumns, SegmentGauge, StatPill } from '../components/glass'
 
@@ -31,6 +32,7 @@ export default function OverviewPage() {
   const surveys = useBadges().surveys
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.get('/admin/overview').then((r) => r.data.data) })
   const { data: d } = useQuery({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/admin/dashboard').then((r) => r.data.data) })
+  const glass = useGlassSettings() // how frosted the cards look: the principal's own choice, kept in this browser
   const ready = Boolean(d)
   // GSAP adds a calm second layer once the data is in: list rows and the small tiles ease in one after another.
   const stage = useStaggerIn('[data-gs]', { y: 10, stagger: 0.05, delay: 0.35, dependencies: [ready] })
@@ -54,11 +56,11 @@ export default function OverviewPage() {
 
   return (
     <PageEnter>
-      <section ref={stage} className="dash-stage min-h-[calc(100vh-7rem)] space-y-4">
+      <section ref={stage} style={glass.style} className="dash-stage min-h-[calc(100vh-7rem)] space-y-4">
         <div className="lp-aurora" aria-hidden><i /><i /><i /></div>
 
         {/* The pill menu: the sections the principal opens most. */}
-        <Reveal instant>
+        <Reveal instant className="relative z-30">
           <nav aria-label={t('academic.overview.title')} className="flex items-center gap-2 rounded-full bg-white/10 p-1.5 backdrop-blur">
             <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
               {[{ path: '/admin', key: 'overview', end: true }, ...nav].map(({ path, key, end }) => (
@@ -67,6 +69,7 @@ export default function OverviewPage() {
                 </li>
               ))}
             </ul>
+            <GlassSettings glass={glass} />
             <button type="button" aria-label={t('dashboard.shortcuts.edit')} title={t('dashboard.shortcuts.edit')} onClick={() => setEditing(true)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-deep-harbor transition-transform hover:scale-110"><Plus size={18} aria-hidden /></button>
           </nav>
         </Reveal>
