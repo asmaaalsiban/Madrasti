@@ -15,7 +15,6 @@ use App\Modules\Academic\Models\Subject;
 use App\Modules\Attendance\Models\StudentAttendance;
 use App\Modules\Auth\Models\DataRequest;
 use App\Modules\Finance\Models\Installment;
-use App\Modules\Finance\Models\Money;
 use App\Modules\Finance\Models\Payment;
 use App\Modules\Finance\Models\StudentFee;
 use App\Modules\Grading\Models\AssessmentScore;
@@ -77,21 +76,22 @@ class AdminDashboardController extends Controller
             })->values()->all();
     }
 
+    /** Added up by the database: a school's fees, payments and installments run to thousands of rows, so they are never loaded into PHP. */
     private function finance(): array
     {
-        $fees = StudentFee::all(['total_amount', 'discount']);
-        $billed = $fees->sum(fn ($f) => Money::cents($f->total_amount) - Money::cents($f->discount));
-        $collected = Payment::where('method', '!=', Payment::CARRY)->get(['amount', 'paid_on']);
-        $overdue = Installment::whereDate('due_date', '<', now()->toDateString())->get(['amount', 'paid_amount'])
-            ->sum(fn ($i) => max(0, Money::cents($i->amount) - Money::cents($i->paid_amount)));
+        $billed = (float) StudentFee::query()->selectRaw('coalesce(sum(total_amount - discount), 0) as total')->value('total');
+        $overdue = (float) Installment::whereDate('due_date', '<', now()->toDateString())->where('amount', '>', DB::raw('paid_amount'))
+            ->selectRaw('coalesce(sum(amount - paid_amount), 0) as total')->value('total');
+        // One row per day with payments (not per payment): the months are added up from those.
+        $perDay = Payment::where('method', '!=', Payment::CARRY)->groupBy('paid_on')->selectRaw('paid_on, sum(amount) as total')->get();
         $months = collect(range(5, 0))->map(fn ($n) => now()->startOfMonth()->subMonths($n)->format('Y-m'));
 
         return [
             'currency' => (string) (DB::table('school_settings')->where('key', 'currency')->value('value') ?: 'JOD'),
-            'billed' => $billed / 100,
-            'collected' => $collected->sum(fn ($p) => Money::cents($p->amount)) / 100,
-            'overdue' => $overdue / 100,
-            'monthly' => $months->map(fn ($m) => ['month' => $m, 'amount' => $collected->filter(fn ($p) => $p->paid_on->format('Y-m') === $m)->sum(fn ($p) => Money::cents($p->amount)) / 100])->all(),
+            'billed' => round($billed, 2),
+            'collected' => round((float) $perDay->sum('total'), 2),
+            'overdue' => round($overdue, 2),
+            'monthly' => $months->map(fn ($m) => ['month' => $m, 'amount' => round((float) $perDay->filter(fn ($p) => $p->paid_on->format('Y-m') === $m)->sum('total'), 2)])->all(),
         ];
     }
 
@@ -105,16 +105,18 @@ class AdminDashboardController extends Controller
         return GradeLevel::orderBy('sort_order')->get()->map(fn ($l) => ['id' => $l->id, 'name_ar' => $l->name_ar, 'name_en' => $l->name_en, 'count' => (int) $perLevel->get($l->id, 0)])->all();
     }
 
-    /** Average mark, as a percent of the maximum, for each subject that has published marks. */
+    /** Average mark, as a percent of the maximum, for each subject that has published marks (averaged by the database, not row by row in PHP). */
     private function marks(): array
     {
         $subjects = Subject::pluck('name_ar', 'id');
         $english = Subject::pluck('name_en', 'id');
 
-        return AssessmentScore::whereNotNull('score')->whereHas('assessment', fn ($q) => $q->where('is_published', true)->where('max_score', '>', 0))
-            ->with('assessment:id,subject_id,max_score')->get()
-            ->groupBy(fn ($s) => $s->assessment->subject_id)
-            ->map(fn ($rows, $id) => ['id' => $id, 'name_ar' => $subjects[$id] ?? '', 'name_en' => $english[$id] ?? '', 'average' => round($rows->avg(fn ($s) => (float) $s->score / (float) $s->assessment->max_score * 100), 1)])
+        return AssessmentScore::query()->whereNotNull('assessment_scores.score')
+            ->join('assessments', 'assessments.id', '=', 'assessment_scores.assessment_id')
+            ->where('assessments.is_published', true)->where('assessments.max_score', '>', 0)
+            ->groupBy('assessments.subject_id')
+            ->selectRaw('assessments.subject_id as subject_id, avg(assessment_scores.score * 100.0 / assessments.max_score) as average')->get()
+            ->map(fn ($r) => ['id' => $r->subject_id, 'name_ar' => $subjects[$r->subject_id] ?? '', 'name_en' => $english[$r->subject_id] ?? '', 'average' => round((float) $r->average, 1)])
             ->sortBy('name_ar')->values()->all();
     }
 

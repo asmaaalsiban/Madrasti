@@ -77,6 +77,32 @@ class RenewalTest extends AcademicTestCase
         $this->getJson('/api/renewals')->assertOk()->assertJsonPath('year.name', '2027/2028')->assertJsonPath('summary.pending', 1)->assertJsonPath('summary.graduating', 1)->assertJsonPath('summary.total', 2);
     }
 
+    public function test_a_student_deleted_after_the_renewal_was_opened_does_not_break_the_page(): void
+    {
+        $gone = $this->student('Gone', $this->oldA);
+        $stays = $this->student('Stays', $this->oldA);
+        $this->postJson('/api/renewals/open', ['year_id' => $this->next->id])->assertCreated()->assertJsonPath('added', 2);
+
+        $this->deleteJson("/api/students/{$gone->id}")->assertNoContent(); // the school deletes a student: the row of the renewal stays
+
+        $this->getJson('/api/renewals')->assertOk()
+            ->assertJsonPath('summary.total', 1)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.student.id', $stays->id);
+    }
+
+    public function test_renewing_everyone_skips_a_student_the_school_deleted(): void
+    {
+        $gone = $this->student('Gone', $this->oldA);
+        $stays = $this->student('Stays', $this->oldA);
+        $this->newRooms();
+        $this->postJson('/api/renewals/open', ['year_id' => $this->next->id])->assertCreated();
+        $this->deleteJson("/api/students/{$gone->id}")->assertNoContent();
+
+        $this->postJson('/api/renewals/renew-all', ['year_id' => $this->next->id])->assertOk()->assertJsonPath('renewed', 1)->assertJsonPath('failed', []);
+        $this->assertSame('renewed', StudentRenewal::where('student_id', $stays->id)->value('status'));
+    }
+
     public function test_the_year_must_come_after_the_current_one(): void
     {
         $this->postJson('/api/renewals/open', ['year_id' => $this->now->id])->assertUnprocessable();
