@@ -178,6 +178,13 @@ class SuperAdminLoginTest extends TestCase
         $this->assertDatabaseHas('super_admins', ['email' => 'new@madrasati.test']);
     }
 
+    public function test_creating_a_super_admin_refuses_an_empty_password(): void
+    {
+        $this->artisan('super-admin:create', ['email' => 'empty@madrasati.test'])
+            ->expectsQuestion('Password (min 14 chars)', '')->assertFailed();
+        $this->assertDatabaseMissing('super_admins', ['email' => 'empty@madrasati.test']);
+    }
+
     public function test_the_code_request_is_throttled(): void
     {
         for ($i = 0; $i < 5; $i++) {

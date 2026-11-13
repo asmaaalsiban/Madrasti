@@ -19,7 +19,7 @@ class CreateSuperAdminCommand extends Command
     {
         $password = $this->option('password') ?: $this->secret('Password (min 14 chars)');
 
-        $check = Validator::make(['password' => $password], ['password' => [new LongPassword]]);
+        $check = Validator::make(['password' => $password], ['password' => ['required', new LongPassword]]);
         if ($check->fails()) {
             $this->error($check->errors()->first('password'));
 
