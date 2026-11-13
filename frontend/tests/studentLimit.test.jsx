@@ -60,4 +60,15 @@ describe('Modal', () => {
     expect(dialog.className).toContain('sm:overflow-visible')
     expect(dialog.className).toContain('sm:max-h-none')
   })
+
+  it('is drawn straight into the page body, so no parent can shrink the dark layer', () => {
+    const { container } = render(<div><Modal open title="T" onClose={() => {}}>x</Modal></div>)
+    expect(container.querySelector('[role=dialog]')).toBeNull()
+    expect(document.body.querySelector('[role=dialog]')).not.toBeNull()
+  })
+
+  it('has a wide size for forms laid out in columns', () => {
+    render(<Modal open size="xl" title="T" onClose={() => {}}>x</Modal>)
+    expect(screen.getByRole('dialog').className).toContain('max-w-5xl')
+  })
 })
