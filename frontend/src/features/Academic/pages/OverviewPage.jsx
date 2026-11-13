@@ -55,7 +55,7 @@ export default function OverviewPage() {
         <div className="lp-aurora" aria-hidden><i /><i /><i /></div>
 
         {/* The pill menu: the sections the principal opens most. */}
-        <Reveal i={0}>
+        <Reveal instant>
           <nav aria-label={t('academic.overview.title')} className="flex items-center gap-2 rounded-full bg-white/10 p-1.5 backdrop-blur">
             <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
               {[{ path: '/admin', key: 'overview', end: true }, ...nav].map(({ path, key, end }) => (
@@ -70,14 +70,14 @@ export default function OverviewPage() {
 
         {/* The title and the pills with the numbers that matter. */}
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <Reveal i={1}>
+          <Reveal instant>
             <h1 className="text-3xl font-extrabold !text-white">{t('academic.overview.title')}</h1>
             <p className="mt-1 text-sm text-white/60">{t('dashboard.glass.subtitle')}</p>
           </Reveal>
           <div className="flex flex-wrap gap-2">
-            <StatPill i={2} icon={GraduationCap} value={kids === null ? '–' : Math.round(kids)} suffix="%" label={t('dashboard.students.title')} />
-            <StatPill i={3} icon={Wallet} value={fin ? Math.round(paidPct) : '–'} suffix="%" label={t('dashboard.money.collectedOf')} />
-            <StatPill i={4} icon={Users} value={d ? d.people.students : '–'} label={t('dashboard.glass.students')} />
+            <StatPill instant icon={GraduationCap} value={kids === null ? '–' : Math.round(kids)} suffix="%" label={t('dashboard.students.title')} />
+            <StatPill instant icon={Wallet} value={fin ? Math.round(paidPct) : '–'} suffix="%" label={t('dashboard.money.collectedOf')} />
+            <StatPill instant icon={Users} value={d ? d.people.students : '–'} label={t('dashboard.glass.students')} />
           </div>
         </div>
 
