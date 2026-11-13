@@ -15,6 +15,7 @@ use App\Modules\Auth\Http\Resources\UserResource;
 use App\Modules\Auth\Services\EmailVerification;
 use App\Modules\Auth\Services\PasswordReset;
 use App\Shared\Enums\Role;
+use App\Shared\Security\LoginMonitor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,7 @@ class AuthController extends Controller
 
         // One generic message for unknown user and wrong password (no user enumeration).
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
+            LoginMonitor::failed((string) (tenant('id') ?? 'school'), $login, $request->ip());
             throw ValidationException::withMessages(['login' => [__('auth.failed')]]);
         }
 

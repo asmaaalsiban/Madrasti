@@ -25,6 +25,7 @@ use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
 use App\Shared\Push\PushTransport;
 use App\Shared\Push\WebPushTransport;
+use App\Shared\Security\ProductionGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -49,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ProductionGuard::apply($this->app);
+
         // Every money event posts its own balanced entry in the journal.
         \App\Modules\Finance\Models\StudentFee::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->fee($m));
         \App\Modules\Finance\Models\Expense::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->bill($m));
@@ -132,6 +135,9 @@ class AppServiceProvider extends ServiceProvider
             Role::Teacher => Enrollment::where('student_id', $student->id)
                 ->whereIn('classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->whereHas('academicYear', fn ($q) => $q->where('is_current', true))->select('id'))->exists(),
         });
+
+        // Every signed-in school route: 300 requests a minute per person (a normal screen makes a handful; this stops a script).
+        RateLimiter::for('school-api', fn (Request $request): Limit => Limit::perMinute(300)->by('api|'.(tenant('id') ?? 'central').'|'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
 
         // Changing a password asks for the current one: 5 tries a minute per user.
         RateLimiter::for('email-code', fn (Request $request): Limit => Limit::perMinute(10)->by('ec|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
