@@ -251,12 +251,12 @@ html[data-lite] .lp-tilt { transition: none; }
 /* The dashboard's glow stands still: an endless blurred animation behind every card makes the browser repaint the whole stage on every frame. */
 .dash-stage > .lp-aurora i { animation: none; will-change: auto; }
 html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-stage .backdrop-blur { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.glass-dark { background: rgba(4, 18, 36, .55); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(10px); box-shadow: 0 8px 24px -12px rgba(0,0,0,.5); }
+.glass-dark { background: rgba(4, 18, 36, .55); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(var(--g-blur, 10px)) saturate(var(--g-sat, 1)); box-shadow: 0 8px 24px -12px rgba(0,0,0,.5); }
 .glass-shimmer { background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.14) 50%, transparent 70%); background-size: 200% 100%; animation: glass-shimmer 1.6s linear infinite; }
 @keyframes glass-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .glass-shimmer { animation: none; } }
 /* Glass card: a translucent panel with a soft blur (same palette, only transparency). */
-.glass-card { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(8px); box-shadow: 0 8px 24px -12px rgba(0,0,0,.35); transition: box-shadow .2s; }
+.glass-card { background: color-mix(in srgb, var(--g-tint, #fff) calc(var(--g-op, .08) * 100%), transparent); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(var(--g-blur, 8px)) saturate(var(--g-sat, 1)); box-shadow: 0 8px 24px -12px rgba(0,0,0,.35); transition: box-shadow .2s; }
 .glass-card:hover { box-shadow: 0 16px 32px -12px rgba(0,0,0,.45); }
 .dash-stat { border-radius: 20px; padding: 1rem; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }
 

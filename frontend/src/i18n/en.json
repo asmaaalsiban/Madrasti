@@ -135,6 +135,23 @@
       "full": "You can have up to {{max}} shortcuts. Remove one to add another.",
       "reset": "Back to the default",
       "done": "Done"
+    },
+    "glassSettings": {
+      "open": "Adjust glass",
+      "title": "Glass appearance",
+      "close": "Close",
+      "hint": "Change how see-through and frosted the overview cards look. Saved in this browser only.",
+      "presets": "Presets",
+      "preset": {
+        "clear": "Clear",
+        "frosted": "Frosted",
+        "solid": "Solid"
+      },
+      "blur": "Blur",
+      "opacity": "Opacity",
+      "saturation": "Colour strength",
+      "tint": "Glass tint",
+      "reset": "Reset"
     }
   },
   "errors": {
