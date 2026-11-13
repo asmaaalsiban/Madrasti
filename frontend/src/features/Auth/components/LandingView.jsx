@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import { useGSAP } from '@gsap/react'
 import { isLowEndDevice } from '../../../lite'
 import SchoolLogo from '../../../components/shared/SchoolLogo'
 import { useTranslation } from 'react-i18next'
 import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, GraduationCap, Heart, MessageCircle, Briefcase, Users, Wallet } from 'lucide-react'
+import { useSmoothScroll } from '../../../hooks/useSmoothScroll'
+import { calmly, EASE } from '../../../hooks/useGsapMotion'
 
 const YEAR = new Date().getFullYear()
 // Kids reading among books under the stars (MotionSites free media shelf, #24). Swap it for the school's own film; if it cannot load, the aurora below stays.
@@ -20,21 +23,16 @@ function HeroVideo({ src }) {
   return <video aria-hidden autoPlay muted loop playsInline preload="auto" src={src} onLoadedData={() => setReady(true)} onError={() => setReady(false)} className={`lp-video ${ready ? 'is-ready' : ''}`} />
 }
 
-// Shows its children when they scroll into view (at once for people who ask for less motion, or when the browser cannot tell).
+// Shows its children when they scroll into view: GSAP eases them up (still for people who ask for less motion).
+// The scroll trigger is created per block and reverted on unmount by useGSAP.
 function Reveal({ children, className = '', delay = 0 }) {
   const ref = useRef(null)
-  const [seen, setSeen] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || typeof IntersectionObserver === 'undefined' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      setSeen(true)
-      return undefined
-    }
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect() } }, { threshold: 0.15 })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-  return <div ref={ref} style={{ '--d': `${delay}ms` }} className={`lp-reveal ${seen ? 'is-in' : ''} ${className}`}>{children}</div>
+  useGSAP(() => {
+    return calmly((g) => {
+      g.from(ref.current, { autoAlpha: 0, y: 28, duration: 0.9, delay: delay / 1000, ease: EASE, clearProps: 'transform,opacity,visibility', scrollTrigger: { trigger: ref.current, start: 'top 88%', once: true } })
+    })
+  }, { scope: ref })
+  return <div ref={ref} className={className}>{children}</div>
 }
 
 // A soft light that follows the pointer over a card.
@@ -109,10 +107,18 @@ function DashboardMock({ t }) {
 // `header` and `actions` are the buttons at the top and under the title; `ctaActions` those of the closing band.
 export default function LandingView({ name, logo, title, text, header, actions, ctaActions }) {
   const { t } = useTranslation()
+  useSmoothScroll()
   const words = name.trim().split(/\s+/)
   const marquee = [...FEATURES, ...FEATURES]
+  const page = useRef(null)
+  // The hero's lights drift slowly against the scroll, so the page feels deep.
+  useGSAP(() => {
+    return calmly((g) => {
+      g.to('.lp-hero-first .lp-aurora', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: '.lp-hero-first', start: 'top top', end: 'bottom top', scrub: 0.8 } })
+    })
+  }, { scope: page })
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div ref={page} className="min-h-screen overflow-x-hidden">
       <section className="lp-hero lp-hero-first">
         <div aria-hidden className="lp-aurora"><i /><i /><i /></div>
         <HeroVideo src={HERO_VIDEO} />

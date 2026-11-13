@@ -1,13 +1,20 @@
 import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
+import NotFoundPage from '../components/shared/NotFoundPage'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
+import SuspendedPage from '../features/Auth/SuspendedPage'
+import DownloadYourDataPage from '../features/Auth/DownloadYourDataPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import ForgotPasswordPage from '../features/Auth/pages/ForgotPasswordPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
 import FindSchoolPage from '../features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
 import WelcomePage from '../features/Central/WelcomePage'
+import SuperAdminLayout from '../features/SuperAdmin/SuperAdminLayout'
+import SchoolsPage from '../features/SuperAdmin/SchoolsPage'
+import SchoolPage from '../features/SuperAdmin/SchoolPage'
+import AddSchoolPage from '../features/SuperAdmin/AddSchoolPage'
 import { getSchool } from '../tenant/school'
 import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
 import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
@@ -230,12 +237,14 @@ const HOME_ROUTES = {
 export const routes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/suspended', element: <SuspendedPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/chat', element: <ChatRedirect /> },
   {
     element: <RequireAuth />,
     children: [
       { path: '/change-password', element: <ChangePasswordPage /> },
+      { element: <RequireRole role="admin" />, children: [{ path: '/download-your-data', element: <DownloadYourDataPage /> }] },
       {
         element: <DashboardLayout />,
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
@@ -333,6 +342,23 @@ export const routes = [
       },
     ],
   },
+  // Any address that matches nothing above (a school is selected): show the "page not found" screen.
+  { path: '*', element: <NotFoundPage /> },
+]
+
+// The platform owner's area. Not linked from any public page; its own sign-in (the layout shows it without a token) and its own token,
+// and it works whether or not a school is selected in this browser.
+const superAdminRoutes = [
+  {
+    path: '/super-admin',
+    element: <SuperAdminLayout />,
+    children: [
+      { index: true, element: <Navigate to="/super-admin/schools" replace /> },
+      { path: 'schools', element: <SchoolsPage /> },
+      { path: 'schools/new', element: <AddSchoolPage /> },
+      { path: 'schools/:id', element: <SchoolPage /> },
+    ],
+  },
 ]
 
 // No school selected yet: only registration and the school-code lookup are available.
@@ -351,6 +377,6 @@ const legalRoutes = [
 ]
 const withLegal = (list) => [{ element: <LegalShell />, children: [...legalRoutes, ...list] }]
 
-export const routesFor = (school) => withLegal(school ? routes : centralRoutes)
+export const routesFor = (school) => withLegal([...superAdminRoutes, ...(school ? routes : centralRoutes)])
 
 export const createRouter = () => createBrowserRouter(routesFor(getSchool()))

@@ -22,6 +22,8 @@ php artisan serve                                     # API on :8000
 php artisan migrate --path=database/migrations/central   # central database
 php artisan tenants:migrate                           # every school database
 php artisan tenants:run <command>                     # run a command inside every school
+php artisan super-admin:create <email> [--name=] [--password=]   # a Super Admin (password 14+ characters)
+php artisan queue:work --timeout=3600                 # needed for the exit window job (see below)
 ```
 
 Frontend (`frontend/`, React 19, Vite, Vitest):
@@ -55,6 +57,14 @@ Other tools: `a11y/axe-check.js` (accessibility check, instructions at its top),
 - Tenant app: everything else. Migrations in `database/migrations/tenant`. Never query across school databases from tenant code. To list tables use `App\Shared\Support\CurrentDatabase`, not `Schema::getTables()` (on MySQL/PostgreSQL that lists every database on the server).
 - Scheduled per-school work runs through `tenants:run` in `routes/console.php`.
 
+### Super Admin area, school state and limits
+
+- The owner's area: frontend `src/features/SuperAdmin` (route `/super-admin`, its own Axios client `saApi` and token `sa-token`, not linked from public pages), API under `/api/central`. Sign-in is two steps: password (14+ characters), then a 6-digit code by email (`AdminLoginCode`: 10 minutes, 5 tries, single use); the token lasts 8 hours. Every owner action is written to `central_audit_logs` (`CentralAudit`).
+- A school's state (active, expired, suspended, exit window, closed) is never stored: `App\Central\Support\SchoolStatus` works it out from the tenant row (`is_active`, `subscription_ends_at` through its whole day, `exit_window_ends_at`, `closed_at`). Use it for any new check. The `EnsureSchoolActive` middleware blocks a non-active school on every request with 403 `school_suspended` (also for people already signed in); the frontend interceptor then signs out and shows `/suspended`.
+- Exit window: `ExitWindow::open` queues `PrepareExit`, which builds the owner's archive (`BackupService`) and a readable handover package (`app/Shared/Handover`, Excel files plus uploads) under `archive/<code>/` and `handover/<code>/` on the backup disk. The window opens only when both are ready; then only school administrators can sign in and download (`/download-your-data`). The job needs a queue worker whose `--timeout` allows 3600 s (`retry_after` is 3900 in `config/queue.php`). **No code deletes school data or archives.**
+- Student limit: `tenants.max_students` (null = none). `StudentLimit` counts live `Student` rows under a per-school lock; a single create and an Excel import (all or nothing) answer 422 `student_limit_reached`; school administrators get a bell notice at 90% and at the limit. A deleted student gives the place back.
+- The owner's students / staff numbers are cached (`school.counts.<code>`); do not read them in a loop.
+
 ### Backend layout
 
 - `app/Modules/<Module>/` holds a module's models, controllers, requests, resources, policies, services and jobs. `app/Shared/` holds what several modules use (Auditable trait, Role enum, backup, import/export, payments, push, attachments).
@@ -67,6 +77,7 @@ Other tools: `a11y/axe-check.js` (accessibility check, instructions at its top),
 ### Backend tests
 
 - `Tests\TenantTestCase` migrates only the tenant schema into one in-memory SQLite database, with no tenancy bootstrapping. Module tests extend it (most through `Tests\Feature\Academic\AcademicTestCase`, which also switches the tenancy middleware off and has `actAsAdmin()` and friends).
+- SQLite does not enforce foreign keys, so a test can pass where MySQL would refuse the row. When code writes an id that points into another table (an audit actor, a creator), think about whose id it is: the Super Admin's id lives in the central database and must never be written into a school table (`Auditable` leaves `user_id` empty for anyone who is not a school user).
 - A test that needs real, separate schools uses `CreateSchool` with `DatabaseMigrations` and the central migrations (see `SchoolTokenIsolationTest`). A test keeps one application for all its requests, so reset the auth guards and end tenancy between requests there, or a second request reuses the first one's user.
 
 ### Frontend layout
@@ -74,6 +85,7 @@ Other tools: `a11y/axe-check.js` (accessibility check, instructions at its top),
 - `src/api/client.js` is the single Axios client (adds the token, `Accept-Language`, `X-School`). Server state is TanStack Query.
 - `src/app/router.jsx` has every route: the admin routes under `AdminLayout`, and the teacher, student and parent routes (`HOME_ROUTES`) under `DashboardLayout`. Guards are in `src/app/guards.jsx`. Pages live in `src/features/<Module>/`.
 - Translations are two files, `src/i18n/ar.json` and `src/i18n/en.json`, keys grouped by module. Arabic has plural forms (`_zero`, `_two`, `_few`, `_many`) that English does not.
+- Smooth scrolling (Lenis, `src/hooks/useSmoothScroll.js`) is used only on the public landing page: dashboards have tables, dialogs and panels that scroll by themselves.
 - One build serves every school: the name, logo and colour come from `GET /api/school` (`src/tenant/`), and `--color-brand` is set at runtime. `src/tenant/color.js` darkens a school's colour until it reaches 4.5:1 contrast.
 
 ### Design system ("Relief") and phone layout

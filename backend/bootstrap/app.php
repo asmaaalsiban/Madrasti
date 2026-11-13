@@ -5,7 +5,11 @@ use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\QueryStats;
+use App\Http\Middleware\RequireHttps;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Modules\People\Support\StudentLimitReached;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -38,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth:sanctum',
             EnsureAccountActive::class,
             EnsurePasswordChanged::class,
+            'throttle:school-api',
         ]);
 
         $middleware->alias([
@@ -56,9 +61,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             SetLocale::class,
             QueryStats::class,
+            SecurityHeaders::class,
         ]);
+        // First in line: a plain-HTTP request is sent to HTTPS before anything else runs (when app.force_https is on).
+        $middleware->prepend(RequireHttps::class);
         // Laravel runs authentication first; the language must be set before it so a 401 is in the right language too.
-        $middleware->prependToPriorityList(before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class, prepend: SetLocale::class);
+        $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Our frontend only talks JSON to the API.
@@ -71,8 +79,13 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => __('tenancy.school_not_found')], 404);
         });
 
+        // The school reached the student limit its owner set: the screen shows the message and how many places are left.
+        $exceptions->render(function (StudentLimitReached $e, Request $request) {
+            return response()->json(['message' => $e->getMessage(), 'code' => 'student_limit_reached', 'limit' => $e->limit, 'current' => $e->current, 'allowed' => $e->allowed], 422);
+        });
+
         // The framework's own messages ("Server Error", "Too Many Attempts.", ...) follow the request language (lang/ar.json).
-        $exceptions->respond(function (Response $response, \Throwable $e, Request $request) {
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
             if ($response instanceof JsonResponse && is_string($message = $response->getData(true)['message'] ?? null)) {
                 $translated = __($message);
                 if ($translated !== $message) {

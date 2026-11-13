@@ -7,6 +7,7 @@ namespace App\Central\Actions;
 use App\Central\Models\Tenant;
 use App\Models\User;
 use App\Shared\Enums\Role;
+use Illuminate\Support\Arr;
 use Throwable;
 
 /**
@@ -16,7 +17,7 @@ use Throwable;
 class CreateSchool
 {
     /**
-     * @param  array{id: string, name: string, domain?: ?string, admin_name: string, admin_email: string, admin_password: string, primary_color?: ?string, default_locale?: ?string}  $data
+     * @param  array{id: string, name: string, domain?: ?string, admin_name: string, admin_email: string, admin_password: string, primary_color?: ?string, default_locale?: ?string, max_students?: ?int, subscription_ends_at?: ?string}  $data
      */
     public function handle(array $data): Tenant
     {
@@ -31,6 +32,7 @@ class CreateSchool
                 'primary_color' => $data['primary_color'] ?? null,
                 'default_locale' => $data['default_locale'] ?? 'ar',
                 'is_active' => true,
+                ...array_filter(Arr::only($data, ['max_students', 'subscription_ends_at']), fn ($v) => $v !== null),
             ]);
 
             if (! empty($data['domain'])) {

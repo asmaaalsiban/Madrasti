@@ -28,6 +28,8 @@ class StoreTenantRequest extends FormRequest
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255'],
             'admin_password' => ['required', 'string', 'min:8'],
+            'max_students' => ['nullable', 'integer', 'min:1'],
+            'subscription_ends_at' => ['nullable', 'date'],
         ];
     }
 }

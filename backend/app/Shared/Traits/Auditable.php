@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Traits;
 
+use App\Models\User;
 use App\Modules\Audit\Models\AuditLog;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,8 +40,12 @@ trait Auditable
         $old = $mask($old);
         $new = $mask($new);
 
+        // Only a person of this school can be the actor: a Super Admin (who creates a school's first account from the central app)
+        // has an id in another database, which would break the foreign key to this school's users.
+        $actor = auth()->user();
+
         AuditLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => $actor instanceof User ? $actor->getKey() : null,
             'action' => $action,
             'auditable_type' => $model::class,
             'auditable_id' => $model->getKey(),

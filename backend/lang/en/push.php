@@ -23,6 +23,8 @@ return [
     'procurement_rejected' => 'Your request was declined: :title — :note',
     'procurement_to_buy' => 'Approved, please buy: :title',
     'procurement_purchased' => 'Bought: :title',
+    'student_limit_near' => 'Your school is close to its student limit: :current of :limit students.',
+    'student_limit_reached' => 'Your school reached its student limit (:limit students). Contact the platform owner to raise it.',
     'task_new' => ':name gave you a task: :title',
     'task_done' => ':name finished the task: :title',
     'task_reminder' => 'Task due tomorrow: :title',

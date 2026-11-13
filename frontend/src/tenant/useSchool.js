@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { api } from '../api/client'
+import { api, setExitWindow } from '../api/client'
 import { applyTheme, clearTheme } from './theme'
 
 // School name / logo / color come from the API by domain.
@@ -11,6 +11,8 @@ export function useSchool() {
     staleTime: Infinity,
     retry: false,
   })
+  const leaving = Boolean(query.data?.exit_window_ends_at)
+  useEffect(() => { setExitWindow(leaving) }, [leaving])
   const primary = query.data?.primary_color
   const dark = query.data?.dark_color
   useEffect(() => {

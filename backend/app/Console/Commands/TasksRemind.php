@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\Communication\Services\Notifier;
 use App\Modules\Tasks\Models\TaskAssignee;
 use Illuminate\Console\Command;
@@ -15,6 +16,11 @@ class TasksRemind extends Command
 
     public function handle(Notifier $notifier): int
     {
+        // A suspended, expired or closed school gets no reminders.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return self::SUCCESS;
+        }
+
         $today = $this->option('date') ?: now()->toDateString();
         $tomorrow = date('Y-m-d', strtotime("$today +1 day"));
         $yesterday = date('Y-m-d', strtotime("$today -1 day"));

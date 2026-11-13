@@ -31,6 +31,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'default_locale',
             'is_active',
             'subscription_ends_at',
+            'max_students',
+            'exit_window_ends_at',
+            'closed_at',
         ];
     }
 
@@ -53,6 +56,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return array_merge(parent::getCasts(), [
             'is_active' => 'boolean',
             'subscription_ends_at' => 'datetime',
+            'max_students' => 'integer',
+            'exit_window_ends_at' => 'datetime',
+            'closed_at' => 'datetime',
         ]);
     }
 }

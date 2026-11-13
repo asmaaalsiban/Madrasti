@@ -25,9 +25,9 @@ export const CardTitle = ({ children, right }) => (
 )
 
 /** A number with a round icon and a small caption (the three pills at the top right of the stage). */
-export function StatPill({ icon: Icon, value, suffix = '', label, i = 0 }) {
+export function StatPill({ icon: Icon, value, suffix = '', label, i = 0, instant = false }) {
   return (
-    <Reveal i={i} className="flex items-center gap-3 rounded-full bg-white/10 py-2 ps-2 pe-5 backdrop-blur">
+    <Reveal i={i} instant={instant} className="flex items-center gap-3 rounded-full bg-white/10 py-2 ps-2 pe-5 backdrop-blur">
       <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-sky-100"><Icon size={18} /></span>
       <span>
         <b className="block text-lg leading-tight text-white" dir="ltr"><CountUp value={value} suffix={typeof value === 'number' ? suffix : ''} /></b>

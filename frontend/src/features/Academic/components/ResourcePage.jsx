@@ -34,7 +34,9 @@ function SelectField({ field, value, onChange, form }) {
 // onSaved(response, isNew): called after a successful save.
 // actions: extra buttons / links next to the Add button.
 // uploadsTo: owner type of the files chosen in the form (form key `_files`); they are uploaded after the save. Keys that start with `_` are never sent as data.
-export default function ResourcePage({ path, title, columns, fields, empty = {}, rowActions = [], filters = {}, onSaved, actions = null, uploadsTo = null }) {
+// A custom field takes the whole row unless it has colSpan (a class string, e.g. 'col-span-full md:col-span-1').
+// formColumns: 2 (default) or 3 — a wide form in 3 columns on a computer screen so a long form fits without scrolling.
+export default function ResourcePage({ path, title, columns, formColumns = 2, fields, empty = {}, rowActions = [], filters = {}, onSaved, actions = null, uploadsTo = null }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const { useList, save, remove } = useResource(path)
@@ -44,6 +46,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const [form, setForm] = useState({})
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
+  const [limitReached, setLimitReached] = useState(false) // the school hit its student limit: shown as a friendly notice, not an error
   const [toDelete, setToDelete] = useState(null)
   const [pending, setPending] = useState(null) // { action, row }
   const [notice, setNotice] = useState('')
@@ -55,7 +58,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const [searchParams, setSearchParams] = useSearchParams()
   useEffect(() => {
     if (searchParams.get('new') === '1') {
-      setErrors({}); setFormError(''); setForm({ ...empty }); setEditing({})
+      setErrors({}); setFormError(''); setLimitReached(false); setForm({ ...empty }); setEditing({})
       const next = new URLSearchParams(searchParams); next.delete('new'); setSearchParams(next, { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,6 +67,7 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
   const openForm = (row) => {
     setErrors({})
     setFormError('')
+    setLimitReached(false)
     setForm(row?.id ? Object.fromEntries(fields.filter((f) => f.type !== 'custom' || f.getValue).map((f) => [f.name, (f.getValue ? f.getValue(row) : row[f.name]) ?? ''])) : { ...empty })
     setEditing(row ?? {})
   }
@@ -91,7 +95,11 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
         onError: (err) => {
           const fieldErrors = err.response?.data?.errors
           setErrors(fieldErrors ?? {})
-          if (!fieldErrors) setFormError(t('admin.actions.error'))
+          // A refusal the server explains (HTTP 4xx with a translated message, e.g. the student limit) is shown as it is; only a real failure gets the generic text.
+          const status = err.response?.status
+          const message = status && status < 500 ? err.response?.data?.message : null
+          setLimitReached(err.response?.data?.code === 'student_limit_reached')
+          if (!fieldErrors) setFormError(message || t('admin.actions.error'))
         },
       },
     )
@@ -142,12 +150,18 @@ export default function ResourcePage({ path, title, columns, fields, empty = {},
         extraActions={rowActions.map((a) => ({ key: a.key, label: t(a.label), when: a.when, onClick: (row) => { setNotice(''); setStatus(''); setPending({ action: a, row }) } }))}
         onDelete={(row) => { setNotice(''); setStatus(''); setToDelete(row) }}
       />
-      <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)} size={fields.length > 6 ? 'lg' : 'md'}>
+      <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)} size={formColumns === 3 ? 'xl' : fields.length > 6 ? 'lg' : 'md'}>
         <form onSubmit={submit} className="space-y-3">
-          {formError && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
-          <div className="grid gap-3 md:grid-cols-2">
+          {formError && limitReached && (
+            <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900">
+              <p className="font-bold">{t('people.limitReachedTitle')}</p>
+              <p className="mt-1 text-sm">{formError}</p>
+            </div>
+          )}
+          {formError && !limitReached && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{formError}</p>}
+          <div className={`grid gap-x-3 gap-y-2 ${formColumns === 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>
           {fields.filter((f) => !f.visibleWhen || f.visibleWhen(form)).map((f) => f.type === 'custom' ? (
-            <div key={f.name} className="md:col-span-2">{f.render({ form, setForm })}</div>
+            <div key={f.name} className={f.colSpan ?? 'col-span-full'}>{f.render({ form, setForm })}</div>
           ) : (
             <FormField key={f.name} label={t(f.label)} error={errors[f.name]?.[0]} hint={f.hint ? t(f.hint) : undefined}>
               {f.type === 'select' ? (

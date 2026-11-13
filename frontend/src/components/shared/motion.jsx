@@ -1,19 +1,21 @@
 import { animate, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
-// Shared motion for the dashboards: a card that fades in out of a blur, a number that counts up, and a flag for "grow from zero" charts.
+// Shared motion for the dashboards: a card that fades and rises into place, a number that counts up, and a flag for "grow from zero" charts.
 // Everything stands still (and shows its final state at once) for people who asked for less motion.
+// Only opacity and position move (no blur: a blur filter on a large area is repainted every frame and makes a slow computer stutter),
+// and quickly: what the person came for (menus, titles) is `instant` and never waits for an animation.
 
-/** A block that sharpens and rises into place; `i` staggers a row of them. */
-export function Reveal({ i = 0, className = '', children, ...rest }) {
+/** A block that fades and rises into place; `i` staggers a row of them. `instant` draws it at once, with no motion at all. */
+export function Reveal({ i = 0, className = '', children, instant = false, ...rest }) {
   const still = useReducedMotion()
-  if (still) return <div className={className} {...rest}>{children}</div>
+  if (still || instant) return <div className={className} {...rest}>{children}</div>
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 0.5, delay: Math.min(i, 12) * 0.06, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, delay: Math.min(i, 8) * 0.03, ease: 'easeOut' }}
       {...rest}
     >
       {children}
@@ -28,7 +30,7 @@ export function CountUp({ value, format = (v) => Math.round(v).toLocaleString(),
   const [shown, setShown] = useState(still ? target : 0)
   useEffect(() => {
     if (target === null || still) { setShown(target); return undefined }
-    const controls = animate(0, target, { duration: 0.9, ease: 'easeOut', onUpdate: setShown })
+    const controls = animate(0, target, { duration: 0.6, ease: 'easeOut', onUpdate: setShown })
     return () => controls.stop()
   }, [target, still])
   if (target === null) return <>{value}</>
@@ -47,11 +49,11 @@ export function useGrown() {
   return grown || Boolean(still)
 }
 
-/** Wraps a page: on every change of page (give it `key={pathname}`) the content sharpens out of a light blur. */
+/** Wraps a page: on every change of page (give it `key={pathname}`) the content fades in (quickly, no blur). */
 export function PageEnter({ children }) {
   const still = useReducedMotion()
   if (still) return <>{children}</>
-  return <motion.div initial={{ opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }} transition={{ duration: 0.35, ease: 'easeOut' }}>{children}</motion.div>
+  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15, ease: 'easeOut' }}>{children}</motion.div>
 }
 
 /** Pill tabs with a pill that slides from one tab to the next (`layoutId` must be unique per group). */

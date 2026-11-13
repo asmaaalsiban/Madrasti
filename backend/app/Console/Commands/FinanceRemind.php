@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\Communication\Services\Notifier;
 use App\Modules\Finance\Models\Installment;
 use App\Modules\Finance\Models\Money;
@@ -22,6 +23,11 @@ class FinanceRemind extends Command
 
     public function handle(FeeBilling $billing, Notifier $notifier): int
     {
+        // A suspended, expired or closed school gets no reminders.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return self::SUCCESS;
+        }
+
         $billing->refreshOverdue();
         $until = now()->addDays((int) $this->option('days'))->toDateString();
         $again = now()->subDays((int) $this->option('repeat'));

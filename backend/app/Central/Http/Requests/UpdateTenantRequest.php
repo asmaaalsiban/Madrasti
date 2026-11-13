@@ -22,7 +22,7 @@ class UpdateTenantRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'primary_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'default_locale' => ['sometimes', 'in:ar,en'],
-            'is_active' => ['sometimes', 'boolean'],
+            'max_students' => ['nullable', 'integer', 'min:1'],
             'subscription_ends_at' => ['nullable', 'date'],
         ];
     }

@@ -9,6 +9,11 @@
     "exportFailed": "تعذّر تنزيل الملف.",
     "account": "حسابي"
   },
+  "suspended": {
+    "title": "هذه المدرسة غير متاحة",
+    "message": "انتهى اشتراك المدرسة، لذلك أُغلق الدخول حاليًا. يرجى التواصل مع مالك المنصة لتجديده.",
+    "signIn": "تسجيل الدخول مرة أخرى"
+  },
   "auth": {
     "title": "تسجيل الدخول",
     "login": "البريد الإلكتروني أو رقم الهاتف",
@@ -134,7 +139,10 @@
   },
   "errors": {
     "forbidden": "غير مسموح لك بالدخول لهذه الصفحة.",
-    "notFound": "الصفحة غير موجودة."
+    "notFound": "الصفحة غير موجودة.",
+    "notFoundTitle": "الصفحة غير موجودة",
+    "notFoundBody": "عذراً، الصفحة التي تبحث عنها غير موجودة.",
+    "backHome": "العودة للرئيسية"
   },
   "landing": {
     "login": "تسجيل الدخول",
@@ -306,6 +314,7 @@
   },
   "people": {
     "students": "الطلاب",
+    "limitReachedTitle": "وصلت إلى الحد الأقصى للطلاب",
     "fields": {
       "email": "البريد الإلكتروني",
       "phone": "الهاتف",
@@ -971,6 +980,8 @@
       "procurement_rejected": "رُفض طلبك: {{title}} — {{note}}",
       "procurement_to_buy": "تمت الموافقة، يرجى الشراء: {{title}}",
       "procurement_purchased": "تم شراء: {{title}}",
+      "student_limit_near": "مدرستك تقترب من الحد الأقصى للطلاب: {{current}} من {{limit}} طالب.",
+      "student_limit_reached": "وصلت مدرستك إلى الحد الأقصى للطلاب ({{limit}} طالب). تواصل مع مالك المنصة لرفع الحد.",
       "task_new": "أعطاك {{name}} مهمة: {{title}}",
       "task_done": "أنجز {{name}} المهمة: {{title}}",
       "task_reminder": "مهمة موعدها غداً: {{title}}",
@@ -3326,5 +3337,138 @@
     "feed": "المنشورات",
     "unread": "{{count}} غير مقروءة",
     "sideMenu": "القائمة"
+  },
+  "superAdmin": {
+    "title": "مالك المنصة",
+    "loginTitle": "تسجيل دخول مالك المنصة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "continue": "متابعة",
+    "signIn": "تسجيل الدخول",
+    "back": "رجوع",
+    "code": "رمز من 6 أرقام",
+    "codeSent": "أرسلنا رمزًا من 6 أرقام إلى {{email}}. صالح لمدة 10 دقائق.",
+    "genericError": "حدث خطأ ما، حاول مرة أخرى.",
+    "schools": "المدارس",
+    "addSchool": "إضافة مدرسة",
+    "searchHint": "الاسم أو الرمز",
+    "status": "الحالة",
+    "allStates": "الكل",
+    "name": "الاسم",
+    "endsAt": "تنتهي في",
+    "students": "الطلاب",
+    "staff": "الموظفون",
+    "open": "فتح",
+    "none": "لا توجد مدارس.",
+    "total_zero": "لا توجد مدارس",
+    "total_one": "مدرسة واحدة",
+    "total_two": "مدرستان",
+    "total_few": "{{count}} مدارس",
+    "total_many": "{{count}} مدرسة",
+    "total_other": "{{count}} مدرسة",
+    "noEndDate": "بلا تاريخ انتهاء",
+    "unlimited": "غير محدود",
+    "states": {
+      "active": "فعّالة",
+      "expired": "منتهية",
+      "suspended": "موقوفة",
+      "exit_window": "فترة التنزيل",
+      "closed": "مغلقة"
+    },
+    "backToSchools": "العودة إلى المدارس",
+    "notFound": "المدرسة غير موجودة.",
+    "details": "بيانات المدرسة",
+    "schoolName": "اسم المدرسة",
+    "schoolCode": "رمز المدرسة",
+    "schoolCodeHint": "من 3 إلى 30 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة. لا يمكن تغييره لاحقًا.",
+    "defaultLocale": "اللغة الافتراضية",
+    "arabic": "العربية",
+    "english": "English",
+    "maxStudents": "حد الطلاب",
+    "maxStudentsHint": "اتركه فارغًا لعدم وجود حد.",
+    "saved": "تم الحفظ.",
+    "adminName": "اسم المدير",
+    "adminEmail": "بريد المدير",
+    "adminPassword": "كلمة مرور المدير",
+    "endDate": "تاريخ انتهاء الاشتراك",
+    "endDateHint": "اتركه فارغًا لعدم وجود تاريخ انتهاء.",
+    "subscription": "الاشتراك",
+    "currentEnd": "تاريخ الانتهاء الحالي",
+    "newEndDate": "تاريخ الانتهاء الجديد",
+    "extend": "تمديد",
+    "extended": "تم تمديد الاشتراك.",
+    "lastBackup": "آخر نسخة احتياطية",
+    "never": "لا يوجد",
+    "exitWindowEnds": "تنتهي فترة تنزيل البيانات في",
+    "closedAt": "أُغلقت في",
+    "suspend": "إيقاف",
+    "suspendQuestion": "إيقاف هذه المدرسة؟",
+    "suspendDescription": "يُمنع كل من في المدرسة عند طلبه التالي إلى أن تعيد تفعيلها. لا تُحذف أي بيانات.",
+    "suspendConfirm": "إيقاف المدرسة",
+    "reactivate": "إعادة التفعيل",
+    "reactivateQuestion": "إعادة تفعيل هذه المدرسة؟",
+    "reactivateDescription": "تعود المدرسة للعمل. إن كانت مغلقة أو في فترة تنزيل يُلغى ذلك؛ حدّد تاريخ انتهاء جديدًا إن كان قد مضى.",
+    "reactivateConfirm": "إعادة تفعيل المدرسة",
+    "audit": {
+      "title": "نشاط المالك",
+      "none": "لا يوجد سجل بعد.",
+      "actions": {
+        "school_create": "إنشاء المدرسة",
+        "school_update": "تعديل البيانات",
+        "school_suspend": "إيقاف",
+        "school_reactivate": "إعادة تفعيل",
+        "school_extend": "تمديد الاشتراك"
+      }
+    },
+    "exit": {
+      "title": "تنزيل البيانات",
+      "hint": "يتيح لمديري المدرسة الدخول لفترة محدودة لتنزيل بياناتهم فقط. يُجهَّز الأرشيف والحزمة أولاً.",
+      "days": "عدد الأيام",
+      "open": "السماح بتنزيل البيانات",
+      "extendDays": "التمديد بعدد الأيام",
+      "extend": "تمديد الفترة",
+      "extended": "تم تمديد الفترة.",
+      "retry": "إعادة المحاولة",
+      "downloadFailed": "تعذّر تنزيل الملف.",
+      "steps": {
+        "archive": "الأرشيف الكامل",
+        "package": "حزمة التسليم"
+      },
+      "status": {
+        "pending": "بالانتظار",
+        "running": "قيد التجهيز",
+        "done": "جاهزة",
+        "failed": "فشلت"
+      },
+      "download": {
+        "archive": "تنزيل الأرشيف",
+        "package": "تنزيل الحزمة"
+      }
+    }
+  },
+  "exit": {
+    "title": "تنزيل بياناتك",
+    "intro": "هذه المدرسة ستُغلق. يمكنك تنزيل جميع بياناتها حتى تنتهي الفترة أدناه. بعد ذلك لن يستطيع أحد الدخول.",
+    "timeLeft": "الوقت المتبقي",
+    "days_zero": "لا أيام",
+    "days_one": "يوم",
+    "days_two": "يومان",
+    "days_few": "{{count}} أيام",
+    "days_many": "{{count}} يومًا",
+    "days_other": "{{count}} يوم",
+    "hours_zero": "لا ساعات",
+    "hours_one": "ساعة",
+    "hours_two": "ساعتان",
+    "hours_few": "{{count}} ساعات",
+    "hours_many": "{{count}} ساعة",
+    "hours_other": "{{count}} ساعة",
+    "lessThanHour": "أقل من ساعة",
+    "endsOn": "تنتهي الفترة في {{date}}",
+    "download": "تنزيل حزمة البيانات",
+    "preparing": "الحزمة قيد التجهيز. عد بعد دقائق.",
+    "downloadFailed": "فشل التنزيل، حاول مرة أخرى.",
+    "loadFailed": "تعذّر تحميل فترة التنزيل.",
+    "contact": "أسئلة؟ تواصل مع مالك المنصة:",
+    "signOut": "تسجيل الخروج"
   }
 }

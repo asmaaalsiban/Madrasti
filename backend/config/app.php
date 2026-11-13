@@ -41,6 +41,9 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    // Send plain HTTP to HTTPS and tell browsers to stay on HTTPS. On by default in production; FORCE_HTTPS=false turns it off.
+    'force_https' => filter_var(env('FORCE_HTTPS', env('APP_ENV') === 'production'), FILTER_VALIDATE_BOOLEAN),
+
     // Load testing aid (see loadtest/README.md): adds X-Queries / X-Query-Ms to API answers. Never in production.
     'query_stats' => env('APP_ENV') !== 'production' && (bool) env('QUERY_STATS', false),
 

@@ -5,5 +5,6 @@ return [
     'guardian_of' => 'Parent of :name',
     'guardian_phone_conflict' => 'This phone number already belongs to another account.',
     'guardian_email_conflict' => 'This email already belongs to another kind of account and cannot be used for a parent.',
+    'student_limit_reached' => "You have reached your school's limit of :limit students. To add more students, please contact the platform owner.",
     'resources' => ['teacher' => 'teacher', 'student' => 'student'],
 ];

@@ -25,6 +25,7 @@ use App\Shared\Enums\Role;
 use App\Shared\Messaging\MessageSender;
 use App\Shared\Push\PushTransport;
 use App\Shared\Push\WebPushTransport;
+use App\Shared\Security\ProductionGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -49,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ProductionGuard::apply($this->app);
+
         // Every money event posts its own balanced entry in the journal.
         \App\Modules\Finance\Models\StudentFee::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->fee($m));
         \App\Modules\Finance\Models\Expense::saved(fn ($m) => app(\App\Modules\Finance\Services\Posting::class)->bill($m));
@@ -133,6 +136,9 @@ class AppServiceProvider extends ServiceProvider
                 ->whereIn('classroom_id', Classroom::where('homeroom_teacher_id', $user->id)->whereHas('academicYear', fn ($q) => $q->where('is_current', true))->select('id'))->exists(),
         });
 
+        // Every signed-in school route: 300 requests a minute per person (a normal screen makes a handful; this stops a script).
+        RateLimiter::for('school-api', fn (Request $request): Limit => Limit::perMinute(300)->by('api|'.(tenant('id') ?? 'central').'|'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+
         // Changing a password asks for the current one: 5 tries a minute per user.
         RateLimiter::for('email-code', fn (Request $request): Limit => Limit::perMinute(10)->by('ec|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
         RateLimiter::for('change-password', fn (Request $request): Limit => Limit::perMinute(5)->by('cp|'.(tenant('id') ?? 'central').'|'.$request->user()?->id));
@@ -149,6 +155,12 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(20)->by('fp|ip|'.$request->ip()),
         ]);
         RateLimiter::for('reset-password', fn (Request $request): Limit => Limit::perMinute(10)->by('rp|'.(tenant('id') ?? 'central').'|'.Str::lower((string) $request->input('login')).'|'.$request->ip()));
+
+        // Super Admin code step: 10 tries a minute per email + IP, 30 per IP (the code itself also locks after 5 wrong tries).
+        RateLimiter::for('central-code', fn (Request $request): array => [
+            Limit::perMinute(10)->by('cc|'.Str::lower((string) $request->input('email')).'|'.$request->ip()),
+            Limit::perMinute(30)->by('cc|ip|'.$request->ip()),
+        ]);
 
         // Login: 5 attempts a minute for the same school + login + IP, and 30 a minute from one IP for a whole school
         // (new accounts share the default password, so one machine must not be able to try it on many emails).

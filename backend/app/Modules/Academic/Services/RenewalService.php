@@ -155,7 +155,7 @@ class RenewalService
     {
         $renewed = 0;
         $failed = [];
-        foreach (StudentRenewal::with('student')->where('to_year_id', $to->id)->where('status', 'pending')->get() as $renewal) {
+        foreach (StudentRenewal::with('student')->where('to_year_id', $to->id)->where('status', 'pending')->whereHas('student')->get() as $renewal) {
             try {
                 $this->renew($renewal, $by);
                 $renewed++;

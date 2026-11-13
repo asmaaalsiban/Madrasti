@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Attendance\Jobs;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\Attendance\Models\AbsenceNotification;
 use App\Modules\Attendance\Models\StudentAttendance;
 use App\Shared\Enums\AttendanceStatus;
@@ -34,6 +35,11 @@ class SendAbsenceNotice implements ShouldQueue
 
     public function handle(MessageSender $sender): void
     {
+        // A suspended, expired or closed school sends no messages.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return;
+        }
+
         $attendance = StudentAttendance::with('student.guardians')->find($this->attendanceId);
         if ($attendance === null || $attendance->status !== AttendanceStatus::Absent || $attendance->student === null) {
             return;

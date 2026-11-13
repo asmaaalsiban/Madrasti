@@ -25,7 +25,8 @@ class RenewalController extends Controller
         $years = AcademicYear::orderByDesc('starts_on')->get(['id', 'name', 'starts_on', 'is_current']);
         $to = $request->integer('year_id') ? AcademicYear::findOrFail($request->integer('year_id')) : $this->renewals->nextYear();
         $rows = $to === null ? collect() : StudentRenewal::with(['student:id,name_ar,name_en,student_number,gender', 'fromClassroom:id,name', 'fromGrade', 'toGrade', 'toClassroom:id,name'])
-            ->where('to_year_id', $to->id)->get()->sortBy(fn ($r) => [$r->from_classroom_id, $r->student->name_ar])->values();
+            ->where('to_year_id', $to->id)->whereHas('student') // a student the school deleted after opening is not listed
+            ->get()->sortBy(fn ($r) => [$r->from_classroom_id, $r->student->name_ar])->values();
 
         return response()->json([
             'year' => $to ? ['id' => $to->id, 'name' => $to->name] : null,

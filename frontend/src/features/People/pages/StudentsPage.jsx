@@ -51,7 +51,7 @@ const fields = [
   },
   { name: '_saved', type: 'custom', getValue: (row) => row.files ?? [], visibleWhen: () => false, render: () => null },
   {
-    name: '_files', type: 'custom', getValue: () => [],
+    name: '_files', type: 'custom', getValue: () => [], colSpan: 'col-span-full md:col-span-1',
     render: ({ form, setForm }) => (
       <AttachmentsField
         label={<StudentFileLabel />}
@@ -62,7 +62,7 @@ const fields = [
       />
     ),
   },
-  { name: 'guardian_picker', type: 'custom', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
+  { name: 'guardian_picker', type: 'custom', colSpan: 'col-span-full md:col-span-1 lg:col-span-2', render: ({ setForm }) => <GuardianPicker setForm={setForm} /> },
   { name: 'guardian_name', label: 'people.fields.guardianName', getValue: (row) => row.guardians?.[0]?.name },
   { name: 'guardian_phone', label: 'people.fields.guardianPhone', type: 'tel', hint: 'people.guardianPhoneHint', requiredWhen: (f) => Boolean(f.guardian_name || f.guardian_email), getValue: (row) => row.guardians?.[0]?.phone },
   { name: 'guardian_email', label: 'people.fields.guardianEmail', type: 'email', hint: 'people.guardianHint', getValue: (row) => row.guardians?.[0]?.email },
@@ -124,6 +124,7 @@ export default function StudentsPage() {
         key={classroom}
         filters={classroom ? { classroom_id: classroom } : {}}
         path="students"
+        formColumns={3}
         uploadsTo="student"
         title="people.students"
         columns={columns}

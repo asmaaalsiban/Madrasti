@@ -9,6 +9,11 @@
     "exportFailed": "The file could not be downloaded.",
     "account": "Account"
   },
+  "suspended": {
+    "title": "This school is not available",
+    "message": "The school's subscription has ended, so access is closed for now. Please contact the platform owner to renew it.",
+    "signIn": "Sign in again"
+  },
   "auth": {
     "title": "Sign in",
     "login": "Email or phone number",
@@ -134,7 +139,10 @@
   },
   "errors": {
     "forbidden": "You are not allowed to view this page.",
-    "notFound": "Page not found."
+    "notFound": "Page not found.",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "Sorry, the page you are looking for does not exist.",
+    "backHome": "Back to home"
   },
   "landing": {
     "login": "Sign in",
@@ -306,6 +314,7 @@
   },
   "people": {
     "students": "Students",
+    "limitReachedTitle": "Student limit reached",
     "fields": {
       "email": "Email",
       "phone": "Phone",
@@ -971,6 +980,8 @@
       "procurement_rejected": "Your request was declined: {{title}} — {{note}}",
       "procurement_to_buy": "Approved, please buy: {{title}}",
       "procurement_purchased": "Bought: {{title}}",
+      "student_limit_near": "Your school is close to its student limit: {{current}} of {{limit}} students.",
+      "student_limit_reached": "Your school reached its student limit ({{limit}} students). Contact the platform owner to raise it.",
       "task_new": "{{name}} gave you a task: {{title}}",
       "task_done": "{{name}} finished the task: {{title}}",
       "task_reminder": "Task due tomorrow: {{title}}",
@@ -3308,5 +3319,126 @@
     "feed": "Feed",
     "unread": "{{count}} unread",
     "sideMenu": "Menu"
+  },
+  "superAdmin": {
+    "title": "Platform owner",
+    "loginTitle": "Platform owner sign-in",
+    "email": "Email",
+    "password": "Password",
+    "continue": "Continue",
+    "signIn": "Sign in",
+    "back": "Back",
+    "code": "6-digit code",
+    "codeSent": "We sent a 6-digit code to {{email}}. It is valid for 10 minutes.",
+    "genericError": "Something went wrong, please try again.",
+    "schools": "Schools",
+    "addSchool": "Add school",
+    "searchHint": "Name or code",
+    "status": "Status",
+    "allStates": "All",
+    "name": "Name",
+    "endsAt": "Ends",
+    "students": "Students",
+    "staff": "Staff",
+    "open": "Open",
+    "none": "No schools found.",
+    "total_one": "{{count}} school",
+    "total_other": "{{count}} schools",
+    "noEndDate": "No end date",
+    "unlimited": "Unlimited",
+    "states": {
+      "active": "Active",
+      "expired": "Expired",
+      "suspended": "Suspended",
+      "exit_window": "Exit window",
+      "closed": "Closed"
+    },
+    "backToSchools": "Back to schools",
+    "notFound": "School not found.",
+    "details": "School details",
+    "schoolName": "School name",
+    "schoolCode": "School code",
+    "schoolCodeHint": "3-30 lowercase letters, digits or hyphens. It cannot be changed later.",
+    "defaultLocale": "Default language",
+    "arabic": "Arabic",
+    "english": "English",
+    "maxStudents": "Student limit",
+    "maxStudentsHint": "Leave empty for no limit.",
+    "saved": "Saved.",
+    "adminName": "Admin name",
+    "adminEmail": "Admin email",
+    "adminPassword": "Admin password",
+    "endDate": "Subscription end date",
+    "endDateHint": "Leave empty for no end date.",
+    "subscription": "Subscription",
+    "currentEnd": "Current end date",
+    "newEndDate": "New end date",
+    "extend": "Extend",
+    "extended": "The subscription was extended.",
+    "lastBackup": "Last backup",
+    "never": "Never",
+    "exitWindowEnds": "Data download window ends",
+    "closedAt": "Closed on",
+    "suspend": "Suspend",
+    "suspendQuestion": "Suspend this school?",
+    "suspendDescription": "Everybody at the school is blocked on their next request until you reactivate it. No data is deleted.",
+    "suspendConfirm": "Suspend school",
+    "reactivate": "Reactivate",
+    "reactivateQuestion": "Reactivate this school?",
+    "reactivateDescription": "The school can be used again. If it is closed or in an exit window, that is cleared; set a new end date if it has passed.",
+    "reactivateConfirm": "Reactivate school",
+    "audit": {
+      "title": "Owner activity",
+      "none": "Nothing recorded yet.",
+      "actions": {
+        "school_create": "School created",
+        "school_update": "Details changed",
+        "school_suspend": "Suspended",
+        "school_reactivate": "Reactivated",
+        "school_extend": "Subscription extended"
+      }
+    },
+    "exit": {
+      "title": "Data download",
+      "hint": "Lets the school's administrators sign in for a limited time, only to download their data. The archive and the package are prepared first.",
+      "days": "Days",
+      "open": "Allow data download",
+      "extendDays": "Extend by (days)",
+      "extend": "Extend window",
+      "extended": "The window was extended.",
+      "retry": "Retry",
+      "downloadFailed": "The file could not be downloaded.",
+      "steps": {
+        "archive": "Full archive",
+        "package": "Handover package"
+      },
+      "status": {
+        "pending": "Waiting",
+        "running": "Preparing",
+        "done": "Done",
+        "failed": "Failed"
+      },
+      "download": {
+        "archive": "Download archive",
+        "package": "Download package"
+      }
+    }
+  },
+  "exit": {
+    "title": "Download your data",
+    "intro": "This school is closing. You can download all of its data until the window below ends. After that, nobody can sign in.",
+    "timeLeft": "Time left",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "lessThanHour": "Less than an hour",
+    "endsOn": "The window ends on {{date}}",
+    "download": "Download the data package",
+    "preparing": "The package is being prepared. Come back in a few minutes.",
+    "downloadFailed": "The download failed, please try again.",
+    "loadFailed": "Could not load the download window.",
+    "contact": "Questions? Contact the platform owner:",
+    "signOut": "Sign out"
   }
 }
