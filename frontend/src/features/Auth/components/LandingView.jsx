@@ -3,6 +3,7 @@ import { isLowEndDevice } from '../../../lite'
 import SchoolLogo from '../../../components/shared/SchoolLogo'
 import { useTranslation } from 'react-i18next'
 import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, GraduationCap, Heart, MessageCircle, Briefcase, Users, Wallet } from 'lucide-react'
+import { useSmoothScroll } from '../../../hooks/useSmoothScroll'
 
 const YEAR = new Date().getFullYear()
 // Kids reading among books under the stars (MotionSites free media shelf, #24). Swap it for the school's own film; if it cannot load, the aurora below stays.
@@ -109,6 +110,7 @@ function DashboardMock({ t }) {
 // `header` and `actions` are the buttons at the top and under the title; `ctaActions` those of the closing band.
 export default function LandingView({ name, logo, title, text, header, actions, ctaActions }) {
   const { t } = useTranslation()
+  useSmoothScroll()
   const words = name.trim().split(/\s+/)
   const marquee = [...FEATURES, ...FEATURES]
   return (
