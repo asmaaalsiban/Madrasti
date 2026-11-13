@@ -1,15 +1,18 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import FormField from '../../components/shared/FormField'
 import { normalizeSchoolCode, goTo, setSchool } from '../../tenant/school'
 import { loginAdmin, registerSchool } from './api'
 import CentralShell from './CentralShell'
+import { useRegistration } from './useRegistration'
 
 const EMPTY = { school_name: '', code: '', admin_name: '', admin_email: '', password: '', password_confirmation: '' }
 const inputClass = 'w-full rounded border p-2'
 
 export default function RegisterSchoolPage() {
   const { t } = useTranslation()
+  const registration = useRegistration()
   const [form, setForm] = useState(EMPTY)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
@@ -43,6 +46,19 @@ export default function RegisterSchoolPage() {
       <input className={inputClass} value={form[name]} onChange={set(name)} required {...props} />
     </FormField>
   )
+
+  if (registration.loading) return <CentralShell><p className="auth-card">{t('common.loading')}</p></CentralShell>
+  if (!registration.enabled) {
+    return (
+      <CentralShell>
+        <div className="auth-card space-y-4">
+          <h1 className="text-xl font-bold">{t('central.registrationClosedTitle')}</h1>
+          <p className="text-slate-600">{t('central.registrationClosed')}</p>
+          <Link to="/find-school" className="cta inline-block bg-brand text-white">{t('central.signIn')}</Link>
+        </div>
+      </CentralShell>
+    )
+  }
 
   return (
     <CentralShell>

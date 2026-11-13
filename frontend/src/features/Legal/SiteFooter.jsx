@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { company } from '../../config/company'
 import { getSchool } from '../../tenant/school'
+import { useRegistration } from '../Central/useRegistration'
 
 const YEAR = new Date().getFullYear()
 
@@ -11,9 +12,10 @@ const YEAR = new Date().getFullYear()
 export default function SiteFooter() {
   const { t } = useTranslation()
   const owner = company.legalName || company.name
+  const { enabled: canRegister } = useRegistration()
   const platform = getSchool()
     ? [['/', t('footer.home')], ['/login', t('landing.login')]]
-    : [['/', t('footer.home')], ['/register', t('footer.register')], ['/find-school', t('footer.findSchool')]]
+    : [['/', t('footer.home')], ...(canRegister ? [['/register', t('footer.register')]] : []), ['/find-school', t('footer.findSchool')]]
   const legal = [['/privacy', t('legal.privacy.title')], ['/terms', t('legal.terms.title')], ['/cookies', t('legal.cookies.title')]]
   const hasContact = Boolean(company.email || company.phone || company.address)
   const linkClass = 'text-slate-600 transition-colors hover:text-deep-harbor hover:underline'

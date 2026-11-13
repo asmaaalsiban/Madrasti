@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import LegalShell from '../src/features/Legal/LegalFooter'
 
+const registration = vi.hoisted(() => ({ on: true }))
+vi.mock('../src/features/Central/useRegistration', () => ({ useRegistration: () => ({ enabled: registration.on, loading: false }) }))
+
 const school = vi.hoisted(() => ({ code: null }))
 const companyMock = vi.hoisted(() => ({ company: { name: 'Madrasati', legalName: '', email: '', phone: '', address: '' } }))
 vi.mock('../src/tenant/school', () => ({ getSchool: () => school.code }))
@@ -16,6 +19,7 @@ const at = (path) => {
 
 beforeEach(async () => {
   school.code = null
+  registration.on = true
   Object.assign(companyMock.company, { name: 'Madrasati', legalName: '', email: '', phone: '', address: '' })
   await i18n.changeLanguage('en')
 })
@@ -40,6 +44,13 @@ describe('the site footer', () => {
     expect(screen.getByRole('link', { name: 'Register a school' })).toHaveAttribute('href', '/register')
     expect(screen.getByRole('link', { name: 'Find your school' })).toHaveAttribute('href', '/find-school')
     expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument()
+  })
+
+  it('hides the register link when public registration is off', () => {
+    registration.on = false
+    at('/')
+    expect(screen.queryByRole('link', { name: 'Register a school' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Find your school' })).toHaveAttribute('href', '/find-school')
   })
 
   it('offers sign-in (not registration) when a school is chosen', () => {

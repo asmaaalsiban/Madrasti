@@ -127,6 +127,20 @@ class RegisterSchoolTest extends TenantTestCase
         $this->assertCount(1, $this->calls);
     }
 
+    public function test_the_website_can_ask_whether_registration_is_on(): void
+    {
+        config(['tenancy.registration_enabled' => true]);
+        $this->getJson('/api/central/registration')->assertOk()->assertExactJson(['enabled' => true]);
+
+        config(['tenancy.registration_enabled' => false]);
+        $this->getJson('/api/central/registration')->assertOk()->assertExactJson(['enabled' => false]);
+    }
+
+    public function test_registration_is_off_unless_it_is_switched_on(): void
+    {
+        $this->assertSame('REGISTRATION_ENABLED=false', collect(file(base_path('.env.example'), FILE_IGNORE_NEW_LINES))->first(fn ($l) => str_starts_with($l, 'REGISTRATION_ENABLED=')), 'the example .env must not turn public registration on');
+    }
+
     public function test_disabled_returns_403(): void
     {
         config(['tenancy.registration_enabled' => false]);

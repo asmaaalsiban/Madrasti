@@ -328,7 +328,10 @@
     "switchSchool": "Switch school",
     "schoolNotFound": "School not found. Check the school code.",
     "schoolCodeHint": "You will type this code when you sign in",
-    "changeSchoolCode": "Change school code"
+    "changeSchoolCode": "Change school code",
+    "heroTextClosed": "Sign in to your school with its code.",
+    "registrationClosedTitle": "Registration is closed",
+    "registrationClosed": "New schools are added by the platform team. If your school is already on the platform, sign in with its code."
   },
   "people": {
     "students": "Students",
