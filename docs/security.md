@@ -10,6 +10,7 @@ Written after the security review of the whole project (see the report in the pu
 | Sign-in | Sanctum tokens, one per school (tokens live in each school's own database); passwords hashed (bcrypt, `hashed` cast); one generic error for a wrong login (no account guessing) |
 | Sign-in abuse | `login`: 5 tries a minute per school + login + IP and 30 per IP; forgot / reset / Super Admin code steps have their own limits; every failed sign-in is logged (`LoginMonitor`, no password, login only as a short hash) and one `alert` entry is written when one address fails 10 times in 15 minutes |
 | Reset codes | 6 digits, 15 minutes, 5 tries, single use, all tokens revoked after the change |
+| Sessions | A school sign-in token lasts 30 days (`SANCTUM_EXPIRATION`, in minutes), then the person signs in again; logout, a password change or a reset revokes it at once |
 | Super Admin | 14+ character password, then an emailed code (10 minutes, 5 tries); 8-hour token |
 | Rate limit | Every signed-in school route: 300 requests a minute per person (`school-api`); public routes have their own |
 | Authorization | Role middleware and policies on the server; a parent only reaches their own children; schools are separate databases |

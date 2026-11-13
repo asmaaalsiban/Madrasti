@@ -50,7 +50,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // A signed-in person has to sign in again after this many minutes (default 30 days). Tokens already issued count from the day they
+    // were made, so a token older than this stops working. SANCTUM_EXPIRATION overrides it (minutes; empty = default).
+    'expiration' => (int) (env('SANCTUM_EXPIRATION') ?: 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------
