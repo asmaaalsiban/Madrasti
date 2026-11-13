@@ -1,4 +1,5 @@
 import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
+import NotFoundPage from '../components/shared/NotFoundPage'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
@@ -341,6 +342,8 @@ export const routes = [
       },
     ],
   },
+  // Any address that matches nothing above (a school is selected): show the "page not found" screen.
+  { path: '*', element: <NotFoundPage /> },
 ]
 
 // The platform owner's area. Not linked from any public page; its own sign-in (the layout shows it without a token) and its own token,
