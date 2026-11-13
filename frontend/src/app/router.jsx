@@ -9,6 +9,10 @@ import LandingPage from '../features/Auth/pages/LandingPage'
 import FindSchoolPage from '../features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
 import WelcomePage from '../features/Central/WelcomePage'
+import SuperAdminLayout from '../features/SuperAdmin/SuperAdminLayout'
+import SchoolsPage from '../features/SuperAdmin/SchoolsPage'
+import SchoolPage from '../features/SuperAdmin/SchoolPage'
+import AddSchoolPage from '../features/SuperAdmin/AddSchoolPage'
 import { getSchool } from '../tenant/school'
 import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
 import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
@@ -337,6 +341,21 @@ export const routes = [
   },
 ]
 
+// The platform owner's area. Not linked from any public page; its own sign-in (the layout shows it without a token) and its own token,
+// and it works whether or not a school is selected in this browser.
+const superAdminRoutes = [
+  {
+    path: '/super-admin',
+    element: <SuperAdminLayout />,
+    children: [
+      { index: true, element: <Navigate to="/super-admin/schools" replace /> },
+      { path: 'schools', element: <SchoolsPage /> },
+      { path: 'schools/new', element: <AddSchoolPage /> },
+      { path: 'schools/:id', element: <SchoolPage /> },
+    ],
+  },
+]
+
 // No school selected yet: only registration and the school-code lookup are available.
 export const centralRoutes = [
   { path: '/', element: <WelcomePage /> },
@@ -353,6 +372,6 @@ const legalRoutes = [
 ]
 const withLegal = (list) => [{ element: <LegalShell />, children: [...legalRoutes, ...list] }]
 
-export const routesFor = (school) => withLegal(school ? routes : centralRoutes)
+export const routesFor = (school) => withLegal([...superAdminRoutes, ...(school ? routes : centralRoutes)])
 
 export const createRouter = () => createBrowserRouter(routesFor(getSchool()))

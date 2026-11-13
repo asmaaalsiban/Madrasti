@@ -39,6 +39,7 @@ Full product details: @docs/product-spec.md (read it before building or changing
 - Onboarding a school: one command creates DB, runs migrations, creates first admin, seeds defaults
 - Frontend is one build for all schools; name, logo, colors come from the API by domain
 - Mobile: responsive web / PWA first (no native app for now)
+- Super Admin area (`/super-admin`, central API, own token): not covered by the automated screen sweep (`tools/ui-check`); check its screens by hand
 
 ## Build order
 1. Foundation: tenancy, auth + roles, school structure
