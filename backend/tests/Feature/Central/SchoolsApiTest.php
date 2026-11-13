@@ -6,6 +6,7 @@ use App\Central\Actions\CreateSchool;
 use App\Central\Models\SuperAdmin;
 use App\Central\Models\Tenant;
 use App\Models\User;
+use App\Modules\Academic\Models\Student;
 use App\Shared\Enums\Role;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Cache;
@@ -91,7 +92,9 @@ class SchoolsApiTest extends TestCase
     {
         $school = $this->school('alpha', ['max_students' => 50, 'subscription_ends_at' => '2099-12-31']);
         $school->run(function () {
-            User::factory()->count(3)->role(Role::Student)->create();
+            foreach ([1, 2, 3] as $n) {
+                Student::create(['student_number' => "S-$n", 'name_ar' => 'طالب', 'gender' => 'male']);
+            }
             User::factory()->role(Role::Teacher)->create();
         });
         $this->fresh();
@@ -203,13 +206,43 @@ class SchoolsApiTest extends TestCase
 
         $this->assertSame(0, $this->listed()[0]['students_count']);
 
-        $school->run(fn () => User::factory()->role(Role::Student)->create());
+        // A number change that is not an add or a remove of a student (written straight to the table) is not seen until the cache expires.
+        $school->run(fn () => DB::table('students')->insert(['student_number' => 'S-1', 'name_ar' => 'طالب', 'gender' => 'male', 'created_at' => now(), 'updated_at' => now()]));
         $this->fresh();
         $this->assertSame(0, $this->listed()[0]['students_count'], 'served from the cache');
         $this->assertTrue(Cache::has('school.counts.alpha'));
 
         Cache::forget('school.counts.alpha');
         $this->assertSame(1, $this->listed()[0]['students_count']);
+    }
+
+    public function test_the_students_count_follows_the_school_at_once_when_it_adds_or_deletes_a_student(): void
+    {
+        $school = $this->school('alpha');
+        $this->owner();
+        $this->assertSame(0, $this->listed()[0]['students_count']);
+        $this->assertTrue(Cache::has('school.counts.alpha'), 'the list caches the numbers');
+
+        $student = $school->run(fn () => Student::create(['student_number' => 'S-1', 'name_ar' => 'طالب', 'gender' => 'male']));
+        $this->fresh();
+        $this->assertFalse(Cache::has('school.counts.alpha'), 'adding a student drops the cached numbers');
+        $this->assertSame(1, $this->listed()[0]['students_count']);
+
+        $school->run(fn () => $student->fresh()->delete());
+        $this->fresh();
+        $this->assertSame(0, $this->listed()[0]['students_count'], 'deleting a student shows at once, not after the cache expires');
+    }
+
+    public function test_the_staff_count_follows_the_school_at_once(): void
+    {
+        $school = $this->school('alpha');
+        $this->owner();
+        $before = $this->listed()[0]['staff_count'];
+
+        $school->run(fn () => User::factory()->role(Role::Teacher)->create());
+        $this->fresh();
+
+        $this->assertSame($before + 1, $this->listed()[0]['staff_count']);
     }
 
     public function test_last_backup_at_is_the_newest_backup_or_null(): void
