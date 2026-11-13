@@ -8,6 +8,7 @@ import { CHANGE_PASSWORD_PATH, homeFor } from '../../../app/guards'
 import { getSchool } from '../../../tenant/school'
 import { useSchool } from '../../../tenant/useSchool'
 import { useAuth } from '../AuthProvider'
+import { useStaggerIn } from '../../../hooks/useGsapMotion'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -17,6 +18,8 @@ export default function LoginPage() {
   const [form, setForm] = useState({ login: '', password: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // The card rises in, then its fields follow one by one.
+  const card = useStaggerIn('.auth-card > *', { y: 14, stagger: 0.07, delay: 0.15 })
 
   if (user) return <Navigate to={homeFor(user.role)} replace />
 
@@ -36,7 +39,7 @@ export default function LoginPage() {
 
   return (
     <AuthShell name={school?.name} logo={school?.logo_url} top={<ChangeSchoolCodeButton />}>
-      <form onSubmit={submit} className="auth-card space-y-4">
+      <form ref={card} onSubmit={submit} className="auth-card space-y-4">
         <div>
           <h1 className="text-2xl font-extrabold">{t('auth.title')}</h1>
           <p dir="ltr" className="text-start text-sm text-slate-500">{getSchool()}</p>
