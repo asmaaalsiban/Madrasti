@@ -1,4 +1,6 @@
 import { Link, Outlet } from 'react-router-dom'
+import { Suspense } from 'react'
+import PageFallback from '../../components/shared/PageFallback'
 import { useTranslation } from 'react-i18next'
 import { company } from '../../config/company'
 import PwaBar from '../../pwa/PwaBar'
@@ -10,7 +12,7 @@ export default function LegalShell() {
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-50 focus:rounded focus:bg-deep-harbor focus:px-4 focus:py-2 focus:text-white" onClick={() => document.getElementById('main')?.focus()}>{t('a11y.skip')}</a>
-      <Outlet />
+      <Suspense fallback={<PageFallback />}><Outlet /></Suspense>
       <PwaBar />
       <div className="border-t border-fog bg-snow px-4 py-3 text-center text-xs text-slate-600 print:hidden">
         <nav aria-label={t('legal.docs')} className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">

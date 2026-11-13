@@ -1,129 +1,139 @@
+import { lazy } from 'react'
 import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom'
 import NotFoundPage from '../components/shared/NotFoundPage'
 import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
-import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
 import SuspendedPage from '../features/Auth/SuspendedPage'
-import DownloadYourDataPage from '../features/Auth/DownloadYourDataPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import ForgotPasswordPage from '../features/Auth/pages/ForgotPasswordPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
-import FindSchoolPage from '../features/Central/FindSchoolPage'
-import RegisterSchoolPage from '../features/Central/RegisterSchoolPage'
 import WelcomePage from '../features/Central/WelcomePage'
 import SuperAdminLayout from '../features/SuperAdmin/SuperAdminLayout'
-import SchoolsPage from '../features/SuperAdmin/SchoolsPage'
-import SchoolPage from '../features/SuperAdmin/SchoolPage'
-import AddSchoolPage from '../features/SuperAdmin/AddSchoolPage'
 import { getSchool } from '../tenant/school'
-import AcademicYearsPage from '../features/Academic/pages/AcademicYearsPage'
-import ClassroomsPage from '../features/Academic/pages/ClassroomsPage'
-import GradeLevelsPage from '../features/Academic/pages/GradeLevelsPage'
-import OverviewPage from '../features/Academic/pages/OverviewPage'
-import TeachingAssignmentsPage from '../features/Academic/pages/TeachingAssignmentsPage'
-import TermsPage from '../features/Academic/pages/TermsPage'
-import SubjectsPage from '../features/Academic/pages/SubjectsPage'
-import RoleHome from '../features/Auth/pages/RoleHome'
-import AttendanceReportPage from '../features/Attendance/pages/AttendanceReportPage'
-import TakeAttendancePage from '../features/Attendance/pages/TakeAttendancePage'
-import DepartmentPage from '../features/Teacher/pages/DepartmentPage'
-import TeacherHome from '../features/Teacher/pages/TeacherHome'
-import AssessmentsPage from '../features/Grading/pages/AssessmentsPage'
-import ResultsPage from '../features/Grading/pages/ResultsPage'
-import ScoreSheetPage from '../features/Grading/pages/ScoreSheetPage'
-import ChildGradesPage from '../features/Parent/pages/ChildGradesPage'
-import StudentHome from '../features/Student/pages/StudentHome'
-import BuildingsPage from '../features/Academic/pages/BuildingsPage'
-import GenerateClassroomsPage from '../features/Academic/pages/GenerateClassroomsPage'
-import CurriculumPage from '../features/Academic/pages/CurriculumPage'
-import SchoolDayPage from '../features/Scheduling/pages/SchoolDayPage'
-import TeacherAvailabilityPage from '../features/Scheduling/pages/TeacherAvailabilityPage'
-import TimetablePage from '../features/Scheduling/pages/TimetablePage'
-import StudentTimetablePage from '../features/Student/pages/StudentTimetablePage'
-import TeacherTimetablePage from '../features/Teacher/pages/TeacherTimetablePage'
-import ChildTimetablePage from '../features/Parent/pages/ChildTimetablePage'
-import StudentsPage from '../features/People/pages/StudentsPage'
-import StudentFilesPage from '../features/StudentFiles/StudentFilesPage'
-import StaffPage from '../features/People/pages/StaffPage'
-import BehaviorPage from '../features/Behavior/pages/BehaviorPage'
-import BehaviorCriteriaPage from '../features/Behavior/pages/BehaviorCriteriaPage'
-import StudentBehaviorPage, { MyBehaviorPage } from '../features/Behavior/pages/StudentBehaviorPage'
-import ImportPage from '../features/Import/pages/ImportPage'
-import BrandingPage from '../features/Branding/BrandingPage'
-import SignaturesPage from '../features/Reports/pages/SignaturesPage'
-import ReportCardPage, { MyReportCardPage } from '../features/Reports/pages/ReportCardPage'
-import MySurveysPage from '../features/Surveys/pages/MySurveysPage'
-import SurveyResponsesPage from '../features/Surveys/pages/SurveyResponsesPage'
-import SurveyResultsPage from '../features/Surveys/pages/SurveyResultsPage'
-import SurveysPage from '../features/Surveys/pages/SurveysPage'
-import MotivationPage from '../features/Motivation/pages/MotivationPage'
-import MotivationSettingsPage from '../features/Motivation/pages/MotivationSettingsPage'
-import StudentMotivationPage, { MyMotivationPage } from '../features/Motivation/pages/StudentMotivationPage'
-import QuestionBankPage from '../features/QuestionBank/pages/QuestionBankPage'
-import QuizzesPage from '../features/QuestionBank/pages/QuizzesPage'
-import QuizRunPage from '../features/QuestionBank/pages/QuizRunPage'
-import ChildQuizzesPage from '../features/QuestionBank/pages/ChildQuizzesPage'
-import WarningsPage from '../features/Warnings/pages/WarningsPage'
-import ChildWarningsPage from '../features/Warnings/pages/ChildWarningsPage'
-import MyWarningsPage from '../features/Warnings/pages/MyWarningsPage'
-import HomeworkPage from '../features/Homework/pages/HomeworkPage'
-import StudentHomeworkPage from '../features/Homework/pages/StudentHomeworkPage'
-import ChildHomeworkPage from '../features/Homework/pages/ChildHomeworkPage'
-import DailySummaryPage from '../features/DailySummary/pages/DailySummaryPage'
-import { ChildSummariesPage, StudentSummariesPage } from '../features/DailySummary/pages/SummariesPages'
-import LessonPlansPage from '../features/LessonPlans/pages/LessonPlansPage'
-import ReviewPlansPage from '../features/LessonPlans/pages/ReviewPlansPage'
-import { ChildPlansPage, StudentPlansPage } from '../features/LessonPlans/pages/PlansPages'
-import AnnouncementsPage from '../features/Announcements/pages/AnnouncementsPage'
-import FinanceDashboardPage from '../features/Finance/pages/FinanceDashboardPage'
-import FeeStructuresPage from '../features/Finance/pages/FeeStructuresPage'
-import AccountsPage from '../features/Finance/pages/AccountsPage'
-import StudentAccountPage from '../features/Finance/pages/StudentAccountPage'
-import ChildFeesPage from '../features/Finance/pages/ChildFeesPage'
-import PayrollPage from '../features/Payroll/pages/PayrollPage'
-import PayrollRunPage from '../features/Payroll/pages/PayrollRunPage'
-import PayslipPage from '../features/Payroll/pages/PayslipPage'
-import MyPayslipsPage from '../features/Payroll/pages/MyPayslipsPage'
-import RenewalsPage from '../features/Renewals/pages/RenewalsPage'
-import StaffAttendancePage from '../features/StaffAttendance/StaffAttendancePage'
-import RulesPage from '../features/Payroll/pages/RulesPage'
-import TemplatesPage from '../features/Payroll/pages/TemplatesPage'
-import AuditLogPage from '../features/Audit/AuditLogPage'
-import ExamsAdminPage from '../features/Exams/ExamsAdminPage'
-import MyExamsPage from '../features/Exams/MyExamsPage'
-import ChildExamsPage from '../features/Exams/ChildExamsPage'
-import DutiesAdminPage from '../features/Duties/DutiesAdminPage'
-import MyDutiesPage from '../features/Duties/MyDutiesPage'
-import StoriesPage from '../features/Stories/StoriesPage'
-import ProcurementPage from '../features/Procurement/ProcurementPage'
-import PrivacyPage from '../features/Privacy/PrivacyPage'
-import PhotoConsentPage from '../features/Privacy/PhotoConsentPage'
-import PrivacyRequestsPage from '../features/Privacy/PrivacyRequestsPage'
-import LegalPage from '../features/Legal/LegalPage'
 import LegalShell from '../features/Legal/LegalFooter'
-import YearEndPage from '../features/Finance/pages/YearEndPage'
-import AccountingReportsPage from '../features/Finance/pages/AccountingReportsPage'
-import BudgetsPage from '../features/Finance/pages/BudgetsPage'
-import TaxPage from '../features/Finance/pages/TaxPage'
-import FullTimetablePage from '../features/Scheduling/pages/FullTimetablePage'
-import CoverPage from '../features/Scheduling/pages/CoverPage'
-import JournalPage from '../features/Finance/pages/JournalPage'
-import MoneyAccountsPage from '../features/Finance/pages/MoneyAccountsPage'
-import MoneyLedgerPage from '../features/Finance/pages/MoneyLedgerPage'
-import ExpensesPage from '../features/Finance/pages/ExpensesPage'
-import SuppliersPage from '../features/Finance/pages/SuppliersPage'
-import TransfersPage from '../features/Finance/pages/TransfersPage'
-import StaffAccessPage from '../features/StaffAccess/StaffAccessPage'
-import TasksPage from '../features/Tasks/TasksPage'
-import TransportPage from '../features/Transport/TransportPage'
-import MyTransportPage from '../features/Transport/MyTransportPage'
-import BoardingReportPage from '../features/Transport/BoardingReportPage'
-import MyBusPage from '../features/Transport/MyBusPage'
-import ContractsRoute from '../features/Payroll/pages/ContractsRoute'
-import ChatPage from '../features/Chat/pages/ChatPage'
-import ParentHome from '../features/Parent/pages/ParentHome'
 import { useAuth } from '../features/Auth/AuthProvider'
 import { RequireAuth, RequireRole } from './guards'
+
+// Every page loads on demand (the first screen no longer downloads the code of all 100+ pages).
+const ChangePasswordPage = lazy(() => import('../features/Auth/pages/ChangePasswordPage'))
+const DownloadYourDataPage = lazy(() => import('../features/Auth/DownloadYourDataPage'))
+const FindSchoolPage = lazy(() => import('../features/Central/FindSchoolPage'))
+const RegisterSchoolPage = lazy(() => import('../features/Central/RegisterSchoolPage'))
+const SchoolsPage = lazy(() => import('../features/SuperAdmin/SchoolsPage'))
+const SchoolPage = lazy(() => import('../features/SuperAdmin/SchoolPage'))
+const AddSchoolPage = lazy(() => import('../features/SuperAdmin/AddSchoolPage'))
+const AcademicYearsPage = lazy(() => import('../features/Academic/pages/AcademicYearsPage'))
+const ClassroomsPage = lazy(() => import('../features/Academic/pages/ClassroomsPage'))
+const GradeLevelsPage = lazy(() => import('../features/Academic/pages/GradeLevelsPage'))
+const OverviewPage = lazy(() => import('../features/Academic/pages/OverviewPage'))
+const TeachingAssignmentsPage = lazy(() => import('../features/Academic/pages/TeachingAssignmentsPage'))
+const TermsPage = lazy(() => import('../features/Academic/pages/TermsPage'))
+const SubjectsPage = lazy(() => import('../features/Academic/pages/SubjectsPage'))
+const RoleHome = lazy(() => import('../features/Auth/pages/RoleHome'))
+const AttendanceReportPage = lazy(() => import('../features/Attendance/pages/AttendanceReportPage'))
+const TakeAttendancePage = lazy(() => import('../features/Attendance/pages/TakeAttendancePage'))
+const DepartmentPage = lazy(() => import('../features/Teacher/pages/DepartmentPage'))
+const TeacherHome = lazy(() => import('../features/Teacher/pages/TeacherHome'))
+const AssessmentsPage = lazy(() => import('../features/Grading/pages/AssessmentsPage'))
+const ResultsPage = lazy(() => import('../features/Grading/pages/ResultsPage'))
+const ScoreSheetPage = lazy(() => import('../features/Grading/pages/ScoreSheetPage'))
+const ChildGradesPage = lazy(() => import('../features/Parent/pages/ChildGradesPage'))
+const StudentHome = lazy(() => import('../features/Student/pages/StudentHome'))
+const BuildingsPage = lazy(() => import('../features/Academic/pages/BuildingsPage'))
+const GenerateClassroomsPage = lazy(() => import('../features/Academic/pages/GenerateClassroomsPage'))
+const CurriculumPage = lazy(() => import('../features/Academic/pages/CurriculumPage'))
+const SchoolDayPage = lazy(() => import('../features/Scheduling/pages/SchoolDayPage'))
+const TeacherAvailabilityPage = lazy(() => import('../features/Scheduling/pages/TeacherAvailabilityPage'))
+const TimetablePage = lazy(() => import('../features/Scheduling/pages/TimetablePage'))
+const StudentTimetablePage = lazy(() => import('../features/Student/pages/StudentTimetablePage'))
+const TeacherTimetablePage = lazy(() => import('../features/Teacher/pages/TeacherTimetablePage'))
+const ChildTimetablePage = lazy(() => import('../features/Parent/pages/ChildTimetablePage'))
+const StudentsPage = lazy(() => import('../features/People/pages/StudentsPage'))
+const StudentFilesPage = lazy(() => import('../features/StudentFiles/StudentFilesPage'))
+const StaffPage = lazy(() => import('../features/People/pages/StaffPage'))
+const BehaviorPage = lazy(() => import('../features/Behavior/pages/BehaviorPage'))
+const BehaviorCriteriaPage = lazy(() => import('../features/Behavior/pages/BehaviorCriteriaPage'))
+const StudentBehaviorPage = lazy(() => import('../features/Behavior/pages/StudentBehaviorPage'))
+const MyBehaviorPage = lazy(() => import('../features/Behavior/pages/StudentBehaviorPage').then((m) => ({ default: m.MyBehaviorPage })))
+const ImportPage = lazy(() => import('../features/Import/pages/ImportPage'))
+const BrandingPage = lazy(() => import('../features/Branding/BrandingPage'))
+const SignaturesPage = lazy(() => import('../features/Reports/pages/SignaturesPage'))
+const ReportCardPage = lazy(() => import('../features/Reports/pages/ReportCardPage'))
+const MyReportCardPage = lazy(() => import('../features/Reports/pages/ReportCardPage').then((m) => ({ default: m.MyReportCardPage })))
+const MySurveysPage = lazy(() => import('../features/Surveys/pages/MySurveysPage'))
+const SurveyResponsesPage = lazy(() => import('../features/Surveys/pages/SurveyResponsesPage'))
+const SurveyResultsPage = lazy(() => import('../features/Surveys/pages/SurveyResultsPage'))
+const SurveysPage = lazy(() => import('../features/Surveys/pages/SurveysPage'))
+const MotivationPage = lazy(() => import('../features/Motivation/pages/MotivationPage'))
+const MotivationSettingsPage = lazy(() => import('../features/Motivation/pages/MotivationSettingsPage'))
+const StudentMotivationPage = lazy(() => import('../features/Motivation/pages/StudentMotivationPage'))
+const MyMotivationPage = lazy(() => import('../features/Motivation/pages/StudentMotivationPage').then((m) => ({ default: m.MyMotivationPage })))
+const QuestionBankPage = lazy(() => import('../features/QuestionBank/pages/QuestionBankPage'))
+const QuizzesPage = lazy(() => import('../features/QuestionBank/pages/QuizzesPage'))
+const QuizRunPage = lazy(() => import('../features/QuestionBank/pages/QuizRunPage'))
+const ChildQuizzesPage = lazy(() => import('../features/QuestionBank/pages/ChildQuizzesPage'))
+const WarningsPage = lazy(() => import('../features/Warnings/pages/WarningsPage'))
+const ChildWarningsPage = lazy(() => import('../features/Warnings/pages/ChildWarningsPage'))
+const MyWarningsPage = lazy(() => import('../features/Warnings/pages/MyWarningsPage'))
+const HomeworkPage = lazy(() => import('../features/Homework/pages/HomeworkPage'))
+const StudentHomeworkPage = lazy(() => import('../features/Homework/pages/StudentHomeworkPage'))
+const ChildHomeworkPage = lazy(() => import('../features/Homework/pages/ChildHomeworkPage'))
+const DailySummaryPage = lazy(() => import('../features/DailySummary/pages/DailySummaryPage'))
+const ChildSummariesPage = lazy(() => import('../features/DailySummary/pages/SummariesPages').then((m) => ({ default: m.ChildSummariesPage })))
+const StudentSummariesPage = lazy(() => import('../features/DailySummary/pages/SummariesPages').then((m) => ({ default: m.StudentSummariesPage })))
+const LessonPlansPage = lazy(() => import('../features/LessonPlans/pages/LessonPlansPage'))
+const ReviewPlansPage = lazy(() => import('../features/LessonPlans/pages/ReviewPlansPage'))
+const ChildPlansPage = lazy(() => import('../features/LessonPlans/pages/PlansPages').then((m) => ({ default: m.ChildPlansPage })))
+const StudentPlansPage = lazy(() => import('../features/LessonPlans/pages/PlansPages').then((m) => ({ default: m.StudentPlansPage })))
+const AnnouncementsPage = lazy(() => import('../features/Announcements/pages/AnnouncementsPage'))
+const FinanceDashboardPage = lazy(() => import('../features/Finance/pages/FinanceDashboardPage'))
+const FeeStructuresPage = lazy(() => import('../features/Finance/pages/FeeStructuresPage'))
+const AccountsPage = lazy(() => import('../features/Finance/pages/AccountsPage'))
+const StudentAccountPage = lazy(() => import('../features/Finance/pages/StudentAccountPage'))
+const ChildFeesPage = lazy(() => import('../features/Finance/pages/ChildFeesPage'))
+const PayrollPage = lazy(() => import('../features/Payroll/pages/PayrollPage'))
+const PayrollRunPage = lazy(() => import('../features/Payroll/pages/PayrollRunPage'))
+const PayslipPage = lazy(() => import('../features/Payroll/pages/PayslipPage'))
+const MyPayslipsPage = lazy(() => import('../features/Payroll/pages/MyPayslipsPage'))
+const RenewalsPage = lazy(() => import('../features/Renewals/pages/RenewalsPage'))
+const StaffAttendancePage = lazy(() => import('../features/StaffAttendance/StaffAttendancePage'))
+const RulesPage = lazy(() => import('../features/Payroll/pages/RulesPage'))
+const TemplatesPage = lazy(() => import('../features/Payroll/pages/TemplatesPage'))
+const AuditLogPage = lazy(() => import('../features/Audit/AuditLogPage'))
+const ExamsAdminPage = lazy(() => import('../features/Exams/ExamsAdminPage'))
+const MyExamsPage = lazy(() => import('../features/Exams/MyExamsPage'))
+const ChildExamsPage = lazy(() => import('../features/Exams/ChildExamsPage'))
+const DutiesAdminPage = lazy(() => import('../features/Duties/DutiesAdminPage'))
+const MyDutiesPage = lazy(() => import('../features/Duties/MyDutiesPage'))
+const StoriesPage = lazy(() => import('../features/Stories/StoriesPage'))
+const ProcurementPage = lazy(() => import('../features/Procurement/ProcurementPage'))
+const PrivacyPage = lazy(() => import('../features/Privacy/PrivacyPage'))
+const PhotoConsentPage = lazy(() => import('../features/Privacy/PhotoConsentPage'))
+const PrivacyRequestsPage = lazy(() => import('../features/Privacy/PrivacyRequestsPage'))
+const LegalPage = lazy(() => import('../features/Legal/LegalPage'))
+const YearEndPage = lazy(() => import('../features/Finance/pages/YearEndPage'))
+const AccountingReportsPage = lazy(() => import('../features/Finance/pages/AccountingReportsPage'))
+const BudgetsPage = lazy(() => import('../features/Finance/pages/BudgetsPage'))
+const TaxPage = lazy(() => import('../features/Finance/pages/TaxPage'))
+const FullTimetablePage = lazy(() => import('../features/Scheduling/pages/FullTimetablePage'))
+const CoverPage = lazy(() => import('../features/Scheduling/pages/CoverPage'))
+const JournalPage = lazy(() => import('../features/Finance/pages/JournalPage'))
+const MoneyAccountsPage = lazy(() => import('../features/Finance/pages/MoneyAccountsPage'))
+const MoneyLedgerPage = lazy(() => import('../features/Finance/pages/MoneyLedgerPage'))
+const ExpensesPage = lazy(() => import('../features/Finance/pages/ExpensesPage'))
+const SuppliersPage = lazy(() => import('../features/Finance/pages/SuppliersPage'))
+const TransfersPage = lazy(() => import('../features/Finance/pages/TransfersPage'))
+const StaffAccessPage = lazy(() => import('../features/StaffAccess/StaffAccessPage'))
+const TasksPage = lazy(() => import('../features/Tasks/TasksPage'))
+const TransportPage = lazy(() => import('../features/Transport/TransportPage'))
+const MyTransportPage = lazy(() => import('../features/Transport/MyTransportPage'))
+const BoardingReportPage = lazy(() => import('../features/Transport/BoardingReportPage'))
+const MyBusPage = lazy(() => import('../features/Transport/MyBusPage'))
+const ContractsRoute = lazy(() => import('../features/Payroll/pages/ContractsRoute'))
+const ChatPage = lazy(() => import('../features/Chat/pages/ChatPage'))
+const ParentHome = lazy(() => import('../features/Parent/pages/ParentHome'))
+
+const GlassDemoPage = lazy(() => import('../features/Demo/GlassDemoPage'))
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
 
@@ -260,6 +270,7 @@ export const routes = [
             element: <AdminLayout />,
             children: [
               { path: '/admin', element: <OverviewPage /> },
+              { path: '/admin/glass-demo', element: <GlassDemoPage /> }, // trial page of the glass dashboard component (sample data)
               { path: '/admin/academic-years', element: <AcademicYearsPage /> },
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
