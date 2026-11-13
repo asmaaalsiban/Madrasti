@@ -176,6 +176,43 @@ class HandoverPackageTest extends TenantTestCase
         $this->assertTrue(Storage::disk('local')->exists('homework/work.txt'));
     }
 
+    /** @return list<string> */
+    private function leftovers(): array
+    {
+        return array_merge(glob(sys_get_temp_dir().'/handover_*') ?: [], glob(sys_get_temp_dir().'/hov*') ?: []);
+    }
+
+    public function test_a_file_that_cannot_be_read_fails_the_build_and_leaves_nothing_behind(): void
+    {
+        config(['backup.file_disks' => ['local']]);
+        $disk = \Mockery::mock();
+        $disk->shouldReceive('allFiles')->andReturn(['docs/gone.txt']);
+        $disk->shouldReceive('readStream')->with('docs/gone.txt')->andReturn(null);
+        Storage::shouldReceive('disk')->with('local')->andReturn($disk);
+        $before = $this->leftovers();
+
+        try {
+            app(HandoverPackage::class)->build();
+            $this->fail('The build should have failed.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('local', $e->getMessage());
+            $this->assertStringContainsString('docs/gone.txt', $e->getMessage());
+        }
+        $this->assertSame($before, $this->leftovers());
+    }
+
+    public function test_a_path_that_would_leave_the_package_folder_fails_the_build(): void
+    {
+        config(['backup.file_disks' => ['local']]);
+        $disk = \Mockery::mock();
+        $disk->shouldReceive('allFiles')->andReturn(['../evil.txt']);
+        Storage::shouldReceive('disk')->with('local')->andReturn($disk);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('../evil.txt');
+        app(HandoverPackage::class)->build();
+    }
+
     public function test_xlsx_write_makes_a_file_and_download_still_works(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'xw');
