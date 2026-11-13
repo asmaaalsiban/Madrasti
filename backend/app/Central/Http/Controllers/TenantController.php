@@ -48,6 +48,11 @@ class TenantController extends Controller
         ));
     }
 
+    public function show(Tenant $tenant): TenantResource
+    {
+        return new TenantResource($tenant->load('domains'));
+    }
+
     public function store(StoreTenantRequest $request, CreateSchool $createSchool, CentralAudit $audit): TenantResource
     {
         $tenant = $createSchool->handle($request->validated());

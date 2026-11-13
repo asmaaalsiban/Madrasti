@@ -3395,7 +3395,12 @@
         "school_update": "Details changed",
         "school_suspend": "Suspended",
         "school_reactivate": "Reactivated",
-        "school_extend": "Subscription extended"
+        "school_extend": "Subscription extended",
+        "exit_window_request": "Data download requested",
+        "exit_window_open": "Data download opened",
+        "exit_window_extend": "Data download extended",
+        "package_downloaded": "Data package downloaded",
+        "archive_downloaded": "Archive downloaded"
       }
     },
     "exit": {
@@ -3421,7 +3426,11 @@
       "download": {
         "archive": "Download archive",
         "package": "Download package"
-      }
+      },
+      "openQuestion": "Allow this school to download its data?",
+      "openDescription": "Once the archive and the package are ready, everybody except the school administrators is blocked on their next request, until the window ends. Nothing is deleted.",
+      "openConfirm": "Allow the download",
+      "retryStuck": "Stuck: retry"
     }
   },
   "exit": {

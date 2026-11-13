@@ -98,6 +98,17 @@ describe('the exit window guard', () => {
     expect(screen.queryByText('admin area')).not.toBeInTheDocument()
   })
 
+  it('an administrator who still has the default password changes it first, then gets the download page', () => {
+    mockSchool.current = { name: 'Al Noor', exit_window_ends_at: '2026-12-01T10:00:00+00:00' }
+    mockAuth.user = { id: 1, role: 'admin', must_change_password: true }
+    const router = createMemoryRouter([
+      { element: <RequireAuth />, children: [{ path: '/admin', element: <p>admin area</p> }, { path: '/download-your-data', element: <p>download page</p> }, { path: '/change-password', element: <p>change password page</p> }] },
+    ], { initialEntries: ['/admin'] })
+    render(<RouterProvider router={router} />)
+    expect(screen.getByText('change password page')).toBeInTheDocument()
+    expect(screen.queryByText('download page')).not.toBeInTheDocument()
+  })
+
   it('an administrator of a school that is not leaving keeps the app', () => {
     renderAt('/admin')
     expect(screen.getByText('admin area')).toBeInTheDocument()
@@ -134,12 +145,12 @@ describe('api client in an exit window', () => {
 
 describe('SchoolPage exit section', () => {
   const leaving = {
-    id: 'alnoor', name: 'Al Noor', state: 'exit_window', is_active: false, default_locale: 'ar',
+    id: 'alnoor', name: 'Al Noor', state: 'exit_window', is_active: true, default_locale: 'ar',
     subscription_ends_at: null, max_students: null, students_count: 1, staff_count: 1,
     last_backup_at: null, exit_window_ends_at: '2026-12-01T10:00:00.000000Z', closed_at: null, domains: [],
   }
   const serve = (state, steps) => saApi.get.mockImplementation((url) => Promise.resolve({
-    data: url.endsWith('/audit') ? { data: [] } : url.endsWith('/exit-steps') ? { data: steps } : { data: [{ ...leaving, ...state }], meta: { current_page: 1, last_page: 1, total: 1 } },
+    data: url.endsWith('/audit') ? { data: [] } : url.endsWith('/exit-steps') ? { data: steps } : /^\/tenants\/[^/]+$/.test(url) ? { data: { ...leaving, ...state } } : { data: [{ ...leaving, ...state }], meta: { current_page: 1, last_page: 1, total: 1 } },
   }))
   const show = () => wrap(<SchoolPage />, '/super-admin/schools/alnoor', '/super-admin/schools/:id')
 
@@ -168,7 +179,57 @@ describe('SchoolPage exit section', () => {
     expect(within(section).getByLabelText('Days')).toHaveValue(14)
     fireEvent.change(within(section).getByLabelText('Days'), { target: { value: '21' } })
     fireEvent.click(within(section).getByRole('button', { name: 'Allow data download' }))
+    expect(saApi.post).not.toHaveBeenCalled() // it asks first: this blocks everybody but the administrators
+    fireEvent.click(await screen.findByRole('button', { name: 'Allow the download' }))
     await waitFor(() => expect(saApi.post).toHaveBeenCalledWith('/tenants/alnoor/exit-window', { days: 21 }))
+  })
+
+  it('offers a retry for a step that is stuck, not only for a failed one', async () => {
+    serve({}, [{ step: 'archive', status: 'done', error: null }, { step: 'package', status: 'running', error: null, stale: true }])
+    saApi.post.mockResolvedValue({ data: { data: [] } })
+    show()
+
+    const section = (await screen.findByRole('heading', { name: 'Data download' })).closest('section')
+    fireEvent.click(await within(section).findByRole('button', { name: 'Stuck: retry' }))
+    await waitFor(() => expect(saApi.post).toHaveBeenCalledWith('/tenants/alnoor/exit-steps/package/retry'))
+  })
+
+  it('a step that is just running has no retry', async () => {
+    serve({}, [{ step: 'archive', status: 'running', error: null, stale: false }, { step: 'package', status: 'pending', error: null, stale: false }])
+    show()
+
+    const section = (await screen.findByRole('heading', { name: 'Data download' })).closest('section')
+    expect(await within(section).findByText('Full archive')).toBeInTheDocument()
+    expect(within(section).queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Reactivate (not Suspend) for a school in its exit window or closed, whose is_active is still true', async () => {
+    for (const state of ['exit_window', 'closed']) {
+      serve({ state, is_active: true }, [])
+      const { unmount } = show()
+      const card = (await screen.findByRole('heading', { name: 'Status' })).closest('section')
+      expect(within(card).getByRole('button', { name: 'Reactivate' })).toBeInTheDocument()
+      expect(within(card).queryByRole('button', { name: 'Suspend' })).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('shows Suspend for an active or expired school', async () => {
+    for (const state of ['active', 'expired']) {
+      serve({ state, is_active: true, exit_window_ends_at: null }, [])
+      const { unmount } = show()
+      const card = (await screen.findByRole('heading', { name: 'Status' })).closest('section')
+      expect(within(card).getByRole('button', { name: 'Suspend' })).toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('shows a dash instead of numbers for a school whose numbers could not be read', async () => {
+    serve({ state: 'active', is_active: true, exit_window_ends_at: null, students_count: null, staff_count: null }, [])
+    show()
+
+    const card = (await screen.findByRole('heading', { name: 'Status' })).closest('section')
+    expect(within(card).getAllByText(/—/).length).toBeGreaterThanOrEqual(2)
   })
 
   it('extend sends the new days', async () => {
@@ -186,7 +247,7 @@ describe('SchoolPage exit section', () => {
     serve({}, [{ step: 'archive', status: 'done', error: null }, { step: 'package', status: 'done', error: null }])
     saApi.get.mockImplementation((url) => (url.endsWith('/package')
       ? Promise.resolve({ data: new Blob(['zip']) })
-      : Promise.resolve({ data: url.endsWith('/audit') ? { data: [] } : url.endsWith('/exit-steps') ? { data: [{ step: 'archive', status: 'done' }, { step: 'package', status: 'done' }] } : { data: [leaving], meta: {} } })))
+      : Promise.resolve({ data: url.endsWith('/audit') ? { data: [] } : url.endsWith('/exit-steps') ? { data: [{ step: 'archive', status: 'done' }, { step: 'package', status: 'done' }] } : /^\/tenants\/[^/]+$/.test(url) ? { data: leaving } : { data: [leaving], meta: {} } })))
     URL.createObjectURL = vi.fn(() => 'blob:x')
     URL.revokeObjectURL = vi.fn()
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})

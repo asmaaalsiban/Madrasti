@@ -81,10 +81,12 @@ class SuperAdminLoginTest extends TestCase
         $this->assertEqualsWithDelta(now()->addHours(8)->timestamp, $token->expires_at->timestamp, 5);
     }
 
-    public function test_a_wrong_password_sends_no_code(): void
+    public function test_a_wrong_password_sends_no_code_and_answers_like_an_unknown_email(): void
     {
-        $this->login('not-the-password')->assertStatus(422);
+        $known = $this->login('not-the-password')->assertOk()->assertExactJson(['challenge' => true]);
+        $unknown = $this->login('not-the-password', 'nobody@madrasati.test')->assertOk();
 
+        $this->assertSame($known->getContent(), $unknown->getContent(), 'the answer must not tell which emails are Super Admins');
         Mail::assertNothingSent();
         $this->assertSame(0, DB::table('super_admin_login_codes')->count());
     }

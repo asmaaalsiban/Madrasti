@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
@@ -68,22 +69,24 @@ function StatusCard({ school }) {
   const suspend = useSuspendSchool(school.id)
   const reactivate = useReactivateSchool(school.id)
   const [confirm, setConfirm] = useState(false)
-  const action = school.is_active ? suspend : reactivate
-  const key = school.is_active ? 'suspend' : 'reactivate'
+  // A school in its exit window or closed still has is_active = true, but only "reactivate" can bring it back to normal.
+  const blocked = ['suspended', 'exit_window', 'closed'].includes(school.state)
+  const action = blocked ? reactivate : suspend
+  const key = blocked ? 'reactivate' : 'suspend'
   const run = () => action.mutate(undefined, { onSettled: () => setConfirm(false) })
   return (
     <Card title={t('superAdmin.status')}>
       <p><StateBadge state={school.state} /></p>
       <dl className="grid grid-cols-2 gap-2 text-sm">
-        <dt className="text-slate-500">{t('superAdmin.students')}</dt><dd dir="ltr" className="text-end">{school.students_count} / {school.max_students ?? t('superAdmin.unlimited')}</dd>
-        <dt className="text-slate-500">{t('superAdmin.staff')}</dt><dd dir="ltr" className="text-end">{school.staff_count}</dd>
+        <dt className="text-slate-500">{t('superAdmin.students')}</dt><dd dir="ltr" className="text-end">{school.students_count ?? '—'} / {school.max_students ?? t('superAdmin.unlimited')}</dd>
+        <dt className="text-slate-500">{t('superAdmin.staff')}</dt><dd dir="ltr" className="text-end">{school.staff_count ?? '—'}</dd>
         <dt className="text-slate-500">{t('superAdmin.lastBackup')}</dt><dd className="text-end">{school.last_backup_at ? formatWhen(school.last_backup_at, i18n.language) : t('superAdmin.never')}</dd>
         {school.exit_window_ends_at && <><dt className="text-slate-500">{t('superAdmin.exitWindowEnds')}</dt><dd className="text-end">{formatWhen(school.exit_window_ends_at, i18n.language)}</dd></>}
         {school.closed_at && <><dt className="text-slate-500">{t('superAdmin.closedAt')}</dt><dd className="text-end">{formatWhen(school.closed_at, i18n.language)}</dd></>}
       </dl>
       {action.isError && <Message>{errorOf(action.error, t('superAdmin.genericError'))}</Message>}
-      <button type="button" className={`rounded px-4 py-2 font-semibold ${school.is_active ? 'border border-red-300 text-red-700' : 'bg-brand text-white'}`} onClick={() => setConfirm(true)}>{t(`superAdmin.${key}`)}</button>
-      <ConfirmDialog open={confirm} danger={school.is_active} busy={action.isPending} message={t(`superAdmin.${key}Question`)} description={t(`superAdmin.${key}Description`)} confirmLabel={t(`superAdmin.${key}Confirm`)} onConfirm={run} onCancel={() => setConfirm(false)} />
+      <button type="button" className={`rounded px-4 py-2 font-semibold ${blocked ? 'bg-brand text-white' : 'border border-red-300 text-red-700'}`} onClick={() => setConfirm(true)}>{t(`superAdmin.${key}`)}</button>
+      <ConfirmDialog open={confirm} danger={!blocked} busy={action.isPending} message={t(`superAdmin.${key}Question`)} description={t(`superAdmin.${key}Description`)} confirmLabel={t(`superAdmin.${key}Confirm`)} onConfirm={run} onCancel={() => setConfirm(false)} />
     </Card>
   )
 }
@@ -100,13 +103,19 @@ function ExitCard({ school }) {
   const [extendDays, setExtendDays] = useState('7')
   const [done, setDone] = useState(false)
   const [downloadError, setDownloadError] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const client = useQueryClient()
   const inWindow = school.state === 'exit_window'
   const preparing = steps.some((s) => s.status === 'pending' || s.status === 'running')
+  // The job opened the window by itself: reload the school so the page shows the window (and the extend form) without a manual reload.
+  const allDone = steps.length > 0 && steps.every((s) => s.status === 'done')
+  useEffect(() => { if (allDone && !inWindow) client.invalidateQueries({ queryKey: ['sa'] }) }, [allDone, inWindow, client])
   const download = async (step) => {
     setDownloadError(false)
     try { await downloadExitFile(school.id, step) } catch { setDownloadError(true) }
   }
-  const submitOpen = (e) => { e.preventDefault(); open.mutate(Number(openDays)) }
+  const submitOpen = (e) => { e.preventDefault(); setConfirmOpen(true) }
+  const confirmOpenNow = () => open.mutate(Number(openDays), { onSettled: () => setConfirmOpen(false) })
   const submitExtend = (e) => { e.preventDefault(); setDone(false); extend.mutate(Number(extendDays), { onSuccess: () => setDone(true) }) }
   return (
     <Card title={t('superAdmin.exit.title')}>
@@ -119,10 +128,10 @@ function ExitCard({ school }) {
                 <span className="min-w-0 break-words font-semibold">{t(`superAdmin.exit.steps.${s.step}`)}</span>
                 <span className={`rounded-full px-2 py-0.5 text-xs ${STEP_STYLE[s.status] ?? ''}`}>{t(`superAdmin.exit.status.${s.status}`)}</span>
               </div>
-              {s.status === 'failed' && (
+              {(s.status === 'failed' || s.stale) && (
                 <>
                   {s.error && <p className="break-words text-xs text-red-700" dir="auto">{s.error}</p>}
-                  <button type="button" disabled={retry.isPending} className="rounded border px-3 py-1 text-sm font-semibold disabled:opacity-60" onClick={() => retry.mutate(s.step)}>{t('superAdmin.exit.retry')}</button>
+                  <button type="button" disabled={retry.isPending} className="rounded border px-3 py-1 text-sm font-semibold disabled:opacity-60" onClick={() => retry.mutate(s.step)}>{t(s.stale && s.status !== 'failed' ? 'superAdmin.exit.retryStuck' : 'superAdmin.exit.retry')}</button>
                 </>
               )}
               {s.status === 'done' && (
@@ -153,6 +162,7 @@ function ExitCard({ school }) {
           <button disabled={open.isPending || preparing} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.exit.open')}</button>
         </form>
       )}
+      <ConfirmDialog open={confirmOpen} danger busy={open.isPending} message={t('superAdmin.exit.openQuestion')} description={t('superAdmin.exit.openDescription')} confirmLabel={t('superAdmin.exit.openConfirm')} onConfirm={confirmOpenNow} onCancel={() => setConfirmOpen(false)} />
     </Card>
   )
 }

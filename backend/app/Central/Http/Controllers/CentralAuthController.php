@@ -36,7 +36,9 @@ class CentralAuthController extends Controller
         }
         if (! Hash::check($data['password'], $admin->password)) {
             LoginMonitor::failed('central', $data['email'], $request->ip());
-            throw ValidationException::withMessages(['email' => [__('auth.failed')]]);
+
+            // The same answer as for an unknown email (no mail is sent): the answer must not tell which emails are Super Admins.
+            return response()->json(['challenge' => true]);
         }
 
         $codes->issue($admin);

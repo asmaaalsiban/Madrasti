@@ -34,14 +34,14 @@ Full product details: @docs/product-spec.md (read it before building or changing
 
 ## Architecture
 - Central app: `tenants` + `domains` tables, Super Admin dashboard
-- Super Admin area (`/super-admin`, API under `/api/central`): sign-in by password + emailed code; schools can be suspended, extended, limited by student count, and closed through an exit window. Nothing of a school is ever deleted
+- Super Admin area (`/super-admin`, API under `/api/central`): sign-in by password + emailed code; schools can be suspended, extended, limited by student count, and closed through an exit window. No code deletes school data (only the nightly backup rotation removes old backups)
 - A school's state (active, expired, suspended, exit window, closed) is never stored: `App\Central\Support\SchoolStatus` works it out from the tenant row. The `EnsureSchoolActive` middleware blocks every non-active school on every request; use `SchoolStatus` for any new check
 - Tenant app: all school features, runs inside the tenant database
 - Central migrations and tenant migrations are kept separate
 - Onboarding a school: one command creates DB, runs migrations, creates first admin, seeds defaults
 - Frontend is one build for all schools; name, logo, colors come from the API by domain
 - Mobile: responsive web / PWA first (no native app for now)
-- Super Admin area (`/super-admin`, central API, own token): not covered by the automated screen sweep (`tools/ui-check`); check its screens by hand
+- Super Admin area (`/super-admin`, central API, own token): not covered by the automated screen sweep (the `tools/ui-check` tool, in open pull request #213 until it is merged); check its screens by hand
 
 ## Build order
 1. Foundation: tenancy, auth + roles, school structure

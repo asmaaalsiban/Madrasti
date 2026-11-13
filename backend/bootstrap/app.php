@@ -10,6 +10,7 @@ use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Modules\People\Support\StudentLimitReached;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -82,6 +83,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // The school reached the student limit its owner set: the screen shows the message and how many places are left.
         $exceptions->render(function (StudentLimitReached $e, Request $request) {
             return response()->json(['message' => $e->getMessage(), 'code' => 'student_limit_reached', 'limit' => $e->limit, 'current' => $e->current, 'allowed' => $e->allowed], 422);
+        });
+
+        // Another student creation or import of the same school holds the lock for too long: a clear answer, not a 500.
+        $exceptions->render(function (LockTimeoutException $e, Request $request) {
+            return response()->json(['message' => __('people.busy'), 'code' => 'busy'], 409);
         });
 
         // The framework's own messages ("Server Error", "Too Many Attempts.", ...) follow the request language (lang/ar.json).

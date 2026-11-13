@@ -15,10 +15,11 @@ export function RequireAuth() {
   const { data: school, isLoading: schoolLoading } = useSchool()
   if (loading || (user && schoolLoading)) return <p className="p-6">{t('common.loading')}</p>
   if (!user) return <Navigate to="/login" replace />
-  // A school in its exit window: its administrator gets only the download page (nothing of the app, so no blocked calls).
-  if (user.role === 'admin' && school?.exit_window_ends_at && pathname !== DOWNLOAD_PATH) return <Navigate to={DOWNLOAD_PATH} replace />
-  // Accounts created by the admin start with the default password: nothing else is available until it is changed.
+  // Accounts created by the admin start with the default password: nothing else is available until it is changed (this comes
+  // first: an administrator who still has it could not download the data of a school in its exit window before changing it).
   if (user.must_change_password && pathname !== CHANGE_PASSWORD_PATH) return <Navigate to={CHANGE_PASSWORD_PATH} replace />
+  // A school in its exit window: its administrator gets only the download page (nothing of the app, so no blocked calls).
+  if (user.role === 'admin' && school?.exit_window_ends_at && pathname !== DOWNLOAD_PATH && pathname !== CHANGE_PASSWORD_PATH) return <Navigate to={DOWNLOAD_PATH} replace />
   return <Outlet />
 }
 
