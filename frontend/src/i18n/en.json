@@ -139,7 +139,10 @@
   },
   "errors": {
     "forbidden": "You are not allowed to view this page.",
-    "notFound": "Page not found."
+    "notFound": "Page not found.",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "Sorry, the page you are looking for does not exist.",
+    "backHome": "Back to home"
   },
   "landing": {
     "login": "Sign in",
