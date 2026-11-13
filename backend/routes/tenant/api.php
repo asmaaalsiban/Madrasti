@@ -22,6 +22,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Auth\Http\Controllers\ExitExportController;
 use App\Modules\Auth\Http\Controllers\LayoutController;
 use App\Modules\Auth\Http\Controllers\PrivacyController;
 use App\Modules\Communication\Http\Controllers\AnnouncementController;
@@ -229,6 +230,9 @@ Route::middleware(['school-user', 'role:admin,teacher'])->prefix('payroll')->gro
 
 // School structure: admin only.
 Route::middleware(['school-user', 'role:admin'])->group(function (): void {
+    // The data handover while the school is in its exit window.
+    Route::get('exit-export', [ExitExportController::class, 'show']);
+    Route::get('exit-export/package', [ExitExportController::class, 'package']);
     Route::get('admin/overview', AdminOverviewController::class);
     Route::get('admin/dashboard', AdminDashboardController::class);
     Route::get('school-details', [SchoolDetailsController::class, 'show']);

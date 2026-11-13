@@ -3,7 +3,9 @@
 namespace Tests\Feature\Tenancy;
 
 use App\Central\Actions\CreateSchool;
+use App\Central\Http\Middleware\EnsureSchoolActive;
 use App\Central\Models\Tenant;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -171,8 +173,23 @@ class SchoolBlockedTest extends TestCase
         $this->change('schoola', ['is_active' => false, 'closed_at' => Carbon::now()]);
 
         $this->fresh();
-        $response = $this->get('/api/school/logo', ['X-School' => 'schoola']);
+        $this->get('/api/school/logo', ['X-School' => 'schoola'])->assertNotFound(); // no logo uploaded: 404, and not the blocked answer
+    }
 
-        $this->assertNotSame(403, $response->getStatusCode());
+    public function test_the_exit_export_allowance_stops_at_the_path_segment(): void
+    {
+        $this->school('schoola');
+        $this->change('schoola', ['exit_window_ends_at' => Carbon::now()->addDays(10)]);
+        $this->fresh();
+        tenancy()->initialize(Tenant::findOrFail('schoola'));
+
+        $through = fn (string $path) => (new EnsureSchoolActive())->handle(Request::create($path, 'GET'), fn () => response('ok'))->getStatusCode();
+
+        $this->assertSame(200, $through('/api/exit-export'));
+        $this->assertSame(200, $through('/api/exit-export/package'));
+        $this->assertSame(403, $through('/api/exit-exportX'));
+        $this->assertSame(403, $through('/api/exit-export-old'));
+
+        tenancy()->end();
     }
 }

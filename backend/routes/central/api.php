@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Central\Http\Controllers\CentralAuthController;
+use App\Central\Http\Controllers\ExitWindowController;
 use App\Central\Http\Controllers\PaymentWebhookController;
 use App\Central\Http\Controllers\RegisterSchoolController;
 use App\Central\Http\Controllers\SchoolActionController;
@@ -36,4 +37,10 @@ Route::middleware(['auth:sanctum', 'super-admin'])->group(function (): void {
     Route::post('tenants/{tenant}/reactivate', [SchoolActionController::class, 'reactivate']);
     Route::post('tenants/{tenant}/extend', [SchoolActionController::class, 'extend']);
     Route::get('tenants/{tenant}/audit', [SchoolActionController::class, 'audit']);
+    Route::post('tenants/{tenant}/exit-window', [ExitWindowController::class, 'open']);
+    Route::patch('tenants/{tenant}/exit-window', [ExitWindowController::class, 'extend']);
+    Route::get('tenants/{tenant}/exit-steps', [ExitWindowController::class, 'steps']);
+    Route::post('tenants/{tenant}/exit-steps/{step}/retry', [ExitWindowController::class, 'retry']);
+    Route::get('tenants/{tenant}/package', [ExitWindowController::class, 'package']);
+    Route::get('tenants/{tenant}/archive', [ExitWindowController::class, 'archive']);
 });

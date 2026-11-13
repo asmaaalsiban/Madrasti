@@ -58,7 +58,8 @@ class EnsureSchoolActive
             return false;
         }
 
-        if (str_starts_with($path, 'api/exit-export')) {
+        // On a path-segment boundary: "api/exit-exportX" is a different path.
+        if ($path === 'api/exit-export' || str_starts_with($path, 'api/exit-export/')) {
             return true;
         }
 

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Auth\Http\Controllers;
 
+use App\Central\Models\Tenant;
+use App\Central\Support\SchoolState;
+use App\Central\Support\SchoolStatus;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Auth\Http\Requests\ChangePasswordRequest;
@@ -38,7 +41,12 @@ class AuthController extends Controller
 
         // Suspended school (outside tenancy, e.g. in tests, tenant() is null).
         $school = tenant();
-        if ($school !== null && ! $school->is_active) {
+        if ($school instanceof Tenant && SchoolStatus::of($school) === SchoolState::ExitWindow) {
+            // In an exit window only school administrators get in, to take their data.
+            if (! $user->hasRole(Role::Admin)) {
+                return response()->json(['message' => __('auth.school_suspended'), 'code' => 'school_suspended'], 403);
+            }
+        } elseif ($school !== null && ! $school->is_active) {
             throw ValidationException::withMessages(['login' => [__('auth.school_inactive')]]);
         }
 
