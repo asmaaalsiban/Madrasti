@@ -1,37 +1,65 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { routesFor } from '../src/app/router'
 import SwitchSchoolButton from '../src/components/shared/SwitchSchoolButton'
-import { loginAdmin, registerSchool, schoolExists } from '../src/features/Central/api'
+import { loginAdmin, registerSchool, registrationEnabled, schoolExists } from '../src/features/Central/api'
 import FindSchoolPage from '../src/features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../src/features/Central/RegisterSchoolPage'
 import WelcomePage from '../src/features/Central/WelcomePage'
 import { clearSchool, getSchool, goTo, setSchool } from '../src/tenant/school'
 
-vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn() }))
+vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn(), registrationEnabled: vi.fn() }))
 vi.mock('../src/tenant/school', async (orig) => ({ ...(await orig()), goTo: vi.fn() }))
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: null, loading: false }) }))
 vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'School Two' } }) }))
 
-const renderPage = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>)
+const withClient = (ui) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>
+const renderPage = (ui) => render(withClient(<MemoryRouter>{ui}</MemoryRouter>))
 
 beforeEach(async () => {
   vi.resetAllMocks()
   clearSchool()
   localStorage.clear()
+  registrationEnabled.mockResolvedValue(true) // public registration is on unless a test says otherwise
   await i18n.changeLanguage('en')
 })
 
 describe('WelcomePage', () => {
   it('links to register and find-school in both languages', async () => {
     renderPage(<WelcomePage />)
-    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toHaveAttribute('href', '/register')
+    expect((await screen.findAllByRole('link', { name: 'Create account' }))[0]).toHaveAttribute('href', '/register')
     expect(screen.getAllByRole('link', { name: 'Sign in' })[0]).toHaveAttribute('href', '/find-school')
     await i18n.changeLanguage('ar')
     renderPage(<WelcomePage />)
-    expect(screen.getAllByRole('link', { name: 'إنشاء حساب' }).length).toBeGreaterThan(0)
+    expect((await screen.findAllByRole('link', { name: 'إنشاء حساب' })).length).toBeGreaterThan(0)
+  })
+
+  it('hides the register links when the server has public registration off', async () => {
+    registrationEnabled.mockResolvedValue(false)
+    renderPage(<WelcomePage />)
+    expect((await screen.findAllByText('Sign in to your school with its code.')).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Sign in' })[0]).toHaveAttribute('href', '/find-school')
+  })
+
+  it('keeps the register links hidden when the server cannot be asked', async () => {
+    registrationEnabled.mockRejectedValue(new Error('offline'))
+    renderPage(<WelcomePage />)
+    expect((await screen.findAllByText('Sign in to your school with its code.')).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument()
+  })
+})
+
+describe('RegisterSchoolPage when registration is off', () => {
+  it('shows that it is closed, with a way to sign in, and no form', async () => {
+    registrationEnabled.mockResolvedValue(false)
+    renderPage(<RegisterSchoolPage />)
+    expect(await screen.findByRole('heading', { name: 'Registration is closed' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('School name')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/find-school')
   })
 })
 
@@ -50,6 +78,7 @@ describe('RegisterSchoolPage', () => {
     registerSchool.mockResolvedValue({ code: 'alnoor' })
     loginAdmin.mockResolvedValue()
     renderPage(<RegisterSchoolPage />)
+    await screen.findByLabelText('School name')
     fill()
     submit()
     await waitFor(() => expect(goTo).toHaveBeenCalledWith('/'))
@@ -65,6 +94,7 @@ describe('RegisterSchoolPage', () => {
     registerSchool.mockResolvedValue({ code: 'alnoor' })
     loginAdmin.mockRejectedValue(new Error('network'))
     renderPage(<RegisterSchoolPage />)
+    await screen.findByLabelText('School name')
     fill()
     submit()
     await waitFor(() => expect(goTo).toHaveBeenCalledWith('/'))
@@ -74,6 +104,7 @@ describe('RegisterSchoolPage', () => {
   it('shows field errors from a 422 and does not select a school', async () => {
     registerSchool.mockRejectedValue({ response: { status: 422, data: { errors: { code: ['This school code is already taken.'] } } } })
     renderPage(<RegisterSchoolPage />)
+    await screen.findByLabelText('School name')
     fill()
     submit()
     expect(await screen.findByText('This school code is already taken.')).toBeInTheDocument()
@@ -84,6 +115,7 @@ describe('RegisterSchoolPage', () => {
   it('shows the server message when registration is closed', async () => {
     registerSchool.mockRejectedValue({ response: { status: 403, data: { message: 'School registration is currently closed.' } } })
     renderPage(<RegisterSchoolPage />)
+    await screen.findByLabelText('School name')
     fill()
     submit()
     expect(await screen.findByText('School registration is currently closed.')).toBeInTheDocument()
@@ -92,6 +124,7 @@ describe('RegisterSchoolPage', () => {
   it('shows a generic error for other failures', async () => {
     registerSchool.mockRejectedValue({ response: { status: 500, data: { message: 'x' } } })
     renderPage(<RegisterSchoolPage />)
+    await screen.findByLabelText('School name')
     fill()
     submit()
     expect(await screen.findByText('Something went wrong, please try again.')).toBeInTheDocument()
@@ -154,11 +187,11 @@ describe('SwitchSchoolButton', () => {
 
 describe('routesFor', () => {
   const at = (school, path = '/') =>
-    render(<RouterProvider router={createMemoryRouter(routesFor(school), { initialEntries: [path] })} />)
+    render(withClient(<RouterProvider router={createMemoryRouter(routesFor(school), { initialEntries: [path] })} />))
 
-  it('serves the welcome page when no school is selected', () => {
+  it('serves the welcome page when no school is selected', async () => {
     at(null)
-    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toBeInTheDocument()
+    expect((await screen.findAllByRole('link', { name: 'Create account' }))[0]).toBeInTheDocument()
   })
 
   it('serves the school landing once a school is selected', () => {
@@ -166,8 +199,8 @@ describe('routesFor', () => {
     expect(screen.getByText('Your whole school in one place')).toBeInTheDocument()
   })
 
-  it('sends unknown paths back to the welcome page when no school is selected', () => {
+  it('sends unknown paths back to the welcome page when no school is selected', async () => {
     at(null, '/nope')
-    expect(screen.getAllByRole('link', { name: 'Create account' })[0]).toBeInTheDocument()
+    expect((await screen.findAllByRole('link', { name: 'Create account' }))[0]).toBeInTheDocument()
   })
 })

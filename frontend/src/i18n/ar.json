@@ -328,7 +328,10 @@
     "switchSchool": "تبديل المدرسة",
     "schoolNotFound": "لا توجد مدرسة بهذا الكود. تأكد من كود المدرسة.",
     "schoolCodeHint": "الكود الذي ستكتبه عند تسجيل الدخول لاحقاً",
-    "changeSchoolCode": "تغيير كود المدرسة"
+    "changeSchoolCode": "تغيير كود المدرسة",
+    "heroTextClosed": "سجّل الدخول إلى مدرستك برمزها.",
+    "registrationClosedTitle": "التسجيل مغلق",
+    "registrationClosed": "تُضاف المدارس الجديدة من فريق المنصة. إذا كانت مدرستك على المنصة فسجّل الدخول برمزها."
   },
   "people": {
     "students": "الطلاب",

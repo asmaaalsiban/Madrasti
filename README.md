@@ -66,7 +66,7 @@ Settings (backend `.env`):
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `REGISTRATION_ENABLED` | `false` (`true` in `.env.example`) | turns public registration on/off; off unless set |
+| `REGISTRATION_ENABLED` | `false` (also in `.env.example`) | turns public registration on/off; off unless set. A school registered this way has no student limit and no end date; the website hides its "register" links while it is off (`GET /api/central/registration`) |
 | `REGISTRATION_DAILY_LIMIT` | `50` | max registrations per day across all IPs |
 | `TRUSTED_PROXIES` | none (`*` when `APP_ENV=local`) | IPs/CIDRs of your load balancer; without it `X-Forwarded-For` is ignored so IP limits cannot be spoofed |
 

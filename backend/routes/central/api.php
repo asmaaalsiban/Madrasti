@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public self-service school registration (throttled, can be switched off).
 Route::post('register', RegisterSchoolController::class)->middleware('throttle:register');
+// Is public registration on? The website hides its "register a school" links while it is off.
+Route::get('registration', fn () => response()->json(['enabled' => (bool) config('tenancy.registration_enabled')]));
 
 // The payment provider's callback: the school code is in the URL (a provider cannot send our X-School header); its signature is what is trusted.
 Route::post('payments/webhook/{school}/{provider}', PaymentWebhookController::class)->middleware('throttle:120,1');

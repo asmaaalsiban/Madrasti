@@ -1,10 +1,13 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { company } from '../src/config/company'
 import LegalPage from '../src/features/Legal/LegalPage'
 import LegalShell from '../src/features/Legal/LegalFooter'
+
+const registration = vi.hoisted(() => ({ on: true }))
+vi.mock('../src/features/Central/useRegistration', () => ({ useRegistration: () => ({ enabled: registration.on, loading: false }) }))
 
 beforeEach(async () => { await i18n.changeLanguage('en') })
 
