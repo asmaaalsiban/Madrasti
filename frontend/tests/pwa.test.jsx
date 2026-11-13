@@ -43,6 +43,28 @@ describe('the installable app', () => {
     expect(post).toHaveBeenCalledWith('SKIP_WAITING')
   })
 
+  describe('taking over of the service worker', () => {
+    const run = (controller) => {
+      const listeners = {}
+      const reload = vi.fn()
+      const original = window.location
+      Object.defineProperty(window, 'location', { value: { ...original, reload }, configurable: true })
+      Object.defineProperty(navigator, 'serviceWorker', { value: { controller, register: () => Promise.resolve({ addEventListener() {} }), addEventListener: (type, cb) => { listeners[type] = cb } }, configurable: true })
+      startPwa()
+      listeners.controllerchange?.()
+      Object.defineProperty(window, 'location', { value: original, configurable: true })
+      return reload
+    }
+
+    it('does not reload the page on the very first visit (nothing old to replace)', () => {
+      expect(run(null)).not.toHaveBeenCalled()
+    })
+
+    it('reloads once when a new version takes over from an old one', () => {
+      expect(run({})).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('shows "Install the app" when the browser allows it, and installs with one tap', async () => {
     startPwa()
     const prompt = vi.fn()

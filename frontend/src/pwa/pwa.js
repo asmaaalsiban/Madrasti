@@ -19,8 +19,11 @@ export function startPwa() {
       worker?.addEventListener('statechange', () => { if (worker.state === 'installed' && navigator.serviceWorker.controller) announce() })
     })
   }).catch(() => {})
+  // A new version took over: reload to use it. But the very first install also "takes over" the page, and reloading then
+  // only loads everything twice (the page was already new): reload only when a worker was in charge before.
+  const hadWorker = Boolean(navigator.serviceWorker.controller)
   let reloading = false
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; window.location.reload() } })
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadWorker && !reloading) { reloading = true; window.location.reload() } })
 }
 
 export const isStandalone = () => typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true)
