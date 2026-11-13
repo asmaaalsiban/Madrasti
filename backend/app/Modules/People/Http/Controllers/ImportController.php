@@ -18,11 +18,14 @@ use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
 use App\Shared\Enums\StaffType;
+use App\Modules\Academic\Models\Student;
 use App\Modules\People\Support\StudentLimit;
+use App\Modules\People\Support\StudentLimitReached;
 use App\Shared\Export\XlsxExport;
 use App\Shared\Import\ColumnMatcher;
 use App\Shared\Import\SpreadsheetReader;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -113,16 +116,29 @@ class ImportController extends Controller
 
         $created = [];
         if ($confirm) {
-            // All or nothing: a file that would pass the student limit imports no student at all.
-            if ($kind === 'students' && $valid !== []) {
-                StudentLimit::assertRoom(count($valid));
-            }
-            foreach ($valid as $item) {
-                try {
-                    $created[] = $importer->create($item['data']);
-                } catch (ValidationException $e) {
-                    $problems[] = ['line' => $item['line'], 'errors' => collect($e->errors())->flatten()->all()];
+            $import = function () use ($valid, $importer, &$created, &$problems): void {
+                foreach ($valid as $item) {
+                    try {
+                        $created[] = $importer->create($item['data']);
+                    } catch (ValidationException $e) {
+                        $problems[] = ['line' => $item['line'], 'errors' => collect($e->errors())->flatten()->all()];
+                    }
                 }
+            };
+
+            if ($kind === 'students') {
+                // All or nothing against the student limit: one transaction under the school's creation lock, so a file
+                // that does not fit imports no student, and the places left are counted before its first row.
+                StudentLimit::exclusively(function () use ($import): void {
+                    $before = Student::count();
+                    try {
+                        DB::transaction($import);
+                    } catch (StudentLimitReached $e) {
+                        throw new StudentLimitReached($e->limit, $before, max(0, $e->limit - $before));
+                    }
+                });
+            } else {
+                $import();
             }
         }
 

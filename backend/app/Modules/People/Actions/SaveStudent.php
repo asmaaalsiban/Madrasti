@@ -14,7 +14,6 @@ use App\Modules\People\Services\StudentEmail;
 use App\Modules\People\Support\StudentLimit;
 use App\Shared\Enums\Role;
 use App\Shared\Support\PhoneNumber;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +39,7 @@ class SaveStudent
     public function create(array $data): Student
     {
         // One creation at a time per school, so two requests cannot both take the last place.
-        return Cache::lock('student-limit:'.(tenant('id') ?? 'school'), 15)->block(10, fn (): Student => $this->createInTransaction($data));
+        return StudentLimit::exclusively(fn (): Student => $this->createInTransaction($data));
     }
 
     /**
@@ -49,8 +48,6 @@ class SaveStudent
     private function createInTransaction(array $data): Student
     {
         return DB::transaction(function () use ($data): Student {
-            StudentLimit::assertRoom();
-
             $email = $this->emails->generate($data['student_number'], $data['name_en'] ?? null, tenant('id') ?? 'school');
 
             $account = User::create([
@@ -65,6 +62,9 @@ class SaveStudent
 
             $classroom = $this->place($student, $data['classroom_id'] ?? null);
             $this->linkGuardian($student, $data['guardian_email'] ?? null, $data['guardian_name'] ?? null, $data['guardian_phone'] ?? null);
+            // Checked last among the things that can refuse the row, so a row that is refused for its own reasons never reports
+            // the limit; the transaction takes the student back out. The lock held by the caller makes the count reliable.
+            StudentLimit::assertRoom(1, inserted: 1);
             // The yearly fee of the grade is applied by itself; the form may add a transport fee and a discount.
             $fees = $classroom ? $this->billing->onboard($student, $classroom, (float) ($data['fee_discount'] ?? 0), (float) ($data['transport_fee'] ?? 0)) : [];
 

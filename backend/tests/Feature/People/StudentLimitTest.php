@@ -147,4 +147,45 @@ class StudentLimitTest extends AcademicTestCase
         $this->putJson("/api/students/$id", $this->body('S-1') + ['name_en' => 'Still fine'])->assertOk();
         $this->assertSame(2, Student::count());
     }
+
+    public function test_a_place_taken_in_the_middle_of_an_import_leaves_no_student_of_the_file(): void
+    {
+        $this->limit(3);
+        $this->postJson('/api/students', $this->body('S-1'))->assertCreated();
+
+        // 2 places are left and the file fits; another request takes one right after the file's first student.
+        $stolen = false;
+        Student::created(function (Student $student) use (&$stolen) {
+            if (! $stolen && str_starts_with($student->student_number, 'A-')) {
+                $stolen = true;
+                Student::withoutEvents(fn () => Student::create(['student_number' => 'X-1', 'name_ar' => 'x']));
+            }
+        });
+
+        $this->import(['A-1', 'A-2'])->assertStatus(422)->assertJsonPath('code', 'student_limit_reached');
+        $this->assertSame(0, Student::where('student_number', 'like', 'A-%')->count()); // nothing of the file stays
+    }
+
+    public function test_rows_that_fail_when_created_do_not_use_up_places(): void
+    {
+        $this->limit(1);
+        $email = app(\App\Modules\People\Services\StudentEmail::class)->generate('A-1', 'Aaa', 'limitschool');
+
+        $path = tempnam(sys_get_temp_dir(), 'lim').'.xlsx';
+        $writer = new Writer;
+        $writer->openToFile($path);
+        $writer->addRow(Row::fromValues(['Student number', 'Name (Arabic)', 'Name (English)', 'Parent email', 'Parent phone']));
+        $writer->addRow(Row::fromValues(['A-1', 'أ', 'Aaa', null, null]));
+        // Valid on its own, but the parent email is the account the first row has just created: refused only when created.
+        $writer->addRow(Row::fromValues(['A-2', 'ب', 'Bbb', $email, '0790000001']));
+        $writer->close();
+
+        $data = $this->post('/api/import/students', ['file' => new UploadedFile($path, 'f.xlsx', null, null, true), 'confirm' => '1'], ['Accept' => 'application/json'])
+            ->assertOk()->json('data');
+
+        $this->assertSame(2, $data['valid']);
+        $this->assertCount(1, $data['created']);
+        $this->assertSame(1, $data['problem_count']);
+        $this->assertSame(1, Student::count());
+    }
 }
