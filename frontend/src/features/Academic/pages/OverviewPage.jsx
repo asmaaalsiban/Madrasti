@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useStaggerIn } from '../../../hooks/useGsapMotion'
 import { useQuery } from '@tanstack/react-query'
 import { Link, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +32,8 @@ export default function OverviewPage() {
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.get('/admin/overview').then((r) => r.data.data) })
   const { data: d } = useQuery({ queryKey: ['admin-dashboard'], queryFn: () => api.get('/admin/dashboard').then((r) => r.data.data) })
   const ready = Boolean(d)
+  // GSAP adds a calm second layer once the data is in: list rows and the small tiles ease in one after another.
+  const stage = useStaggerIn('[data-gs]', { y: 10, stagger: 0.05, delay: 0.35, dependencies: [ready] })
   const name = (o) => o[`name_${i18n.language}`] || o.name_ar
   const money = (v) => Number(v).toLocaleString(i18n.language, { maximumFractionDigits: 0 })
   const kids = d ? rate(d.students_today) : null
@@ -51,7 +54,7 @@ export default function OverviewPage() {
 
   return (
     <PageEnter>
-      <section className="dash-stage min-h-[calc(100vh-7rem)] space-y-4">
+      <section ref={stage} className="dash-stage min-h-[calc(100vh-7rem)] space-y-4">
         <div className="lp-aurora" aria-hidden><i /><i /><i /></div>
 
         {/* The pill menu: the sections the principal opens most. */}
@@ -100,7 +103,7 @@ export default function OverviewPage() {
             )}
             <div className="mt-4 grid grid-cols-2 gap-2">
               {COUNTS.map(([key, label, Icon]) => (
-                <div key={key} className="rounded-2xl bg-white/8 p-3">
+                <div key={key} data-gs className="rounded-2xl bg-white/8 p-3">
                   <Icon size={16} aria-hidden className="text-sky-100" />
                   <p className="mt-1 text-xl font-bold text-white" dir="ltr"><CountUp value={data?.[key] ?? '–'} /></p>
                   <p className="text-[11px] text-white/60">{t(label)}</p>
@@ -122,7 +125,7 @@ export default function OverviewPage() {
               {waiting.length > 0 && <p className="mt-1 text-xs text-white/50">{t('dashboard.glass.waitingCount', { count: waiting.reduce((s, w) => s + w[2], 0) })}</p>}
               <ul className="mt-4 space-y-2">
                 {[['/admin/students', 'dashboard.quick.student', Users], ['/admin/announcements', 'dashboard.quick.announce', Megaphone], ['/admin/import', 'dashboard.quick.import', Upload]].map(([to, label, Icon]) => (
-                  <li key={to}>
+                  <li key={to} data-gs>
                     <Link to={to} className="group flex items-center gap-3 rounded-full bg-white/10 p-1.5 pe-4 text-sm text-white transition hover:bg-white hover:text-deep-harbor">
                       <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 group-hover:bg-sky-tint"><Icon size={16} /></span>{t(label)}
                     </Link>
@@ -158,7 +161,7 @@ export default function OverviewPage() {
             <CardTitle>{t('dashboard.waiting.title')}</CardTitle>
             {waiting.length === 0 ? <p className="text-sm text-white/60">{t('dashboard.waiting.none')}</p> : (
               <ul className="space-y-2">
-                {waiting.map(([to, label, count]) => <li key={to}><Link to={to} className="flex items-center justify-between rounded-2xl bg-amber-300/20 px-3 py-2 text-sm text-amber-100 transition hover:bg-amber-300/30"><span>{t(label)}</span><b dir="ltr">{count}</b></Link></li>)}
+                {waiting.map(([to, label, count]) => <li key={to} data-gs><Link to={to} className="flex items-center justify-between rounded-2xl bg-amber-300/20 px-3 py-2 text-sm text-amber-100 transition hover:bg-amber-300/30"><span>{t(label)}</span><b dir="ltr">{count}</b></Link></li>)}
               </ul>
             )}
           </GlassCard>
@@ -166,7 +169,7 @@ export default function OverviewPage() {
             <CardTitle>{t('dashboard.absences.title')}</CardTitle>
             {d && (d.frequent_absences.length === 0 ? <p className="text-sm text-white/60">{t('dashboard.absences.none')}</p> : (
               <ul className="grid gap-2 sm:grid-cols-2">
-                {d.frequent_absences.map((s) => <li key={s.id} className="flex justify-between rounded-2xl bg-red-300/15 px-3 py-2 text-sm text-red-100"><bdi>{name(s)}</bdi><b>{t('dashboard.absences.days', { count: s.days })}</b></li>)}
+                {d.frequent_absences.map((s) => <li key={s.id} data-gs className="flex justify-between rounded-2xl bg-red-300/15 px-3 py-2 text-sm text-red-100"><bdi>{name(s)}</bdi><b>{t('dashboard.absences.days', { count: s.days })}</b></li>)}
               </ul>
             ))}
           </GlassCard>
