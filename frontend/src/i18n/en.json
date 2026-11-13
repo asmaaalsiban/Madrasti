@@ -3391,6 +3391,48 @@
         "school_reactivate": "Reactivated",
         "school_extend": "Subscription extended"
       }
+    },
+    "exit": {
+      "title": "Data download",
+      "hint": "Lets the school's administrators sign in for a limited time, only to download their data. The archive and the package are prepared first.",
+      "days": "Days",
+      "open": "Allow data download",
+      "extendDays": "Extend by (days)",
+      "extend": "Extend window",
+      "extended": "The window was extended.",
+      "retry": "Retry",
+      "downloadFailed": "The file could not be downloaded.",
+      "steps": {
+        "archive": "Full archive",
+        "package": "Handover package"
+      },
+      "status": {
+        "pending": "Waiting",
+        "running": "Preparing",
+        "done": "Done",
+        "failed": "Failed"
+      },
+      "download": {
+        "archive": "Download archive",
+        "package": "Download package"
+      }
     }
+  },
+  "exit": {
+    "title": "Download your data",
+    "intro": "This school is closing. You can download all of its data until the window below ends. After that, nobody can sign in.",
+    "timeLeft": "Time left",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "lessThanHour": "Less than an hour",
+    "endsOn": "The window ends on {{date}}",
+    "download": "Download the data package",
+    "preparing": "The package is being prepared. Come back in a few minutes.",
+    "downloadFailed": "The download failed, please try again.",
+    "loadFailed": "Could not load the download window.",
+    "contact": "Questions? Contact the platform owner:",
+    "signOut": "Sign out"
   }
 }

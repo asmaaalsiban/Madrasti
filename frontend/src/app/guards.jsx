@@ -1,6 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../features/Auth/AuthProvider'
+import { DOWNLOAD_PATH } from '../api/client'
+import { useSchool } from '../tenant/useSchool'
 
 export const homeFor = (role) => `/${role}`
 
@@ -10,8 +12,11 @@ export function RequireAuth() {
   const { user, loading } = useAuth()
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  if (loading) return <p className="p-6">{t('common.loading')}</p>
+  const { data: school, isLoading: schoolLoading } = useSchool()
+  if (loading || (user && schoolLoading)) return <p className="p-6">{t('common.loading')}</p>
   if (!user) return <Navigate to="/login" replace />
+  // A school in its exit window: its administrator gets only the download page (nothing of the app, so no blocked calls).
+  if (user.role === 'admin' && school?.exit_window_ends_at && pathname !== DOWNLOAD_PATH) return <Navigate to={DOWNLOAD_PATH} replace />
   // Accounts created by the admin start with the default password: nothing else is available until it is changed.
   if (user.must_change_password && pathname !== CHANGE_PASSWORD_PATH) return <Navigate to={CHANGE_PASSWORD_PATH} replace />
   return <Outlet />

@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { saveBlob } from '../../api/download'
 import saApi from './saApi'
 
 // Server state of the Super Admin area (TanStack Query over the central API).
@@ -34,6 +35,18 @@ export const useUpdateSchool = (code) => useAction(async (payload) => (await saA
 export const useSuspendSchool = (code) => useAction(async () => (await saApi.post(`/tenants/${code}/suspend`)).data.data)
 export const useReactivateSchool = (code) => useAction(async () => (await saApi.post(`/tenants/${code}/reactivate`)).data.data)
 export const useExtendSchool = (code) => useAction(async (date) => (await saApi.post(`/tenants/${code}/extend`, { subscription_ends_at: date })).data.data)
+
+// The two preparation steps of a school's exit (archive, package). Polled while one is still being prepared.
+export const useExitSteps = (code) => useQuery({
+  queryKey: ['sa', 'exit-steps', code],
+  queryFn: async () => (await saApi.get(`/tenants/${code}/exit-steps`)).data.data,
+  refetchInterval: (query) => (query.state.data?.some((s) => s.status === 'pending' || s.status === 'running') ? 3000 : false),
+})
+export const useOpenExit = (code) => useAction(async (days) => (await saApi.post(`/tenants/${code}/exit-window`, { days })).data.data)
+export const useExtendExit = (code) => useAction(async (days) => (await saApi.patch(`/tenants/${code}/exit-window`, { days })).data.data)
+export const useRetryExitStep = (code) => useAction(async (step) => (await saApi.post(`/tenants/${code}/exit-steps/${step}/retry`)).data.data)
+// A file of the exit is fetched with the owner's token, then saved from a blob.
+export const downloadExitFile = async (code, step) => saveBlob((await saApi.get(`/tenants/${code}/${step}`, { responseType: 'blob' })).data, `${code}-${step}.zip`)
 
 // The first error message of a failed request: a field error, the server's message, or the generic text.
 export const errorOf = (err, fallback) => {

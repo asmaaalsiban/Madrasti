@@ -14,6 +14,11 @@ export const setToken = (t) => {
 }
 
 const SUSPENDED_PATH = '/suspended'
+export const DOWNLOAD_PATH = '/download-your-data'
+
+// Set from the school answer: in an exit window the administrator works only on the download page.
+let inExitWindow = false
+export const setExitWindow = (value) => { inExitWindow = value }
 
 // Same origin: the Vite dev proxy and the production web server forward /api to Laravel.
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -41,7 +46,10 @@ api.interceptors.response.use(
       window.dispatchEvent(new Event('auth:expired'))
     }
     // The platform blocked this school: forget the token and explain, instead of showing broken screens.
-    if (error.response?.status === 403 && error.response.data?.code === 'school_suspended') {
+    // The one exception: the administrator on the download page of a school in an exit window. A blocked background call
+    // must not sign them out of the only page they are allowed to use.
+    const keepForDownload = inExitWindow && window.location.pathname === DOWNLOAD_PATH
+    if (error.response?.status === 403 && error.response.data?.code === 'school_suspended' && !keepForDownload) {
       setToken(null)
       window.dispatchEvent(new Event('auth:expired'))
       if (window.location.pathname !== SUSPENDED_PATH) goTo(SUSPENDED_PATH)

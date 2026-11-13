@@ -6,7 +6,7 @@ import { DateInput } from '../../components/shared/DateInput'
 import FormField from '../../components/shared/FormField'
 import { StateBadge } from './SchoolsPage'
 import { dayOf, formatDay, formatWhen } from './format'
-import { errorOf, fieldErrors, useExtendSchool, useReactivateSchool, useSchoolAudit, useSchoolByCode, useSuspendSchool, useUpdateSchool } from './useSuperAdmin'
+import { downloadExitFile, errorOf, fieldErrors, useExitSteps, useExtendExit, useExtendSchool, useOpenExit, useRetryExitStep, useReactivateSchool, useSchoolAudit, useSchoolByCode, useSuspendSchool, useUpdateSchool } from './useSuperAdmin'
 
 const inputClass = 'w-full rounded border p-2'
 const Card = ({ title, children }) => <section className="space-y-3 rounded-lg border bg-white p-4"><h2 className="font-bold">{title}</h2>{children}</section>
@@ -88,6 +88,75 @@ function StatusCard({ school }) {
   )
 }
 
+const STEP_STYLE = { pending: 'bg-slate-100 text-slate-700', running: 'bg-sky-100 text-sky-800', done: 'bg-green-100 text-green-800', failed: 'bg-red-100 text-red-700' }
+
+function ExitCard({ school }) {
+  const { t } = useTranslation()
+  const { data: steps = [], isError } = useExitSteps(school.id)
+  const open = useOpenExit(school.id)
+  const extend = useExtendExit(school.id)
+  const retry = useRetryExitStep(school.id)
+  const [openDays, setOpenDays] = useState('14')
+  const [extendDays, setExtendDays] = useState('7')
+  const [done, setDone] = useState(false)
+  const [downloadError, setDownloadError] = useState(false)
+  const inWindow = school.state === 'exit_window'
+  const preparing = steps.some((s) => s.status === 'pending' || s.status === 'running')
+  const download = async (step) => {
+    setDownloadError(false)
+    try { await downloadExitFile(school.id, step) } catch { setDownloadError(true) }
+  }
+  const submitOpen = (e) => { e.preventDefault(); open.mutate(Number(openDays)) }
+  const submitExtend = (e) => { e.preventDefault(); setDone(false); extend.mutate(Number(extendDays), { onSuccess: () => setDone(true) }) }
+  return (
+    <Card title={t('superAdmin.exit.title')}>
+      {isError && <Message>{t('superAdmin.genericError')}</Message>}
+      {steps.length > 0 && (
+        <ul className="divide-y text-sm">
+          {steps.map((s) => (
+            <li key={s.step} className="space-y-1 py-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="min-w-0 break-words font-semibold">{t(`superAdmin.exit.steps.${s.step}`)}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${STEP_STYLE[s.status] ?? ''}`}>{t(`superAdmin.exit.status.${s.status}`)}</span>
+              </div>
+              {s.status === 'failed' && (
+                <>
+                  {s.error && <p className="break-words text-xs text-red-700" dir="auto">{s.error}</p>}
+                  <button type="button" disabled={retry.isPending} className="rounded border px-3 py-1 text-sm font-semibold disabled:opacity-60" onClick={() => retry.mutate(s.step)}>{t('superAdmin.exit.retry')}</button>
+                </>
+              )}
+              {s.status === 'done' && (
+                <button type="button" className="rounded border px-3 py-1 text-sm font-semibold" onClick={() => download(s.step)}>{t(`superAdmin.exit.download.${s.step}`)}</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {downloadError && <Message>{t('superAdmin.exit.downloadFailed')}</Message>}
+      {retry.isError && <Message>{errorOf(retry.error, t('superAdmin.genericError'))}</Message>}
+      {inWindow ? (
+        <form onSubmit={submitExtend} className="space-y-3">
+          <FormField label={t('superAdmin.exit.extendDays')}>
+            <input required type="number" min="1" max="365" dir="ltr" className={inputClass} value={extendDays} onChange={(e) => { setDone(false); setExtendDays(e.target.value) }} />
+          </FormField>
+          {extend.isError && <Message>{errorOf(extend.error, t('superAdmin.genericError'))}</Message>}
+          <Message ok>{done && t('superAdmin.exit.extended')}</Message>
+          <button disabled={extend.isPending} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.exit.extend')}</button>
+        </form>
+      ) : (
+        <form onSubmit={submitOpen} className="space-y-3">
+          <p className="text-sm text-slate-600">{t('superAdmin.exit.hint')}</p>
+          <FormField label={t('superAdmin.exit.days')}>
+            <input required type="number" min="1" max="365" dir="ltr" className={inputClass} value={openDays} onChange={(e) => setOpenDays(e.target.value)} />
+          </FormField>
+          {open.isError && <Message>{errorOf(open.error, t('superAdmin.genericError'))}</Message>}
+          <button disabled={open.isPending || preparing} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.exit.open')}</button>
+        </form>
+      )}
+    </Card>
+  )
+}
+
 function AuditCard({ code }) {
   const { t, i18n } = useTranslation()
   const { data, isLoading } = useSchoolAudit(code)
@@ -129,6 +198,7 @@ export default function SchoolPage() {
             <StatusCard school={school} />
             <ExtendCard school={school} />
             <EditCard school={school} />
+            <ExitCard school={school} />
             <AuditCard code={school.id} />
           </div>
         </>

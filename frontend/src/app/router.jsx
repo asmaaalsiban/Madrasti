@@ -3,6 +3,7 @@ import AdminLayout from '../layouts/AdminLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ChangePasswordPage from '../features/Auth/pages/ChangePasswordPage'
 import SuspendedPage from '../features/Auth/SuspendedPage'
+import DownloadYourDataPage from '../features/Auth/DownloadYourDataPage'
 import LoginPage from '../features/Auth/pages/LoginPage'
 import ForgotPasswordPage from '../features/Auth/pages/ForgotPasswordPage'
 import LandingPage from '../features/Auth/pages/LandingPage'
@@ -242,6 +243,7 @@ export const routes = [
     element: <RequireAuth />,
     children: [
       { path: '/change-password', element: <ChangePasswordPage /> },
+      { element: <RequireRole role="admin" />, children: [{ path: '/download-your-data', element: <DownloadYourDataPage /> }] },
       {
         element: <DashboardLayout />,
         children: ROLES.filter((role) => role !== 'admin').map((role) => ({
