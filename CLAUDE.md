@@ -55,6 +55,7 @@ Full product details: @docs/product-spec.md (read it before building or changing
 - Never query across tenant databases from tenant code
 - Every feature ships with tests (Pest/PHPUnit backend, Vitest frontend)
 - Audit log entry for every create/update/delete on sensitive data (grades, finance, attendance)
+- After every addition or change: commit, push to the working branch, and open a pull request, then give the user its link so they can merge it
 
 ### i18n / RTL
 - `react-i18next`; no hardcoded strings in components
