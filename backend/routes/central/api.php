@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Central\Http\Controllers\CentralAuthController;
 use App\Central\Http\Controllers\PaymentWebhookController;
 use App\Central\Http\Controllers\RegisterSchoolController;
+use App\Central\Http\Controllers\SchoolActionController;
 use App\Central\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,8 @@ Route::prefix('auth')->group(function (): void {
 
 Route::middleware(['auth:sanctum', 'super-admin'])->group(function (): void {
     Route::apiResource('tenants', TenantController::class)->only(['index', 'store', 'update']);
+    Route::post('tenants/{tenant}/suspend', [SchoolActionController::class, 'suspend']);
+    Route::post('tenants/{tenant}/reactivate', [SchoolActionController::class, 'reactivate']);
+    Route::post('tenants/{tenant}/extend', [SchoolActionController::class, 'extend']);
+    Route::get('tenants/{tenant}/audit', [SchoolActionController::class, 'audit']);
 });
