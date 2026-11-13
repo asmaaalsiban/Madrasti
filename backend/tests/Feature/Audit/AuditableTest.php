@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Audit;
 
+use App\Central\Models\SuperAdmin;
 use App\Models\User;
 use App\Modules\Academic\Models\Subject;
 use App\Modules\Audit\Models\AuditLog;
@@ -34,5 +35,18 @@ class AuditableTest extends TenantTestCase
         Subject::factory()->create();
 
         $this->assertNull(AuditLog::where('auditable_type', Subject::class)->first()->user_id);
+    }
+
+    public function test_a_super_admin_creating_an_account_is_not_written_as_a_school_user(): void
+    {
+        // The Super Admin creates a new school's first administrator from the central app. Their id lives in the central database,
+        // so in the school's database it would point at nobody (a foreign key failure on MySQL) or at some other person.
+        $this->actingAs((new SuperAdmin)->forceFill(['id' => 987654, 'name' => 'Owner', 'email' => 'owner@madrasati.test']), 'sanctum');
+
+        $first = User::factory()->role(Role::Admin)->create();
+
+        $log = AuditLog::where('auditable_type', User::class)->where('auditable_id', $first->id)->where('action', 'created')->first();
+        $this->assertNotNull($log);
+        $this->assertNull($log->user_id);
     }
 }
