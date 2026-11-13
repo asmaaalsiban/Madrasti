@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Central\Support\SchoolStatus;
 use App\Modules\HR\Services\PayrollService;
 use Illuminate\Console\Command;
 
@@ -16,6 +17,11 @@ class ContractsRemind extends Command
 
     public function handle(PayrollService $payroll): int
     {
+        // A suspended, expired or closed school gets no reminders.
+        if (SchoolStatus::currentSchoolBlocked()) {
+            return self::SUCCESS;
+        }
+
         $this->info($payroll->remindExpiring((int) $this->option('days')).' contract(s) reminded');
 
         return self::SUCCESS;

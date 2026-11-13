@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\QueryStats;
 use App\Http\Middleware\SetLocale;
+use App\Modules\People\Support\StudentLimitReached;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -69,6 +70,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Unknown school domain -> clean 404 instead of a 500.
         $exceptions->render(function (TenantCouldNotBeIdentifiedException $e, Request $request) {
             return response()->json(['message' => __('tenancy.school_not_found')], 404);
+        });
+
+        // The school reached the student limit its owner set: the screen shows the message and how many places are left.
+        $exceptions->render(function (StudentLimitReached $e, Request $request) {
+            return response()->json(['message' => $e->getMessage(), 'code' => 'student_limit_reached', 'limit' => $e->limit, 'current' => $e->current, 'allowed' => $e->allowed], 422);
         });
 
         // The framework's own messages ("Server Error", "Too Many Attempts.", ...) follow the request language (lang/ar.json).

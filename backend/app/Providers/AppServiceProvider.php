@@ -150,6 +150,12 @@ class AppServiceProvider extends ServiceProvider
         ]);
         RateLimiter::for('reset-password', fn (Request $request): Limit => Limit::perMinute(10)->by('rp|'.(tenant('id') ?? 'central').'|'.Str::lower((string) $request->input('login')).'|'.$request->ip()));
 
+        // Super Admin code step: 10 tries a minute per email + IP, 30 per IP (the code itself also locks after 5 wrong tries).
+        RateLimiter::for('central-code', fn (Request $request): array => [
+            Limit::perMinute(10)->by('cc|'.Str::lower((string) $request->input('email')).'|'.$request->ip()),
+            Limit::perMinute(30)->by('cc|ip|'.$request->ip()),
+        ]);
+
         // Login: 5 attempts a minute for the same school + login + IP, and 30 a minute from one IP for a whole school
         // (new accounts share the default password, so one machine must not be able to try it on many emails).
         RateLimiter::for('login', function (Request $request): array {

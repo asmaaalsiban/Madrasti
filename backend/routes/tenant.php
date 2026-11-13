@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Central\Http\Middleware\EnsureSchoolActive;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -20,4 +21,5 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 Route::middleware([
     'api',
     InitializeTenancyByRequestData::class,
+    EnsureSchoolActive::class,
 ])->prefix('api')->group(base_path('routes/tenant/api.php'));

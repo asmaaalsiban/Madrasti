@@ -9,6 +9,8 @@ vi.mock('../src/features/Auth/AuthProvider', () => ({
   useAuth: () => ({ user: mockUser.current, loading: false }),
 }))
 
+vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'Al Noor', exit_window_ends_at: null }, isLoading: false }) }))
+
 function renderAt(path) {
   const router = createMemoryRouter(
     [

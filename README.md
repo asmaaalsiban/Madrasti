@@ -856,3 +856,63 @@ The overview (`/admin`) is rebuilt after the reference video, in the school's ow
 - A bar fixed to the bottom of the screen with **four destinations of equal weight** (Home, Inbox, News, Feed), an icon above a short label: the current one tinted in the school's colour and the others muted, and **count badges** on Inbox (unread chat) and News (unread announcements). It is a `<nav>` of links; the current page has `aria-current="page"`. Switching is instant (no slide or push).
 - Shown **only on phones and tablets**: a window narrower than 1024px, or a touch screen with no mouse (so an iPad in landscape too). Never on a computer (`.tabbar` in `index.css`).
 - The bar is padded by `env(safe-area-inset-bottom)` so the icons clear the iPhone home indicator (the page already has `viewport-fit=cover`), and the page gets room under it. In every role's layout (`BottomTabBar.jsx`); a destination the principal switched off for a staff member is not shown.
+
+## Super Admin (the platform owner)
+The Super Admin is the owner of the platform. This person manages the schools: adds a school, suspends it, extends its subscription, sets its student limit and closes it. The screens live at `/super-admin` on the central domain. They are not linked from any public page: you type the address. The API is under `/api/central` (`routes/central/api.php`).
+
+### Sign-in
+- Create the first Super Admin on the server: `php artisan super-admin:create owner@example.com --name="Owner"`. Without `--password` the command asks for it. The password needs **at least 14 characters** (`LongPassword`), because this account reaches every school.
+- Sign-in has two steps. First the email and the password. Then a **6-digit code sent by email**. The code works for **10 minutes**, allows **5 wrong tries** and can be used **once**. A new code cancels the older ones. Only a hash of the code is stored.
+- The session lasts **8 hours**. After that, sign in again.
+- Every action on a school (suspend, reactivate, extend, open or extend an exit window, download) is written to the central audit log (`CentralAudit`). The school page shows it.
+
+### School states
+The state is worked out from the school's row each time (`App\Central\Support\SchoolStatus`). It is never stored. The middleware `EnsureSchoolActive` checks it on **every request**, so people who are already signed in are blocked on their next request. Blocked users see a page that says the school is not available. Reminders and notices skip a blocked school.
+
+| State | When | What the school's users can do |
+| --- | --- | --- |
+| Active | Switched on, subscription not over | Everything |
+| Expired | The subscription end date has passed (the whole last day still counts) | Nothing. Extend the subscription to bring it back |
+| Suspended | The owner suspended it | Nothing. Reactivate to bring it back |
+| Exit window | The window is open (see below) | Only school administrators can sign in, and only to download their data |
+| Closed | The exit window ended | Nothing. Reactivate to bring it back |
+
+In every blocked state only the public school answer and the logo stay open (the blocked page uses the school's name and colours).
+
+### Student limit
+- The owner can set a maximum number of students for each school (`max_students`). Empty means no limit.
+- The limit is checked against the number of students the school has right now.
+- **Adding one student** over the limit is refused with a 422 error, `student_limit_reached`. The message tells the school to contact the platform owner.
+- **Excel import of students** is all or nothing. If the file does not fit in the places left, **no student is imported**. The answer carries the limit, the current number and the places left.
+- Two people adding students at the same moment cannot both take the last place.
+- The limit only stops adding. Students already in the school are never removed, even if the limit is set below their number.
+
+### The exit window
+This is how a school leaves with its data. **Nothing is ever deleted**: no database, no file, no backup. The window only blocks use of the school and gives the administrators time to take their data.
+1. The owner opens the window on the school page. The default is **14 days** (1 to 365 days).
+2. Opening it only queues a job (`PrepareExit`). The job makes two things, one after the other: the **archive** (the same full backup as the nightly one) and the **handover package** (Excel files and uploaded files, see below). Both are stored on the backup disk, outside the school's own data.
+3. The window **starts only when both are ready**. Until then the school works as before, and the school page shows each step as waiting, running, done or failed.
+4. Once it starts, the school is in the exit window state. **Only school administrators can sign in.** They see the page "Download your data" with the days left and a button for the package. Teachers, students and parents are told the school is not available.
+5. The owner can **extend** the window by some days while it is open. The owner can also download the package and the archive.
+6. If a step **fails**, the owner sees the error and presses **Retry** for that step. A step that is already done is not redone. A step stuck for more than 70 minutes with no job behind it counts as stale and can be retried too.
+7. When the window ends, the school is Closed. The owner can **reactivate** it at any time, in any state. Reactivating clears the window and the school works again with all its data.
+
+### What the handover package holds
+One zip, `handover/<school code>/...` on the backup disk. It is made to be opened by a person, not by a program. It has a `README.txt` that lists every folder and file. The headings and file titles are written in Arabic and English.
+- `accounting/`: fee structures, student fees, installments, payments, money accounts and their entries, transfers, suppliers, expenses and their payments, chart of accounts, journal, budgets, and the yearly reports (such as the trial balance).
+- `people/`: students, enrollments, guardians, staff, staff contracts.
+- `payroll/`: payroll runs, payslips and their items.
+- `academic/`: academic years, terms, grades, student and staff attendance, behaviour notes and evaluations, warnings, timetable, exam timetable, duties.
+- `uploaded_files/`: every uploaded file (homework photos, attachments), one folder per storage disk (`local`, `public`).
+
+The package only reads school data. If one uploaded file cannot be copied, the whole package fails (and shows as failed), so a package is never silently incomplete.
+
+### Settings needed in production
+- **Working mail.** The sign-in code is sent by email. With `MAIL_MAILER=log` (the default in `.env.example`) the code is only written to the log, and with no mail nobody can sign in to the Super Admin area. Set the `MAIL_*` values and test it before you rely on it.
+- **A running queue worker.** Set `QUEUE_CONNECTION` to `database` or `redis` (not `sync`) and keep `php artisan queue:work` running (Supervisor or systemd). The exit job can run for up to **3600 seconds**, so start the worker with `--timeout=3600` or more (and a time limit above it for your process manager). In `config/queue.php` `retry_after` was raised to **3900 seconds** for the database, Beanstalkd and Redis connections. If `retry_after` were shorter than the job, a second worker would pick up the job while it is still running and the job would be marked failed. Keep `retry_after` above the job timeout.
+- **The backup disk** (`BACKUP_DISK`, see Backups). The archive goes to `archive/<school code>/` and the package to `handover/<school code>/` on this disk. Use a disk on another machine, and keep it large enough for the school's files.
+- **The central migrations.** Run `php artisan migrate --path=database/migrations/central` on every deploy that includes this feature. It adds the Super Admin tables, the school state columns and the exit steps. Tenant migrations (`php artisan tenants:migrate`) are run as usual.
+
+### Known limits
+- The Super Admin screens were checked only against a **mocked API**, not a real backend. Do a full manual pass on a real server before the first school depends on it.
+- The automated screen sweep (the layout check across screens) **does not cover `/super-admin`**.
