@@ -7,7 +7,6 @@ import { Award, BookOpenCheck, CalendarClock, CircleCheck, FileBarChart, Graduat
 import { useSmoothScroll } from '../../../hooks/useSmoothScroll'
 import { calmly, EASE } from '../../../hooks/useGsapMotion'
 
-const YEAR = new Date().getFullYear()
 // Kids reading among books under the stars (MotionSites free media shelf, #24). Swap it for the school's own film; if it cannot load, the aurora below stays.
 const HERO_VIDEO = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4'
 const ROLES = [['admin', Briefcase], ['teacher', Users], ['student', GraduationCap], ['parent', Heart]]
@@ -211,9 +210,6 @@ export default function LandingView({ name, logo, title, text, header, actions, 
         </Reveal>
       </section>
 
-      <footer className="border-t py-6 text-center text-sm text-slate-500">
-        {t('landing.footer', { year: YEAR, name })}
-      </footer>
     </div>
   )
 }
