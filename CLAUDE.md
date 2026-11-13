@@ -58,6 +58,8 @@ Lessons learned and handover notes from earlier sessions (user preferences, gotc
 - Audit log entry for every create/update/delete on sensitive data (grades, finance, attendance)
 - After every addition or change: commit, push to the working branch, and open a pull request, then give the user its link so they can merge it
 - Whenever you give the user a branch or pull request link, also write the terminal commands they need to run (fetch/checkout or pull, then `npm install` and `npm run dev` for the frontend, `composer install` and migrations for the backend when needed), each command in its own code block
+- Never force-push over a branch before checking its pull request is merged (`git merge-base --is-ancestor <branch> origin/main`). If it is not merged, keep its commits and add new ones on top. A force push once removed an unmerged commit (the handover notes) from the branch
+- Before saying a screen change is done, open it in a real browser (Playwright, mocked API) and look at it, then say plainly what was not checked. A settings button once shipped that the user could not find
 
 ### i18n / RTL
 - `react-i18next`; no hardcoded strings in components
