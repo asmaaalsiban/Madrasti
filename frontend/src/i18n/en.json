@@ -151,7 +151,8 @@
       "opacity": "Opacity",
       "saturation": "Colour strength",
       "tint": "Glass tint",
-      "reset": "Reset"
+      "reset": "Reset",
+      "lite": "Your device is in saving mode, so the blur is off automatically. Opacity and tint still work."
     }
   },
   "errors": {

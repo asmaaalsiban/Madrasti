@@ -42,6 +42,8 @@ export default function GlassSettings({ glass }) {
   const close = useCallback(() => { setOpen(false); trigger.current?.focus() }, [])
   useEffect(() => { if (open) panel.current?.querySelector('input')?.focus() }, [open])
   const { settings, update, reset, custom } = glass
+  // On weak devices the page switches the blur off by itself (html[data-lite], see lite.js): the blur slider would show nothing there.
+  const lite = typeof document !== 'undefined' && Boolean(document.documentElement.dataset.lite)
   const sliders = [
     ['blur', t('dashboard.glassSettings.blur'), 0, 24, 1, `${Math.round(settings.blur)} px`],
     ['opacity', t('dashboard.glassSettings.opacity'), 0.04, 0.4, 0.01, `${Math.round(settings.opacity * 100)}%`],
@@ -49,21 +51,22 @@ export default function GlassSettings({ glass }) {
   ]
   return (
     <>
-      <button ref={trigger} type="button" aria-label={t('dashboard.glassSettings.open')} title={t('dashboard.glassSettings.open')} aria-expanded={open} onClick={() => setOpen(!open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"><Settings2 size={17} aria-hidden /></button>
+      <button ref={trigger} type="button" aria-label={t('dashboard.glassSettings.open')} title={t('dashboard.glassSettings.open')} aria-expanded={open} onClick={() => setOpen(!open)} className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-white/10 px-2.5 text-sm text-white transition-colors hover:bg-white/20 sm:px-3"><Settings2 size={17} aria-hidden /><span className="hidden whitespace-nowrap sm:inline">{t('dashboard.glassSettings.open')}</span></button>
       {open && (
-        <aside ref={panel} role="dialog" aria-label={t('dashboard.glassSettings.title')} onKeyDown={(e) => { if (e.key === 'Escape') close() }} className="glass-dark absolute end-2 top-16 z-30 max-h-[80vh] w-72 max-w-[calc(100%-1rem)] overflow-auto rounded-3xl p-5 text-white shadow-2xl">
+        <aside ref={panel} role="dialog" aria-label={t('dashboard.glassSettings.title')} onKeyDown={(e) => { if (e.key === 'Escape') close() }} className="absolute end-2 top-16 z-30 border border-white/15 bg-[#071a33] max-h-[80vh] w-72 max-w-[calc(100%-1rem)] overflow-auto rounded-3xl p-5 text-white shadow-2xl">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base font-bold">{t('dashboard.glassSettings.title')}</h2>
+            <h2 className="text-base font-bold !text-white">{t('dashboard.glassSettings.title')}</h2>
             <button type="button" aria-label={t('dashboard.glassSettings.close')} onClick={close} className="grid h-8 w-8 place-items-center rounded-full hover:bg-white/15"><X size={16} aria-hidden /></button>
           </div>
           <p className="mt-1 text-xs text-white/60">{t('dashboard.glassSettings.hint')}</p>
           <div className="mt-4 flex gap-1.5" role="group" aria-label={t('dashboard.glassSettings.presets')}>
             {Object.entries(PRESETS).map(([name, value]) => <button key={name} type="button" onClick={() => update(value)} className="flex-1 rounded-lg border border-white/20 py-1.5 text-xs hover:bg-white/15">{t(`dashboard.glassSettings.preset.${name}`)}</button>)}
           </div>
+          {lite && <p role="note" className="mt-3 rounded-lg bg-amber-300/15 p-2 text-xs text-amber-100">{t('dashboard.glassSettings.lite')}</p>}
           {sliders.map(([name, label, min, max, step, shown]) => (
             <label key={name} className="mt-4 block text-xs">
               <span className="flex justify-between">{label}<output dir="ltr" className="text-white/60">{shown}</output></span>
-              <input type="range" aria-label={label} min={min} max={max} step={step} value={settings[name]} onChange={(e) => update({ [name]: Number(e.target.value) })} className="mt-2 w-full accent-sky-300" />
+              <input type="range" aria-label={label} min={min} max={max} step={step} value={settings[name]} disabled={lite && name === 'blur'} onChange={(e) => update({ [name]: Number(e.target.value) })} className="mt-2 w-full accent-sky-300" />
             </label>
           ))}
           <label className="mt-4 flex items-center justify-between text-xs">{t('dashboard.glassSettings.tint')}<input type="color" aria-label={t('dashboard.glassSettings.tint')} value={settings.tint} onChange={(e) => update({ tint: e.target.value })} className="h-7 w-11 cursor-pointer rounded border border-white/20 bg-transparent p-0.5" /></label>
