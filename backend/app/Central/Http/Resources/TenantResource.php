@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Central\Http\Resources;
 
 use App\Central\Models\Tenant;
+use App\Central\Support\SchoolCounts;
 use App\Central\Support\SchoolStatus;
 use App\Models\User;
+use App\Modules\Academic\Models\Student;
 use App\Shared\Backup\BackupService;
 use App\Shared\Enums\Role;
 use Illuminate\Http\Request;
@@ -44,15 +46,16 @@ class TenantResource extends JsonResource
     }
 
     /**
-     * Read from the school's own database (the only place its people are), and cached together for 5 minutes so a list of
-     * schools does not open every database on every request.
+     * Read from the school's own database (the only place its people are), and cached together for a few minutes (and dropped at once when the
+     * school adds or removes a student or staff member, see SchoolCounts) so a list of schools does not open every database on every request.
      *
      * @return array{students: int, staff: int}
      */
     private function counts(): array
     {
-        return Cache::remember("school.counts.{$this->id}", now()->addMinutes(5), fn () => $this->resource->run(fn () => [
-            'students' => User::where('role', Role::Student)->count(),
+        return Cache::remember(SchoolCounts::key((string) $this->id), now()->addMinutes(SchoolCounts::MINUTES), fn () => $this->resource->run(fn () => [
+            // The same number the student limit counts, so "used / limit" always agrees with what the school is allowed.
+            'students' => Student::count(),
             'staff' => User::whereIn('role', [Role::Admin, Role::Teacher])->count(),
         ]));
     }

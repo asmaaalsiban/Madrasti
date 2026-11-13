@@ -8,6 +8,7 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\People\Models\StaffProfile;
 use App\Shared\Enums\Role;
 use App\Shared\Traits\Auditable;
+use App\Shared\Traits\ForgetsSchoolCounts;
 use Database\Factories\UserFactory;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -25,7 +26,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use Auditable, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use Auditable, ForgetsSchoolCounts, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * @var list<string>

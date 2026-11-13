@@ -116,6 +116,20 @@ class StudentLimitTest extends AcademicTestCase
         $this->assertStringNotContainsString(':limit', $message);
     }
 
+    public function test_deleting_a_student_gives_the_place_back(): void
+    {
+        $this->limit(2);
+        $first = $this->postJson('/api/students', $this->body('S-1'))->assertCreated()->json('data.id');
+        $this->postJson('/api/students', $this->body('S-2'))->assertCreated();
+        $this->postJson('/api/students', $this->body('S-3'))->assertStatus(422)->assertJsonPath('code', 'student_limit_reached');
+
+        $this->deleteJson("/api/students/$first")->assertNoContent();
+
+        $this->postJson('/api/students', $this->body('S-3'))->assertCreated();
+        $this->assertSame(2, Student::count());
+        $this->postJson('/api/students', $this->body('S-4'))->assertStatus(422);
+    }
+
     public function test_null_means_unlimited(): void
     {
         $this->limit(null);
