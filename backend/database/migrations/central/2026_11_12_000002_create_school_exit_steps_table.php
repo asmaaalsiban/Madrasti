@@ -17,6 +17,7 @@ return new class extends Migration
             $t->string('path')->nullable(); // where the file is on the backup disk
             $t->text('error')->nullable();
             $t->timestamp('finished_at')->nullable();
+            $t->timestamp('updated_at')->nullable(); // a step untouched for longer than a job may run is stale
             $t->unique(['tenant_id', 'step']);
         });
     }

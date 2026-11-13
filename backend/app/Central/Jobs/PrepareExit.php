@@ -30,7 +30,15 @@ class PrepareExit implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 1;
 
-    public int $timeout = 3600;
+    public const TIMEOUT = 3600;
+
+    /** A step untouched for this long has no job behind it any more. */
+    public const STALE_AFTER = self::TIMEOUT + 600;
+
+    public int $timeout = self::TIMEOUT;
+
+    /** The unique lock expires with the staleness window, so a leaked lock cannot block a retry for ever. */
+    public int $uniqueFor = self::STALE_AFTER;
 
     public function __construct(public readonly string $tenantId) {}
 
@@ -52,13 +60,13 @@ class PrepareExit implements ShouldBeUnique, ShouldQueue
         $school = Tenant::findOrFail($this->tenantId);
         $code = (string) $school->getTenantKey();
 
-        $worked = $this->run($code, SchoolExitStep::ARCHIVE, function () use ($school, $backup, $code): string {
+        $this->run($code, SchoolExitStep::ARCHIVE, function () use ($school, $backup, $code): string {
             $file = $school->run(fn () => $backup->build($code, config('backup.file_disks'), config('backup.password') ?: null));
 
             return $backup->store("archive/$code", $file);
         });
 
-        $worked = $this->run($code, SchoolExitStep::PACKAGE, function () use ($school, $backup, $package, $code): string {
+        $this->run($code, SchoolExitStep::PACKAGE, function () use ($school, $backup, $package, $code): string {
             // Account names in the reports follow the school's own language.
             $previous = app()->getLocale();
             app()->setLocale($school->default_locale ?: config('app.locale'));
@@ -69,16 +77,18 @@ class PrepareExit implements ShouldBeUnique, ShouldQueue
             }
 
             return $backup->store("handover/$code", $file);
-        }) || $worked;
+        });
 
+        // Both ready and the window not opened yet for this request: open it (also when an earlier run died right after the last step).
+        // Once opened the request is cleared, so a repeated job changes nothing and never shifts an open window.
+        $school = $school->fresh();
         $ready = SchoolExitStep::where('tenant_id', $code)->where('status', 'done')->count() === count(SchoolExitStep::STEPS);
-        // Only the run that finished a step opens the window, and never over one that is already open: a repeated job changes nothing.
-        if (! $ready || ! $worked || SchoolStatus::of($school->fresh()) === SchoolState::ExitWindow) {
+        if (! $ready || ! $school->exit_window_requested || SchoolStatus::of($school) === SchoolState::ExitWindow) {
             return;
         }
 
         $days = (int) ($school->exit_window_days ?: ExitWindow::DEFAULT_DAYS);
-        $school->update(['exit_window_ends_at' => now()->addDays($days)]);
+        $school->update(['exit_window_ends_at' => now()->addDays($days), 'exit_window_requested' => false]);
         $audit->record('exit_window.open', $code, ['days' => $days]);
     }
 

@@ -11,6 +11,7 @@ use App\Central\Support\SchoolState;
 use App\Central\Support\SchoolStatus;
 use DomainException;
 use RuntimeException;
+use Throwable;
 
 /**
  * Opens and extends a school's exit window. Opening only queues the preparation (archive + handover package); the window itself
@@ -22,11 +23,11 @@ class ExitWindow
 
     public function __construct(private readonly CentralAudit $audit) {}
 
-    /** @throws DomainException while a window is open or a step is still pending or running */
+    /** @throws DomainException while a window is open or a step is being prepared (not stale) */
     public function open(Tenant $school, int $days = self::DEFAULT_DAYS): void
     {
         $busy = SchoolStatus::of($school) === SchoolState::ExitWindow
-            || SchoolExitStep::where('tenant_id', $school->getTenantKey())->whereIn('status', ['pending', 'running'])->exists();
+            || SchoolExitStep::where('tenant_id', $school->getTenantKey())->get()->contains(fn (SchoolExitStep $s) => $s->isActive());
         if ($busy) {
             throw new DomainException('An exit window is already open or being prepared.');
         }
@@ -37,10 +38,24 @@ class ExitWindow
                 ['status' => 'pending', 'path' => null, 'error' => null, 'finished_at' => null],
             );
         }
-        $school->update(['exit_window_days' => $days]); // kept for a retry of a failed step
+        // Kept for the job and for a retry: how long the window is, and that this request has not opened it yet.
+        $school->update(['exit_window_days' => $days, 'exit_window_requested' => true]);
         $this->audit->record('exit_window.request', $school->getTenantKey(), ['days' => $days]);
 
-        PrepareExit::dispatch((string) $school->getTenantKey());
+        $this->queue($school);
+    }
+
+    /** Queues the preparation. If the queue refuses, the waiting steps are marked failed, so the owner can retry instead of being stuck. */
+    public function queue(Tenant $school): void
+    {
+        try {
+            PrepareExit::dispatch((string) $school->getTenantKey());
+        } catch (Throwable $e) {
+            SchoolExitStep::where('tenant_id', $school->getTenantKey())->whereIn('status', ['pending', 'running'])
+                ->update(['status' => 'failed', 'error' => mb_substr('Could not queue the job: '.$e->getMessage(), 0, 1000), 'finished_at' => now()]);
+
+            throw $e;
+        }
     }
 
     public function extend(Tenant $school, int $days): void

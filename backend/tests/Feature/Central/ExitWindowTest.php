@@ -412,4 +412,62 @@ class ExitWindowTest extends TestCase
         $this->postJson('/api/central/tenants/alpha/exit-steps/archive/retry')->assertStatus(422); // a done step is never redone
         $this->assertSame('x.zip', basename(SchoolExitStep::where('step', 'archive')->value('path')));
     }
+
+    public function test_when_the_queue_refuses_the_job_no_step_stays_pending_and_open_can_be_called_again(): void
+    {
+        $school = $this->school();
+        config(['queue.default' => 'database', 'queue.connections.database.table' => 'no_such_jobs_table']); // pushing fails
+        $this->assertThrows(fn () => app(ExitWindow::class)->open($school), \Throwable::class);
+
+        $this->assertSame(0, SchoolExitStep::whereIn('status', ['pending', 'running'])->count());
+
+        config(['queue.default' => 'sync']);
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+        $this->assertSame('pending', $this->stepStatus('alpha', 'archive'));
+    }
+
+    public function test_a_stale_running_or_pending_step_can_be_retried_but_a_fresh_one_cannot(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+        SchoolExitStep::where('step', 'archive')->update(['status' => 'done', 'path' => 'archive/alpha/x.zip']);
+        SchoolExitStep::where('step', 'package')->update(['status' => 'running']);
+        $this->owner();
+
+        $this->postJson('/api/central/tenants/alpha/exit-steps/package/retry')->assertStatus(422); // fresh: a job may be working on it
+
+        $this->travel(PrepareExit::STALE_AFTER + 60)->seconds();
+        $this->postJson('/api/central/tenants/alpha/exit-steps/package/retry')->assertOk();
+        Queue::assertPushed(PrepareExit::class, 2);
+        $this->assertSame('pending', $this->stepStatus('alpha', 'package'));
+    }
+
+    public function test_both_steps_done_without_a_window_is_opened_by_a_rerun_exactly_once(): void
+    {
+        $school = $this->school();
+        Queue::fake();
+        app(ExitWindow::class)->open($school, 6); // a run that died after the last step: both done, no window
+        SchoolExitStep::query()->update(['status' => 'done', 'path' => 'x.zip']);
+        $this->assertNull(Tenant::find('alpha')->exit_window_ends_at);
+
+        $this->runJob($school);
+        $ends = Tenant::find('alpha')->exit_window_ends_at;
+        $this->assertEqualsWithDelta(now()->addDays(6)->timestamp, $ends->timestamp, 5);
+
+        $this->travel(2)->days();
+        $this->runJob($school);
+        $this->assertTrue(Tenant::find('alpha')->exit_window_ends_at->equalTo($ends));
+        $this->assertSame(1, DB::connection(config('tenancy.database.central_connection'))->table('central_audit_logs')->where('action', 'exit_window.open')->count());
+    }
+
+    public function test_the_queue_waits_longer_than_the_job_may_run_and_the_unique_lock_expires(): void
+    {
+        $job = new PrepareExit('alpha');
+        foreach (['database', 'redis', 'beanstalkd'] as $connection) {
+            $this->assertGreaterThan($job->timeout, config("queue.connections.$connection.retry_after"));
+        }
+        $this->assertGreaterThan($job->timeout, $job->uniqueFor);
+    }
 }

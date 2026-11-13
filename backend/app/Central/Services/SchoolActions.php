@@ -23,7 +23,7 @@ class SchoolActions
     /** Also brings a closed school back: the window and the closing date are cleared. */
     public function reactivate(Tenant $school): void
     {
-        $school->update(['is_active' => true, 'closed_at' => null, 'exit_window_ends_at' => null]);
+        $school->update(['is_active' => true, 'closed_at' => null, 'exit_window_ends_at' => null, 'exit_window_requested' => false]);
         $this->audit->record('school.reactivate', $school->getTenantKey());
     }
 

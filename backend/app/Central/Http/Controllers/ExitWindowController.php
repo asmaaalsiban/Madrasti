@@ -59,16 +59,24 @@ class ExitWindowController extends Controller
         ])->all();
     }
 
-    public function retry(Tenant $tenant, string $step): JsonResponse
+    public function retry(Tenant $tenant, string $step, ExitWindow $window): JsonResponse
     {
-        $row = SchoolExitStep::where('tenant_id', $tenant->getTenantKey())->where('step', $step)->first();
+        $rows = SchoolExitStep::where('tenant_id', $tenant->getTenantKey())->get();
+        $row = $rows->firstWhere('step', $step);
         abort_if($row === null, 404);
-        abort_unless($row->status === 'failed', 422, __('exit.not_failed'));
-        // Another step still being prepared owns the job: retrying now could leave this step waiting with no job to run it.
-        abort_if(SchoolExitStep::where('tenant_id', $tenant->getTenantKey())->whereIn('status', ['pending', 'running'])->exists(), 422, __('exit.already_open'));
 
-        $row->update(['status' => 'pending', 'error' => null]);
-        PrepareExit::dispatch((string) $tenant->getTenantKey());
+        // Another step being prepared owns the job: retrying now could leave this one waiting with no job to run it.
+        abort_if($rows->contains(fn (SchoolExitStep $s) => $s->isActive()), 422, __('exit.already_open'));
+
+        // A failed or stale step is redone. A done step is never redone: it is only (re)queued when every step is done but the
+        // window was never opened for the request (a run died right after the last step); the job then just opens it.
+        $resume = $row->isDone() && $rows->every->isDone() && $tenant->exit_window_requested && SchoolStatus::of($tenant) !== SchoolState::ExitWindow;
+        abort_unless($row->status === 'failed' || $row->isStale() || $resume, 422, __('exit.not_failed'));
+
+        if (! $resume) {
+            $row->update(['status' => 'pending', 'error' => null]);
+        }
+        $window->queue($tenant);
 
         return response()->json(['data' => $this->stepRows($tenant)]);
     }
