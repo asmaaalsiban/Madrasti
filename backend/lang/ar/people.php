@@ -5,6 +5,6 @@ return [
     'guardian_of' => 'ولي أمر :name',
     'guardian_phone_conflict' => 'رقم الهاتف هذا يعود لحساب آخر.',
     'guardian_email_conflict' => 'هذا الإيميل يعود لنوع حساب آخر ولا يمكن استخدامه لولي أمر.',
-    'student_limit_reached' => "الحد الأقصى لعدد الطلاب في مدرستك هو :limit طالب؛ تواصل مع مالك المنصة.",
+    'student_limit_reached' => "وصلت إلى الحد الأقصى لعدد الطلاب في مدرستك (:limit طالب). لإضافة المزيد من الطلاب تواصل مع مالك المنصة.",
     'resources' => ['teacher' => 'المعلم', 'student' => 'الطالب'],
 ];

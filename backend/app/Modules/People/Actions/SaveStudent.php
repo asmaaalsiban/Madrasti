@@ -39,7 +39,12 @@ class SaveStudent
     public function create(array $data): Student
     {
         // One creation at a time per school, so two requests cannot both take the last place.
-        return StudentLimit::exclusively(fn (): Student => $this->createInTransaction($data));
+        return StudentLimit::exclusively(function () use ($data): Student {
+            $student = $this->createInTransaction($data);
+            StudentLimit::notifyAdmins();
+
+            return $student;
+        });
     }
 
     /**
