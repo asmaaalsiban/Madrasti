@@ -21,6 +21,19 @@ class XlsxExport
     public function download(string $filename, string $sheetName, array $headers, iterable $rows): BinaryFileResponse
     {
         $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        $this->write($path, $sheetName, $headers, $rows);
+
+        return response()->download($path, $this->safeName($filename).'.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])->deleteFileAfterSend();
+    }
+
+    /**
+     * Writes the workbook to `$path`, one row at a time (a generator keeps memory flat however big the sheet is).
+     *
+     * @param  list<string>  $headers
+     * @param  iterable<list<scalar|null>>  $rows
+     */
+    public function write(string $path, string $sheetName, array $headers, iterable $rows): void
+    {
         $writer = new Writer();
         $writer->openToFile($path);
         $sheet = $writer->getCurrentSheet();
@@ -33,8 +46,6 @@ class XlsxExport
             $writer->addRow(Row::fromValues($row));
         }
         $writer->close();
-
-        return response()->download($path, $this->safeName($filename).'.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])->deleteFileAfterSend();
     }
 
     /** A file name with no path characters, whatever the title. */
