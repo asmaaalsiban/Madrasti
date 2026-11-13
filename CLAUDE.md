@@ -4,6 +4,7 @@ A multi-tenant, ClassDojo-style school platform: academic management + finance +
 Sold to multiple schools. Each school gets its own subdomain and its own database.
 
 Full product details: @docs/product-spec.md (read it before building or changing any module).
+Lessons learned and handover notes from earlier sessions (user preferences, gotchas, bugs, PR state): @docs/CLAUDE-DENSE.md. Code wins over docs.
 
 ## Team
 - 3 developers (backend, frontend, full-stack)
