@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Suspense } from 'react'
+import PageFallback from '../../components/shared/PageFallback'
 import { Link, Outlet } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +42,7 @@ export default function SuperAdminLayout() {
           </div>
         </div>
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none"><Outlet /></main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none"><Suspense fallback={<PageFallback />}><Outlet /></Suspense></main>
     </div>
   )
 }

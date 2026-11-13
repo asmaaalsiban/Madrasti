@@ -1,4 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Suspense } from 'react'
+import PageFallback from '../components/shared/PageFallback'
 import { useTranslation } from 'react-i18next'
 import BackButton from '../components/shared/BackButton'
 import UserMenu from '../components/shared/UserMenu'
@@ -36,7 +38,7 @@ export default function DashboardLayout() {
       </header>
       <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none">
         <BackButton />
-        {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Outlet />}
+        {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Suspense fallback={<PageFallback />}><Outlet /></Suspense>}
       </main>
       <BottomTabBar />
       <ResponsiveTables />
