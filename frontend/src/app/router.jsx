@@ -133,6 +133,8 @@ const ContractsRoute = lazy(() => import('../features/Payroll/pages/ContractsRou
 const ChatPage = lazy(() => import('../features/Chat/pages/ChatPage'))
 const ParentHome = lazy(() => import('../features/Parent/pages/ParentHome'))
 
+const GlassDemoPage = lazy(() => import('../features/Demo/GlassDemoPage'))
+
 const ROLES = ['admin', 'teacher', 'student', 'parent']
 
 // A notification link /chat?c=5 goes to the chat page of whoever opens it.
@@ -268,6 +270,7 @@ export const routes = [
             element: <AdminLayout />,
             children: [
               { path: '/admin', element: <OverviewPage /> },
+              { path: '/admin/glass-demo', element: <GlassDemoPage /> }, // trial page of the glass dashboard component (sample data)
               { path: '/admin/academic-years', element: <AcademicYearsPage /> },
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
