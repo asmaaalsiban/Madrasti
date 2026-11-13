@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\People\Support;
 
 use App\Modules\Academic\Models\Student;
+use App\Models\User;
+use App\Modules\Communication\Services\Notifier;
+use App\Shared\Enums\Role;
 use Closure;
 use Illuminate\Support\Facades\Cache;
 
@@ -34,6 +37,33 @@ final class StudentLimit
                 self::$held = false;
             }
         });
+    }
+
+    /**
+     * Tells the school's administrators (the bell) when the student count has just reached 90% of the limit and when it has just
+     * reached the limit itself. It fires on the exact count, so each threshold rings once as the school grows. Call it after a student is created.
+     */
+    public static function notifyAdmins(): void
+    {
+        $limit = tenant()?->max_students;
+        if ($limit === null) {
+            return;
+        }
+
+        $limit = (int) $limit;
+        $current = Student::count();
+        $near = max(1, (int) ceil($limit * 0.9));
+        $kind = match (true) {
+            $current === $limit => 'student_limit_reached',
+            $current === $near && $near < $limit => 'student_limit_near',
+            default => null,
+        };
+        if ($kind === null) {
+            return;
+        }
+
+        $admins = User::where('role', Role::Admin)->where('is_active', true)->pluck('id');
+        app(Notifier::class)->toUsers($admins, $kind, ['current' => $current, 'limit' => $limit], '/admin/students');
     }
 
     /**

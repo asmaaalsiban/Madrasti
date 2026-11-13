@@ -3,9 +3,11 @@
 namespace Tests\Feature\People;
 
 use App\Central\Models\Tenant;
+use App\Models\User;
 use App\Modules\Academic\Models\Student;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
 use Tests\Feature\Academic\AcademicTestCase;
@@ -68,6 +70,50 @@ class StudentLimitTest extends AcademicTestCase
             ->assertJsonPath('current', 1)
             ->assertJsonPath('allowed', 0);
         $this->assertSame(1, Student::count());
+    }
+
+    private function bellCount(string $kind): int
+    {
+        return DB::table('notifications')->where('data', 'like', '%"kind":"'.$kind.'"%')->count();
+    }
+
+    public function test_the_admin_is_told_when_the_school_gets_close_to_the_limit_and_when_it_reaches_it(): void
+    {
+        $this->limit(10);
+        for ($i = 1; $i <= 8; $i++) {
+            $this->postJson('/api/students', $this->body('S-'.$i))->assertCreated();
+        }
+        $this->assertSame(0, $this->bellCount('student_limit_near'));
+
+        $this->postJson('/api/students', $this->body('S-9'))->assertCreated(); // 9 of 10 = 90%
+        $this->assertSame(1, $this->bellCount('student_limit_near'));
+        $this->assertSame(0, $this->bellCount('student_limit_reached'));
+        $this->assertSame(1, DB::table('notifications')->where('notifiable_id', User::where('role', 'admin')->value('id'))->where('data', 'like', '%"current":9%')->count());
+
+        $this->postJson('/api/students', $this->body('S-10'))->assertCreated(); // 10 of 10
+        $this->assertSame(1, $this->bellCount('student_limit_near'), 'the near notice rings once');
+        $this->assertSame(1, $this->bellCount('student_limit_reached'));
+    }
+
+    public function test_no_notice_without_a_limit_and_a_refused_student_rings_nothing(): void
+    {
+        $this->limit(null);
+        $this->postJson('/api/students', $this->body('S-1'))->assertCreated();
+        $this->assertSame(0, $this->bellCount('student_limit_reached') + $this->bellCount('student_limit_near'));
+
+        $this->limit(1);
+        $this->postJson('/api/students', $this->body('S-2'))->assertStatus(422); // 1 student exists, the limit is 1
+        $this->assertSame(0, $this->bellCount('student_limit_reached'));
+    }
+
+    public function test_the_refusal_message_names_the_limit(): void
+    {
+        $this->limit(1);
+        $this->postJson('/api/students', $this->body('S-1'))->assertCreated();
+
+        $message = $this->postJson('/api/students', $this->body('S-2'))->assertStatus(422)->json('message');
+        $this->assertStringContainsString('1', $message);
+        $this->assertStringNotContainsString(':limit', $message);
     }
 
     public function test_null_means_unlimited(): void

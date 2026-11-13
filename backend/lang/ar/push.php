@@ -23,6 +23,8 @@ return [
     'procurement_rejected' => 'رُفض طلبك: :title — :note',
     'procurement_to_buy' => 'تمت الموافقة، يرجى الشراء: :title',
     'procurement_purchased' => 'تم شراء: :title',
+    'student_limit_near' => 'مدرستك تقترب من الحد الأقصى للطلاب: :current من :limit طالب.',
+    'student_limit_reached' => 'وصلت مدرستك إلى الحد الأقصى للطلاب (:limit طالب). تواصل مع مالك المنصة لرفع الحد.',
     'task_new' => 'أعطاك :name مهمة: :title',
     'task_done' => 'أنجز :name المهمة: :title',
     'task_reminder' => 'مهمة موعدها غداً: :title',
