@@ -25,6 +25,7 @@ class EnsureSchoolActive
         ['POST', 'api/auth/login'],
         ['GET', 'api/auth/me'],
         ['POST', 'api/auth/logout'],
+        ['POST', 'api/auth/change-password'], // an administrator who still has the default password must change it before the download
     ];
 
     public function handle(Request $request, Closure $next): Response

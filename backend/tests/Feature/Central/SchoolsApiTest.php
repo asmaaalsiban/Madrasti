@@ -11,6 +11,7 @@ use App\Shared\Enums\Role;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Throwable;
@@ -243,6 +244,40 @@ class SchoolsApiTest extends TestCase
         $this->fresh();
 
         $this->assertSame($before + 1, $this->listed()[0]['staff_count']);
+    }
+
+    public function test_one_school_can_be_read_by_its_code(): void
+    {
+        $this->school('alpha', ['max_students' => 40]);
+        $this->owner();
+
+        $this->getJson('/api/central/tenants/alpha')->assertOk()->assertJsonPath('data.id', 'alpha')->assertJsonPath('data.max_students', 40);
+        $this->getJson('/api/central/tenants/nope')->assertNotFound();
+    }
+
+    public function test_only_a_super_admin_can_read_one_school(): void
+    {
+        $this->school('alpha');
+        $this->fresh();
+
+        $this->getJson('/api/central/tenants/alpha')->assertUnauthorized();
+    }
+
+    public function test_a_school_whose_database_cannot_be_read_does_not_break_the_list(): void
+    {
+        $this->school('alpha');
+        $broken = $this->school('gamma');
+        $this->owner();
+        $broken->run(fn () => Schema::dropIfExists('students')); // reading this school's numbers now fails
+        Cache::forget('school.counts.alpha');
+        Cache::forget('school.counts.gamma');
+
+        $rows = collect($this->listed())->keyBy('id');
+
+        $this->assertSame(0, $rows['alpha']['students_count']);
+        $this->assertNull($rows['gamma']['students_count'], 'no numbers for the broken school');
+        $this->assertNull($rows['gamma']['staff_count']);
+        $this->assertFalse(Cache::has('school.counts.gamma'), 'the failure is not cached');
     }
 
     public function test_last_backup_at_is_the_newest_backup_or_null(): void

@@ -29,7 +29,7 @@ final class StudentLimit
             return $work();
         }
 
-        return Cache::lock('student-limit:'.(tenant('id') ?? 'school'), 60)->block(30, function () use ($work) {
+        return Cache::lock('student-limit:'.(tenant('id') ?? 'school'), 600)->block(30, function () use ($work) {
             self::$held = true;
             try {
                 return $work();

@@ -27,8 +27,9 @@ const wrap = (ui, path = '/', route = '/') => render(
   </QueryClientProvider>,
 )
 
+const ONE = /^\/tenants\/[^/]+$/ // one school by its code
 const serve = (rows = [school], audit = []) => saApi.get.mockImplementation((url) => Promise.resolve({
-  data: url.endsWith('/audit') ? { data: audit } : { data: rows, meta: { current_page: 1, last_page: 1, total: rows.length } },
+  data: url.endsWith('/audit') ? { data: audit } : ONE.test(url) ? { data: rows[0] } : { data: rows, meta: { current_page: 1, last_page: 1, total: rows.length } },
 }))
 
 beforeEach(async () => {

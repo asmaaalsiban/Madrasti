@@ -3435,7 +3435,12 @@
         "school_update": "تعديل البيانات",
         "school_suspend": "إيقاف",
         "school_reactivate": "إعادة تفعيل",
-        "school_extend": "تمديد الاشتراك"
+        "school_extend": "تمديد الاشتراك",
+        "exit_window_request": "طُلب تنزيل البيانات",
+        "exit_window_open": "فُتحت نافذة تنزيل البيانات",
+        "exit_window_extend": "مُدّدت نافذة تنزيل البيانات",
+        "package_downloaded": "نُزّلت حزمة البيانات",
+        "archive_downloaded": "نُزّل الأرشيف"
       }
     },
     "exit": {
@@ -3461,7 +3466,11 @@
       "download": {
         "archive": "تنزيل الأرشيف",
         "package": "تنزيل الحزمة"
-      }
+      },
+      "openQuestion": "السماح لهذه المدرسة بتنزيل بياناتها؟",
+      "openDescription": "عندما يجهز الأرشيف والحزمة، يُمنع الجميع ما عدا مديري المدرسة عند طلبهم التالي، حتى تنتهي النافذة. لا يُحذف أي شيء.",
+      "openConfirm": "السماح بالتنزيل",
+      "retryStuck": "عالقة: أعد المحاولة"
     }
   },
   "exit": {

@@ -872,12 +872,12 @@ The state is worked out from the school's row each time (`App\Central\Support\Sc
 | State | When | What the school's users can do |
 | --- | --- | --- |
 | Active | Switched on, subscription not over | Everything |
-| Expired | The subscription end date has passed (the whole last day still counts) | Nothing. Extend the subscription to bring it back |
+| Expired | The subscription end date has passed (the whole last day still counts) | Nothing. Extend the subscription (or reactivate it and extend if the end date has passed) |
 | Suspended | The owner suspended it | Nothing. Reactivate to bring it back |
 | Exit window | The window is open (see below) | Only school administrators can sign in, and only to download their data |
-| Closed | The exit window ended | Nothing. Reactivate to bring it back |
+| Closed | The exit window ended (worked out from `exit_window_ends_at` in the past; the `closed_at` column is reserved and no code sets it yet) | Nothing. Reactivate to bring it back (and extend the end date if it has passed) |
 
-In every blocked state only the public school answer and the logo stay open (the blocked page uses the school's name and colours).
+In every blocked state only the public school answer and the logo stay open (the blocked page uses the school's name and colours). The exit window is the one exception: the administrators can also sign in and out, change their password and download (see below).
 
 ### Student limit
 - The owner can set a maximum number of students for each school (`max_students`). Empty means no limit.
@@ -888,14 +888,14 @@ In every blocked state only the public school answer and the logo stay open (the
 - The limit only stops adding. Students already in the school are never removed, even if the limit is set below their number.
 
 ### The exit window
-This is how a school leaves with its data. **Nothing is ever deleted**: no database, no file, no backup. The window only blocks use of the school and gives the administrators time to take their data.
+This is how a school leaves with its data. **No school data is ever deleted by this feature**: no database, no uploaded file, and the exit archive and package are never pruned. The window only blocks use of the school and gives the administrators time to take their data. The nightly backups (`backup:prune`) keep their normal rotation, so old nightly backups of a blocked or closed school are still removed after their retention time. A payment already made online is still recorded for a school in its exit window or closed, so the package can be a little older than the data.
 1. The owner opens the window on the school page. The default is **14 days** (1 to 365 days).
 2. Opening it only queues a job (`PrepareExit`). The job makes two things, one after the other: the **archive** (the same full backup as the nightly one) and the **handover package** (Excel files and uploaded files, see below). Both are stored on the backup disk, outside the school's own data.
 3. The window **starts only when both are ready**. Until then the school works as before, and the school page shows each step as waiting, running, done or failed.
 4. Once it starts, the school is in the exit window state. **Only school administrators can sign in.** They see the page "Download your data" with the days left and a button for the package. Teachers, students and parents are told the school is not available.
 5. The owner can **extend** the window by some days while it is open. The owner can also download the package and the archive.
-6. If a step **fails**, the owner sees the error and presses **Retry** for that step. A step that is already done is not redone. A step stuck for more than 70 minutes with no job behind it counts as stale and can be retried too.
-7. When the window ends, the school is Closed. The owner can **reactivate** it at any time, in any state. Reactivating clears the window and the school works again with all its data.
+6. If a step **fails**, the owner sees the error and presses **Retry** for that step. A step that is already done is not redone. A step stuck for more than 70 minutes with no job behind it counts as stale: the screen then shows **Stuck: retry** for it.
+7. When the window ends, the school is Closed. The owner can **reactivate** it at any time, in any state (the button on the school page is **Reactivate** whenever the school is suspended, in its exit window or closed). Reactivating clears the window and the school works again with all its data.
 
 ### What the handover package holds
 One zip, `handover/<school code>/...` on the backup disk. It is made to be opened by a person, not by a program. It has a `README.txt` that lists every folder and file. The headings and file titles are written in Arabic and English.

@@ -10,12 +10,16 @@ export const useSchools = (params) => useQuery({
   placeholderData: keepPreviousData,
 })
 
-// There is no "show one school" endpoint: the code is unique, so the search finds exactly that school.
+// One school by its code (null when there is no such school).
 export const useSchoolByCode = (code) => useQuery({
   queryKey: ['sa', 'school', code],
   queryFn: async () => {
-    const { data } = await saApi.get('/tenants', { params: { search: code } })
-    return data.data.find((s) => s.id === code) ?? null
+    try {
+      return (await saApi.get(`/tenants/${code}`)).data.data
+    } catch (err) {
+      if (err.response?.status === 404) return null
+      throw err
+    }
   },
 })
 

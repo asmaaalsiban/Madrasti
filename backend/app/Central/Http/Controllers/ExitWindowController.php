@@ -56,6 +56,7 @@ class ExitWindowController extends Controller
             'status' => $s->status,
             'error' => $s->error,
             'finished_at' => $s->finished_at?->toIso8601String(),
+            'stale' => $s->isStale(), // pending or running for longer than the job can take: the owner may retry it
         ])->all();
     }
 

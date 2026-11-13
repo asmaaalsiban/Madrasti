@@ -294,6 +294,35 @@ class ExitWindowTest extends TestCase
         $this->asSchool($token, 'alpha', 'POST', '/api/auth/logout')->assertOk();
     }
 
+    public function test_an_administrator_with_the_default_password_changes_it_in_the_window_and_then_downloads(): void
+    {
+        $school = $this->school();
+        $school->run(fn () => User::where('email', 'admin@alpha.test')->update(['must_change_password' => true]));
+        $token = $this->token('alpha');
+        $this->openAndRun($school);
+
+        $this->asSchool($token, 'alpha', 'GET', '/api/exit-export')->assertForbidden()->assertJsonPath('code', 'password_change_required');
+
+        $this->fresh();
+        $this->json('POST', '/api/auth/change-password', ['current_password' => 'Secret12345', 'password' => 'MyOwnPass1', 'password_confirmation' => 'MyOwnPass1'], ['Authorization' => "Bearer $token", 'X-School' => 'alpha'])->assertOk();
+
+        $this->asSchool($token, 'alpha', 'GET', '/api/exit-export')->assertOk()->assertJsonPath('ready', true);
+    }
+
+    public function test_the_steps_tell_the_owner_which_one_is_stuck(): void
+    {
+        $school = $this->school();
+        $this->owner();
+        Queue::fake();
+        app(ExitWindow::class)->open($school);
+        SchoolExitStep::where('tenant_id', 'alpha')->where('step', 'archive')->update(['status' => 'running', 'updated_at' => now()->subHours(2)]);
+
+        $steps = collect($this->getJson('/api/central/tenants/alpha/exit-steps')->assertOk()->json('data'))->keyBy('step');
+
+        $this->assertTrue($steps['archive']['stale']);
+        $this->assertFalse($steps['package']['stale'], 'a step that was just queued is not stuck');
+    }
+
     public function test_after_the_window_the_administrator_is_blocked_too(): void
     {
         $school = $this->school();
