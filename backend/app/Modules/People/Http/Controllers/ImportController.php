@@ -18,6 +18,7 @@ use App\Modules\People\Import\Importer;
 use App\Modules\People\Import\StaffImporter;
 use App\Modules\People\Import\StudentImporter;
 use App\Shared\Enums\StaffType;
+use App\Modules\People\Support\StudentLimit;
 use App\Shared\Export\XlsxExport;
 use App\Shared\Import\ColumnMatcher;
 use App\Shared\Import\SpreadsheetReader;
@@ -112,6 +113,10 @@ class ImportController extends Controller
 
         $created = [];
         if ($confirm) {
+            // All or nothing: a file that would pass the student limit imports no student at all.
+            if ($kind === 'students' && $valid !== []) {
+                StudentLimit::assertRoom(count($valid));
+            }
             foreach ($valid as $item) {
                 try {
                     $created[] = $importer->create($item['data']);

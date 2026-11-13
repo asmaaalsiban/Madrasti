@@ -11,8 +11,10 @@ use App\Modules\Academic\Models\Student;
 use App\Modules\Finance\Models\Money;
 use App\Modules\Finance\Services\FeeBilling;
 use App\Modules\People\Services\StudentEmail;
+use App\Modules\People\Support\StudentLimit;
 use App\Shared\Enums\Role;
 use App\Shared\Support\PhoneNumber;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -37,7 +39,18 @@ class SaveStudent
      */
     public function create(array $data): Student
     {
+        // One creation at a time per school, so two requests cannot both take the last place.
+        return Cache::lock('student-limit:'.(tenant('id') ?? 'school'), 15)->block(10, fn (): Student => $this->createInTransaction($data));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function createInTransaction(array $data): Student
+    {
         return DB::transaction(function () use ($data): Student {
+            StudentLimit::assertRoom();
+
             $email = $this->emails->generate($data['student_number'], $data['name_en'] ?? null, tenant('id') ?? 'school');
 
             $account = User::create([
