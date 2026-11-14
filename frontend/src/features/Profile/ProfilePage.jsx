@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import Avatar from '../../components/shared/Avatar'
 import { useAuth } from '../Auth/AuthProvider'
+import PhotoCropper from './PhotoCropper'
 
 // The ready-made characters are /avatars/a01.svg ... a24.svg (scripts/make-avatars.mjs); the server accepts exactly these keys.
 const KEYS = Array.from({ length: 24 }, (_, i) => `a${String(i + 1).padStart(2, '0')}`)
@@ -18,9 +19,10 @@ export default function ProfilePage() {
   const { user, updateUser } = useAuth()
   const file = useRef(null)
   const [error, setError] = useState('')
+  const [picked, setPicked] = useState(null)
   const isStudent = user.role === 'student'
 
-  const done = { onSuccess: (r) => { setError(''); updateUser({ ...user, ...r.data.data }) }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) }
+  const done = { onSuccess: (r) => { setError(''); setPicked(null); updateUser({ ...user, ...r.data.data }) }, onError: (err) => setError(errorOf(err, t('admin.actions.error'))) }
   const upload = useMutation({ mutationFn: (photo) => { const body = new FormData(); body.append('photo', photo); return api.post('/profile/avatar', body) }, ...done })
   const choose = useMutation({ mutationFn: (key) => api.put('/profile/avatar/preset', { key }), ...done })
   const remove = useMutation({ mutationFn: () => api.delete('/profile/avatar'), ...done })
@@ -48,7 +50,7 @@ export default function ProfilePage() {
         ) : (
           <>
             <p className="text-sm text-slate-600">{t('profile.photoHelp')}</p>
-            <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('profile.choosePhoto')} onChange={(e) => { const photo = e.target.files?.[0]; if (photo) upload.mutate(photo); e.target.value = '' }} />
+            <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('profile.choosePhoto')} onChange={(e) => { const photo = e.target.files?.[0]; if (photo) setPicked(photo); e.target.value = '' }} />
             <button type="button" disabled={busy} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 font-semibold text-brand disabled:opacity-60" onClick={() => file.current?.click()}>
               <Camera aria-hidden size={18} />{t('profile.choosePhoto')}
             </button>
@@ -74,6 +76,7 @@ export default function ProfilePage() {
           </button>
         )}
       </div>
+      <PhotoCropper file={picked} busy={upload.isPending} onSave={(photo) => upload.mutate(photo)} onCancel={() => setPicked(null)} />
     </section>
   )
 }

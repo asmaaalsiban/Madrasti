@@ -3485,12 +3485,18 @@
     "title": "My profile",
     "menu": "My profile",
     "photo": "Photo",
-    "photoHelp": "A photo of you (JPG, PNG or WebP, up to 3 MB). It is cut to a square.",
+    "photoHelp": "A photo of you (JPG, PNG or WebP, up to 3 MB). You choose how it is cut.",
     "choosePhoto": "Choose a photo",
     "studentsNoPhoto": "Students choose a character: real photos of students are not kept on the platform.",
     "characters": "Characters",
     "charactersHelp": "Or pick a character as your picture.",
     "character": "Character {{number}}",
-    "remove": "Remove my picture (show my initials)"
+    "remove": "Remove my picture (show my initials)",
+    "cropTitle": "Adjust your photo",
+    "cropHelp": "Drag the photo and zoom to choose what is kept.",
+    "zoom": "Zoom",
+    "savePhoto": "Save photo",
+    "cancel": "Cancel",
+    "cropFailed": "Could not cut this photo. Try another one."
   }
 }
