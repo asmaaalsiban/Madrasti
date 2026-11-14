@@ -3491,7 +3491,7 @@
     "characters": "Characters",
     "charactersHelp": "Or pick a character as your picture.",
     "character": "Character {{number}}",
-    "remove": "Remove my picture (show my initials)",
+    "remove": "Delete my picture",
     "cropTitle": "Adjust your photo",
     "cropHelp": "Drag the photo and zoom to choose what is kept.",
     "zoom": "Zoom",
