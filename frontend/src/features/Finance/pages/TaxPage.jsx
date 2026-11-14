@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -40,7 +41,7 @@ export default function TaxPage() {
           <legend className="mb-1 font-bold">{t('tax.feeKinds')}</legend>
           <div className="flex flex-wrap gap-3">{data.kinds.map((k) => <label key={k} className="flex items-center gap-1"><input type="checkbox" disabled={!can} checked={form.fee_kinds.includes(k)} onChange={() => toggleKind(k)} />{t(`tax.kinds.${k}`, { defaultValue: k })}</label>)}</div>
         </fieldset>
-        {can && <div className="flex justify-end"><button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button></div>}
+        {can && <div className="flex justify-end"><InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton></div>}
       </form>
     </section>
   )

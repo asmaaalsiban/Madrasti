@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useResource } from '../hooks/useResource'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const FIELDS = [['mixed', 'mixed'], ['male', 'boys'], ['female', 'girls']]
 
@@ -79,9 +80,9 @@ export default function GenerateClassroomsPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-medium">{t('generate.total', { count: total })}</p>
-        <button type="button" disabled={total === 0 || run.isPending} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-60" onClick={() => run.mutate({ dry: true })}>
+        <InteractiveHoverButton type="button" disabled={total === 0 || run.isPending} className="px-5 py-2 disabled:opacity-60" onClick={() => run.mutate({ dry: true })}>
           {t('generate.preview')}
-        </button>
+        </InteractiveHoverButton>
       </div>
 
       {error && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{error}</p>}

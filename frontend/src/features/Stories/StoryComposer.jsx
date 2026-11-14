@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ImagePlus, X } from 'lucide-react'
 import { api } from '../../api/client'
 import { useAuth } from '../Auth/AuthProvider'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const MAX = 6
 
@@ -75,7 +76,7 @@ export default function StoryComposer() {
           <select className="rounded border p-1.5" value={chosen} onChange={(e) => setTarget(e.target.value)}>{options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select>
         </label>
         <label className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={comments} onChange={(e) => setComments(e.target.checked)} />{t('stories.allowComments')}</label>
-        <button type="submit" disabled={send.isPending || blocked || (!body.trim() && files.length === 0)} className="ms-auto rounded bg-brand px-6 py-2 text-white disabled:opacity-50">{t('stories.post')}</button>
+        <InteractiveHoverButton type="submit" disabled={send.isPending || blocked || (!body.trim() && files.length === 0)} className="ms-auto px-6 py-2 disabled:opacity-50">{t('stories.post')}</InteractiveHoverButton>
       </div>
       {missing > 0 && (
         <p role={blocked ? 'alert' : 'status'} className={`rounded p-2 text-sm ${blocked ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-900'}`}>

@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -51,7 +52,7 @@ function EntryDialog({ accounts, onClose }) {
         <p className={`text-sm ${balanced ? 'text-green-700' : 'text-amber-700'}`}>{t('journal.totals', { debit: (debit / 100).toFixed(2), credit: (credit / 100).toFixed(2) })}</p>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={!balanced || save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={!balanced || save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -83,7 +84,7 @@ function AccountsTab({ data, canManage }) {
           <input required aria-label={t('expenses.nameAr')} placeholder={t('expenses.nameAr')} className="rounded border p-2" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} />
           <input required dir="ltr" aria-label={t('expenses.nameEn')} placeholder={t('expenses.nameEn')} className="rounded border p-2" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
           <select aria-label={t('journal.type')} className="rounded border p-2" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{data.types.map((x) => <option key={x} value={x}>{t(`journal.types.${x}`)}</option>)}</select>
-          <button type="submit" className="rounded bg-brand px-4 py-2 text-white">{t('admin.actions.add')}</button>
+          <InteractiveHoverButton type="submit" className="px-4 py-2">{t('admin.actions.add')}</InteractiveHoverButton>
         </form>
       )}
     </div>
@@ -110,7 +111,7 @@ export default function JournalPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('journal.title')}</h1>
-        {canManage && tab === 'journal' && <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog(true)}><Plus size={16} aria-hidden />{t('journal.newEntry')}</button>}
+        {canManage && tab === 'journal' && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog(true)}><Plus size={16} aria-hidden />{t('journal.newEntry')}</InteractiveHoverButton>}
       </div>
       <div className="flex gap-2">
         <button type="button" className={tabBtn('journal')} onClick={() => setTab('journal')}>{t('journal.entries')}</button>

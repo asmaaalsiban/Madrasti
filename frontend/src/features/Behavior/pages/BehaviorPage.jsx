@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import EvaluateDialog from '../components/EvaluateDialog'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -44,7 +45,7 @@ export default function BehaviorPage({ base }) {
           <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded border bg-white p-3">
             <span>{s[`name_${i18n.language}`] || s.name_ar} {s.special_count > 0 && <span title={t('behavior.special.badgeHint')} className="ms-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800">★ {t('behavior.special.badge', { count: s.special_count })}</span>} {s.evaluation && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{t('behavior.done')}</span>}</span>
             <span className="flex gap-2">
-              <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setEditing(s)}>{t('behavior.evaluate')}</button>
+              <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setEditing(s)}>{t('behavior.evaluate')}</InteractiveHoverButton>
               <Link to={`${base}/behavior/students/${s.id}`} className="rounded border px-3 py-1 text-sm text-brand">{t('behavior.results')}</Link>
             </span>
           </li>

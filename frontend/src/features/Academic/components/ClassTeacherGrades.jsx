@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // One grade: is it taught by a class teacher, and which of its subjects are kept for specialist teachers (English, computer...)?
 function GradeRow({ grade, subjects, cells, onSaved }) {
@@ -21,7 +22,7 @@ function GradeRow({ grade, subjects, cells, onSaved }) {
     <li className="space-y-2 rounded-lg border bg-white p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} aria-label={`${t('classTeachers.enable')} ${name(grade)}`} />{name(grade)}</label>
-        <button type="button" disabled={save.isPending} className="rounded bg-brand px-3 py-1 text-sm text-white disabled:opacity-50" aria-label={`${t('admin.actions.save')} ${name(grade)}`} onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+        <InteractiveHoverButton type="button" disabled={save.isPending} className="px-3 py-1 text-sm disabled:opacity-50" aria-label={`${t('admin.actions.save')} ${name(grade)}`} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
       </div>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       {on && (

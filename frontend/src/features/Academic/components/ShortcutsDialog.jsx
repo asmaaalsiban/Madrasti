@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, Check, Plus, RotateCcw, X } from 'lucide-react'
 import Modal from '../../../components/shared/Modal'
 import { GROUPS } from '../../../layouts/AdminLayout'
 import { swap } from '../../Layout/arrange'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The pages a shortcut can open: every entry of the side menu except the overview (which is always first).
 export const CATALOG = GROUPS.flatMap((g) => g.items.filter((i) => i[0] !== '/admin').map(([path, key, Icon]) => ({ path, key, Icon, group: g.key })))
@@ -72,7 +73,7 @@ export default function ShortcutsDialog({ open, onClose, paths, onChange, onRese
 
         <div className="flex items-center justify-between gap-2">
           <button type="button" disabled={!custom} className="inline-flex items-center gap-1.5 rounded border px-3 py-1.5 text-sm disabled:opacity-40" onClick={onReset}><RotateCcw size={14} aria-hidden />{t('dashboard.shortcuts.reset')}</button>
-          <button type="button" className="rounded bg-brand px-5 py-1.5 text-white" onClick={onClose}>{t('dashboard.shortcuts.done')}</button>
+          <InteractiveHoverButton type="button" className="px-5 py-1.5" onClick={onClose}>{t('dashboard.shortcuts.done')}</InteractiveHoverButton>
         </div>
       </div>
     </Modal>

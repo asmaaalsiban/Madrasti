@@ -8,6 +8,7 @@ import FormField from '../../components/shared/FormField'
 import { StateBadge } from './SchoolsPage'
 import { dayOf, formatDay, formatWhen } from './format'
 import { downloadExitFile, errorOf, fieldErrors, useExitSteps, useExtendExit, useExtendSchool, useOpenExit, useRetryExitStep, useReactivateSchool, useSchoolAudit, useSchoolByCode, useSuspendSchool, useUpdateSchool } from './useSuperAdmin'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const inputClass = 'w-full rounded border p-2'
 const Card = ({ title, children }) => <section className="space-y-3 rounded-lg border bg-white p-4"><h2 className="font-bold">{title}</h2>{children}</section>
@@ -36,7 +37,7 @@ function EditCard({ school }) {
         </FormField>
         {update.isError && !Object.keys(errors).length && <Message>{errorOf(update.error, t('superAdmin.genericError'))}</Message>}
         <Message ok>{done && t('superAdmin.saved')}</Message>
-        <button disabled={update.isPending} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('admin.actions.save')}</button>
+        <InteractiveHoverButton disabled={update.isPending} className="px-4 py-2 font-semibold disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
       </form>
     </Card>
   )
@@ -58,7 +59,7 @@ function ExtendCard({ school }) {
         <FormField label={t('superAdmin.newEndDate')}><DateInput required className={inputClass} value={date} min={dayOf(school.subscription_ends_at) || undefined} onChange={(e) => { setDone(false); setDate(e.target.value) }} /></FormField>
         {extend.isError && <Message>{errorOf(extend.error, t('superAdmin.genericError'))}</Message>}
         <Message ok>{done && t('superAdmin.extended')}</Message>
-        <button disabled={!date || extend.isPending} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.extend')}</button>
+        <InteractiveHoverButton disabled={!date || extend.isPending} className="px-4 py-2 font-semibold disabled:opacity-60">{t('superAdmin.extend')}</InteractiveHoverButton>
       </form>
     </Card>
   )
@@ -150,7 +151,7 @@ function ExitCard({ school }) {
           </FormField>
           {extend.isError && <Message>{errorOf(extend.error, t('superAdmin.genericError'))}</Message>}
           <Message ok>{done && t('superAdmin.exit.extended')}</Message>
-          <button disabled={extend.isPending} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.exit.extend')}</button>
+          <InteractiveHoverButton disabled={extend.isPending} className="px-4 py-2 font-semibold disabled:opacity-60">{t('superAdmin.exit.extend')}</InteractiveHoverButton>
         </form>
       ) : (
         <form onSubmit={submitOpen} className="space-y-3">
@@ -159,7 +160,7 @@ function ExitCard({ school }) {
             <input required type="number" min="1" max="365" dir="ltr" className={inputClass} value={openDays} onChange={(e) => setOpenDays(e.target.value)} />
           </FormField>
           {open.isError && <Message>{errorOf(open.error, t('superAdmin.genericError'))}</Message>}
-          <button disabled={open.isPending || preparing} className="rounded bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('superAdmin.exit.open')}</button>
+          <InteractiveHoverButton disabled={open.isPending || preparing} className="px-4 py-2 font-semibold disabled:opacity-60">{t('superAdmin.exit.open')}</InteractiveHoverButton>
         </form>
       )}
       <ConfirmDialog open={confirmOpen} danger busy={open.isPending} message={t('superAdmin.exit.openQuestion')} description={t('superAdmin.exit.openDescription')} confirmLabel={t('superAdmin.exit.openConfirm')} onConfirm={confirmOpenNow} onCancel={() => setConfirmOpen(false)} />

@@ -6,6 +6,7 @@ import { Timer } from 'lucide-react'
 import { api } from '../../../api/client'
 import RichText from '../components/RichText'
 import QuestionImage from '../components/QuestionImage'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
@@ -100,7 +101,7 @@ export default function QuizRunPage() {
             <p className="text-sm">{feedback.explanation ? <RichText text={feedback.explanation} /> : t('quiz.noExplanation')}</p>
             {feedback.has_explanation_image && <div className="mt-2"><QuestionImage path={`${base}/explanation`} alt={t('questionBank.imageAlt')} /></div>}
           </div>
-          <button type="button" className="rounded bg-brand px-6 py-2 text-white" onClick={() => setFeedback(null)}>{t('quiz.next')}</button>
+          <InteractiveHoverButton type="button" className="px-6 py-2" onClick={() => setFeedback(null)}>{t('quiz.next')}</InteractiveHoverButton>
         </div>
       )}
     </section>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Download } from 'lucide-react'
 import { api } from '../../api/client'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const STYLE = { pending: 'bg-amber-100 text-amber-800', done: 'bg-green-100 text-green-800', refused: 'bg-red-100 text-red-700' }
@@ -69,7 +70,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg">{t('privacy.download')}</h2>
         <p className="text-sm text-slate-600">{t('privacy.downloadHelp')}</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => get.mutate({ params: {}, name: 'my-data.json' })}><Download size={16} aria-hidden />{t('privacy.downloadMine')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-2" onClick={() => get.mutate({ params: {}, name: 'my-data.json' })}><Download size={16} aria-hidden />{t('privacy.downloadMine')}</InteractiveHoverButton>
           {children.map((c) => (
             <button key={c.id} type="button" className="inline-flex items-center gap-2 rounded border px-4 py-2 text-brand" onClick={() => get.mutate({ params: { student_id: c.id }, name: `data-${c.id}.json` })}><Download size={16} aria-hidden />{t('privacy.downloadChild', { name: nameOf(c) })}</button>
           ))}
@@ -95,7 +96,7 @@ export default function PrivacyPage() {
           )}
         </div>
         <label className="block text-sm">{t('privacy.details')}<textarea rows={3} maxLength={1000} className="mt-1 w-full rounded border p-2" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} /></label>
-        <button type="submit" disabled={ask.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50">{t('privacy.send')}</button>
+        <InteractiveHoverButton type="submit" disabled={ask.isPending} className="px-4 py-2 disabled:opacity-50">{t('privacy.send')}</InteractiveHoverButton>
       </form>
 
       <div className="space-y-2">

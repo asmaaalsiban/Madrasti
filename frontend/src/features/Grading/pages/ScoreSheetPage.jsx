@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useStudentName } from '../../Attendance/components/useStudentName'
 import ResultBadge from '../components/ResultBadge'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const round = (n) => Math.round(n * 100) / 100
 
@@ -147,9 +148,9 @@ export default function ScoreSheetPage() {
         <p className="min-w-0 flex-1 text-xs text-slate-600 md:text-sm">{t('grading.summary', { n: entered.length, total: students.length, avg: average, max: assessment.max_score })}
           {pending > 0 && ` · ${t('grading.pendingCount', { n: pending })}`}
         </p>
-        <button type="button" disabled={save.isPending} className="min-h-11 shrink-0 rounded-lg bg-brand px-6 py-2 font-semibold text-white disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={submit}>
+        <InteractiveHoverButton type="button" disabled={save.isPending} className="min-h-11 shrink-0 px-6 py-2 font-semibold disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={submit}>
           {t('admin.actions.save')}
-        </button>
+        </InteractiveHoverButton>
       </div>
     </section>
   )

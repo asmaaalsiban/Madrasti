@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import QuizHistory from '../components/QuizHistory'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -64,7 +65,7 @@ export default function QuizzesPage() {
               {timed && <label className="flex items-center gap-2">{t('quiz.minutes')}<input type="number" min="1" max="240" dir="ltr" className="w-20 rounded border p-1.5" value={minutes} onChange={(e) => setMinutes(e.target.value)} /></label>}
             </div>
             {picked.length > 0 && Number(count) > available && <p className="text-sm text-amber-700">{t('quiz.onlyAvailable', { n: available })}</p>}
-            <button type="submit" disabled={start.isPending || picked.length === 0} className="rounded bg-brand px-6 py-2 text-white disabled:opacity-50">{t('quiz.generate')}</button>
+            <InteractiveHoverButton type="submit" disabled={start.isPending || picked.length === 0} className="px-6 py-2 disabled:opacity-50">{t('quiz.generate')}</InteractiveHoverButton>
           </>
         )}
       </form>

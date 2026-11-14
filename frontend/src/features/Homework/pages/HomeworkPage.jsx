@@ -9,6 +9,7 @@ import { HomeworkPhotos } from '../components/HomeworkImage'
 import ImagePicker from '../components/ImagePicker'
 import SubmissionsDialog from '../components/SubmissionsDialog'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const EMPTY = { pair: '', title: '', description: '', due_on: '', files: [], saved: [], dropped: [] }
 
@@ -53,7 +54,7 @@ export default function HomeworkPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('homework.title')}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => { setError(''); setForm({ ...EMPTY }) }}>{t('homework.add')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => { setError(''); setForm({ ...EMPTY }) }}>{t('homework.add')}</InteractiveHoverButton>
       </div>
 
       {list.isSuccess && list.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('homework.noneSent')}</p>}
@@ -68,7 +69,7 @@ export default function HomeworkPage() {
             <HomeworkPhotos ids={h.images} />
             <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
             <div className="flex gap-2 pt-1">
-              <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setViewing(h)}>{t('homework.answers')}</button>
+              <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setViewing(h)}>{t('homework.answers')}</InteractiveHoverButton>
               <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(h)}>{t('admin.actions.edit')}</button>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(h)}>{t('admin.actions.delete')}</button>
             </div>
@@ -99,7 +100,7 @@ export default function HomeworkPage() {
             </div>
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
-              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</button>
+              <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>
         </Modal>

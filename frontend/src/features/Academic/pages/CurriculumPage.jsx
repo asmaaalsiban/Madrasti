@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import ClassTeacherGrades from '../components/ClassTeacherGrades'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const key = (grade, subject) => `${grade}-${subject}`
 
@@ -77,7 +78,7 @@ export default function CurriculumPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" disabled={dirty} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => setCopy({ from: String(data.grades[0]?.id ?? ''), to: [] })}>{t('curriculum.copyGrade')}</button>
           <button type="button" disabled={dirty} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => setConfirmPlan(true)}>{t('curriculum.standardPlan')}</button>
-          <button type="button" disabled={!dirty || save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="button" disabled={!dirty || save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </div>
       <p className="text-sm text-slate-600">{t('curriculum.help')} <Link to="/admin/subjects" className="text-brand underline">{t('curriculum.subjectsLink')}</Link></p>
@@ -156,7 +157,7 @@ export default function CurriculumPage() {
             <p className="text-xs text-slate-500">{t('curriculum.copyWarning')}</p>
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setCopy(null)}>{t('admin.actions.cancel')}</button>
-              <button type="button" disabled={copy.to.length === 0 || copyGrade.isPending} className="rounded bg-brand px-3 py-1.5 text-white disabled:opacity-50" onClick={() => copyGrade.mutate()}>{t('curriculum.copy')}</button>
+              <InteractiveHoverButton type="button" disabled={copy.to.length === 0 || copyGrade.isPending} className="px-3 py-1.5 disabled:opacity-50" onClick={() => copyGrade.mutate()}>{t('curriculum.copy')}</InteractiveHoverButton>
             </div>
           </div>
         )}

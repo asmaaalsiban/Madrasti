@@ -8,6 +8,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -100,7 +101,7 @@ function BillDialog({ bill, options, onClose }) {
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -156,7 +157,7 @@ function DetailDialog({ billId, options, currency, canManage, onClose, onEdit })
             <h3 className="text-sm font-bold">{t('expenses.addPayment')}</h3>
             <Field label={t('expenses.amount')}><input type="number" step="0.01" min="0.01" max={bill.remaining} dir="ltr" placeholder={bill.remaining} className="mt-1 w-full rounded border p-2 sm:w-1/2" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} /></Field>
             <PayFields accounts={options.accounts} methods={options.methods} value={pay} onChange={(v) => setPay({ ...pay, ...v })} t={t} />
-            <button type="submit" disabled={add.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('expenses.pay')}</button>
+            <InteractiveHoverButton type="submit" disabled={add.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('expenses.pay')}</InteractiveHoverButton>
           </form>
         )}
         <div className="flex flex-wrap justify-between gap-2">
@@ -196,7 +197,7 @@ function CategoriesDialog({ canManage, onClose }) {
           <form className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); add.mutate() }}>
             <input required aria-label={t('expenses.nameAr')} placeholder={t('expenses.nameAr')} className="rounded border p-2" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} />
             <input required aria-label={t('expenses.nameEn')} placeholder={t('expenses.nameEn')} dir="ltr" className="rounded border p-2" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
-            <button type="submit" className="rounded bg-brand px-4 py-2 text-white">{t('admin.actions.add')}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-2">{t('admin.actions.add')}</InteractiveHoverButton>
           </form>
         )}
         <div className="flex justify-end">
@@ -226,7 +227,7 @@ export default function ExpensesPage({ base }) {
         <div className="flex flex-wrap gap-2">
           <Link to={`${base}/finance/suppliers`} className="inline-flex items-center gap-2 rounded border px-4 py-1.5 text-brand"><Users size={16} aria-hidden />{t('expenses.suppliers')}</Link>
           <button type="button" className="inline-flex items-center gap-2 rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'categories' })}><Tags size={16} aria-hidden />{t('expenses.categories')}</button>
-          {data?.can_manage && <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({ type: 'bill' })}><Plus size={16} aria-hidden />{t('expenses.newBill')}</button>}
+          {data?.can_manage && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({ type: 'bill' })}><Plus size={16} aria-hidden />{t('expenses.newBill')}</InteractiveHoverButton>}
         </div>
       </div>
 

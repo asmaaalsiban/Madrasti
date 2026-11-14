@@ -8,6 +8,7 @@ import { DateInput } from '../../components/shared/DateInput'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 import Money from '../Finance/components/Money'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const COLUMNS = ['pending', 'approved', 'purchased', 'received']
@@ -41,7 +42,7 @@ function RequestDialog({ request, onClose }) {
         <label className="block text-sm sm:max-w-xs">{t('procurement.neededBy')}<DateInput className="mt-1 w-full rounded border p-2" value={form.needed_by} onChange={set('needed_by')} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('procurement.send')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('procurement.send')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -124,7 +125,7 @@ function PurchaseDialog({ request, currency, onClose }) {
             <label className="block text-sm">{t('procurement.payRef')}<input dir="ltr" className="mt-1 w-full rounded border p-2" value={pay.reference} onChange={(e) => setPay({ ...pay, reference: e.target.value })} /></label>
           </div>
         )}
-        <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button><button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('procurement.recordPurchase')}</button></div>
+        <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button><InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('procurement.recordPurchase')}</InteractiveHoverButton></div>
       </form>
     </Modal>
   )
@@ -180,7 +181,7 @@ export default function ProcurementPage() {
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1>{t('procurement.title')}</h1>
-        <button type="button" className="flex items-center gap-2 rounded bg-brand px-5 py-2 text-white" onClick={() => setDialog({ type: 'edit' })}><Plus size={18} aria-hidden />{t('procurement.newRequest')}</button>
+        <InteractiveHoverButton type="button" className="px-5 py-2" onClick={() => setDialog({ type: 'edit' })}><Plus size={18} aria-hidden />{t('procurement.newRequest')}</InteractiveHoverButton>
       </div>
       {(data.can_review || data.can_buy) && (
         <div className="grid gap-3 sm:grid-cols-3">

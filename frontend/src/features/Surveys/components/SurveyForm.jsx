@@ -6,6 +6,7 @@ import Modal from '../../../components/shared/Modal'
 import { AttachmentsField } from '../../../components/shared/Attachments'
 import { uploadAttachments } from '../../../api/attachments'
 import StaffPicker from './StaffPicker'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const CHOICE = ['single_choice', 'multiple_choice']
 const blank = (type = 'single_choice') => ({ type, text: '', options: '', is_required: true })
@@ -150,7 +151,7 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
 
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || (staffMode ? staffPicked.length === 0 : form.audience === 'classrooms' && picked.length === 0)} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('surveys.send')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || (staffMode ? staffPicked.length === 0 : form.audience === 'classrooms' && picked.length === 0)} className="px-4 py-1.5 disabled:opacity-50">{t('surveys.send')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

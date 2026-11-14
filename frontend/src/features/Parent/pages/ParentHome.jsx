@@ -7,6 +7,7 @@ import SectionTiles from '../../../components/shared/SectionTiles'
 import AddEmailForm from '../../Auth/components/AddEmailForm'
 import { useAuth } from '../../Auth/AuthProvider'
 import ChildAttendance from '../components/ChildAttendance'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const initialOf = (name) => (name ?? '?').trim().charAt(0)
 
@@ -64,7 +65,7 @@ export default function ParentHome() {
         <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-4">
           <p className="font-medium text-amber-900">{t('auth.addEmail.reminder')}</p>
           {addingEmail ? <AddEmailForm onDone={() => setAddingEmail(false)} onSkip={() => setAddingEmail(false)} /> : (
-            <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={() => setAddingEmail(true)}>{t('auth.addEmail.button')}</button>
+            <InteractiveHoverButton type="button" className="px-4 py-2" onClick={() => setAddingEmail(true)}>{t('auth.addEmail.button')}</InteractiveHoverButton>
           )}
         </div>
       )}

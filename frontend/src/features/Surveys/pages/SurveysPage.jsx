@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import SurveyForm from '../components/SurveyForm'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Admin / teacher: the polls, surveys and approvals they sent, with how many parents answered.
 export default function SurveysPage({ base }) {
@@ -19,7 +20,7 @@ export default function SurveysPage({ base }) {
         <h1 className="text-xl font-bold">{t('surveys.title')}</h1>
         <div className="flex flex-wrap gap-2">
           <Link to={`${base}/my-surveys`} className="rounded border px-3 py-2 text-sm text-brand">{t('surveys.forMe')}{pending.data > 0 && <span className="ms-1 rounded-full bg-brand px-2 text-xs text-white">{pending.data}</span>}</Link>
-          <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={() => setCreating(true)}>{t('surveys.new')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-2" onClick={() => setCreating(true)}>{t('surveys.new')}</InteractiveHoverButton>
         </div>
       </div>
       <p className="text-sm text-slate-600">{t('surveys.help')}</p>

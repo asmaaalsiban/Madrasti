@@ -6,6 +6,7 @@ import Modal from '../../components/shared/Modal'
 import { useAuth } from '../Auth/AuthProvider'
 import CheckInCard from './CheckInCard'
 import { DateInput } from '../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const STATUS_STYLE = { present: 'bg-green-100 text-green-800', late: 'bg-amber-100 text-amber-800', absent: 'bg-red-100 text-red-700', leave: 'bg-blue-100 text-blue-800' }
 
@@ -37,7 +38,7 @@ function EditDialog({ row, date, onClose }) {
         <label className="block text-sm">{t('staffAttendance.note')}<input className="mt-1 w-full rounded border p-2" value={form.note} onChange={set('note')} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

@@ -7,6 +7,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const TYPES = ['quiz', 'exam', 'assignment', 'project', 'participation']
 const inputClass = 'w-full rounded border p-2'
@@ -87,9 +88,9 @@ export default function AssessmentsPage() {
         <h1 className="text-xl font-bold">{t('grading.title')}</h1>
         {/* On a phone the two main buttons sit under the title, side by side and big enough to hit. */}
         <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-          <button type="button" className="min-h-11 rounded bg-brand px-4 py-1.5 font-semibold text-white disabled:opacity-60 sm:order-2 sm:min-h-0 sm:font-normal" disabled={params === null} onClick={() => openForm(null)}>
+          <InteractiveHoverButton type="button" className="min-h-11 px-4 py-1.5 font-semibold disabled:opacity-60 sm:order-2 sm:min-h-0 sm:font-normal" disabled={params === null} onClick={() => openForm(null)}>
             {t('grading.add')}
-          </button>
+          </InteractiveHoverButton>
           {params && (
             <Link className="flex min-h-11 items-center justify-center rounded border px-3 py-1.5 font-semibold text-brand sm:order-1 sm:min-h-0 sm:font-normal sm:text-inherit" to={`${base}/results?${new URLSearchParams({ classroom: params.classroom_id, subject: params.subject_id, term: params.term_id })}`}>
               {t('grading.results')}
@@ -223,7 +224,7 @@ export default function AssessmentsPage() {
           <FormFieldErrors errors={errors} names={['term_id', 'subject_id', 'classroom_id']} />
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-3 py-1.5 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>
       </Modal>

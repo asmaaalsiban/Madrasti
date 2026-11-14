@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -44,7 +45,7 @@ function Form({ settings }) {
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} />{t('paySettings.enabled')}</label>
       <p className="text-xs text-slate-500">{t('paySettings.callback')}: <bdi dir="ltr" className="break-all">{settings.callback_url}</bdi></p>
       <div className="flex flex-wrap gap-2">
-        <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+        <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         <button type="button" disabled={test.isPending || !settings.server_key_set} className="rounded border px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => { setMessage(null); test.mutate() }}>{test.isPending ? t('paySettings.testing') : t('paySettings.test')}</button>
       </div>
     </form>

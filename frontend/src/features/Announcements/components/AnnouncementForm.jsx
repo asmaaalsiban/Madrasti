@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const ROLES = ['teacher', 'student', 'parent', 'admin']
 
@@ -67,7 +68,7 @@ export default function AnnouncementForm({ announcement, options, onClose }) {
         </div>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('announcements.publish')}</button>
+          <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('announcements.publish')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import EditLessonDialog from '../components/EditLessonDialog'
 import GenerateTimetableDialog from '../components/GenerateTimetableDialog'
 import TimetableGrid from '../components/TimetableGrid'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The week as a grid: periods are rows, school days are columns.
 export default function TimetablePage() {
@@ -37,7 +38,7 @@ export default function TimetablePage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('timetable.title')}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setGenerate(true)}>{t('timetable.generate')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setGenerate(true)}>{t('timetable.generate')}</InteractiveHoverButton>
       </div>
 
       <div className="flex flex-wrap items-end gap-3">

@@ -7,6 +7,7 @@ import Modal from '../../../components/shared/Modal'
 import ApplyFeeDialog from '../components/ApplyFeeDialog'
 import Money from '../components/Money'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The yearly fee of each grade. The accountant adds them and gives them to the students of the grade; the admin only reads.
 export default function FeeStructuresPage() {
@@ -39,7 +40,7 @@ export default function FeeStructuresPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('finance.structures')}</h1>
-        {canManage && options.data && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => { setError(''); setForm({ grade_level_id: String(options.data.grades[0]?.id ?? ''), name: '', amount: '', installments_count: '4', first_due: '', every_months: '1', auto_apply: true }) }}>{t('finance.addStructure')}</button>}
+        {canManage && options.data && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => { setError(''); setForm({ grade_level_id: String(options.data.grades[0]?.id ?? ''), name: '', amount: '', installments_count: '4', first_due: '', every_months: '1', auto_apply: true }) }}>{t('finance.addStructure')}</InteractiveHoverButton>}
       </div>
       {error && !form && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       {list.isSuccess && list.data.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('finance.noStructures')}</p>}
@@ -52,7 +53,7 @@ export default function FeeStructuresPage() {
             </div>
             {canManage && (
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setApplying(s)}>{t('finance.giveToStudents')}</button>
+                <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setApplying(s)}>{t('finance.giveToStudents')}</InteractiveHoverButton>
                 <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => { setError(''); setForm({ id: s.id, grade_level_id: String(s.grade_level.id), name: s.name, amount: s.amount, installments_count: String(s.installments_count), first_due: s.first_due ?? '', every_months: String(s.every_months), auto_apply: s.auto_apply }) }}>{t('admin.actions.edit')}</button>
                 <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(s)}>{t('admin.actions.delete')}</button>
               </div>
@@ -77,7 +78,7 @@ export default function FeeStructuresPage() {
             <p className="text-xs text-slate-500">{t('finance.autoApplyHelp')}</p>
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
-              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</button>
+              <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>
         </Modal>

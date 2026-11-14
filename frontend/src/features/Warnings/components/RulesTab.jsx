@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const CATEGORIES = ['absence', 'late', 'behavior', 'violence', 'academic', 'uniform', 'other']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -46,7 +47,7 @@ function RuleDialog({ rule, onClose }) {
         <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={form.auto_send} onChange={(e) => setForm({ ...form, auto_send: e.target.checked })} /><span>{t('warnings.rules.autoSend')}<span className="block text-xs text-slate-500">{t('warnings.rules.autoSendHint')}</span></span></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -69,7 +70,7 @@ export default function RulesTab() {
     <div className="space-y-3">
       <p className="text-sm text-slate-600">{t('warnings.rules.intro')}</p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('warnings.rules.new')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('warnings.rules.new')}</InteractiveHoverButton>
         <button type="button" disabled={run.isPending} className="rounded border px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => run.mutate()}>{t('warnings.rules.runNow')}</button>
       </div>
       {message && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{message}</p>}

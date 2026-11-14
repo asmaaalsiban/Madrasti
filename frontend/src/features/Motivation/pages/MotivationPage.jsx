@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Teacher / admin: pick a section, tick students, give or take points, hand a badge, crown the star of the week.
 export default function MotivationPage({ base }) {
@@ -92,14 +93,14 @@ export default function MotivationPage({ base }) {
               <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newCategory.name_ar} onChange={(e) => setNewCategory({ ...newCategory, name_ar: e.target.value })} /></label>
               <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCategory.name_en} onChange={(e) => setNewCategory({ ...newCategory, name_en: e.target.value })} /></label>
               <label className="text-sm">{t('motivation.points')}<input type="number" min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={newCategory.points} onChange={(e) => setNewCategory({ ...newCategory, points: e.target.value })} /></label>
-              <button type="button" disabled={!newCategory.name_ar || !newCategory.name_en || !newCategory.points || createCategory.isPending} onClick={() => createCategory.mutate()} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-40">{t('motivation.saveCategory')}</button>
+              <InteractiveHoverButton type="button" disabled={!newCategory.name_ar || !newCategory.name_en || !newCategory.points || createCategory.isPending} onClick={() => createCategory.mutate()} className="px-4 py-2 disabled:opacity-40">{t('motivation.saveCategory')}</InteractiveHoverButton>
               <button type="button" className="rounded border px-3 py-2" onClick={() => setAddingCategory(false)}>{t('admin.actions.cancel')}</button>
             </div>
           ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAddingCategory(true)}>{t('motivation.addOwnCategory')}</button>}
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); award.mutate({ points: Number(custom.points), note: custom.note }) }}>
             <label className="text-sm">{t('motivation.points')}<input type="number" required min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={custom.points} onChange={(e) => setCustom({ ...custom, points: e.target.value })} /></label>
             <label className="text-sm">{t('motivation.note')}<input required className="mt-1 block rounded border p-2" value={custom.note} onChange={(e) => setCustom({ ...custom, note: e.target.value })} /></label>
-            <button type="submit" disabled={picked.length === 0 || award.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-40">{t('motivation.give')}</button>
+            <InteractiveHoverButton type="submit" disabled={picked.length === 0 || award.isPending} className="px-4 py-2 disabled:opacity-40">{t('motivation.give')}</InteractiveHoverButton>
           </form>
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-sm">{t('motivation.badge')}
@@ -116,7 +117,7 @@ export default function MotivationPage({ base }) {
               <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newBadge.name_ar} onChange={(e) => setNewBadge({ ...newBadge, name_ar: e.target.value })} /></label>
               <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newBadge.name_en} onChange={(e) => setNewBadge({ ...newBadge, name_en: e.target.value })} /></label>
               <label className="text-sm">{t('motivation.icon')}<input className="mt-1 block w-20 rounded border p-2" value={newBadge.icon} onChange={(e) => setNewBadge({ ...newBadge, icon: e.target.value })} /></label>
-              <button type="button" disabled={!newBadge.name_ar || !newBadge.name_en || !newBadge.icon || createBadge.isPending} onClick={() => createBadge.mutate()} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-40">{t('motivation.saveBadge')}</button>
+              <InteractiveHoverButton type="button" disabled={!newBadge.name_ar || !newBadge.name_en || !newBadge.icon || createBadge.isPending} onClick={() => createBadge.mutate()} className="px-4 py-2 disabled:opacity-40">{t('motivation.saveBadge')}</InteractiveHoverButton>
             </div>
           )}
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}

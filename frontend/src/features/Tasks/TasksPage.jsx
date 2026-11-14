@@ -9,6 +9,7 @@ import Modal from '../../components/shared/Modal'
 import { useAuth } from '../Auth/AuthProvider'
 import { uploadAttachments } from '../../api/attachments'
 import { AttachmentList, AttachmentsField, LiveAttachments } from '../../components/shared/Attachments'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const STATUSES = ['todo', 'doing', 'done']
@@ -124,7 +125,7 @@ function TaskDialog({ task, onClose }) {
         </fieldset>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || form.user_ids.length === 0} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || form.user_ids.length === 0} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -193,7 +194,7 @@ export default function TasksPage() {
             {t(`tasks.tabs.${k}`)}{k === 'mine' && mine.data?.open > 0 ? ` (${mine.data.open})` : ''}
           </button>
         ))}
-        {canGive && <button type="button" className="ms-auto inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('tasks.new')}</button>}
+        {canGive && <InteractiveHoverButton type="button" className="ms-auto px-4 py-2" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('tasks.new')}</InteractiveHoverButton>}
       </div>
 
       {tab === 'mine' && (

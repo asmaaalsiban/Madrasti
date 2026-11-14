@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import ImagePicker from './ImagePicker'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The student's answer to a homework: a text and/or a photo of the notebook. Sending again replaces the answer.
 export default function AnswerDialog({ homework, onClose }) {
@@ -41,7 +42,7 @@ export default function AnswerDialog({ homework, onClose }) {
           {mine ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => remove.mutate()}>{t('homework.withdraw')}</button> : <span />}
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={send.isPending}>{t('homework.send')}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={send.isPending}>{t('homework.send')}</InteractiveHoverButton>
           </span>
         </div>
       </form>

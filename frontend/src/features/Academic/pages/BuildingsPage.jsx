@@ -6,6 +6,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
 import { useResource } from '../hooks/useResource'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const inputClass = 'w-full rounded border p-2'
 const GENDERS = ['male', 'female', 'mixed']
@@ -79,7 +80,7 @@ export default function BuildingsPage() {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t('buildings.title')}</h1>
-        <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => openBuilding(null)}>{t('buildings.addBuilding')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => openBuilding(null)}>{t('buildings.addBuilding')}</InteractiveHoverButton>
       </div>
       {notice && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{notice}</p>}
       {isSuccess && buildings.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('buildings.empty')}</p>}
@@ -168,7 +169,7 @@ export default function BuildingsPage() {
           )}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-3 py-1.5 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>
       </Modal>

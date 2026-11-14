@@ -6,6 +6,7 @@ import Modal from '../../../components/shared/Modal'
 import { AttachmentsField } from '../../../components/shared/Attachments'
 import { uploadAttachments } from '../../../api/attachments'
 import Money from './Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const firstError = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -91,7 +92,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           <p className="text-xs text-slate-500">{t('finance.receiptInName')}</p>
           <div className="flex justify-end gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={start.isPending}>{t('finance.continueToPay')}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={start.isPending}>{t('finance.continueToPay')}</InteractiveHoverButton>
           </div>
         </form>
       )}
@@ -113,7 +114,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           <AttachmentsField files={proof.files} onChange={(files) => setProof({ ...proof, files })} label={t('finance.transfer.proof')} />
           <div className="flex justify-end gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => setStep('details')}>{t('finance.transfer.back')}</button>
-            <button type="submit" disabled={sendTransfer.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('finance.transfer.submit')}</button>
+            <InteractiveHoverButton type="submit" disabled={sendTransfer.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('finance.transfer.submit')}</InteractiveHoverButton>
           </div>
         </form>
       )}
@@ -121,7 +122,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
       {step === 'transferDone' && (
         <div className="space-y-3">
           <p role="status" className="rounded bg-green-50 p-3 text-green-800">{t('finance.transfer.sent')}</p>
-          <div className="flex justify-end"><button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={onClose}>{t('finance.close')}</button></div>
+          <div className="flex justify-end"><InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={onClose}>{t('finance.close')}</InteractiveHoverButton></div>
         </div>
       )}
 
@@ -137,7 +138,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={pay.isPending}>{t('finance.card.pay', { amount: form.amount, currency })}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={pay.isPending}>{t('finance.card.pay', { amount: form.amount, currency })}</InteractiveHoverButton>
           </div>
         </form>
       )}
@@ -149,7 +150,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           {result.status === 'review' && <p role="alert" className="rounded bg-amber-50 p-3 text-amber-800">{t('finance.online.review')}</p>}
           <div className="flex justify-end gap-2">
             {result.status === 'failed' && <button type="button" className="rounded border px-3 py-1.5" onClick={() => { setResult(null); setStep('details') }}>{t('finance.online.tryAgain')}</button>}
-            <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={onClose}>{t('finance.close')}</button>
+            <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={onClose}>{t('finance.close')}</InteractiveHoverButton>
           </div>
         </div>
       )}

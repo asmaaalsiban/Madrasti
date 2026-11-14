@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -57,7 +58,7 @@ export default function DailySummaryPage() {
         </label>
         {existing && <p className="text-xs text-slate-500">{t('dailySummary.replaces')}</p>}
         <div className="flex items-center gap-3">
-          <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={!active || save.isPending}>{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={!active || save.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
           {saved && <span role="status" className="text-sm text-green-700">{t('dailySummary.saved')}</span>}
         </div>
       </form>

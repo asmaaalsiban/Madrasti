@@ -5,6 +5,7 @@ import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const DAYS = [0, 1, 2, 3, 4, 5, 6] // Sunday first
@@ -47,7 +48,7 @@ function PostDialog({ post, onClose }) {
           {post ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button> : <span />}
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
       </form>
@@ -98,7 +99,7 @@ function DutyDialog({ duty, posts, onClose }) {
           {duty ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('admin.actions.delete')}</button> : <span />}
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
       </form>
@@ -145,7 +146,7 @@ function WhoForm({ teachers, onSaved, t }) {
         ))}
       </ul>
       <div className="flex items-center gap-3">
-        <button type="button" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+        <InteractiveHoverButton type="button" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         {saved && <span role="status" className="text-sm text-green-800">{t('duties.whoSaved')}</span>}
       </div>
     </div>
@@ -180,7 +181,7 @@ export default function DutiesAdminPage() {
       <WhoDoesDuty />
 
       <div className="space-y-3 rounded-lg border bg-snow p-5">
-        <div className="flex items-center justify-between gap-2"><h2 className="text-lg">{t('duties.posts')}</h2><button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({ type: 'post' })}>{t('duties.newPost')}</button></div>
+        <div className="flex items-center justify-between gap-2"><h2 className="text-lg">{t('duties.posts')}</h2><InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({ type: 'post' })}>{t('duties.newPost')}</InteractiveHoverButton></div>
         {list.length === 0 ? <p className="text-sm text-slate-500">{t('duties.noPosts')}</p> : (
           <ul className="grid gap-2 sm:grid-cols-2">
             {list.map((p) => (
@@ -228,7 +229,7 @@ export default function DutiesAdminPage() {
         )}
         <div className="flex flex-wrap gap-2">
           <button type="submit" disabled={run.isPending || !range.from || !range.to} className="rounded border px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('duties.preview')}</button>
-          <button type="button" disabled={run.isPending || !range.from || !range.to} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-50" onClick={() => run.mutate(false)}>{t('duties.publish')}</button>
+          <InteractiveHoverButton type="button" disabled={run.isPending || !range.from || !range.to} className="px-5 py-2 disabled:opacity-50" onClick={() => run.mutate(false)}>{t('duties.publish')}</InteractiveHoverButton>
         </div>
       </form>
 

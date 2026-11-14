@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { DateInput } from '../../../components/shared/DateInput'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const CATEGORIES = ['absence', 'late', 'behavior', 'violence', 'academic', 'uniform', 'other']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -62,7 +63,7 @@ export default function NewWarningDialog({ canWarnStaff, initialSubject = 'stude
         {!canWarnStaff && <p className="text-xs text-slate-500">{t('warnings.proposalNote')}</p>}
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={!pick || save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{canWarnStaff ? t('warnings.issue') : t('warnings.propose')}</button>
+          <InteractiveHoverButton type="submit" disabled={!pick || save.isPending} className="px-5 py-1.5 disabled:opacity-50">{canWarnStaff ? t('warnings.issue') : t('warnings.propose')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

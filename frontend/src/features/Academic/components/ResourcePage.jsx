@@ -8,6 +8,7 @@ import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
 import { uploadAttachments } from '../../../api/attachments'
 import { useResource } from '../hooks/useResource'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const inputClass = 'w-full rounded border p-2'
 
@@ -130,9 +131,9 @@ export default function ResourcePage({ path, title, columns, formColumns = 2, fi
         <h1 className="text-xl font-bold">{t(title)}</h1>
         <div className="flex flex-wrap items-center gap-2">
           {actions}
-          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => openForm(null)}>
+          <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => openForm(null)}>
             {t('admin.actions.add')}
-          </button>
+          </InteractiveHoverButton>
         </div>
       </div>
       {notice && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{notice}</p>}
@@ -183,7 +184,7 @@ export default function ResourcePage({ path, title, columns, formColumns = 2, fi
           </div>
           <div className="sticky bottom-0 -mx-1 flex justify-end gap-2 bg-white px-1 pt-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-3 py-1.5 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>
       </Modal>

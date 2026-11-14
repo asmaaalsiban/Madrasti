@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A group for a section: its students and teachers, optionally the parents; optionally only the teachers can write.
 export default function NewGroupDialog({ onClose, onOpened }) {
@@ -33,7 +34,7 @@ export default function NewGroupDialog({ onClose, onOpened }) {
         <p className="text-xs text-slate-500">{t('chat.groupHelp')}</p>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={create.isPending || !classroomId}>{t('chat.createGroup')}</button>
+          <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={create.isPending || !classroomId}>{t('chat.createGroup')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

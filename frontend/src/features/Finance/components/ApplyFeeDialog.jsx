@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Gives a structure's fee to every student of its grade, split into equal installments.
 export default function ApplyFeeDialog({ structure, onClose }) {
@@ -37,7 +38,7 @@ export default function ApplyFeeDialog({ structure, onClose }) {
           <label className="block text-sm">{t('finance.fields.discountAll')}<input type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.discount} onChange={set('discount')} /></label>
           <div className="flex justify-end gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={apply.isPending}>{t('finance.apply')}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={apply.isPending}>{t('finance.apply')}</InteractiveHoverButton>
           </div>
         </form>
       )}

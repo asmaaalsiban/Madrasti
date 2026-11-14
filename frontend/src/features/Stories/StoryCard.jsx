@@ -7,6 +7,7 @@ import { api } from '../../api/client'
 import AuthImage from '../../components/shared/AuthImage'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const ago = (iso, language) => {
   const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000)
@@ -42,7 +43,7 @@ function Comments({ story }) {
       {story.comments_enabled ? (
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (text.trim()) add.mutate() }}>
           <input aria-label={t('stories.writeComment')} maxLength={500} className="min-w-0 flex-1 rounded border p-2 text-sm" placeholder={t('stories.writeComment')} value={text} onChange={(e) => setText(e.target.value)} />
-          <button type="submit" disabled={add.isPending || !text.trim()} className="rounded bg-brand px-4 py-1.5 text-sm text-white disabled:opacity-50">{t('stories.send')}</button>
+          <InteractiveHoverButton type="submit" disabled={add.isPending || !text.trim()} className="px-4 py-1.5 text-sm disabled:opacity-50">{t('stories.send')}</InteractiveHoverButton>
         </form>
       ) : <p className="text-xs text-slate-500">{t('stories.commentsClosed')}</p>}
       {error && <p role="alert" className="text-xs text-red-700">{error}</p>}

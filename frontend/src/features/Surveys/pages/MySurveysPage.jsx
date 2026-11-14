@@ -3,6 +3,7 @@ import { AttachmentList } from '../../../components/shared/Attachments'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const STATE_STYLE = { pending: 'bg-amber-100 text-amber-800', answered: 'bg-green-100 text-green-800', approved: 'bg-green-100 text-green-800', declined: 'bg-red-100 text-red-700' }
 
@@ -71,7 +72,7 @@ function SurveyCard({ s }) {
           <button type="button" disabled={send.isPending} className="rounded border border-red-300 px-4 py-2 text-red-700 disabled:opacity-50" onClick={() => submit('declined')}>{t('surveys.decline')}</button>
         </div>
       )}
-      {canAnswer && s.type !== 'approval' && <button type="button" disabled={send.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50" onClick={() => submit(null)}>{t('surveys.submit')}</button>}
+      {canAnswer && s.type !== 'approval' && <InteractiveHoverButton type="button" disabled={send.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => submit(null)}>{t('surveys.submit')}</InteractiveHoverButton>}
       {s.open && !editing && <button type="button" className="text-sm text-brand underline" onClick={() => setEditing(true)}>{t('surveys.change')}</button>}
     </li>
   )

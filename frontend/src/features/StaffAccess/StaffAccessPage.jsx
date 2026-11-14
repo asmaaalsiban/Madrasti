@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import Modal from '../../components/shared/Modal'
 import { GROUPS } from './staffFeatures'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 function AccessDialog({ people, onClose }) {
   const { t } = useTranslation()
@@ -43,7 +44,7 @@ function AccessDialog({ people, onClose }) {
           </span>
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
       </form>
@@ -75,7 +76,7 @@ export default function StaffAccessPage() {
           <option value="">{t('tasks.allJobs')}</option>
           {types.map((k) => <option key={k} value={k}>{t(`staff.types.${k}`)}</option>)}
         </select>
-        <button type="button" disabled={picked.length === 0} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => setDialog(all.filter((p) => picked.includes(p.id)))}>{t('staffAccess.editSelected', { count: picked.length })}</button>
+        <InteractiveHoverButton type="button" disabled={picked.length === 0} className="px-4 py-1.5 disabled:opacity-50" onClick={() => setDialog(all.filter((p) => picked.includes(p.id)))}>{t('staffAccess.editSelected', { count: picked.length })}</InteractiveHoverButton>
       </div>
       <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-start text-sm">
