@@ -8,18 +8,15 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 /**
  * A person's picture. `users.avatar_path` holds one of two things: `preset:a07` (a ready-made character, drawn by the frontend from
- * /avatars/a07.svg) or the path of an uploaded photo on the private disk. Nothing in it means "initials". A photo is cut to a square and
- * scaled to 256 px on the server, so what is stored is small and has no camera data.
+ * /avatars/a07.svg) or the path of an uploaded photo on the private disk. Nothing in it means "initials". The photo is cut to a square and scaled by the
+ * browser (PhotoCropper), so what is stored is a small JPEG without camera data.
  */
 final class Avatar
 {
     public const PRESET_PATTERN = '/^a(0[1-9]|1[0-9]|2[0-4])$/'; // a01 ... a24
-
-    public const SIZE = 256;
 
     /** What the app needs to draw it: null, or ['type' => 'preset', 'key'] or ['type' => 'photo', 'url', 'v'] (v changes with the picture). */
     public static function for(User $user): ?array
@@ -41,26 +38,11 @@ final class Avatar
         $user->update(['avatar_path' => "preset:$key"]);
     }
 
+    /** Stores the picture as it is: the browser has already cut it to a square JPEG (the controller checked that), so nothing here needs GD. */
     public function setPhoto(User $user, UploadedFile $file): void
     {
-        $source = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
-        if ($source === false) {
-            throw new RuntimeException('Not a picture.');
-        }
-        $w = imagesx($source);
-        $h = imagesy($source);
-        $side = min($w, $h);
-
-        // The middle square, scaled to SIZE, on white (a transparent PNG would turn black as a JPEG).
-        $canvas = imagecreatetruecolor(self::SIZE, self::SIZE);
-        imagefill($canvas, 0, 0, (int) imagecolorallocate($canvas, 255, 255, 255));
-        imagecopyresampled($canvas, $source, 0, 0, intdiv($w - $side, 2), intdiv($h - $side, 2), self::SIZE, self::SIZE, $side, $side);
-        ob_start();
-        imagejpeg($canvas, null, 86);
-        $bytes = (string) ob_get_clean();
-
         $path = 'avatars/'.$user->id.'-'.Str::random(12).'.jpg';
-        Storage::put($path, $bytes);
+        Storage::put($path, (string) file_get_contents($file->getRealPath()));
         $this->deletePhoto($user);
         $user->update(['avatar_path' => $path]);
     }

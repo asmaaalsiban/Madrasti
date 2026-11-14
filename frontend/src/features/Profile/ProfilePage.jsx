@@ -27,6 +27,11 @@ export default function ProfilePage() {
   const choose = useMutation({ mutationFn: (key) => api.put('/profile/avatar/preset', { key }), ...done })
   const remove = useMutation({ mutationFn: () => api.delete('/profile/avatar'), ...done })
   const busy = upload.isPending || choose.isPending || remove.isPending
+  const removeBtn = user.avatar && (
+    <button type="button" disabled={busy} className="inline-flex items-center gap-2 rounded-full border border-red-200 px-4 py-2 font-semibold text-red-700 disabled:opacity-60" onClick={() => remove.mutate()}>
+      <Trash2 aria-hidden size={16} />{t('profile.remove')}
+    </button>
+  )
   const current = user.avatar?.type === 'preset' ? user.avatar.key : null
 
   return (
@@ -51,9 +56,12 @@ export default function ProfilePage() {
           <>
             <p className="text-sm text-slate-600">{t('profile.photoHelp')}</p>
             <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('profile.choosePhoto')} onChange={(e) => { const photo = e.target.files?.[0]; if (photo) setPicked(photo); e.target.value = '' }} />
-            <button type="button" disabled={busy} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 font-semibold text-brand disabled:opacity-60" onClick={() => file.current?.click()}>
-              <Camera aria-hidden size={18} />{t('profile.choosePhoto')}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" disabled={busy} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 font-semibold text-brand disabled:opacity-60" onClick={() => file.current?.click()}>
+                <Camera aria-hidden size={18} />{t('profile.choosePhoto')}
+              </button>
+              {removeBtn}
+            </div>
           </>
         )}
       </div>
@@ -70,11 +78,7 @@ export default function ProfilePage() {
             </li>
           ))}
         </ul>
-        {user.avatar && (
-          <button type="button" disabled={busy} className="inline-flex items-center gap-2 text-sm font-semibold text-red-700 disabled:opacity-60" onClick={() => remove.mutate()}>
-            <Trash2 aria-hidden size={16} />{t('profile.remove')}
-          </button>
-        )}
+        {isStudent && removeBtn}
       </div>
       <PhotoCropper file={picked} busy={upload.isPending} onSave={(photo) => upload.mutate(photo)} onCancel={() => setPicked(null)} />
     </section>

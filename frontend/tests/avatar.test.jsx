@@ -123,10 +123,17 @@ describe('ProfilePage', () => {
   it('removes the picture only when there is one', async () => {
     api.delete.mockResolvedValue({ data: { data: { ...teacher, avatar: null } } })
     const { unmount } = showAs(teacher)
-    expect(screen.queryByRole('button', { name: /Remove my picture/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Delete my picture/ })).not.toBeInTheDocument()
     unmount()
     showAs({ ...teacher, avatar: { type: 'preset', key: 'a03' } })
-    fireEvent.click(screen.getByRole('button', { name: /Remove my picture/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Delete my picture/ }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/profile/avatar'))
+  })
+
+  it('lets a student delete the character they chose', async () => {
+    api.delete.mockResolvedValue({ data: { data: { id: 2, name: 'Layla', role: 'student', avatar: null } } })
+    showAs({ id: 2, name: 'Layla', role: 'student', avatar: { type: 'preset', key: 'a03' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Delete my picture' }))
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/profile/avatar'))
   })
 
