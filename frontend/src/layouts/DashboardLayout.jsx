@@ -36,7 +36,7 @@ export default function DashboardLayout() {
           <UserMenu detail={[label, detail].filter(Boolean).join(' · ')} />
         </div>
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-5xl p-4 outline-none">
+      <main id="main" tabIndex={-1} className="p-4 outline-none lg:px-8">
         <BackButton />
         {isHidden(user, pathname) ? <p role="status" className="rounded-lg border bg-snow p-6 text-center text-slate-600">{t('staffAccess.notAvailable')}</p> : <Suspense fallback={<PageFallback />}><Outlet /></Suspense>}
       </main>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
@@ -90,7 +91,7 @@ export default function YearEndPage({ base }) {
                   <tr key={s.student_id} className="border-t">
                     <td className="p-2"><input type="checkbox" aria-label={t('yearEnd.includeFor', { name: nameOf(s) })} checked={!skipped.has(s.student_id)} onChange={() => toggle(s.student_id)} disabled={!data.can_manage} /></td>
                     <td className="p-2" dir="ltr">{s.student_number}</td>
-                    <td className="p-2 font-medium"><Link className="text-brand underline" to={`${base}/finance/students/${s.student_id}`}><bdi>{nameOf(s)}</bdi></Link></td>
+                    <td className="p-2 font-medium"><Link className="inline-flex items-center gap-1 text-brand" to={`${base}/finance/students/${s.student_id}`}><bdi>{nameOf(s)}</bdi><ArrowUpRight size={14} aria-hidden /></Link></td>
                     <td className="p-2"><Money value={s.remaining} currency={c} /></td>
                     <td className={`p-2 ${Number(s.overdue) > 0 ? 'text-red-700' : ''}`}><Money value={s.overdue} currency={c} /></td>
                   </tr>

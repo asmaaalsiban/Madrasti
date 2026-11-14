@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ChatImage from './ChatImage'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Trash2 } from 'lucide-react'
 
 const time = (iso) => iso.slice(11, 16)
 
@@ -64,7 +66,7 @@ export default function Thread({ conversation, onBack }) {
               {m.body && <p className="whitespace-pre-line break-words">{m.body}</p>}
               <p className={`mt-1 flex items-center gap-2 text-xs ${m.mine ? 'text-white/80' : 'text-slate-400'}`} dir="ltr">
                 <span>{time(m.created_at)}</span>{ticks(m)}
-                {m.mine && <button type="button" className="underline" onClick={() => remove.mutate(m.id)}>{t('admin.actions.delete')}</button>}
+                {m.mine && <IconActionButton icon={Trash2} tone="slate" label={t('admin.actions.delete')} type="button" onClick={() => remove.mutate(m.id)} />}
               </p>
             </div>
           </li>
@@ -74,7 +76,7 @@ export default function Thread({ conversation, onBack }) {
       {conversation.can_post ? (
         <form className="space-y-2 border-t p-3" onSubmit={(e) => { e.preventDefault(); if (text.trim() || photo) send.mutate() }}>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          {photo && <p className="text-xs text-slate-600">📷 {photo.name} <button type="button" className="text-red-700 underline" onClick={() => setPhoto(null)}>{t('homework.removeImage')}</button></p>}
+          {photo && <p className="text-xs text-slate-600">📷 {photo.name} <IconActionButton icon={Trash2} tone="red" label={t('homework.removeImage')} type="button" onClick={() => setPhoto(null)} /></p>}
           <div className="flex items-end gap-2">
             <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('chat.photo')} onChange={(e) => { setPhoto(e.target.files[0] ?? null); e.target.value = '' }} />
             <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" aria-label={t('chat.addPhoto')} title={t('chat.addPhoto')} onClick={() => input.current.click()}>📷</InteractiveHoverButton>

@@ -37,7 +37,7 @@ export default function ExtraSubjects({ value, onChange }) {
           </div>
         </div>
       ))}
-      <button type="button" className="inline-flex items-center gap-1 text-sm text-brand underline" onClick={() => onChange([...value, { subject_id: '', grade_ids: [] }])}><Plus size={14} aria-hidden />{t('staff.extra.add')}</button>
+      <button type="button" className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm text-brand" onClick={() => onChange([...value, { subject_id: '', grade_ids: [] }])}><Plus size={14} aria-hidden />{t('staff.extra.add')}</button>
       <p className="text-xs text-slate-500">{t('staff.extra.hint')}</p>
     </fieldset>
   )

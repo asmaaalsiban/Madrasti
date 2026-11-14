@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Plus, Ban } from 'lucide-react'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import NewWarningDialog from '../components/NewWarningDialog'
 import WarningCard from '../components/WarningCard'
 import RulesTab from '../components/RulesTab'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 // The admin's record of warnings: students and staff, what waits for approval, writing a new one, withdrawing one.
 export default function WarningsPage() {
@@ -48,7 +49,7 @@ export default function WarningsPage() {
               {canManage && (
                 <div className="flex gap-3 pt-1 text-sm">
                   {w.status === 'pending' && <button type="button" disabled={approve.isPending} className="rounded bg-green-700 px-3 py-1 text-white" onClick={() => approve.mutate(w.id)}>{t('warnings.approve')}</button>}
-                  {w.status !== 'withdrawn' && <button type="button" className="text-red-700 underline" onClick={() => setWithdrawing(w)}>{t('warnings.withdraw')}</button>}
+                  {w.status !== 'withdrawn' && <IconActionButton icon={Ban} tone="red" label={t('warnings.withdraw')} type="button" onClick={() => setWithdrawing(w)} />}
                 </div>
               )}
             </WarningCard>

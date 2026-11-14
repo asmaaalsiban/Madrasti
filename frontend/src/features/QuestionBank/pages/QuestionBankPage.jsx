@@ -8,6 +8,7 @@ import Modal from '../../../components/shared/Modal'
 import RichText from '../components/RichText'
 import QuestionImage from '../components/QuestionImage'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const blankOption = (correct = false) => ({ body: '', is_correct: correct })
@@ -20,7 +21,7 @@ function ImageField({ slot, question, files, setFiles, removed, setRemoved }) {
     <div className="space-y-1 text-sm">
       <p className="font-bold">{t(slot === 'question' ? 'questionBank.questionImage' : 'questionBank.explanationImage')} <span className="font-normal text-slate-500">({t('questionBank.optional')})</span></p>
       {has && !removed[slot] && !files[slot] && (
-        <div className="flex items-end gap-3"><QuestionImage path={`/question-bank/questions/${question.id}/image/${slot}`} alt={t('questionBank.imageAlt')} /><button type="button" className="text-red-700 underline" onClick={() => setRemoved({ ...removed, [slot]: true })}>{t('questionBank.removeImage')}</button></div>
+        <div className="flex items-end gap-3"><QuestionImage path={`/question-bank/questions/${question.id}/image/${slot}`} alt={t('questionBank.imageAlt')} /><IconActionButton icon={Trash2} tone="red" label={t('questionBank.removeImage')} type="button" onClick={() => setRemoved({ ...removed, [slot]: true })} /></div>
       )}
       <input type="file" accept="image/png,image/jpeg,image/webp" aria-label={t(slot === 'question' ? 'questionBank.questionImage' : 'questionBank.explanationImage')} onChange={(e) => setFiles({ ...files, [slot]: e.target.files?.[0] ?? null })} />
     </div>
@@ -72,7 +73,7 @@ function QuestionDialog({ lessonId, question, onClose }) {
               {options.length > 2 && !question && <button type="button" aria-label={t('admin.actions.delete')} className="text-red-700" onClick={() => setOptions(options.filter((_, j) => j !== i))}><Trash2 size={16} aria-hidden /></button>}
             </div>
           ))}
-          {options.length < 6 && !question && <button type="button" className="text-sm text-brand underline" onClick={() => setOptions([...options, blankOption()])}>{t('questionBank.addOption')}</button>}
+          {options.length < 6 && !question && <IconActionButton icon={Plus} tone="brand" label={t('questionBank.addOption')} type="button" onClick={() => setOptions([...options, blankOption()])} />}
         </fieldset>
         <label className="block text-sm">{t('questionBank.explanation')}<textarea rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={explanation} onChange={(e) => setExplanation(e.target.value)} /><span className="text-xs text-slate-500">{t('questionBank.explanationHint')}</span></label>
         <ImageField slot="explanation" question={question} files={files} setFiles={setFiles} removed={removed} setRemoved={setRemoved} />

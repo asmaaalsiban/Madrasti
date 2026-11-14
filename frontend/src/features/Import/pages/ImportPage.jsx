@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 // In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
 const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians', 'marks', 'fees', 'attendance', 'contracts']
@@ -75,7 +77,7 @@ export default function ImportPage() {
         ))}
       </div>
 
-      <p className="text-sm"><Link to="/admin/student-files" className="text-brand underline">{t('import.studentFilesLink')}</Link></p>
+      <p className="text-sm"><IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('import.studentFilesLink')} to="/admin/student-files" /></p>
 
       {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 

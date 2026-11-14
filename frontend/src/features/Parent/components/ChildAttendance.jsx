@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import StatusDates from '../../Attendance/components/StatusDates'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { ChevronDown } from 'lucide-react'
 
 // Present / late / absent totals of the school year for one child, with the dates on demand.
 export default function ChildAttendance({ studentId }) {
@@ -24,9 +26,7 @@ export default function ChildAttendance({ studentId }) {
       <span className="sr-only">{t('attendance.childSummary', { absent, late })}</span>
       {missed.length > 0 && (
         <>
-          <button type="button" className="text-brand underline" aria-expanded={open} onClick={() => setOpen(!open)}>
-            {t(open ? 'attendance.hideDates' : 'attendance.showDates')}
-          </button>
+          <IconActionButton icon={ChevronDown} tone="brand" label={t(open ? 'attendance.hideDates' : 'attendance.showDates')} type="button" aria-expanded={open} onClick={() => setOpen(!open)} />
           {open && <StatusDates records={missed} />}
         </>
       )}

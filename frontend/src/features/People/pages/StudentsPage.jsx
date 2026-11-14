@@ -1,4 +1,4 @@
-import { KeyRound, UserRoundCog } from 'lucide-react'
+import { KeyRound, UserRoundCog, FileText, Wallet } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { AttachmentsField } from '../../../components/shared/Attachments'
 import ResourcePage from '../../Academic/components/ResourcePage'
 import { useResource } from '../../Academic/hooks/useResource'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 // A heading that explains the fee fields below it.
 // The title of the file field: what a student's file is for.
@@ -72,7 +73,7 @@ const fields = [
 
 function ReportCardLink({ id }) {
   const { t } = useTranslation()
-  return <Link to={`/admin/report-card/${id}`} className="text-brand underline">{t('reportCard.open')}</Link>
+  return <IconActionButton as={Link} icon={FileText} tone="brand" label={t('reportCard.open')} to={`/admin/report-card/${id}`} />
 }
 
 const baseColumns = [
@@ -110,7 +111,7 @@ export default function StudentsPage() {
   // What each student still owes this year, a link to their account (fees, installments, payments).
   const columns = [...baseColumns, {
     key: 'balance', label: 'people.fields.remaining',
-    render: (r) => (r.balance ? <Link className={`underline ${Number(r.balance.overdue) > 0 ? 'font-bold text-red-700' : 'text-brand'}`} dir="ltr" to={`/admin/finance/students/${r.id}`}>{`${r.balance.remaining} ${settings.data?.currency ?? ''}`}</Link> : '—'),
+    render: (r) => (r.balance ? <Link className={`inline-flex items-center gap-1 ${Number(r.balance.overdue) > 0 ? 'font-bold text-red-700' : 'text-brand'}`} dir="ltr" to={`/admin/finance/students/${r.id}`}>{`${r.balance.remaining} ${settings.data?.currency ?? ''}`}<Wallet size={14} aria-hidden /></Link> : '—'),
   }]
   const [classroom, setClassroom] = useState('')
   const classrooms = useResource('classrooms').useList({ per_page: 100 })

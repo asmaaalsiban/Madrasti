@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
+import { IconActionButton } from '../../components/ui/icon-action-button'
+import { FileText } from 'lucide-react'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -17,7 +19,7 @@ export default function BoardingReportPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('transport.report.title')}</h1>
-        <Link to="/admin/transport" className="text-sm text-brand underline">{t('transport.report.back')}</Link>
+        <IconActionButton as={Link} icon={FileText} tone="brand" label={t('transport.report.back')} to="/admin/transport" />
       </div>
       <label className="block text-sm">{t('transport.report.date')}<DateInput className="mt-1 block rounded border p-1.5" value={date} onChange={(e) => setDate(e.target.value)} /></label>
       {!data ? <p className="text-slate-500">{t('common.loading')}</p> : data.rows.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('transport.report.none')}</p> : (

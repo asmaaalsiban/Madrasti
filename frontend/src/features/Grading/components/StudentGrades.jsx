@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { today } from '../../../lib/dates'
 import ResultBadge from './ResultBadge'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { ChevronDown } from 'lucide-react'
 
 const KIND = { pass: 'pass', fail: 'fail', makeup: 'pending', retake: 'pending', none: 'none' }
 const STATUS_LABEL = { absent: 'studentGrades.statusAbsent', makeup: 'studentGrades.statusMakeup', retake: 'studentGrades.statusRetake' }
@@ -55,9 +57,7 @@ export default function StudentGrades({ studentId }) {
               {s.percent !== null && <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${s.result === 'fail' ? 'bg-red-500' : s.result === 'pass' ? 'bg-brand' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, Math.max(0, s.percent))}%` }} /></div>}
               <ResultBadge kind={KIND[s.result]} label={t(`studentGrades.result.${s.result}`)} />
               <div>
-                <button type="button" className="text-sm text-brand underline" aria-expanded={Boolean(open[key])} onClick={() => setOpen({ ...open, [key]: !open[key] })}>
-                  {t(open[key] ? 'studentGrades.hideDetails' : 'studentGrades.showDetails')}
-                </button>
+                <IconActionButton icon={ChevronDown} tone="brand" label={t(open[key] ? 'studentGrades.hideDetails' : 'studentGrades.showDetails')} type="button" aria-expanded={Boolean(open[key])} onClick={() => setOpen({ ...open, [key]: !open[key] })} />
               </div>
               {open[key] && (
                 <ul className="divide-y text-sm">

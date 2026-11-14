@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Pencil } from 'lucide-react'
 
 const STATE_STYLE = { pending: 'bg-amber-100 text-amber-800', answered: 'bg-green-100 text-green-800', approved: 'bg-green-100 text-green-800', declined: 'bg-red-100 text-red-700' }
 
@@ -73,7 +75,7 @@ function SurveyCard({ s }) {
         </div>
       )}
       {canAnswer && s.type !== 'approval' && <InteractiveHoverButton type="button" disabled={send.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => submit(null)}>{t('surveys.submit')}</InteractiveHoverButton>}
-      {s.open && !editing && <button type="button" className="text-sm text-brand underline" onClick={() => setEditing(true)}>{t('surveys.change')}</button>}
+      {s.open && !editing && <IconActionButton icon={Pencil} tone="brand" label={t('surveys.change')} type="button" onClick={() => setEditing(true)} />}
     </li>
   )
 }

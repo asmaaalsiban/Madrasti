@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Trash2 } from 'lucide-react'
 
 const TABS = ['weeks', 'months', 'terms']
 
@@ -92,7 +94,7 @@ export default function StudentBehavior({ studentId, canEdit = false }) {
               <li key={n.id} className={`rounded border p-3 text-sm ${n.type === 'positive' ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
                 <p><span className="font-medium">{t(`behavior.type.${n.type}`)}:</span> {n.note}</p>
                 <p className="text-xs text-slate-500">{n.noted_on} · {n.teacher}{canEdit && !n.visible_to_parent ? ` · ${t('behavior.hiddenFromParent')}` : ''}</p>
-                {canEdit && <button type="button" className="text-xs text-red-700 underline" onClick={() => removeNote.mutate(n.id)}>{t('admin.actions.delete')}</button>}
+                {canEdit && <IconActionButton icon={Trash2} tone="red" label={t('admin.actions.delete')} type="button" onClick={() => removeNote.mutate(n.id)} />}
               </li>
             ))}
           </ul>

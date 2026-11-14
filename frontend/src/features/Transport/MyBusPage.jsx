@@ -4,7 +4,7 @@ import { Bus, Check, MapPin, Phone, X } from 'lucide-react'
 import { api } from '../../api/client'
 import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
-const Call = ({ phone }) => (phone ? <a href={`tel:${phone}`} dir="ltr" className="inline-flex items-center gap-1 text-brand underline"><Phone aria-hidden size={13} />{phone}</a> : null)
+const Call = ({ phone }) => (phone ? <a href={`tel:${phone}`} dir="ltr" className="inline-flex items-center gap-1 font-semibold text-brand"><Phone aria-hidden size={13} />{phone}</a> : null)
 
 // The driver's (or the escort's) own page: the bus, who is on it with him, and for each round the students to pick up or take home
 // with their section and a parent to call.

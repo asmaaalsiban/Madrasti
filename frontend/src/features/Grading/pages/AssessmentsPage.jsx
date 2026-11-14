@@ -8,6 +8,8 @@ import FormField from '../../../components/shared/FormField'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const TYPES = ['quiz', 'exam', 'assignment', 'project', 'participation']
 const inputClass = 'w-full rounded border p-2'
@@ -186,10 +188,8 @@ export default function AssessmentsPage() {
                 </td>
                 <td className="p-2 lg:p-3">
                   <div className="flex flex-wrap gap-3">
-                    <Link className="text-brand underline" to={`${base}/${r.id}`}>{t('grading.enterScores')}</Link>
-                    <button type="button" className="text-slate-700 underline" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))}>
-                      {t(r.is_published ? 'grading.unpublish' : 'grading.publish')}
-                    </button>
+                    <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('grading.enterScores')} to={`${base}/${r.id}`} />
+                    <IconActionButton icon={SquareArrowOutUpRight} tone="slate" label={t(r.is_published ? 'grading.unpublish' : 'grading.publish')} type="button" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))} />
                     <button type="button" className="text-brand" onClick={() => openForm(r)}>{t('admin.actions.edit')}</button>
                     {!r.is_published && <button type="button" className="text-red-600" onClick={() => setToDelete(r)}>{t('admin.actions.delete')}</button>}
                   </div>

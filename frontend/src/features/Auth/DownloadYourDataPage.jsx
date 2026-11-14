@@ -69,12 +69,12 @@ export default function DownloadYourDataPage() {
         {(company.email || company.phone) && (
           <p className="text-sm text-slate-600">
             {t('exit.contact')}{' '}
-            {company.email && <a className="underline" dir="ltr" href={`mailto:${company.email}`}>{company.email}</a>}
+            {company.email && <a className="font-semibold" dir="ltr" href={`mailto:${company.email}`}>{company.email}</a>}
             {company.email && company.phone && ' · '}
             {company.phone && <span dir="ltr">{company.phone}</span>}
           </p>
         )}
-        <button type="button" onClick={logout} className="w-full text-center text-sm underline">{t('exit.signOut')}</button>
+        <button type="button" onClick={logout} className="w-full text-center text-sm font-semibold">{t('exit.signOut')}</button>
       </section>
     </AuthShell>
   )

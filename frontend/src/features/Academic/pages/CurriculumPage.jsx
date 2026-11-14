@@ -7,6 +7,8 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import ClassTeacherGrades from '../components/ClassTeacherGrades'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const key = (grade, subject) => `${grade}-${subject}`
 
@@ -81,7 +83,7 @@ export default function CurriculumPage() {
           <InteractiveHoverButton type="button" disabled={!dirty || save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </div>
-      <p className="text-sm text-slate-600">{t('curriculum.help')} <Link to="/admin/subjects" className="text-brand underline">{t('curriculum.subjectsLink')}</Link></p>
+      <p className="text-sm text-slate-600">{t('curriculum.help')} <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('curriculum.subjectsLink')} to="/admin/subjects" /></p>
 
       {message.kind === 'error' && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{message.text}</p>}
       {message.kind === 'ok' && <p role="status" className="rounded bg-green-50 p-3 text-green-800">{message.text}</p>}

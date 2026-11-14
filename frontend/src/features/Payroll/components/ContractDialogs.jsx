@@ -6,6 +6,8 @@ import Modal from '../../../components/shared/Modal'
 import Money from '../../Finance/components/Money'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Plus } from 'lucide-react'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const cents = (v) => Math.round(Number(v || 0) * 100)
@@ -29,7 +31,7 @@ function ItemsEditor({ items, onChange }) {
           <button type="button" className="rounded border border-red-300 px-2 py-1 text-sm text-red-700" onClick={() => onChange(items.filter((_, j) => j !== i))}>✕</button>
         </div>
       ))}
-      <button type="button" className="text-sm text-brand underline" onClick={() => onChange([...items, { kind: 'allowance', label: '', amount: '' }])}>{t('payroll.addItem')}</button>
+      <IconActionButton icon={Plus} tone="brand" label={t('payroll.addItem')} type="button" onClick={() => onChange([...items, { kind: 'allowance', label: '', amount: '' }])} />
     </div>
   )
 }

@@ -18,7 +18,7 @@ export default function SiteFooter() {
     : [['/', t('footer.home')], ...(canRegister ? [['/register', t('footer.register')]] : []), ['/find-school', t('footer.findSchool')]]
   const legal = [['/privacy', t('legal.privacy.title')], ['/terms', t('legal.terms.title')], ['/cookies', t('legal.cookies.title')]]
   const hasContact = Boolean(company.email || company.phone || company.address)
-  const linkClass = 'text-slate-600 transition-colors hover:text-deep-harbor hover:underline'
+  const linkClass = 'text-slate-600 transition-colors hover:text-deep-harbor'
 
   return (
     <footer className="border-t border-fog bg-white px-4 py-12 text-slate-700 print:hidden sm:px-8">

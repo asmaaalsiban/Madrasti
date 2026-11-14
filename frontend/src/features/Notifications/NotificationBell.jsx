@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
-import { Bell } from 'lucide-react'
+import { Bell, CheckCheck } from 'lucide-react'
 import PushToggle from './PushToggle'
+import { IconActionButton } from '../../components/ui/icon-action-button'
 
 // The sentence of a notification, written in the reader's language from its kind and parameters.
 export function notificationText(t, language, n) {
@@ -66,7 +67,7 @@ export default function NotificationBell() {
         <div role="dialog" aria-label={t('notifications.title')} className="z-40 rounded-lg border bg-white p-2 text-start text-slate-800 shadow-lg max-md:fixed max-md:inset-x-3 max-md:top-[4.75rem] md:absolute md:end-0 md:mt-2 md:w-80 md:max-w-[90vw]">
           <div className="flex items-center justify-between px-2 pb-2">
             <span className="font-bold">{t('notifications.title')}</span>
-            {unread > 0 && <button type="button" className="text-xs text-brand underline" onClick={() => readAll.mutate()}>{t('notifications.readAll')}</button>}
+            {unread > 0 && <IconActionButton icon={CheckCheck} tone="brand" label={t('notifications.readAll')} type="button" onClick={() => readAll.mutate()} />}
           </div>
           {!data?.items?.length ? <p className="p-3 text-sm text-slate-500">{t('notifications.none')}</p> : (
             <ul className="max-h-96 divide-y overflow-y-auto">

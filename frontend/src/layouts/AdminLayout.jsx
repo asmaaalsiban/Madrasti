@@ -130,7 +130,7 @@ export default function AdminLayout() {
             </div>
           </header>
         )}
-        <main id="main" tabIndex={-1} className={`mx-auto p-4 outline-none ${pathname === '/admin' ? 'max-w-none' : 'max-w-5xl'}`}><BackButton /><PageEnter key={pathname}><Suspense fallback={<PageFallback />}><Outlet /></Suspense></PageEnter></main>
+        <main id="main" tabIndex={-1} className={'p-4 outline-none lg:px-8'}><BackButton /><PageEnter key={pathname}><Suspense fallback={<PageFallback />}><Outlet /></Suspense></PageEnter></main>
         <BottomTabBar />
       <ResponsiveTables />
       </div>

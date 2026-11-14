@@ -9,6 +9,8 @@ import { StateBadge } from './SchoolsPage'
 import { dayOf, formatDay, formatWhen } from './format'
 import { downloadExitFile, errorOf, fieldErrors, useExitSteps, useExtendExit, useExtendSchool, useOpenExit, useRetryExitStep, useReactivateSchool, useSchoolAudit, useSchoolByCode, useSuspendSchool, useUpdateSchool } from './useSuperAdmin'
 import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../components/ui/icon-action-button'
+import { Undo2 } from 'lucide-react'
 
 const inputClass = 'w-full rounded border p-2'
 const Card = ({ title, children }) => <section className="space-y-3 rounded-lg border bg-white p-4"><h2 className="font-bold">{title}</h2>{children}</section>
@@ -198,7 +200,7 @@ export default function SchoolPage() {
 
   return (
     <section className="space-y-4">
-      <Link to="/super-admin/schools" className="text-sm underline">{t('superAdmin.backToSchools')}</Link>
+      <IconActionButton as={Link} icon={Undo2} tone="slate" label={t('superAdmin.backToSchools')} to="/super-admin/schools" />
       {isLoading && <p className="text-slate-500">{t('common.loading')}</p>}
       {isError && <p role="alert" className="text-red-700">{t('superAdmin.genericError')}</p>}
       {school === null && <p role="alert" className="text-red-700">{t('superAdmin.notFound')}</p>}

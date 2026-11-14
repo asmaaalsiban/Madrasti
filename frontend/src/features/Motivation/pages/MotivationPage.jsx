@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Plus } from 'lucide-react'
 
 // Teacher / admin: pick a section, tick students, give or take points, hand a badge, crown the star of the week.
 export default function MotivationPage({ base }) {
@@ -96,7 +98,7 @@ export default function MotivationPage({ base }) {
               <InteractiveHoverButton type="button" disabled={!newCategory.name_ar || !newCategory.name_en || !newCategory.points || createCategory.isPending} onClick={() => createCategory.mutate()} className="px-4 py-2 disabled:opacity-40">{t('motivation.saveCategory')}</InteractiveHoverButton>
               <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" onClick={() => setAddingCategory(false)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             </div>
-          ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAddingCategory(true)}>{t('motivation.addOwnCategory')}</button>}
+          ) : <IconActionButton icon={Plus} tone="brand" label={t('motivation.addOwnCategory')} type="button" onClick={() => setAddingCategory(true)} />}
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); award.mutate({ points: Number(custom.points), note: custom.note }) }}>
             <label className="text-sm">{t('motivation.points')}<input type="number" required min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={custom.points} onChange={(e) => setCustom({ ...custom, points: e.target.value })} /></label>
             <label className="text-sm">{t('motivation.note')}<input required className="mt-1 block rounded border p-2" value={custom.note} onChange={(e) => setCustom({ ...custom, note: e.target.value })} /></label>

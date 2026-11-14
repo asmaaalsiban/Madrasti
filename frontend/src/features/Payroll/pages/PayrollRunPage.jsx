@@ -9,6 +9,8 @@ import { useAuth } from '../../Auth/AuthProvider'
 import { itemLabel } from '../itemLabel'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -169,7 +171,7 @@ export default function PayrollRunPage({ base }) {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('payroll.runTitle', { month: run.month })} <span className="ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-sm font-normal">{t(`payroll.runStatus.${run.status}`)}</span></h1>
-        <Link to={`${base}/payroll`} className="text-sm text-brand underline">{t('payroll.title')}</Link>
+        <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('payroll.title')} to={`${base}/payroll`} />
       </div>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       {draft && run.return_note && <p className="rounded border border-amber-300 bg-amber-50 p-2 text-sm">{t('payroll.returned')}: {run.return_note}</p>}

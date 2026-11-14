@@ -13,7 +13,7 @@ export default function LegalPage({ doc }) {
   return (
     <main id="main" tabIndex={-1} className="mx-auto max-w-3xl space-y-6 p-4 outline-none sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link to="/" className="text-sm text-brand underline">{t('legal.home')}</Link>
+        <Link to="/" className="text-sm font-semibold text-brand">{t('legal.home')}</Link>
         <LanguageSwitcher />
       </div>
       <h1>{t(`legal.${doc}.title`)}</h1>
@@ -33,7 +33,7 @@ export default function LegalPage({ doc }) {
         </dl>
       </section>
       <nav aria-label={t('legal.other')} className="flex flex-wrap gap-4 border-t pt-4 text-sm">
-        {DOCS.filter((d) => d !== doc).map((d) => <Link key={d} to={`/${d}`} className="text-brand underline">{t(`legal.${d}.title`)}</Link>)}
+        {DOCS.filter((d) => d !== doc).map((d) => <Link key={d} to={`/${d}`} className="font-semibold text-brand">{t(`legal.${d}.title`)}</Link>)}
       </nav>
     </main>
   )

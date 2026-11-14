@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
             <label className="block text-sm">{t('auth.changePassword.confirm')}<PasswordInput className="mt-1" required value={form.password_confirmation} onChange={set('password_confirmation')} /></label>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('auth.forgot.setPassword')}</button>
-            <button type="button" className="w-full text-sm text-brand underline" disabled={busy} onClick={() => requestCode()}>{t('auth.forgot.resend')}</button>
+            <button type="button" className="w-full text-sm font-semibold text-brand" disabled={busy} onClick={() => requestCode()}>{t('auth.forgot.resend')}</button>
           </form>
         )}
 
