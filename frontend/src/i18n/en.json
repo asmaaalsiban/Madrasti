@@ -3498,5 +3498,46 @@
     "savePhoto": "Save photo",
     "cancel": "Cancel",
     "cropFailed": "Could not cut this photo. Try another one."
+  },
+  "pricingDemo": {
+    "title": "Simple, transparent pricing",
+    "description": "Sample plans for trying the block.\nThe prices here are not real.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save": "save 20%",
+    "popular": "Popular",
+    "billedMonthly": "billed monthly",
+    "billedAnnually": "billed annually",
+    "perMonth": "month",
+    "choose": "Choose plan",
+    "basic": {
+      "name": "BASIC",
+      "description": "For a small school",
+      "features": [
+        "Up to 200 students",
+        "Attendance and grades",
+        "Parent portal"
+      ]
+    },
+    "standard": {
+      "name": "STANDARD",
+      "description": "For a growing school",
+      "features": [
+        "Up to 600 students",
+        "Everything in Basic",
+        "Finance and installments",
+        "Chat and announcements"
+      ]
+    },
+    "premium": {
+      "name": "PREMIUM",
+      "description": "For large schools",
+      "features": [
+        "Unlimited students",
+        "Everything in Standard",
+        "Transport and payroll",
+        "Priority support"
+      ]
+    }
   }
 }
