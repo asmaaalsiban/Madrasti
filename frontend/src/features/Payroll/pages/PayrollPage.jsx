@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Money from '../../Finance/components/Money'
 import { useAuth } from '../../Auth/AuthProvider'
 import { MonthInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -34,7 +35,7 @@ export default function PayrollPage({ base }) {
       {user?.staff_type === 'accountant' && (
         <form className="flex flex-wrap items-end gap-2 rounded-lg border bg-white p-3" onSubmit={(e) => { e.preventDefault(); setError(''); prepare.mutate() }}>
           <label className="text-sm">{t('payroll.month')}<MonthInput required className="mt-1 block rounded border p-2" value={month} onChange={(e) => setMonth(e.target.value)} /></label>
-          <button type="submit" disabled={prepare.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50">{t('payroll.prepare')}</button>
+          <InteractiveHoverButton type="submit" disabled={prepare.isPending} className="px-4 py-2 disabled:opacity-50">{t('payroll.prepare')}</InteractiveHoverButton>
           {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
         </form>
       )}

@@ -9,6 +9,7 @@ import PaymentDialog from '../components/PaymentDialog'
 import ReceiptDialog from '../components/ReceiptDialog'
 import Statement from '../components/Statement'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // One student's money: the statement; the accountant adds a fee, records and prints payments, cancels a wrong one.
 export default function StudentAccountPage() {
@@ -87,7 +88,7 @@ export default function StudentAccountPage() {
             </label>
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
-              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={saveEdit.isPending}>{t('admin.actions.save')}</button>
+              <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={saveEdit.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>
         </Modal>
@@ -129,7 +130,7 @@ export default function StudentAccountPage() {
             )}
             <div className="flex justify-end gap-2">
               <button type="button" className="rounded border px-3 py-1.5" onClick={() => setAdding(null)}>{t('admin.actions.cancel')}</button>
-              <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={addFee.isPending}>{t('admin.actions.save')}</button>
+              <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={addFee.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>
         </Modal>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ExportButton from '../../../components/shared/ExportButton'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // In the order a new school needs them: later kinds point to earlier ones (a section needs its grade).
 const KINDS = ['grade_levels', 'subjects', 'staff', 'classrooms', 'teaching', 'students', 'guardians', 'marks', 'fees', 'attendance', 'contracts']
@@ -84,7 +85,7 @@ export default function ImportPage() {
           <p className="text-xs text-slate-500">{t(`import.note.${kind}`)}</p>
           <input type="file" aria-label={t('import.file')} accept=".xlsx,.csv" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError('') }} />
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" disabled={!file || read.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => read.mutate()}>{t('import.read')}</button>
+            <InteractiveHoverButton type="button" disabled={!file || read.isPending} className="px-4 py-1.5 disabled:opacity-50" onClick={() => read.mutate()}>{t('import.read')}</InteractiveHoverButton>
             <ExportButton path={`/import/${kind}/template`} fallbackName={`${kind}.xlsx`} label={t('import.downloadTemplate')} />
           </div>
         </div>
@@ -128,7 +129,7 @@ export default function ImportPage() {
 
           <div className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={() => restart()}>{t('import.otherFile')}</button>
-            <button type="button" disabled={send.isPending || !ready} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" onClick={() => send.mutate(false)}>{t('import.check')}</button>
+            <InteractiveHoverButton type="button" disabled={send.isPending || !ready} className="px-4 py-1.5 disabled:opacity-50" onClick={() => send.mutate(false)}>{t('import.check')}</InteractiveHoverButton>
           </div>
         </div>
       )}
@@ -153,7 +154,7 @@ export default function ImportPage() {
           <div className="flex gap-2">
             {!done && <button type="button" className="rounded border px-3 py-1.5" onClick={() => setReport(null)}>{t('import.back')}</button>}
             {!done && report.valid > 0 && (
-              <button type="button" disabled={send.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50" onClick={() => send.mutate(true)}>{t('import.run', { count: report.valid })}</button>
+              <InteractiveHoverButton type="button" disabled={send.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => send.mutate(true)}>{t('import.run', { count: report.valid })}</InteractiveHoverButton>
             )}
             {done && <button type="button" className="rounded border px-3 py-1.5" onClick={() => restart()}>{t('import.another')}</button>}
           </div>

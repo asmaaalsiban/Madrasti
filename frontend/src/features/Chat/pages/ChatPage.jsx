@@ -7,6 +7,7 @@ import { useAuth } from '../../Auth/AuthProvider'
 import NewChatDialog from '../components/NewChatDialog'
 import NewGroupDialog from '../components/NewGroupDialog'
 import Thread from '../components/Thread'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Chat: the list of conversations on one side, the open conversation on the other (one at a time on a phone).
 export default function ChatPage() {
@@ -26,7 +27,7 @@ export default function ChatPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('chat.title')}</h1>
         <div className="flex gap-2">
-          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog('chat')}>{t('chat.newChat')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog('chat')}>{t('chat.newChat')}</InteractiveHoverButton>
           {canGroup && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog('group')}>{t('chat.newGroup')}</button>}
         </div>
       </div>

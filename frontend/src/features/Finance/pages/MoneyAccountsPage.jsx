@@ -7,6 +7,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -20,7 +21,7 @@ function Form({ title, onClose, onSubmit, pending, error, children, submitLabel 
         {children}
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={pending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{submitLabel ?? t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={pending} className="px-4 py-1.5 disabled:opacity-50">{submitLabel ?? t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -127,7 +128,7 @@ export default function MoneyAccountsPage({ base }) {
         {data?.can_manage && (
           <div className="flex gap-2">
             <button type="button" className="inline-flex items-center gap-2 rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'transfer' })}><ArrowLeftRight size={16} aria-hidden />{t('money.transfer')}</button>
-            <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({ type: 'account' })}><Plus size={16} aria-hidden />{t('money.newAccount')}</button>
+            <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({ type: 'account' })}><Plus size={16} aria-hidden />{t('money.newAccount')}</InteractiveHoverButton>
           </div>
         )}
       </div>

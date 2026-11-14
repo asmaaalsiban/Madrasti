@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const BAR = { ok: 'bg-green-600', near: 'bg-amber-500', over: 'bg-red-600', unplanned: 'bg-red-600', none: 'bg-slate-300' }
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -60,7 +61,7 @@ export default function BudgetsPage() {
               </li>
             ))}
           </ul>
-          {canManage && <div className="flex justify-end"><button type="button" disabled={save.isPending || Object.keys(edits).length === 0} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</button></div>}
+          {canManage && <div className="flex justify-end"><InteractiveHoverButton type="button" disabled={save.isPending || Object.keys(edits).length === 0} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton></div>}
         </>
       )}
     </section>

@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import { useAuth } from '../../Auth/AuthProvider'
 import AnnouncementForm from '../components/AnnouncementForm'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Everyone: the announcements meant for them, unread ones marked; opening one marks it read. Admin and teachers can also publish.
 export default function AnnouncementsPage() {
@@ -32,7 +33,7 @@ export default function AnnouncementsPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('announcements.title')}</h1>
-        {canPublish && options.data && <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => setEditing({})}>{t('announcements.add')}</button>}
+        {canPublish && options.data && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setEditing({})}>{t('announcements.add')}</InteractiveHoverButton>}
       </div>
       {list.isSuccess && list.data.length === 0 && <p className="rounded bg-white p-4 text-slate-600">{t('announcements.none')}</p>}
       <ul className="space-y-3">

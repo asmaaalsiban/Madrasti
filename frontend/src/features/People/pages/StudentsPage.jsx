@@ -8,6 +8,7 @@ import GuardianPicker from '../components/GuardianPicker'
 import { AttachmentsField } from '../../../components/shared/Attachments'
 import ResourcePage from '../../Academic/components/ResourcePage'
 import { useResource } from '../../Academic/hooks/useResource'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A heading that explains the fee fields below it.
 // The title of the file field: what a student's file is for.
@@ -157,7 +158,7 @@ export default function StudentsPage() {
           </div>
         )}
         <div className="flex justify-end pt-4">
-          <button type="button" className="rounded bg-brand px-3 py-1.5 text-white" onClick={() => setAccount(null)}>{t('people.accountCreated.close')}</button>
+          <InteractiveHoverButton type="button" className="px-3 py-1.5" onClick={() => setAccount(null)}>{t('people.accountCreated.close')}</InteractiveHoverButton>
         </div>
       </Modal>
     </>

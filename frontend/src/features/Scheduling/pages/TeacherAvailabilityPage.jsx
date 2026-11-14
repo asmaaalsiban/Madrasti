@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import TimetableGrid from '../components/TimetableGrid'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The periods a teacher cannot teach in: click a period to mark it; the timetable generator and hand edits keep away from them.
 export default function TeacherAvailabilityPage() {
@@ -53,7 +54,7 @@ function Editor({ teacherId, initial, periods, onSaved }) {
         </div>
       )}
       {result && result.clashes.length === 0 && <p role="status" className="text-sm text-green-700">{t('availability.saved')}</p>}
-      <button type="button" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+      <InteractiveHoverButton type="button" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
     </div>
   )
 }

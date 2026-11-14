@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A small list manager: add (a form), hide / show, remove.
 function Manager({ title, help, path, fields, empty, describe }) {
@@ -28,7 +29,7 @@ function Manager({ title, help, path, fields, empty, describe }) {
               value={draft[f.key]} onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })} />
           </label>
         ))}
-        <button type="submit" className="rounded bg-brand px-4 py-2 text-white">{t('admin.actions.add')}</button>
+        <InteractiveHoverButton type="submit" className="px-4 py-2">{t('admin.actions.add')}</InteractiveHoverButton>
       </form>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       <ul className="space-y-2">

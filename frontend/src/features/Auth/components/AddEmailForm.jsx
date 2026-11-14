@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, setToken } from '../../../api/client'
 import { useAuth } from '../AuthProvider'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -43,7 +44,7 @@ export default function AddEmailForm({ onDone, onSkip }) {
           <p className="text-sm text-slate-600">{t('auth.addEmail.help')}</p>
           <label className="block text-sm">{t('auth.addEmail.email')}<input required type="email" dir="ltr" autoComplete="email" className="mt-1 w-full rounded border p-2" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
           <div className="flex flex-wrap gap-2">
-            <button disabled={busy} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-60">{t('auth.addEmail.sendCode')}</button>
+            <InteractiveHoverButton disabled={busy} className="px-4 py-2 disabled:opacity-60">{t('auth.addEmail.sendCode')}</InteractiveHoverButton>
             {onSkip && <button type="button" className="rounded border px-4 py-2" onClick={onSkip}>{t('auth.addEmail.later')}</button>}
           </div>
         </form>
@@ -56,7 +57,7 @@ export default function AddEmailForm({ onDone, onSkip }) {
             <input required inputMode="numeric" autoComplete="one-time-code" maxLength={6} dir="ltr" className="mt-1 w-full rounded border p-2 text-center text-xl tracking-widest" value={code} onChange={(e) => setCode(e.target.value)} />
           </label>
           <div className="flex flex-wrap gap-2">
-            <button disabled={busy} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-60">{t('auth.addEmail.confirm')}</button>
+            <InteractiveHoverButton disabled={busy} className="px-4 py-2 disabled:opacity-60">{t('auth.addEmail.confirm')}</InteractiveHoverButton>
             <button type="button" disabled={busy} className="rounded border px-4 py-2" onClick={() => sendCode()}>{t('auth.forgot.resend')}</button>
             <button type="button" className="rounded border px-4 py-2" onClick={() => { setStep('email'); setCode('') }}>{t('auth.addEmail.change')}</button>
           </div>
@@ -66,7 +67,7 @@ export default function AddEmailForm({ onDone, onSkip }) {
       {step === 'done' && (
         <div className="space-y-3">
           <p role="status" className="rounded bg-green-50 p-3 text-green-800">{merged ? t('auth.addEmail.merged') : t('auth.addEmail.saved', { email })}</p>
-          <button type="button" className="rounded bg-brand px-4 py-2 text-white" onClick={onDone}>{t('auth.addEmail.continue')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-2" onClick={onDone}>{t('auth.addEmail.continue')}</InteractiveHoverButton>
         </div>
       )}
     </div>

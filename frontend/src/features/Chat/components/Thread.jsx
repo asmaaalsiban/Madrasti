@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ChatImage from './ChatImage'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const time = (iso) => iso.slice(11, 16)
 
@@ -78,7 +79,7 @@ export default function Thread({ conversation, onBack }) {
             <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('chat.photo')} onChange={(e) => { setPhoto(e.target.files[0] ?? null); e.target.value = '' }} />
             <button type="button" className="rounded border px-3 py-2" aria-label={t('chat.addPhoto')} title={t('chat.addPhoto')} onClick={() => input.current.click()}>📷</button>
             <textarea rows={1} aria-label={t('chat.message')} placeholder={t('chat.message')} className="min-w-0 flex-1 rounded border p-2" value={text} onChange={(e) => setText(e.target.value)} />
-            <button type="submit" className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50" disabled={send.isPending}>{t('chat.send')}</button>
+            <InteractiveHoverButton type="submit" className="px-4 py-2 disabled:opacity-50" disabled={send.isPending}>{t('chat.send')}</InteractiveHoverButton>
           </div>
         </form>
       ) : <p className="border-t p-3 text-sm text-slate-500">{t('chat.staffOnly')}</p>}

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const blank = () => ({ bank: '', holder: '', iban: '', cliq: '' })
@@ -35,7 +36,7 @@ function Form({ settings }) {
       <button type="button" className="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-sm text-brand" onClick={() => setForm({ ...form, accounts: [...form.accounts, blank()] })}><Plus size={14} aria-hidden />{t('bankSettings.addAccount')}</button>
       <label className="block text-sm">{t('bankSettings.instructions')}<textarea rows={2} className="mt-1 w-full rounded border p-2" placeholder={t('bankSettings.instructionsHint')} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} /></label>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} />{t('bankSettings.enabled')}</label>
-      <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+      <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
     </form>
   )
 }

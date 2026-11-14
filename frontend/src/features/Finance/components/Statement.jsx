@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import Money from './Money'
 import StatusBadge from './StatusBadge'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A student's statement: totals, then every fee with its installments and payments. `actions` adds buttons (accountant).
 export default function Statement({ data, onPay = null, onReceipt = null, onVoid = null, onDeleteFee = null, onTransport = null, onDiscount = null, onPayOnline = null }) {
@@ -86,8 +87,8 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
           )}
           {(onPay || onDeleteFee || onDiscount || onPayOnline) && (
             <div className="flex gap-2 pt-1">
-              {onPayOnline && Number(fee.remaining) > 0 && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => onPayOnline(fee)}>{t('finance.payOnline')}</button>}
-              {onPay && Number(fee.remaining) > 0 && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => onPay(fee)}>{t('finance.recordPayment')}</button>}
+              {onPayOnline && Number(fee.remaining) > 0 && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => onPayOnline(fee)}>{t('finance.payOnline')}</InteractiveHoverButton>}
+              {onPay && Number(fee.remaining) > 0 && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => onPay(fee)}>{t('finance.recordPayment')}</InteractiveHoverButton>}
               {onDiscount && fee.kind !== 'transport' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</button>}
               {onDeleteFee && fee.payments.length === 0 && <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => onDeleteFee(fee)}>{t('finance.deleteFee')}</button>}
             </div>

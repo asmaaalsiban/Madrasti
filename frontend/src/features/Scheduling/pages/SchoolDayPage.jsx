@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import FormField from '../../../components/shared/FormField'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const inputClass = 'w-full rounded border p-2'
 const pad = (n) => String(n).padStart(2, '0')
@@ -109,7 +110,7 @@ export default function SchoolDayPage() {
               <input className={inputClass} type="number" min="5" max="90" dir="ltr" value={form.long_break_minutes} onChange={set('long_break_minutes')} />
             </FormField>
           )}
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-60">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-2 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
         </form>
 
         <div className="space-y-4">

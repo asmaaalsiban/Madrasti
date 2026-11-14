@@ -7,6 +7,7 @@ import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import RichText from '../components/RichText'
 import QuestionImage from '../components/QuestionImage'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const blankOption = (correct = false) => ({ body: '', is_correct: correct })
@@ -77,7 +78,7 @@ function QuestionDialog({ lessonId, question, onClose }) {
         <ImageField slot="explanation" question={question} files={files} setFiles={setFiles} removed={removed} setRemoved={setRemoved} />
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || options.filter((o) => o.is_correct).length !== 1} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || options.filter((o) => o.is_correct).length !== 1} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -95,7 +96,7 @@ function Questions({ lesson }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-bold">{lesson.title}</h2>
-        <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('questionBank.newQuestion')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('questionBank.newQuestion')}</InteractiveHoverButton>
       </div>
       {!data ? <p className="text-slate-500">{t('common.loading')}</p> : data.filter((q) => q.is_active).length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('questionBank.noQuestions')}</p> : (
         <ul className="space-y-2">
@@ -167,7 +168,7 @@ export default function QuestionBankPage() {
         <aside className="space-y-3">
           <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate() }}>
             <input required dir="auto" aria-label={t('questionBank.lessonTitle')} placeholder={t('questionBank.lessonTitle')} className="min-w-0 flex-1 rounded border p-2" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <button type="submit" disabled={add.isPending} className="rounded bg-brand px-3 py-2 text-white">{t('admin.actions.add')}</button>
+            <InteractiveHoverButton type="submit" disabled={add.isPending} className="px-3 py-2">{t('admin.actions.add')}</InteractiveHoverButton>
           </form>
           <ul className="divide-y rounded-lg border bg-white text-sm">
             {(lessons.data ?? []).length === 0 && <li className="p-3 text-slate-500">{t('questionBank.noLessons')}</li>}

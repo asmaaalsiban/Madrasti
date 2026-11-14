@@ -7,6 +7,7 @@ import Modal from '../../../components/shared/Modal'
 import NewWarningDialog from '../components/NewWarningDialog'
 import WarningCard from '../components/WarningCard'
 import RulesTab from '../components/RulesTab'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The admin's record of warnings: students and staff, what waits for approval, writing a new one, withdrawing one.
 export default function WarningsPage() {
@@ -29,7 +30,7 @@ export default function WarningsPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('warnings.title2')}</h1>
-        <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setAdding(true)}><Plus size={16} aria-hidden />{t('warnings.new')}</button>
+        <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setAdding(true)}><Plus size={16} aria-hidden />{t('warnings.new')}</InteractiveHoverButton>
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div role="tablist" className="flex gap-2">{['student', 'staff', 'rules'].map((k) => <button key={k} type="button" role="tab" aria-selected={subject === k} className={tab(k)} onClick={() => setSubject(k)}>{k === 'rules' ? t('warnings.rules.tab') : t(`warnings.subject.${k}`)}</button>)}</div>

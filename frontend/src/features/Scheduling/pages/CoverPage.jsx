@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -70,7 +71,7 @@ export default function CoverPage() {
                           {s.teaches_subject ? t('cover.teachesSubject') : s.teaches_grade ? t('cover.teachesGrade') : t('cover.otherGrade')} · {t('cover.lessonsToday', { n: s.lessons_today })}{s.covers_today > 0 ? ` · ${t('cover.coversToday', { n: s.covers_today })}` : ''}
                         </span>
                       </span>
-                      <button type="button" disabled={choose.isPending} className="shrink-0 rounded bg-brand px-3 py-1 text-white disabled:opacity-50" aria-label={`${t('cover.choose')} ${s.teacher.name}`} onClick={() => choose.mutate({ lesson: l, teacher: s.teacher })}>{t('cover.choose')}</button>
+                      <InteractiveHoverButton type="button" disabled={choose.isPending} className="shrink-0 px-3 py-1 disabled:opacity-50" aria-label={`${t('cover.choose')} ${s.teacher.name}`} onClick={() => choose.mutate({ lesson: l, teacher: s.teacher })}>{t('cover.choose')}</InteractiveHoverButton>
                     </li>
                   ))}
                 </ul>

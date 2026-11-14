@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import AnswerDialog from './AnswerDialog'
 import { HomeworkPhotos } from './HomeworkImage'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The homework of a section (student and parent), ordered by due date. canAnswer: the student can send an answer; a parent sees whether their child did.
 export default function HomeworkList({ endpoint, canAnswer = false }) {
@@ -29,7 +30,7 @@ export default function HomeworkList({ endpoint, canAnswer = false }) {
           <div className="flex flex-wrap items-center gap-2 pt-1">
             {h.submission ? <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">{t('homework.sentAt', { date: h.submission.submitted_at.slice(0, 10) })}{h.submission.late ? ` · ${t('homework.late')}` : ''}</span>
               : <span className="rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-800">{t('homework.notSentYet')}</span>}
-            {canAnswer && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => setAnswering(h)}>{h.submission ? t('homework.editAnswer') : t('homework.answer')}</button>}
+            {canAnswer && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setAnswering(h)}>{h.submission ? t('homework.editAnswer') : t('homework.answer')}</InteractiveHoverButton>}
           </div>
         </li>
       ))}

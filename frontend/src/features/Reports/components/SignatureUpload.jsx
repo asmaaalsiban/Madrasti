@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Add (or replace) a signature from a photo or scan. The server removes the paper; the strength can be adjusted after.
 export default function SignatureUpload({ scope, userId = null, withTitle = false, label }) {
@@ -39,7 +40,7 @@ export default function SignatureUpload({ scope, userId = null, withTitle = fals
       {file && <p role="status" className="text-sm text-green-800">✔ {t('signatures.chosen', { name: file.name })}</p>}
       <p className="text-xs text-slate-500">{t('signatures.tips')}</p>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-      <button type="submit" disabled={!file || send.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50">{t('signatures.save')}</button>
+      <InteractiveHoverButton type="submit" disabled={!file || send.isPending} className="px-4 py-2 disabled:opacity-50">{t('signatures.save')}</InteractiveHoverButton>
     </form>
   )
 }

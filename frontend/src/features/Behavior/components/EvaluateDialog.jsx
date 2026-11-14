@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Scores one student against the criteria (1-5, or leave empty), with a note, and can add a quick positive / negative note.
 export default function EvaluateDialog({ student, date, onClose }) {
@@ -77,7 +78,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
           <div className="flex flex-wrap items-end gap-2 rounded border bg-slate-50 p-2">
             <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newCriterion.name_ar} onChange={(e) => setNewCriterion({ ...newCriterion, name_ar: e.target.value })} /></label>
             <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCriterion.name_en} onChange={(e) => setNewCriterion({ ...newCriterion, name_en: e.target.value })} /></label>
-            <button type="button" className="rounded bg-brand px-3 py-2 text-white disabled:opacity-50" disabled={!newCriterion.name_ar || !newCriterion.name_en || addCriterion.isPending} onClick={() => addCriterion.mutate()}>{t('behavior.saveCriterion')}</button>
+            <InteractiveHoverButton type="button" className="px-3 py-2 disabled:opacity-50" disabled={!newCriterion.name_ar || !newCriterion.name_en || addCriterion.isPending} onClick={() => addCriterion.mutate()}>{t('behavior.saveCriterion')}</InteractiveHoverButton>
             <button type="button" className="rounded border px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</button>
           </div>
         ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAdding(true)}>{t('behavior.addCriterion')}</button>}
@@ -110,7 +111,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />{t('behavior.visibleToParent')}</label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
 
         <div className="space-y-2 border-t pt-3">

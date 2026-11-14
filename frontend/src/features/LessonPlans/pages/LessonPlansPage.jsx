@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import PlanCard from '../components/PlanCard'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const EMPTY = { pair: '', date: today(), title: '', objectives: '', content: '', shared: true, fromStatus: null }
@@ -62,7 +63,7 @@ export default function LessonPlansPage() {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.shared} onChange={(e) => { setForm({ ...form, shared: e.target.checked }); setSaved(false) }} />{t('lessonPlans.shareWithParents')}</label>
         {['submitted', 'approved'].includes(form.fromStatus) && <p role="note" className="rounded bg-amber-50 p-2 text-sm text-amber-800">{t(`lessonPlans.editWarning.${form.fromStatus}`)}</p>}
         <div className="flex items-center gap-3">
-          <button type="submit" className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50" disabled={!pair || save.isPending}>{t('lessonPlans.saveDraft')}</button>
+          <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={!pair || save.isPending}>{t('lessonPlans.saveDraft')}</InteractiveHoverButton>
           {saved && <span role="status" className="text-sm text-green-700">{t('lessonPlans.saved')}</span>}
         </div>
       </form>
@@ -74,7 +75,7 @@ export default function LessonPlansPage() {
           <PlanCard key={p.id} plan={p}>
             <div className="flex flex-wrap gap-2 pt-1">
               <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(p)}>{t('admin.actions.edit')}</button>
-              {['draft', 'rejected'].includes(p.status) && <button type="button" className="rounded bg-brand px-3 py-1 text-sm text-white" onClick={() => submit.mutate(p.id)}>{t('lessonPlans.submit')}</button>}
+              {['draft', 'rejected'].includes(p.status) && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => submit.mutate(p.id)}>{t('lessonPlans.submit')}</InteractiveHoverButton>}
               {p.status === 'submitted' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => withdraw.mutate(p.id)}>{t('lessonPlans.withdraw')}</button>}
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(p)}>{t('admin.actions.delete')}</button>
             </div>

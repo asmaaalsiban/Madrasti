@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { MonthInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const CATEGORIES = ['private_lessons', 'summer_club', 'club', 'other']
@@ -36,7 +37,7 @@ function TemplateDialog({ template, onClose }) {
         </label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -78,7 +79,7 @@ function AssignDialog({ template, onClose }) {
             <label className="block text-sm">{t('payroll.toMonth')}<MonthInput className="mt-1 w-full rounded border p-2" value={form.ends_on} onChange={(e) => setForm({ ...form, ends_on: e.target.value })} /></label>
           </div>
           <p className="text-xs text-slate-500">{t('payroll.toMonthHint')}</p>
-          <button type="submit" disabled={add.isPending || picked.length === 0 || !form.starts_on} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.assignAction', { count: picked.length })}</button>
+          <InteractiveHoverButton type="submit" disabled={add.isPending || picked.length === 0 || !form.starts_on} className="px-4 py-1.5 disabled:opacity-50">{t('payroll.assignAction', { count: picked.length })}</InteractiveHoverButton>
         </form>
         <div>
           <p className="mb-1 text-sm font-medium">{t('payroll.assignedNow')}</p>
@@ -108,7 +109,7 @@ export default function TemplatesPage({ base }) {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('payroll.templatesTitle')}</h1>
-        <span className="flex gap-2"><Link to={`${base}/payroll`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.title')}</Link><button type="button" className="rounded bg-brand px-3 py-1.5 text-sm text-white" onClick={() => setDialog({})}>{t('payroll.newRule')}</button></span>
+        <span className="flex gap-2"><Link to={`${base}/payroll`} className="rounded border px-3 py-1.5 text-sm text-brand">{t('payroll.title')}</Link><InteractiveHoverButton type="button" className="px-3 py-1.5 text-sm" onClick={() => setDialog({})}>{t('payroll.newRule')}</InteractiveHoverButton></span>
       </div>
       <p className="text-sm text-slate-600">{t('payroll.templatesHelp')}</p>
       <div className="overflow-x-auto rounded-lg border bg-white">
@@ -121,7 +122,7 @@ export default function TemplatesPage({ base }) {
                 <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-xs ${r.kind === 'deduction' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-800'}`}>{t(`payroll.kinds.${r.kind}`)}</span></td>
                 <td className="p-2" dir="ltr">{r.type === 'percent' ? `${Number(r.value)}%` : `${r.value} ${data.currency}`}</td>
                 <td className="p-2 text-slate-600">{r.category ? t(`payroll.categories.${r.category}`) : '—'}</td>
-                <td className="p-2"><span className="flex justify-end gap-2"><button type="button" className="rounded bg-brand px-2 py-1 text-white" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</button><button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</button><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => setDropping(r)}>{t('admin.actions.delete')}</button></span></td>
+                <td className="p-2"><span className="flex justify-end gap-2"><InteractiveHoverButton type="button" className="px-2 py-1" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</InteractiveHoverButton><button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</button><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => setDropping(r)}>{t('admin.actions.delete')}</button></span></td>
               </tr>
             ))}
             {data.data.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('payroll.noTemplates')}</td></tr>}

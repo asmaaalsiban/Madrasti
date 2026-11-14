@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const CODES = ['punctuality', 'daily_summary', 'weekly_plan']
 
@@ -99,7 +100,7 @@ function RulesForm({ base, initial }) {
       </fieldset>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       {saved && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{t('payroll.rulesSaved')}</p>}
-      {canEdit && <button type="button" disabled={save.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</button>}
+      {canEdit && <InteractiveHoverButton type="button" disabled={save.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>}
     </section>
   )
 }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import WarningCard from '../components/WarningCard'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A child's warnings, for the parent (who can say they have seen each one).
 export default function ChildWarningsPage() {
@@ -22,7 +23,7 @@ export default function ChildWarningsPage() {
         <div className="space-y-3">
           {data.map((w) => (
             <WarningCard key={w.id} w={w}>
-              {!w.acknowledged_at && <button type="button" disabled={seen.isPending} className="rounded bg-brand px-4 py-1.5 text-sm text-white" onClick={() => seen.mutate(w.id)}>{t('warnings.iHaveSeen')}</button>}
+              {!w.acknowledged_at && <InteractiveHoverButton type="button" disabled={seen.isPending} className="px-4 py-1.5 text-sm" onClick={() => seen.mutate(w.id)}>{t('warnings.iHaveSeen')}</InteractiveHoverButton>}
             </WarningCard>
           ))}
         </div>

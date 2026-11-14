@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import { useAuth } from '../../Auth/AuthProvider'
 import NewWarningDialog from '../components/NewWarningDialog'
 import WarningCard from '../components/WarningCard'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The signed-in student's or member of staff's own warnings. A teacher can also propose a warning for a student here (the admin approves it).
 export default function MyWarningsPage() {
@@ -21,13 +22,13 @@ export default function MyWarningsPage() {
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('warnings.mineTitle')}</h1>
-        {isTeacher && <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-1.5 text-white" onClick={() => setAdding(true)}><Plus size={16} aria-hidden />{t('warnings.proposeForStudent')}</button>}
+        {isTeacher && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setAdding(true)}><Plus size={16} aria-hidden />{t('warnings.proposeForStudent')}</InteractiveHoverButton>}
       </div>
       {!mine.data ? <p className="text-slate-500">{t('common.loading')}</p> : mine.data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('warnings.noneForMe')}</p> : (
         <div className="space-y-3">
           {mine.data.map((w) => (
             <WarningCard key={w.id} w={w}>
-              {isTeacher && !w.acknowledged_at && <button type="button" disabled={seen.isPending} className="rounded bg-brand px-4 py-1.5 text-sm text-white" onClick={() => seen.mutate(w.id)}>{t('warnings.iHaveSeen')}</button>}
+              {isTeacher && !w.acknowledged_at && <InteractiveHoverButton type="button" disabled={seen.isPending} className="px-4 py-1.5 text-sm" onClick={() => seen.mutate(w.id)}>{t('warnings.iHaveSeen')}</InteractiveHoverButton>}
             </WarningCard>
           ))}
         </div>

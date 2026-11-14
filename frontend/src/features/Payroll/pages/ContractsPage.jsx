@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Money from '../../Finance/components/Money'
 import { EndDialog, HistoryDialog, NewContractDialog, RenewDialog } from '../components/ContractDialogs'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const SOON = 60
 
@@ -65,9 +66,9 @@ export default function ContractsPage({ base, canManage }) {
                   </td>
                   <td className="p-2">
                     <span className="flex flex-wrap justify-end gap-2">
-                      {canManage && c?.status === 'active' && <button type="button" className="rounded bg-brand px-3 py-1 text-white" onClick={() => setDialog({ type: 'renew', staff: r })}>{t('payroll.renew')}</button>}
+                      {canManage && c?.status === 'active' && <InteractiveHoverButton type="button" className="px-3 py-1" onClick={() => setDialog({ type: 'renew', staff: r })}>{t('payroll.renew')}</InteractiveHoverButton>}
                       {canManage && c?.status === 'active' && <button type="button" className="rounded border border-red-300 px-3 py-1 text-red-700" onClick={() => setDialog({ type: 'end', staff: r })}>{t('payroll.endContract')}</button>}
-                      {canManage && (!c || c.status !== 'active') && <button type="button" className="rounded bg-brand px-3 py-1 text-white" onClick={() => setDialog({ type: 'new', staff: r })}>{t('payroll.newContract')}</button>}
+                      {canManage && (!c || c.status !== 'active') && <InteractiveHoverButton type="button" className="px-3 py-1" onClick={() => setDialog({ type: 'new', staff: r })}>{t('payroll.newContract')}</InteractiveHoverButton>}
                       {r.contracts_count > 0 && <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setDialog({ type: 'history', staff: r })}>{t('payroll.history')}</button>}
                     </span>
                   </td>

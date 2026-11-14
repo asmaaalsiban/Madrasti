@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import Modal from '../../../components/shared/Modal'
 import { useSchool } from '../../../tenant/useSchool'
 import Money from './Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // A receipt the accountant prints (the browser's print dialog; only the receipt is printed).
 export default function ReceiptDialog({ payment, fee, student, currency, onClose }) {
@@ -23,7 +24,7 @@ export default function ReceiptDialog({ payment, fee, student, currency, onClose
         </div>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('homework.close')}</button>
-          <button type="button" className="rounded bg-brand px-4 py-1.5 text-white" onClick={() => window.print()}>{t('finance.print')}</button>
+          <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => window.print()}>{t('finance.print')}</InteractiveHoverButton>
         </div>
       </div>
     </Modal>

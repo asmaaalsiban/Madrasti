@@ -314,3 +314,22 @@ html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-
   table[data-stack] td[data-actions] button, table[data-stack] td[data-actions] a { display: flex; align-items: center; justify-content: center; min-height: 2.5rem; padding: 0.4rem 0.5rem; border-radius: 0.6rem; background: var(--color-brand); color: #fff !important; text-decoration: none; font-weight: 600; text-align: center; }
   table[data-stack] td[data-actions] button.text-red-600, table[data-stack] td[data-actions] a.text-red-600 { background: #fef2f2; color: #dc2626 !important; }
 }
+
+/* Interactive hover button (components/ui/interactive-hover-button.jsx). Phone and tablet: a plain solid brand button. */
+.ihb { position: relative; overflow: hidden; border-radius: 9999px; background: var(--color-brand); color: #fff; font-weight: 600; text-align: center; cursor: pointer; --s: 1; }
+[dir="rtl"] .ihb { --s: -1; }
+.ihb > .ihb-text { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.ihb > .ihb-in, .ihb > .ihb-dot { display: none; }
+.ihb:disabled { pointer-events: none; }
+@media (min-width: 768px) and (hover: hover) {
+  .ihb { min-width: 7.5rem; background: var(--color-snow); color: var(--color-deep-harbor); border: 1px solid #cbd5e1; }
+  .ihb > .ihb-text { transform: translateX(calc(var(--s) * 0.25rem)); transition: transform .3s, opacity .3s, color .3s; }
+  .ihb > .ihb-in { display: flex; position: absolute; inset: 0; z-index: 2; align-items: center; justify-content: center; gap: 0.5rem; color: #fff; opacity: 0; transform: translateX(calc(var(--s) * 3rem)); transition: transform .3s, opacity .3s; }
+  .ihb > .ihb-in::before { content: attr(data-text); }
+  .ihb > .ihb-dot { display: block; position: absolute; inset-inline-start: 20%; top: 40%; width: 0.5rem; height: 0.5rem; border-radius: 0.5rem; background: var(--color-brand); transition: all .3s; }
+  .ihb:hover > .ihb-text { transform: translateX(calc(var(--s) * 3rem)); opacity: 0; }
+  .ihb:hover > .ihb-in { opacity: 1; transform: translateX(calc(var(--s) * -0.25rem)); }
+  .ihb:hover > .ihb-dot { inset-inline-start: 0; top: 0; width: 100%; height: 100%; transform: scale(1.8); }
+  .ihb-plain:hover { color: #fff; }
+  .ihb-plain:hover > .ihb-text { transform: translateX(calc(var(--s) * 0.25rem)); opacity: 1; }
+}

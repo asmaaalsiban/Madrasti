@@ -7,6 +7,7 @@ import { api } from '../../api/client'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 import { DateInput } from '../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const nameOf = (o, lang) => o?.[`name_${lang}`] || o?.name_ar || ''
@@ -38,7 +39,7 @@ function RoundDialog({ round, onClose }) {
         </div>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -82,7 +83,7 @@ function SubstituteDialog({ bus, round, escorts, current, onClose }) {
         </label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="button" disabled={!escortId || save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50" onClick={() => save.mutate({ id: Number(escortId) })}>{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="button" disabled={!escortId || save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate({ id: Number(escortId) })}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </div>
     </Modal>
@@ -158,7 +159,7 @@ function BusDialog({ bus, rounds, drivers = [], escorts = [], onClose }) {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />{t('transport.active')}</label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -244,7 +245,7 @@ function AssignDialog({ student, overview, onClose }) {
         <p className="text-xs text-slate-500">{t('transport.seatsHint')}</p>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || !ready} className="rounded bg-brand px-5 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || !ready} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -261,7 +262,7 @@ function BusesTab({ overview }) {
   return (
     <div className="space-y-4">
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-      <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => setDialog({ type: 'bus' })}><Plus size={16} aria-hidden />{t('transport.newBus')}</button>
+      <InteractiveHoverButton type="button" className="px-4 py-2" onClick={() => setDialog({ type: 'bus' })}><Plus size={16} aria-hidden />{t('transport.newBus')}</InteractiveHoverButton>
       {overview.buses.length === 0 && <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('transport.noBuses')}</p>}
       <div className="grid gap-4 md:grid-cols-2">
         {overview.buses.map((b) => (
@@ -314,7 +315,7 @@ function RoundsTab({ overview }) {
     <div className="space-y-4">
       <p className="text-sm text-slate-600">{t('transport.roundsHelp')}</p>
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
-      <button type="button" className="inline-flex items-center gap-2 rounded bg-brand px-4 py-2 text-white" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('transport.newRound')}</button>
+      <InteractiveHoverButton type="button" className="px-4 py-2" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('transport.newRound')}</InteractiveHoverButton>
       {PERIODS.map((p) => (
         <div key={p} className="space-y-2">
           <h2 className="text-lg font-bold">{t(`transport.periods.${p}`)}</h2>

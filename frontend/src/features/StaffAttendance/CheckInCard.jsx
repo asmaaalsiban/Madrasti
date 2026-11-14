@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // "I arrived" / "I left": the staff member records their own working day.
 export default function CheckInCard() {
@@ -26,7 +27,7 @@ export default function CheckInCard() {
         </p>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       </div>
-      {!today?.check_in && <button type="button" disabled={act.isPending} className="rounded bg-brand px-4 py-2 text-white disabled:opacity-50" onClick={() => act.mutate('check-in')}>{t('staffAttendance.checkIn')}</button>}
+      {!today?.check_in && <InteractiveHoverButton type="button" disabled={act.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => act.mutate('check-in')}>{t('staffAttendance.checkIn')}</InteractiveHoverButton>}
       {today?.check_in && !today.check_out && <button type="button" disabled={act.isPending} className="rounded border px-4 py-2 text-brand disabled:opacity-50" onClick={() => act.mutate('check-out')}>{t('staffAttendance.checkOut')}</button>}
     </div>
   )

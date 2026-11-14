@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import { today } from '../../../lib/dates'
 import { useStudentName } from '../components/useStudentName'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const STATUSES = ['present', 'late', 'absent']
 const COUNT_BOX = { present: 'bg-green-50 text-green-800', late: 'bg-yellow-50 text-yellow-800', absent: 'bg-red-50 text-red-800' }
@@ -124,9 +125,9 @@ export default function TakeAttendancePage() {
           <p className="min-w-0 flex-1 text-xs text-slate-600 md:text-sm">
             {t('attendance.summary', { present: count('present'), late: count('late'), absent: count('absent') })}
           </p>
-          <button type="button" disabled={save.isPending} className="min-h-11 shrink-0 rounded-lg bg-brand px-6 py-2 font-semibold text-white disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={() => save.mutate()}>
+          <InteractiveHoverButton type="button" disabled={save.isPending} className="min-h-11 shrink-0 px-6 py-2 font-semibold disabled:opacity-60 md:min-h-0 md:rounded md:px-5 md:font-normal" onClick={() => save.mutate()}>
             {t('admin.actions.save')}
-          </button>
+          </InteractiveHoverButton>
         </div>
       )}
     </section>

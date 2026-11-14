@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Edits one cell of a section's week by hand: pick a subject (its teacher comes from the teacher assignment), lock, or empty the cell.
 export default function EditLessonDialog({ classroomId, period, entry, onClose }) {
@@ -47,7 +48,7 @@ export default function EditLessonDialog({ classroomId, period, entry, onClose }
           </div>
           <div className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="button" className="rounded bg-brand px-4 py-1.5 text-sm text-white disabled:opacity-50" disabled={!subjectId || save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="button" className="px-4 py-1.5 text-sm disabled:opacity-50" disabled={!subjectId || save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </div>
       </div>

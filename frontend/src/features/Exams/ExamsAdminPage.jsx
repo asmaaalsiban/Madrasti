@@ -5,6 +5,7 @@ import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -65,7 +66,7 @@ function EditDialog({ session, onClose }) {
           <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button>
           <span className="flex gap-2">
             <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-            <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+            <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
       </form>
@@ -101,7 +102,7 @@ function BulkDialog({ scope, count, onClose }) {
         {scope.kind !== 'monthly' && <label className="block text-sm">{t('exams.newStart')}<input type="time" className="mt-1 w-full rounded border p-2" value={form.start_time} onChange={set('start_time')} /></label>}
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || !(form.shift_days || form.period_from || form.start_time)} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('exams.applyToAll')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || !(form.shift_days || form.period_from || form.start_time)} className="px-4 py-1.5 disabled:opacity-50">{t('exams.applyToAll')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -218,7 +219,7 @@ export default function ExamsAdminPage() {
         )}
         <div className="flex flex-wrap gap-2">
           <button type="submit" disabled={run.isPending || !ready} className="rounded border px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('exams.preview')}</button>
-          <button type="button" disabled={run.isPending || !ready} className="rounded bg-brand px-5 py-2 text-white disabled:opacity-50" onClick={() => run.mutate(false)}>{t('exams.publish')}</button>
+          <InteractiveHoverButton type="button" disabled={run.isPending || !ready} className="px-5 py-2 disabled:opacity-50" onClick={() => run.mutate(false)}>{t('exams.publish')}</InteractiveHoverButton>
         </div>
       </form>
 

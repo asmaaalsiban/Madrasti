@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import Money from '../../Finance/components/Money'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const cents = (v) => Math.round(Number(v || 0) * 100)
@@ -77,7 +78,7 @@ export function NewContractDialog({ staff, onClose }) {
         <label className="block text-sm">{t('payroll.notes')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('admin.actions.save')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>
@@ -120,7 +121,7 @@ export function RenewDialog({ staff, currency, onClose }) {
         <label className="block text-sm">{t('payroll.notes')}<input className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
           <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
-          <button type="submit" disabled={save.isPending || preview <= 0} className="rounded bg-brand px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.renew')}</button>
+          <InteractiveHoverButton type="submit" disabled={save.isPending || preview <= 0} className="px-4 py-1.5 disabled:opacity-50">{t('payroll.renew')}</InteractiveHoverButton>
         </div>
       </form>
     </Modal>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The admin's list of what students are evaluated on: add your own, rename, hide or remove.
 export default function BehaviorCriteriaPage() {
@@ -24,7 +25,7 @@ export default function BehaviorCriteriaPage() {
       <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate() }}>
         <label className="text-sm">{t('behavior.nameAr')}<input required className="mt-1 block rounded border p-2" value={draft.name_ar} onChange={(e) => setDraft({ ...draft, name_ar: e.target.value })} /></label>
         <label className="text-sm">{t('behavior.nameEn')}<input required dir="ltr" className="mt-1 block rounded border p-2" value={draft.name_en} onChange={(e) => setDraft({ ...draft, name_en: e.target.value })} /></label>
-        <button type="submit" className="rounded bg-brand px-4 py-2 text-white">{t('admin.actions.add')}</button>
+        <InteractiveHoverButton type="submit" className="px-4 py-2">{t('admin.actions.add')}</InteractiveHoverButton>
       </form>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       <ul className="space-y-2">
