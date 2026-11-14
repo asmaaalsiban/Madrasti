@@ -93,7 +93,7 @@ export default function BuildingsPage() {
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">{genderLabel(b.gender)}</span>
             </div>
             <div className="flex gap-3 text-sm">
-              <button type="button" className="rounded border px-3 py-1" onClick={() => openFloor(b, null)}>{t('buildings.addFloor')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1" onClick={() => openFloor(b, null)}>{t('buildings.addFloor')}</InteractiveHoverButton>
               <button type="button" className="text-brand" onClick={() => openBuilding(b)}>{t('admin.actions.edit')}</button>
               <button type="button" className="text-red-600" onClick={() => setToDelete({ kind: 'building', row: b })}>{t('admin.actions.delete')}</button>
             </div>
@@ -168,7 +168,7 @@ export default function BuildingsPage() {
             </>
           )}
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>

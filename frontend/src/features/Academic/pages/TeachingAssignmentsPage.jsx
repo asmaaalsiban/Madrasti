@@ -4,6 +4,7 @@ import AutoAssignDialog from '../components/AutoAssignDialog'
 import ResourcePage from '../components/ResourcePage'
 import ExportButton from '../../../components/shared/ExportButton'
 import { useResource } from '../hooks/useResource'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Who teaches which subject in which classroom. The teacher list only offers the teachers of the chosen subject.
 const fields = [
@@ -47,7 +48,7 @@ export default function TeachingAssignmentsPage() {
         empty={{ classroom_id: classroom, subject_id: '', teacher_id: '', weekly_periods: 3 }}
         actions={(
           <>
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setAuto(true)}>{t('autoAssign.button')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setAuto(true)}>{t('autoAssign.button')}</InteractiveHoverButton>
             <ExportButton path="/teaching-assignments/export" fallbackName="distribution.xlsx" label={t('academic.teaching.exportDistribution')} />
           </>
         )}

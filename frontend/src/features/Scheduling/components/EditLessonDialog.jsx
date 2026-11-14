@@ -43,11 +43,11 @@ export default function EditLessonDialog({ classroomId, period, entry, onClose }
         <p className="text-xs text-slate-500">{t('timetable.editHelp')}</p>
         <div className="flex flex-wrap justify-between gap-2">
           <div className="flex gap-2">
-            {entry && <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => lock.mutate()}>{entry.is_locked ? t('timetable.unlock') : t('timetable.lock')}</button>}
+            {entry && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm" onClick={() => lock.mutate()}>{entry.is_locked ? t('timetable.unlock') : t('timetable.lock')}</InteractiveHoverButton>}
             {entry && <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-700" onClick={() => remove.mutate()}>{t('timetable.emptyCell')}</button>}
           </div>
           <div className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="button" className="px-4 py-1.5 text-sm disabled:opacity-50" disabled={!subjectId || save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </div>

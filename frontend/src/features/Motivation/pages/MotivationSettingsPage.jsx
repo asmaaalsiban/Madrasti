@@ -37,7 +37,7 @@ function Manager({ title, help, path, fields, empty, describe }) {
           <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded border bg-white p-3">
             <span className={row.is_active ? '' : 'text-slate-400 line-through'}>{describe(row)}</span>
             <span className="flex gap-2">
-              <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => toggle.mutate(row)}>{row.is_active ? t('behavior.hide') : t('behavior.show')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => toggle.mutate(row)}>{row.is_active ? t('behavior.hide') : t('behavior.show')}</InteractiveHoverButton>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => remove.mutate(row)}>{t('admin.actions.delete')}</button>
             </span>
           </li>

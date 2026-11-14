@@ -45,7 +45,7 @@ function RenewDialog({ row, year, onClose }) {
         </div>
         <p className="text-xs text-slate-500">{t('renewals.feesHint')}</p>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || !gradeId} className="px-4 py-1.5 disabled:opacity-50">{t('renewals.renew')}</InteractiveHoverButton>
         </div>
       </form>
@@ -69,7 +69,7 @@ function DeclineDialog({ row, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <label className="block text-sm">{t('renewals.reason')}<input className="mt-1 w-full rounded border p-2" value={reason} onChange={(e) => setReason(e.target.value)} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <button type="submit" disabled={save.isPending} className="rounded bg-red-700 px-4 py-1.5 text-white disabled:opacity-50">{t('renewals.decline')}</button>
         </div>
       </form>
@@ -119,7 +119,7 @@ export default function RenewalsPage() {
 
       {data.year && (
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" disabled={open.isPending} className="rounded border px-3 py-1.5 text-brand" onClick={() => open.mutate()}>{data.summary.total > 0 ? t('renewals.addMissing') : t('renewals.open')}</button>
+          <InteractiveHoverButton variant="outline" type="button" disabled={open.isPending} className="px-3 py-1.5 text-brand" onClick={() => open.mutate()}>{data.summary.total > 0 ? t('renewals.addMissing') : t('renewals.open')}</InteractiveHoverButton>
           {data.summary.pending > 0 && <InteractiveHoverButton type="button" disabled={all.isPending} className="px-3 py-1.5 disabled:opacity-50" onClick={() => all.mutate()}>{t('renewals.renewAll', { count: data.summary.pending })}</InteractiveHoverButton>}
         </div>
       )}
@@ -146,7 +146,7 @@ export default function RenewalsPage() {
                       <span className="flex flex-wrap justify-end gap-2">
                         {['pending', 'graduating'].includes(r.status) && <InteractiveHoverButton type="button" className="px-3 py-1" onClick={() => setDialog({ type: 'renew', row: r })}>{t('renewals.renew')}</InteractiveHoverButton>}
                         {['pending', 'graduating'].includes(r.status) && <button type="button" className="rounded border border-red-300 px-3 py-1 text-red-700" onClick={() => setDialog({ type: 'decline', row: r })}>{t('renewals.decline')}</button>}
-                        {r.status === 'declined' && <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => reopen.mutate(r.id)}>{t('renewals.reopen')}</button>}
+                        {r.status === 'declined' && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => reopen.mutate(r.id)}>{t('renewals.reopen')}</InteractiveHoverButton>}
                       </span>
                     </td>
                   </tr>

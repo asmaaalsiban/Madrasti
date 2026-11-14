@@ -90,9 +90,9 @@ export default function ScoreSheetPage() {
             {' · '}{t('grading.maxScore')}: {assessment.max_score}
           </p>
         </div>
-        <button type="button" className="min-h-11 w-full rounded border px-3 py-1.5 font-medium sm:min-h-0 sm:w-auto sm:font-normal" disabled={publish.isPending} onClick={() => publish.mutate()}>
+        <InteractiveHoverButton variant="outline" type="button" className="min-h-11 w-full px-3 py-1.5 font-medium sm:min-h-0 sm:w-auto sm:font-normal" disabled={publish.isPending} onClick={() => publish.mutate()}>
           {t(assessment.is_published ? 'grading.unpublish' : 'grading.publish')}
-        </button>
+        </InteractiveHoverButton>
       </div>
 
       {message.kind === 'error' && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{message.text}</p>}
@@ -117,7 +117,7 @@ export default function ScoreSheetPage() {
                     {s.was_absent && v.status === '' && v.score === '' && (
                       <span className="mt-1 flex flex-wrap items-center gap-2 text-xs font-normal text-amber-700">
                         {t('grading.absentThatDay')}
-                        <button type="button" className="rounded border border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</button>
+                        <InteractiveHoverButton variant="outline" type="button" className="border-amber-400 px-2 py-0.5" onClick={() => setStatus(s.id, 'absent')}>{t('grading.markAbsent')}</InteractiveHoverButton>
                       </span>
                     )}
                   </span>

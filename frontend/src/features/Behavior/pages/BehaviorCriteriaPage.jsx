@@ -33,7 +33,7 @@ export default function BehaviorCriteriaPage() {
           <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded border bg-white p-3">
             <span className={c.is_active ? '' : 'text-slate-400 line-through'}>{c.name_ar} · <span dir="ltr">{c.name_en}</span></span>
             <span className="flex gap-2">
-              <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => toggle.mutate(c)}>{c.is_active ? t('behavior.hide') : t('behavior.show')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => toggle.mutate(c)}>{c.is_active ? t('behavior.hide') : t('behavior.show')}</InteractiveHoverButton>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => remove.mutate(c)}>{t('admin.actions.delete')}</button>
             </span>
           </li>

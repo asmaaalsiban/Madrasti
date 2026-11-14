@@ -30,7 +30,7 @@ function SelectField({ field, value, onChange, form }) {
 
 // Config-driven list + create/edit modal + delete confirmation for one resource.
 // fields: [{ name, label, type? ('custom' = render({ form, setForm }) draws it, no value), options?, optionsFrom?, optionsParams? (object, or a function of the form), optionLabel?, getValue?(row), hint?, visibleWhen?(form), requiredWhen?(form) }]
-// rowActions: [{ key, label, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
+// rowActions: [{ key, label, icon?, confirm, done, run(row), when?(row) }]: extra per-row buttons that ask for confirmation first.
 // filters: extra query parameters of the list (remount the page with a new key when they change).
 // onSaved(response, isNew): called after a successful save.
 // actions: extra buttons / links next to the Add button.
@@ -148,7 +148,7 @@ export default function ResourcePage({ path, title, columns, formColumns = 2, fi
         lastPage={data?.meta?.last_page ?? 1}
         onPage={setPage}
         onEdit={openForm}
-        extraActions={rowActions.map((a) => ({ key: a.key, label: t(a.label), when: a.when, onClick: (row) => { setNotice(''); setStatus(''); setPending({ action: a, row }) } }))}
+        extraActions={rowActions.map((a) => ({ key: a.key, label: t(a.label), icon: a.icon, when: a.when, onClick: (row) => { setNotice(''); setStatus(''); setPending({ action: a, row }) } }))}
         onDelete={(row) => { setNotice(''); setStatus(''); setToDelete(row) }}
       />
       <Modal open={editing !== null} title={t(title)} onClose={() => setEditing(null)} size={formColumns === 3 ? 'xl' : fields.length > 6 ? 'lg' : 'md'}>
@@ -183,7 +183,7 @@ export default function ResourcePage({ path, title, columns, formColumns = 2, fi
           ))}
           </div>
           <div className="sticky bottom-0 -mx-1 flex justify-end gap-2 bg-white px-1 pt-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>

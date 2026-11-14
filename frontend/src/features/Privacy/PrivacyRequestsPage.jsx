@@ -20,7 +20,7 @@ function AnswerDialog({ row, status, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <label className="block text-sm">{t(status === 'done' ? 'privacy.admin.whatDone' : 'privacy.admin.whyRefused')}<textarea required rows={3} className="mt-1 w-full rounded border p-2" value={answer} onChange={(e) => setAnswer(e.target.value)} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('privacy.admin.send')}</InteractiveHoverButton>
         </div>
       </form>

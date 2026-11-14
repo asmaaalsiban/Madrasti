@@ -7,6 +7,7 @@ import Modal from '../../../components/shared/Modal'
 import StatusDates from '../components/StatusDates'
 import { useStudentName } from '../components/useStudentName'
 import { DateInput } from '../../../components/shared/DateInput'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Per student: how many days absent / late in the period; the number opens the dates behind it.
 export default function AttendanceReportPage() {
@@ -86,16 +87,16 @@ export default function AttendanceReportPage() {
 
       {meta?.last_page > 1 && (
         <div className="flex items-center justify-between text-sm">
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('admin.actions.prev')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('admin.actions.prev')}</InteractiveHoverButton>
           <span>{page} / {meta.last_page}</span>
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page >= meta.last_page} onClick={() => setPage(page + 1)}>{t('admin.actions.next')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page >= meta.last_page} onClick={() => setPage(page + 1)}>{t('admin.actions.next')}</InteractiveHoverButton>
         </div>
       )}
 
       <Modal open={open !== null} title={open ? t(`attendance.${open.status}Dates`, { name: nameOf(open.student) }) : ''} onClose={() => setOpen(null)}>
         {days.data ? <StatusDates records={days.data.records} /> : <p className="text-sm text-slate-500">{t('attendance.loading')}</p>}
         <div className="flex justify-end pt-4">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={() => setOpen(null)}>{t('attendance.close')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setOpen(null)}>{t('attendance.close')}</InteractiveHoverButton>
         </div>
       </Modal>
     </section>

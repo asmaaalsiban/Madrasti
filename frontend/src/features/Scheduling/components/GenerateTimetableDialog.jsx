@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Builds the timetable of every section from the teacher assignments: preview first (nothing is saved), then apply.
 export default function GenerateTimetableDialog({ open, onClose }) {
@@ -60,8 +61,8 @@ export default function GenerateTimetableDialog({ open, onClose }) {
           </div>
         )}
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={close}>{t('autoAssign.close')}</button>
-          <button type="button" disabled={run.isPending} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => run.mutate({ apply: false })}>{t('generate.preview')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={close}>{t('autoAssign.close')}</InteractiveHoverButton>
+          <InteractiveHoverButton variant="outline" type="button" disabled={run.isPending} className="px-3 py-1.5 disabled:opacity-50" onClick={() => run.mutate({ apply: false })}>{t('generate.preview')}</InteractiveHoverButton>
           {report?.dry_run && report.placed > 0 && (
             <button type="button" disabled={run.isPending} className="rounded bg-green-700 px-3 py-1.5 text-white disabled:opacity-50" onClick={() => run.mutate({ apply: true })}>{t('timetable.apply')}</button>
           )}

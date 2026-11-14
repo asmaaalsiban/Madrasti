@@ -46,7 +46,7 @@ function RuleDialog({ rule, onClose }) {
         <label className="block text-sm">{t('warnings.details')}<textarea rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={form.body} onChange={set('body')} /><span className="text-xs text-slate-500">{t('warnings.rules.bodyHint')}</span></label>
         <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={form.auto_send} onChange={(e) => setForm({ ...form, auto_send: e.target.checked })} /><span>{t('warnings.rules.autoSend')}<span className="block text-xs text-slate-500">{t('warnings.rules.autoSendHint')}</span></span></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -71,7 +71,7 @@ export default function RulesTab() {
       <p className="text-sm text-slate-600">{t('warnings.rules.intro')}</p>
       <div className="flex flex-wrap gap-2">
         <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({})}><Plus size={16} aria-hidden />{t('warnings.rules.new')}</InteractiveHoverButton>
-        <button type="button" disabled={run.isPending} className="rounded border px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => run.mutate()}>{t('warnings.rules.runNow')}</button>
+        <InteractiveHoverButton variant="outline" type="button" disabled={run.isPending} className="px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => run.mutate()}>{t('warnings.rules.runNow')}</InteractiveHoverButton>
       </div>
       {message && <p role="status" className="rounded bg-green-50 p-2 text-sm text-green-800">{message}</p>}
       {!data ? <p className="text-slate-500">{t('common.loading')}</p> : data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('warnings.rules.none')}</p> : (

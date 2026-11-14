@@ -79,7 +79,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
             <label className="text-sm">{t('behavior.nameAr')}<input className="mt-1 block rounded border p-2" value={newCriterion.name_ar} onChange={(e) => setNewCriterion({ ...newCriterion, name_ar: e.target.value })} /></label>
             <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCriterion.name_en} onChange={(e) => setNewCriterion({ ...newCriterion, name_en: e.target.value })} /></label>
             <InteractiveHoverButton type="button" className="px-3 py-2 disabled:opacity-50" disabled={!newCriterion.name_ar || !newCriterion.name_en || addCriterion.isPending} onClick={() => addCriterion.mutate()}>{t('behavior.saveCriterion')}</InteractiveHoverButton>
-            <button type="button" className="rounded border px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           </div>
         ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAdding(true)}>{t('behavior.addCriterion')}</button>}
         <div className="space-y-2 rounded-lg border border-dashed border-brand bg-blue-50/40 p-3">
@@ -103,14 +103,14 @@ export default function EvaluateDialog({ student, date, onClose }) {
           <div className="flex flex-wrap items-center gap-2">
             <input aria-label={t('behavior.special.newName')} className="min-w-0 flex-1 rounded border p-2" placeholder={t('behavior.special.newName')} value={specialName} onChange={(e) => setSpecialName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (specialName.trim()) addSpecial.mutate() } }} />
-            <button type="button" className="rounded border px-3 py-2 text-brand disabled:opacity-50" disabled={!specialName.trim() || addSpecial.isPending} onClick={() => addSpecial.mutate()}>{t('behavior.special.add')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2 text-brand disabled:opacity-50" disabled={!specialName.trim() || addSpecial.isPending} onClick={() => addSpecial.mutate()}>{t('behavior.special.add')}</InteractiveHoverButton>
           </div>
         </div>
         <p className="text-xs text-slate-500">{[1, 2, 3, 4, 5].map((v) => `${v} = ${t(`behavior.levels.${v}`)}`).join(' · ')}</p>
         <label className="block text-sm">{t('behavior.note')}<textarea rows={3} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />{t('behavior.visibleToParent')}</label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending} onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
 
@@ -123,7 +123,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
               <option value="negative">{t('behavior.type.negative')}</option>
             </select>
             <input aria-label={t('behavior.quickText')} className="min-w-0 flex-1 rounded border p-2" value={quick.note} onChange={(e) => { setQuick({ ...quick, note: e.target.value }); setQuickSaved(false) }} />
-            <button type="button" className="rounded border px-3 py-2 disabled:opacity-50" disabled={!quick.note || addQuick.isPending} onClick={() => addQuick.mutate()}>{t('behavior.addNote')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2 disabled:opacity-50" disabled={!quick.note || addQuick.isPending} onClick={() => addQuick.mutate()}>{t('behavior.addNote')}</InteractiveHoverButton>
           </div>
           {quickSaved && <p role="status" className="text-sm text-green-700">{t('behavior.noteAdded')}</p>}
         </div>

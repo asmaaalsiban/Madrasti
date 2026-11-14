@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { currentSubscription, disablePush, enablePush, needsHomeScreen, pushSupported } from './push'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // "Notifications on this phone": turns web push on or off for this device (shown inside the bell).
 export default function PushToggle() {
@@ -40,9 +41,9 @@ export default function PushToggle() {
   return (
     <div className="space-y-1 border-t p-2 text-sm">
       {state === 'denied' ? <p className="text-xs text-amber-700">{t('notifications.push.denied')}</p> : (
-        <button type="button" disabled={busy || state === 'checking'} className="w-full rounded border px-3 py-1 text-start disabled:opacity-60" onClick={toggle}>
+        <InteractiveHoverButton variant="outline" type="button" disabled={busy || state === 'checking'} className="w-full px-3 py-1 text-start disabled:opacity-60" onClick={toggle}>
           {state === 'on' ? t('notifications.push.disable') : t('notifications.push.enable')}
-        </button>
+        </InteractiveHoverButton>
       )}
       {state === 'on' && <p role="status" className="text-xs text-green-700">{t('notifications.push.on')}</p>}
       {error && <p role="alert" className="text-xs text-red-700">{error}</p>}

@@ -148,10 +148,10 @@ export default function AssessmentsPage() {
             </dl>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Link className="col-span-2 flex min-h-11 items-center justify-center rounded-lg bg-brand px-3 font-semibold text-white" to={`${base}/${r.id}`}>{t('grading.enterScores')}</Link>
-              <button type="button" className="min-h-11 rounded-lg border px-3 font-medium text-slate-700" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))}>
+              <InteractiveHoverButton variant="outline" type="button" className="min-h-11 px-3 font-medium text-slate-700" onClick={() => run(() => api.post(`/assessments/${r.id}/${r.is_published ? 'unpublish' : 'publish'}`))}>
                 {t(r.is_published ? 'grading.unpublish' : 'grading.publish')}
-              </button>
-              <button type="button" className="min-h-11 rounded-lg border px-3 font-medium text-brand" onClick={() => openForm(r)}>{t('admin.actions.edit')}</button>
+              </InteractiveHoverButton>
+              <InteractiveHoverButton variant="outline" type="button" className="min-h-11 px-3 font-medium text-brand" onClick={() => openForm(r)}>{t('admin.actions.edit')}</InteractiveHoverButton>
               {!r.is_published && <button type="button" className="col-span-2 min-h-11 rounded-lg bg-red-50 px-3 font-medium text-red-600" onClick={() => setToDelete(r)}>{t('admin.actions.delete')}</button>}
             </div>
           </li>
@@ -223,7 +223,7 @@ export default function AssessmentsPage() {
           </FormField>
           <FormFieldErrors errors={errors} names={['term_id', 'subject_id', 'classroom_id']} />
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-3 py-1.5 disabled:opacity-60">{t('admin.actions.save')}</InteractiveHoverButton>
           </div>
         </form>

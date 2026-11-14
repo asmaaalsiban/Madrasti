@@ -333,3 +333,19 @@ html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-
   .ihb-plain:hover { color: #fff; }
   .ihb-plain:hover > .ihb-text { transform: translateX(calc(var(--s) * 0.25rem)); opacity: 1; }
 }
+
+/* Outline variant (cancel, previous/next...): on a phone it stays a plain outline button. */
+.ihb-outline { background: var(--color-snow); color: inherit; border: 1px solid #cbd5e1; font-weight: 500; }
+/* Icon-only row actions (components/ui/icon-action-button.jsx). */
+.ihb-icon { --ihb-color: var(--color-brand); }
+.ihb-slate { --ihb-color: #334155; }
+.ihb-red { --ihb-color: #dc2626; }
+.ihb-icon .ihb-label { margin-inline-start: 0.25rem; }
+@media (min-width: 768px) and (hover: hover) {
+  .ihb-icon { min-width: 0; width: 2.25rem; height: 2.25rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--ihb-color); border-color: color-mix(in srgb, var(--ihb-color) 35%, white); }
+  .ihb-icon .ihb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+  .ihb-icon > .ihb-text, .ihb-icon:hover > .ihb-text { transform: none; opacity: 1; }
+  .ihb-icon > .ihb-dot { background: var(--ihb-color); inset-inline-start: 50%; top: 50%; width: 0; height: 0; transform: none; }
+  .ihb-icon:hover > .ihb-dot { inset-inline-start: 0; top: 0; width: 100%; height: 100%; transform: scale(1.8); }
+  .ihb-icon:hover { color: #fff; }
+}

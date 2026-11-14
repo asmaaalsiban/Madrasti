@@ -47,7 +47,7 @@ function PostDialog({ post, onClose }) {
         <div className="flex justify-between gap-2">
           {post ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button> : <span />}
           <span className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
@@ -98,7 +98,7 @@ function DutyDialog({ duty, posts, onClose }) {
         <div className="flex justify-between gap-2">
           {duty ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('admin.actions.delete')}</button> : <span />}
           <span className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
@@ -133,8 +133,8 @@ function WhoForm({ teachers, onSaved, t }) {
       <p className="text-sm text-slate-600">{t('duties.whoHelp')}</p>
       <div className="flex flex-wrap items-center gap-2">
         <input type="search" aria-label={t('admin.actions.search')} placeholder={t('admin.actions.search')} className="rounded border p-1.5 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button type="button" className="rounded border px-3 py-1 text-sm text-brand" onClick={() => change(teachers.map((x) => x.id))}>{t('duties.selectAll')}</button>
-        <button type="button" className="rounded border px-3 py-1 text-sm text-brand" onClick={() => change([])}>{t('duties.selectNone')}</button>
+        <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm text-brand" onClick={() => change(teachers.map((x) => x.id))}>{t('duties.selectAll')}</InteractiveHoverButton>
+        <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm text-brand" onClick={() => change([])}>{t('duties.selectNone')}</InteractiveHoverButton>
       </div>
       <ul className="grid max-h-60 gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((x) => (
@@ -175,7 +175,7 @@ export default function DutiesAdminPage() {
   const days = roster.data ? [...new Set(roster.data.data.map((d) => d.date))] : []
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2"><h1>{t('duties.title')}</h1><button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'duty' })}>{t('duties.addDuty')}</button></div>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h1>{t('duties.title')}</h1><InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'duty' })}>{t('duties.addDuty')}</InteractiveHoverButton></div>
       <p className="text-sm text-slate-600">{t('duties.help')}</p>
 
       <WhoDoesDuty />
@@ -187,7 +187,7 @@ export default function DutiesAdminPage() {
             {list.map((p) => (
               <li key={p.id} className={`flex items-center justify-between gap-2 rounded-2xl border p-3 ${p.is_active ? '' : 'opacity-50'}`}>
                 <span><b className="block text-deep-harbor">{p.name}</b><span className="text-xs text-slate-600" dir="ltr">{p.starts_at} – {p.ends_at}</span><span className="ms-2 text-xs text-slate-600">× {p.staff_count}{p.days ? ` · ${p.days.map((d) => t(`duties.weekdays.${d}`)).join('، ')}` : ''}</span></span>
-                <button type="button" className="rounded border px-3 py-1 text-sm text-brand" onClick={() => setDialog({ type: 'post', post: p })}>{t('admin.actions.edit')}</button>
+                <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm text-brand" onClick={() => setDialog({ type: 'post', post: p })}>{t('admin.actions.edit')}</InteractiveHoverButton>
               </li>
             ))}
           </ul>
@@ -217,7 +217,7 @@ export default function DutiesAdminPage() {
           <div className="flex flex-wrap items-center gap-2">
             {off.map((d) => <span key={d} className="rounded-full bg-sky-tint px-3 py-1" dir="ltr">{d}<button type="button" aria-label={t('admin.actions.delete')} className="ms-2 text-red-700" onClick={() => setOff(off.filter((x) => x !== d))}>✕</button></span>)}
             <DateInput aria-label={t('duties.holidays')} className="rounded border p-1.5" value={offDraft} onChange={(e) => setOffDraft(e.target.value)} />
-            <button type="button" disabled={!offDraft} className="rounded border px-3 py-1 text-brand disabled:opacity-40" onClick={() => { setOff([...new Set([...off, offDraft])]); setOffDraft('') }}>{t('duties.addHoliday')}</button>
+            <InteractiveHoverButton variant="outline" type="button" disabled={!offDraft} className="px-3 py-1 text-brand disabled:opacity-40" onClick={() => { setOff([...new Set([...off, offDraft])]); setOffDraft('') }}>{t('duties.addHoliday')}</InteractiveHoverButton>
           </div>
         </div>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
@@ -228,7 +228,7 @@ export default function DutiesAdminPage() {
           </div>
         )}
         <div className="flex flex-wrap gap-2">
-          <button type="submit" disabled={run.isPending || !range.from || !range.to} className="rounded border px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('duties.preview')}</button>
+          <InteractiveHoverButton variant="outline" type="submit" disabled={run.isPending || !range.from || !range.to} className="px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('duties.preview')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" disabled={run.isPending || !range.from || !range.to} className="px-5 py-2 disabled:opacity-50" onClick={() => run.mutate(false)}>{t('duties.publish')}</InteractiveHoverButton>
         </div>
       </form>
@@ -244,7 +244,7 @@ export default function DutiesAdminPage() {
                   <span className="w-28 text-slate-600" dir="ltr">{x.starts_at} – {x.ends_at}</span>
                   <span className="font-bold text-deep-harbor">{x.location}</span>
                   <span className="min-w-0 flex-1 truncate">{x.user.name}{x.is_locked && <span className="ms-2 rounded-full bg-slate-100 px-2 text-xs">{t('duties.locked')}</span>}</span>
-                  <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setDialog({ type: 'duty', duty: x })}>{t('admin.actions.edit')}</button>
+                  <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => setDialog({ type: 'duty', duty: x })}>{t('admin.actions.edit')}</InteractiveHoverButton>
                 </li>
               ))}
             </ul>

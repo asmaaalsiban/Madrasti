@@ -60,7 +60,7 @@ export default function WarningsPage() {
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); withdraw.mutate() }}>
           <p className="text-sm text-slate-600">{t('warnings.withdrawHelp')}</p>
           <label className="block text-sm">{t('warnings.reason')}<input required className="mt-1 w-full rounded border p-2" value={reason} onChange={(e) => setReason(e.target.value)} /></label>
-          <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={() => setWithdrawing(null)}>{t('admin.actions.cancel')}</button><button type="submit" disabled={withdraw.isPending} className="rounded bg-red-600 px-5 py-1.5 text-white disabled:opacity-50">{t('warnings.withdraw')}</button></div>
+          <div className="flex justify-end gap-2"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setWithdrawing(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton><button type="submit" disabled={withdraw.isPending} className="rounded bg-red-600 px-5 py-1.5 text-white disabled:opacity-50">{t('warnings.withdraw')}</button></div>
         </form>
       </Modal>
     </section>

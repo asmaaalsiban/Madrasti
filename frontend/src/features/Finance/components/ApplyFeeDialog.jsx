@@ -26,7 +26,7 @@ export default function ApplyFeeDialog({ structure, onClose }) {
       {result !== null ? (
         <div className="space-y-3">
           <p role="status" className="rounded bg-green-50 p-3 text-green-800">{t('finance.applied', { count: result })}</p>
-          <div className="flex justify-end"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('homework.close')}</button></div>
+          <div className="flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('homework.close')}</InteractiveHoverButton></div>
         </div>
       ) : (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); apply.mutate() }}>
@@ -37,7 +37,7 @@ export default function ApplyFeeDialog({ structure, onClose }) {
           <label className="block text-sm">{t('finance.fields.everyMonths')}<input required type="number" min="1" max="12" className="mt-1 w-full rounded border p-2" value={form.every_months} onChange={set('every_months')} /></label>
           <label className="block text-sm">{t('finance.fields.discountAll')}<input type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.discount} onChange={set('discount')} /></label>
           <div className="flex justify-end gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={apply.isPending}>{t('finance.apply')}</InteractiveHoverButton>
           </div>
         </form>

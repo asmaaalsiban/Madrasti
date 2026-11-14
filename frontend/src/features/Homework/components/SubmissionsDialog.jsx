@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { HomeworkPhotos } from './HomeworkImage'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The teacher's list for one homework: who sent an answer (with its text and photo) and who has not.
 export default function SubmissionsDialog({ homework, onClose }) {
@@ -41,7 +42,7 @@ export default function SubmissionsDialog({ homework, onClose }) {
             </ul>
           </>
         )}
-        <div className="flex justify-end"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('homework.close')}</button></div>
+        <div className="flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('homework.close')}</InteractiveHoverButton></div>
       </div>
     </Modal>
   )

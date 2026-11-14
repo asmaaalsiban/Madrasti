@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const STATE_STYLE = { pending: 'bg-amber-100 text-amber-800', answered: 'bg-green-100 text-green-800', approved: 'bg-green-100 text-green-800', declined: 'bg-red-100 text-red-700' }
 
@@ -43,8 +44,8 @@ export default function SurveyResultsPage({ base }) {
 
       <div className="flex flex-wrap gap-2">
         <Link to={`${base}/surveys/${id}/responses`} className="rounded bg-brand px-3 py-1.5 text-sm text-white">{t('surveys.openTable')}</Link>
-        {open && pending > 0 && <button type="button" disabled={remind.isPending} className="rounded border px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={() => remind.mutate()}>{t('surveys.remind', { count: pending })}</button>}
-        {open && <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => close.mutate()}>{t('surveys.close')}</button>}
+        {open && pending > 0 && <InteractiveHoverButton variant="outline" type="button" disabled={remind.isPending} className="px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={() => remind.mutate()}>{t('surveys.remind', { count: pending })}</InteractiveHoverButton>}
+        {open && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm" onClick={() => close.mutate()}>{t('surveys.close')}</InteractiveHoverButton>}
         <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-700" onClick={() => setConfirmDelete(true)}>{t('admin.actions.delete')}</button>
       </div>
       {notice && <p role="status" className="rounded bg-amber-50 p-2 text-sm text-amber-900">{notice}</p>}

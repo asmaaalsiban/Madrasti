@@ -6,6 +6,7 @@ import { Check } from 'lucide-react'
 import { api } from '../../../api/client'
 import { DateInput } from '../../../components/shared/DateInput'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -21,7 +22,7 @@ function Ledger({ id }) {
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-white p-3">
         <label className="text-sm">{t('money.fromDate')}<DateInput className="mt-1 block rounded border p-1.5" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} /></label>
         <label className="text-sm">{t('money.toDate')}<DateInput className="mt-1 block rounded border p-1.5" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} /></label>
-        {(range.from || range.to) && <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => setRange({ from: '', to: '' })}>{t('money.clear')}</button>}
+        {(range.from || range.to) && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm" onClick={() => setRange({ from: '', to: '' })}>{t('money.clear')}</InteractiveHoverButton>}
       </div>
       {!data ? <p className="text-slate-500">{t('common.loading')}</p> : (
         <div className="overflow-x-auto rounded-lg border bg-white">

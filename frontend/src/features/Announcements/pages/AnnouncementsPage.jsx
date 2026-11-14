@@ -50,7 +50,7 @@ export default function AnnouncementsPage() {
             {open === a.id && <p className="mt-2 whitespace-pre-line text-sm text-slate-700">{a.body}</p>}
             {a.can_edit && canPublish && (
               <div className="flex gap-2 pt-2">
-                <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => setEditing(a)}>{t('admin.actions.edit')}</button>
+                <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => setEditing(a)}>{t('admin.actions.edit')}</InteractiveHoverButton>
                 <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(a)}>{t('admin.actions.delete')}</button>
               </div>
             )}

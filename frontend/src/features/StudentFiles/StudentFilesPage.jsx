@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { LiveAttachments } from '../../components/shared/Attachments'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // The student's file (birth certificate, records, ID copies...): find the student by name or number, then add their files.
 export default function StudentFilesPage() {
@@ -48,7 +49,7 @@ export default function StudentFilesPage() {
         <div className="space-y-4 rounded-lg border bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p><bdi className="text-lg font-bold">{nameOf(student)}</bdi> <span className="text-sm text-slate-600" dir="ltr">#{student.student_number}</span></p>
-            <button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={() => { setPicked(null); setSearch('') }}>{t('studentFiles.change')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm" onClick={() => { setPicked(null); setSearch('') }}>{t('studentFiles.change')}</InteractiveHoverButton>
           </div>
           <LiveAttachments ownerType="student" ownerId={student.id} items={student.files ?? []} label={t('studentFiles.files')} invalidate={['student-files']} />
           {(student.files ?? []).length === 0 && <p className="text-sm text-slate-500">{t('studentFiles.empty')}</p>}

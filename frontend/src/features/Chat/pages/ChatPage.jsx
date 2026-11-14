@@ -28,7 +28,7 @@ export default function ChatPage() {
         <h1 className="text-xl font-bold">{t('chat.title')}</h1>
         <div className="flex gap-2">
           <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog('chat')}>{t('chat.newChat')}</InteractiveHoverButton>
-          {canGroup && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog('group')}>{t('chat.newGroup')}</button>}
+          {canGroup && <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5 text-brand" onClick={() => setDialog('group')}>{t('chat.newGroup')}</InteractiveHoverButton>}
         </div>
       </div>
 

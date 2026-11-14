@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { PALETTE, SIZES } from '../../features/Layout/arrange'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
 // The switch that puts a screen in "arrange" mode, and the way back to the default order.
 export function ArrangeBar({ editing, onToggle, onReset, custom, size, onSize, className = '' }) {
@@ -57,7 +58,7 @@ export function ColorButton({ label, value, onChange }) {
         <span role="group" aria-label={t('arrange.colorOf', { name: label })} className="absolute start-0 top-9 z-20 flex w-44 flex-wrap gap-1.5 rounded-lg border bg-white p-2 shadow-lg">
           {PALETTE.map((c) => <button key={c} type="button" aria-label={c} aria-pressed={value === c} className={`h-6 w-6 rounded-full border-2 ${value === c ? 'border-deep-harbor' : 'border-white'}`} style={{ background: c }} onClick={() => { onChange(c); setOpen(false) }} />)}
           <label className="flex w-full items-center gap-2 text-xs text-slate-700">{t('arrange.custom')}<input type="color" aria-label={t('arrange.custom')} value={value ?? '#2563eb'} onChange={(e) => onChange(e.target.value)} /></label>
-          <button type="button" className="w-full rounded border px-2 py-0.5 text-xs text-slate-700" onClick={() => { onChange(null); setOpen(false) }}>{t('arrange.defaultColor')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="w-full px-2 py-0.5 text-xs text-slate-700" onClick={() => { onChange(null); setOpen(false) }}>{t('arrange.defaultColor')}</InteractiveHoverButton>
         </span>
       )}
     </span>

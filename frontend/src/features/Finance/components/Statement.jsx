@@ -89,7 +89,7 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
             <div className="flex gap-2 pt-1">
               {onPayOnline && Number(fee.remaining) > 0 && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => onPayOnline(fee)}>{t('finance.payOnline')}</InteractiveHoverButton>}
               {onPay && Number(fee.remaining) > 0 && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => onPay(fee)}>{t('finance.recordPayment')}</InteractiveHoverButton>}
-              {onDiscount && fee.kind !== 'transport' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</button>}
+              {onDiscount && fee.kind !== 'transport' && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => onDiscount(fee)}>{t('finance.changeDiscount')}</InteractiveHoverButton>}
               {onDeleteFee && fee.payments.length === 0 && <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => onDeleteFee(fee)}>{t('finance.deleteFee')}</button>}
             </div>
           )}

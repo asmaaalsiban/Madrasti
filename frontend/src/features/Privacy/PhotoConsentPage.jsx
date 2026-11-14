@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const MODES = ['required', 'warn', 'off']
 
@@ -47,7 +48,7 @@ export default function PhotoConsentPage() {
                 <td className="p-2 font-medium"><bdi>{nameOf(s)}</bdi></td>
                 <td className={`p-2 ${s.photo_consent === true ? 'text-green-700' : s.photo_consent === false ? 'text-red-700' : 'text-amber-700'}`}>{t(`privacy.photo.state.${s.photo_consent === true ? 'yes' : s.photo_consent === false ? 'no' : 'unknown'}`)}</td>
                 <td className="p-2"><span className="flex justify-end gap-2">
-                  <button type="button" aria-label={t('privacy.photo.allowFor', { name: nameOf(s) })} className="rounded border px-3 py-1 text-green-800" onClick={() => set.mutate({ id: s.id, allowed: true })}>{t('privacy.photo.allow')}</button>
+                  <InteractiveHoverButton variant="outline" type="button" aria-label={t('privacy.photo.allowFor', { name: nameOf(s) })} className="px-3 py-1 text-green-800" onClick={() => set.mutate({ id: s.id, allowed: true })}>{t('privacy.photo.allow')}</InteractiveHoverButton>
                   <button type="button" aria-label={t('privacy.photo.denyFor', { name: nameOf(s) })} className="rounded border px-3 py-1 text-red-800" onClick={() => set.mutate({ id: s.id, allowed: false })}>{t('privacy.photo.deny')}</button>
                 </span></td>
               </tr>

@@ -41,7 +41,7 @@ function RequestDialog({ request, onClose }) {
         </div>
         <label className="block text-sm sm:max-w-xs">{t('procurement.neededBy')}<DateInput className="mt-1 w-full rounded border p-2" value={form.needed_by} onChange={set('needed_by')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('procurement.send')}</InteractiveHoverButton>
         </div>
       </form>
@@ -60,7 +60,7 @@ function RejectDialog({ request, onClose }) {
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate() }}>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <label className="block text-sm">{t('procurement.reason')}<textarea required rows={2} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
-        <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button><button type="submit" disabled={save.isPending} className="rounded bg-red-600 px-5 py-1.5 text-white disabled:opacity-50">{t('procurement.reject')}</button></div>
+        <div className="flex justify-end gap-2"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton><button type="submit" disabled={save.isPending} className="rounded bg-red-600 px-5 py-1.5 text-white disabled:opacity-50">{t('procurement.reject')}</button></div>
       </form>
     </Modal>
   )
@@ -125,7 +125,7 @@ function PurchaseDialog({ request, currency, onClose }) {
             <label className="block text-sm">{t('procurement.payRef')}<input dir="ltr" className="mt-1 w-full rounded border p-2" value={pay.reference} onChange={(e) => setPay({ ...pay, reference: e.target.value })} /></label>
           </div>
         )}
-        <div className="flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button><InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('procurement.recordPurchase')}</InteractiveHoverButton></div>
+        <div className="flex justify-end gap-2"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton><InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('procurement.recordPurchase')}</InteractiveHoverButton></div>
       </form>
     </Modal>
   )

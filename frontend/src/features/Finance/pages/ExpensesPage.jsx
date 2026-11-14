@@ -100,7 +100,7 @@ function BillDialog({ bill, options, onClose }) {
           </div>
         )}
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -161,9 +161,9 @@ function DetailDialog({ billId, options, currency, canManage, onClose, onEdit })
           </form>
         )}
         <div className="flex flex-wrap justify-between gap-2">
-          {canManage ? <div className="flex gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={() => onEdit(bill)}>{t('admin.actions.edit')}</button>
+          {canManage ? <div className="flex gap-2"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => onEdit(bill)}>{t('admin.actions.edit')}</InteractiveHoverButton>
             {bill.payments.length === 0 && <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setDeleting(true)}>{t('admin.actions.delete')}</button>}</div> : <span />}
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('common.back')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('common.back')}</InteractiveHoverButton>
         </div>
       </div>
       <ConfirmDialog open={voiding !== null} message={t('expenses.confirmCancel')} confirmLabel={t('expenses.cancelPayment')} onConfirm={() => void_.mutate(voiding.id)} onCancel={() => setVoiding(null)} />
@@ -201,7 +201,7 @@ function CategoriesDialog({ canManage, onClose }) {
           </form>
         )}
         <div className="flex justify-end">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('common.back')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('common.back')}</InteractiveHoverButton>
         </div>
       </div>
     </Modal>
@@ -273,7 +273,7 @@ export default function ExpensesPage({ base }) {
                   <td className="p-2"><Money value={b.amount} currency={c} /></td>
                   <td className="p-2"><Money value={b.paid} currency={c} /></td>
                   <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-xs ${STATUS[b.status]}`}>{t(`expenses.statuses.${b.status}`)}</span></td>
-                  <td className="p-2 text-end"><button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setDialog({ type: 'detail', id: b.id })}>{t('expenses.open')}</button></td>
+                  <td className="p-2 text-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => setDialog({ type: 'detail', id: b.id })}>{t('expenses.open')}</InteractiveHoverButton></td>
                 </tr>
               ))}
             </tbody>

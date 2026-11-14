@@ -36,7 +36,7 @@ function TemplateDialog({ template, onClose }) {
           <select className="mt-1 w-full rounded border p-2" value={form.category} onChange={set('category')}><option value="">—</option>{CATEGORIES.map((c) => <option key={c} value={c}>{t(`payroll.categories.${c}`)}</option>)}</select>
         </label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -90,7 +90,7 @@ function AssignDialog({ template, onClose }) {
             {(list.data ?? []).length === 0 && <li className="text-sm text-slate-500">{t('payroll.noAssigned')}</li>}
           </ul>
         </div>
-        <div className="flex justify-end"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</button></div>
+        <div className="flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</InteractiveHoverButton></div>
       </div>
     </Modal>
   )
@@ -122,7 +122,7 @@ export default function TemplatesPage({ base }) {
                 <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-xs ${r.kind === 'deduction' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-800'}`}>{t(`payroll.kinds.${r.kind}`)}</span></td>
                 <td className="p-2" dir="ltr">{r.type === 'percent' ? `${Number(r.value)}%` : `${r.value} ${data.currency}`}</td>
                 <td className="p-2 text-slate-600">{r.category ? t(`payroll.categories.${r.category}`) : '—'}</td>
-                <td className="p-2"><span className="flex justify-end gap-2"><InteractiveHoverButton type="button" className="px-2 py-1" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</InteractiveHoverButton><button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</button><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => setDropping(r)}>{t('admin.actions.delete')}</button></span></td>
+                <td className="p-2"><span className="flex justify-end gap-2"><InteractiveHoverButton type="button" className="px-2 py-1" onClick={() => setDialog({ assign: r })}>{t('payroll.assignStaff')}{r.assignments_count > 0 ? ` (${r.assignments_count})` : ''}</InteractiveHoverButton><InteractiveHoverButton variant="outline" type="button" className="px-2 py-1 text-brand" onClick={() => setDialog(r)}>{t('admin.actions.edit')}</InteractiveHoverButton><button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => setDropping(r)}>{t('admin.actions.delete')}</button></span></td>
               </tr>
             ))}
             {data.data.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('payroll.noTemplates')}</td></tr>}

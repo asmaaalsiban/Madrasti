@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Bus, Check, MapPin, Phone, X } from 'lucide-react'
 import { api } from '../../api/client'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const Call = ({ phone }) => (phone ? <a href={`tel:${phone}`} dir="ltr" className="inline-flex items-center gap-1 text-brand underline"><Phone aria-hidden size={13} />{phone}</a> : null)
 
@@ -54,7 +55,7 @@ export default function MyBusPage() {
               {r.students.length > 0 && (
                 <p className="flex flex-wrap items-center gap-3 text-sm">
                   <span role="status">{t('transport.boarding.summary', { boarded: r.students.filter((x) => statusOf(b.id, r.id, x.id) === 'boarded').length, missed: r.students.filter((x) => statusOf(b.id, r.id, x.id) === 'not_boarded').length, left: r.students.filter((x) => statusOf(b.id, r.id, x.id) === null).length })}</span>
-                  <button type="button" disabled={all.isPending} className="rounded border px-3 py-1 text-brand" aria-label={`${t('transport.boarding.everyone')} ${r.name_en || r.name_ar}`} onClick={() => all.mutate({ busId: b.id, roundId: r.id })}>{t('transport.boarding.everyone')}</button>
+                  <InteractiveHoverButton variant="outline" type="button" disabled={all.isPending} className="px-3 py-1 text-brand" aria-label={`${t('transport.boarding.everyone')} ${r.name_en || r.name_ar}`} onClick={() => all.mutate({ busId: b.id, roundId: r.id })}>{t('transport.boarding.everyone')}</InteractiveHoverButton>
                   <span className="text-xs text-slate-500">{t('transport.boarding.private')}</span>
                 </p>
               )}

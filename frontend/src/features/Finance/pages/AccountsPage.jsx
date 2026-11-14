@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import ExportButton from '../../../components/shared/ExportButton'
 import { api } from '../../../api/client'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Every student's balance this year, with filters; click a student for the statement and to record payments.
 export default function AccountsPage({ base }) {
@@ -64,9 +65,9 @@ export default function AccountsPage({ base }) {
       </div>
       {list.data && list.data.last_page > 1 && (
         <div className="flex items-center justify-center gap-3 text-sm">
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('finance.prev')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('finance.prev')}</InteractiveHoverButton>
           <span>{page} / {list.data.last_page}</span>
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page >= list.data.last_page} onClick={() => setPage(page + 1)}>{t('finance.next')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page >= list.data.last_page} onClick={() => setPage(page + 1)}>{t('finance.next')}</InteractiveHoverButton>
         </div>
       )}
     </section>

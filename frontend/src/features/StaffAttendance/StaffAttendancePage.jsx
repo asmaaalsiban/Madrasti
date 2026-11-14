@@ -37,7 +37,7 @@ function EditDialog({ row, date, onClose }) {
         )}
         <label className="block text-sm">{t('staffAttendance.note')}<input className="mt-1 w-full rounded border p-2" value={form.note} onChange={set('note')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -73,7 +73,7 @@ export default function StaffAttendancePage() {
                     <td className="p-2">{r.status ? <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLE[r.status]}`}>{t(`staffAttendance.status.${r.status}`)}</span> : <span className="text-slate-400">—</span>}{r.note && <span className="ms-2 text-xs text-slate-500">{r.note}</span>}</td>
                     <td className="p-2" dir="ltr">{r.check_in ?? '—'}</td>
                     <td className="p-2" dir="ltr">{r.check_out ?? '—'}</td>
-                    <td className="p-2 text-end">{canEdit && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setEdit(r)}>{t('admin.actions.edit')}</button>}</td>
+                    <td className="p-2 text-end">{canEdit && <InteractiveHoverButton variant="outline" type="button" className="px-2 py-1 text-brand" onClick={() => setEdit(r)}>{t('admin.actions.edit')}</InteractiveHoverButton>}</td>
                   </tr>
                 ))}
               </tbody>

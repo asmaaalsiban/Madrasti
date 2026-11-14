@@ -57,7 +57,7 @@ export default function PaymentDialog({ fee, currency, payerDefault = '', onClos
         <label className="block text-sm">{t('finance.fields.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
         <label className="block text-sm">{t('finance.fields.note')}<input className="mt-1 w-full rounded border p-2" value={form.note} onChange={set('note')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('finance.save')}</InteractiveHoverButton>
         </div>
       </form>

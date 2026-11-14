@@ -132,11 +132,11 @@ function ExitCard({ school }) {
               {(s.status === 'failed' || s.stale) && (
                 <>
                   {s.error && <p className="break-words text-xs text-red-700" dir="auto">{s.error}</p>}
-                  <button type="button" disabled={retry.isPending} className="rounded border px-3 py-1 text-sm font-semibold disabled:opacity-60" onClick={() => retry.mutate(s.step)}>{t(s.stale && s.status !== 'failed' ? 'superAdmin.exit.retryStuck' : 'superAdmin.exit.retry')}</button>
+                  <InteractiveHoverButton variant="outline" type="button" disabled={retry.isPending} className="px-3 py-1 text-sm font-semibold disabled:opacity-60" onClick={() => retry.mutate(s.step)}>{t(s.stale && s.status !== 'failed' ? 'superAdmin.exit.retryStuck' : 'superAdmin.exit.retry')}</InteractiveHoverButton>
                 </>
               )}
               {s.status === 'done' && (
-                <button type="button" className="rounded border px-3 py-1 text-sm font-semibold" onClick={() => download(s.step)}>{t(`superAdmin.exit.download.${s.step}`)}</button>
+                <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm font-semibold" onClick={() => download(s.step)}>{t(`superAdmin.exit.download.${s.step}`)}</InteractiveHoverButton>
               )}
             </li>
           ))}

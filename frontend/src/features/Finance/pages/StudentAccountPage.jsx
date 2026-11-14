@@ -61,7 +61,7 @@ export default function StudentAccountPage() {
         <h1 className="text-xl font-bold">{student[`name_${i18n.language}`] || student.name_ar} <span className="text-sm font-normal text-slate-500" dir="ltr">{student.student_number}</span></h1>
         {canManage && (
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => { setError(''); setAdding({ description: '', total: '', kind: 'other', transport: '', discount: '0', count: '9', first_due: '', every: '1', first_payment: '', method: 'cash', payer: data.payer_default ?? '' }) }}>{data.has_schedule ? t('finance.addCharge') : t('finance.addFee')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5 text-brand" onClick={() => { setError(''); setAdding({ description: '', total: '', kind: 'other', transport: '', discount: '0', count: '9', first_due: '', every: '1', first_payment: '', method: 'cash', payer: data.payer_default ?? '' }) }}>{data.has_schedule ? t('finance.addCharge') : t('finance.addFee')}</InteractiveHoverButton>
           </div>
         )}
       </div>
@@ -87,7 +87,7 @@ export default function StudentAccountPage() {
               <input required type="number" min="0" step="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} />
             </label>
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setEditing(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={saveEdit.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>
@@ -129,7 +129,7 @@ export default function StudentAccountPage() {
               </>
             )}
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setAdding(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setAdding(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={addFee.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>

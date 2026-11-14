@@ -128,7 +128,7 @@ export default function ImportPage() {
           {!ready && !NAME_KINDS.includes(kind) && <p role="alert" className="text-sm text-red-700">{t('import.needColumns', { columns: missing.map((f) => f.label).join(', ') })}</p>}
 
           <div className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => restart()}>{t('import.otherFile')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => restart()}>{t('import.otherFile')}</InteractiveHoverButton>
             <InteractiveHoverButton type="button" disabled={send.isPending || !ready} className="px-4 py-1.5 disabled:opacity-50" onClick={() => send.mutate(false)}>{t('import.check')}</InteractiveHoverButton>
           </div>
         </div>
@@ -152,11 +152,11 @@ export default function ImportPage() {
           )}
 
           <div className="flex gap-2">
-            {!done && <button type="button" className="rounded border px-3 py-1.5" onClick={() => setReport(null)}>{t('import.back')}</button>}
+            {!done && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setReport(null)}>{t('import.back')}</InteractiveHoverButton>}
             {!done && report.valid > 0 && (
               <InteractiveHoverButton type="button" disabled={send.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => send.mutate(true)}>{t('import.run', { count: report.valid })}</InteractiveHoverButton>
             )}
-            {done && <button type="button" className="rounded border px-3 py-1.5" onClick={() => restart()}>{t('import.another')}</button>}
+            {done && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => restart()}>{t('import.another')}</InteractiveHoverButton>}
           </div>
 
           {done && report.created.length > 0 && (

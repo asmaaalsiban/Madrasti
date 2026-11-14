@@ -62,7 +62,7 @@ export default function NewWarningDialog({ canWarnStaff, initialSubject = 'stude
         <label className="block text-sm">{t('warnings.details')}<textarea rows={4} dir="auto" className="mt-1 w-full rounded border p-2" value={form.body} onChange={set('body')} /></label>
         {!canWarnStaff && <p className="text-xs text-slate-500">{t('warnings.proposalNote')}</p>}
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={!pick || save.isPending} className="px-5 py-1.5 disabled:opacity-50">{canWarnStaff ? t('warnings.issue') : t('warnings.propose')}</InteractiveHoverButton>
         </div>
       </form>
