@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, KeyRound, Languages, LockKeyhole, LogOut, Repeat } from 'lucide-react'
+import { ChevronDown, KeyRound, Languages, LockKeyhole, LogOut, Repeat, UserRound } from 'lucide-react'
+import Avatar from './Avatar'
 import { useAuth } from '../../features/Auth/AuthProvider'
 import { clearSchool, goTo } from '../../tenant/school'
 import InstallMenuItem from '../../pwa/InstallMenuItem'
@@ -24,11 +25,10 @@ export default function UserMenu({ detail }) {
     return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc) }
   }, [open])
 
-  const initial = (user?.name ?? '?').trim().charAt(0)
   return (
     <div className="relative" ref={box}>
       <button type="button" aria-expanded={open} aria-haspopup="menu" className="flex items-center gap-2 rounded-full border bg-snow py-1 ps-1 pe-3" onClick={() => setOpen((v) => !v)}>
-        <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-deep-harbor text-sm font-bold text-white">{initial}</span>
+        <Avatar user={user} size={32} />
         <span className="sr-only">{t('common.account')}: {user?.name}</span>
         <span aria-hidden className="hidden min-w-0 text-start leading-tight sm:block">
           <span className="block max-w-40 truncate text-sm font-bold text-deep-harbor">{user?.name}</span>
@@ -44,6 +44,7 @@ export default function UserMenu({ detail }) {
           </div>
           <hr className="mb-1" />
           <button type="button" role="menuitem" className={item} onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}><Languages aria-hidden size={18} />{t('common.language')}</button>
+          <Link role="menuitem" to={`/${user?.role}/profile`} className={item} onClick={() => setOpen(false)}><UserRound aria-hidden size={18} />{t('profile.menu')}</Link>
           <Link role="menuitem" to="/change-password" className={item} onClick={() => setOpen(false)}><KeyRound aria-hidden size={18} />{t('auth.changePassword.link')}</Link>
           <Link role="menuitem" to={`/${user?.role}/privacy`} className={item} onClick={() => setOpen(false)}><LockKeyhole aria-hidden size={18} />{t('privacy.menu')}</Link>
           <button type="button" role="menuitem" className={item} onClick={() => { clearSchool(); goTo('/find-school') }}><Repeat aria-hidden size={18} />{t('central.switchSchool')}</button>

@@ -108,6 +108,7 @@ const MyDutiesPage = lazy(() => import('../features/Duties/MyDutiesPage'))
 const StoriesPage = lazy(() => import('../features/Stories/StoriesPage'))
 const ProcurementPage = lazy(() => import('../features/Procurement/ProcurementPage'))
 const PrivacyPage = lazy(() => import('../features/Privacy/PrivacyPage'))
+const ProfilePage = lazy(() => import('../features/Profile/ProfilePage'))
 const PhotoConsentPage = lazy(() => import('../features/Privacy/PhotoConsentPage'))
 const PrivacyRequestsPage = lazy(() => import('../features/Privacy/PrivacyRequestsPage'))
 const LegalPage = lazy(() => import('../features/Legal/LegalPage'))
@@ -153,6 +154,7 @@ const HOME_ROUTES = {
     { path: 'children/:id/timetable', element: <ChildTimetablePage /> },
     { path: 'children/:id/exams', element: <ChildExamsPage /> },
     { path: 'privacy', element: <PrivacyPage /> },
+    { path: 'profile', element: <ProfilePage /> },
     { path: 'children/:id/transport', element: <MyTransportPage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'children/:id/stories', element: <Navigate to="/parent/stories" replace /> }, // old notifications pointed here
@@ -171,6 +173,7 @@ const HOME_ROUTES = {
     { index: true, element: <StudentHome /> },
     { path: 'timetable', element: <StudentTimetablePage /> },
     { path: 'privacy', element: <PrivacyPage /> },
+    { path: 'profile', element: <ProfilePage /> },
     { path: 'grades', element: <StudentHome /> },
     { path: 'homework', element: <StudentHomeworkPage /> },
     { path: 'quizzes', element: <QuizzesPage /> },
@@ -231,6 +234,7 @@ const HOME_ROUTES = {
     { path: 'procurement', element: <ProcurementPage /> },
     { path: 'tasks', element: <TasksPage /> },
     { path: 'privacy', element: <PrivacyPage /> },
+    { path: 'profile', element: <ProfilePage /> },
     { path: 'stories', element: <StoriesPage /> },
     { path: 'payroll', element: <PayrollPage base="/teacher" /> },
     { path: 'payroll/contracts', element: <ContractsRoute base="/teacher" /> },
@@ -312,6 +316,7 @@ export const routes = [
               { path: '/admin/procurement', element: <ProcurementPage /> },
               { path: '/admin/tasks', element: <TasksPage /> },
               { path: '/admin/privacy', element: <PrivacyPage /> },
+              { path: '/admin/profile', element: <ProfilePage /> },
               { path: '/admin/privacy-requests', element: <PrivacyRequestsPage /> },
               { path: '/admin/photo-consent', element: <PhotoConsentPage /> },
               { path: '/admin/staff-access', element: <StaffAccessPage /> },

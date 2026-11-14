@@ -3480,5 +3480,17 @@
     "register": "Register a school",
     "findSchool": "Find your school",
     "rights": "© {{year}} {{name}}. All rights reserved."
+  },
+  "profile": {
+    "title": "My profile",
+    "menu": "My profile",
+    "photo": "Photo",
+    "photoHelp": "A photo of you (JPG, PNG or WebP, up to 3 MB). It is cut to a square.",
+    "choosePhoto": "Choose a photo",
+    "studentsNoPhoto": "Students choose a character: real photos of students are not kept on the platform.",
+    "characters": "Characters",
+    "charactersHelp": "Or pick a character as your picture.",
+    "character": "Character {{number}}",
+    "remove": "Remove my picture (show my initials)"
   }
 }

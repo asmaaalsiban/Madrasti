@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import Avatar from '../../components/shared/Avatar'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, MessageCircle, Pin, PinOff, Trash2, MessageCircleOff, MessageCirclePlus, Megaphone } from 'lucide-react'
@@ -82,7 +83,7 @@ export default function StoryCard({ story }) {
   return (
     <article className={`space-y-3 rounded-lg border bg-snow p-4 ${story.is_pinned ? 'ring-2 ring-sky-tint' : ''}`}>
       <header className="flex items-center gap-3">
-        <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-deep-harbor text-lg font-bold text-white">{story.author.name.trim().charAt(0)}</span>
+        <Avatar user={story.author} size={44} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-deep-harbor">{story.author.name}</p>
           <p className="text-xs text-slate-500">{role} · {ago(story.created_at, i18n.language)}</p>

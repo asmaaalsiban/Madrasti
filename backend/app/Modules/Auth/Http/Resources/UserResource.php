@@ -26,7 +26,8 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'role' => $this->role->value,
             'locale' => $this->locale,
-            'avatar_path' => $this->avatar_path,
+            // A ready-made character, an uploaded photo, or null (the app then draws the initials).
+            'avatar' => \App\Modules\Auth\Services\Avatar::for($this->resource),
             'is_active' => $this->is_active,
             'must_change_password' => $this->must_change_password,
             // How the person arranged their own icons and menus (see LayoutController).

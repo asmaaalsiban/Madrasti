@@ -22,6 +22,7 @@ use App\Modules\Attendance\Http\Controllers\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\AttendanceReportController;
 use App\Modules\Audit\Http\Controllers\AuditLogController;
 use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Auth\Http\Controllers\AvatarController;
 use App\Modules\Auth\Http\Controllers\ExitExportController;
 use App\Modules\Auth\Http\Controllers\LayoutController;
 use App\Modules\Auth\Http\Controllers\PrivacyController;
@@ -365,6 +366,14 @@ Route::middleware('school-user')->prefix('chat')->group(function (): void {
 
 // All the header counters in one answer (notifications, announcements, chat, surveys).
 Route::middleware('school-user')->get('badges', BadgesController::class);
+
+// A person's own picture (a photo, or a ready-made character) and the photo of anybody of the school.
+Route::middleware('school-user')->prefix('profile')->group(function (): void {
+    Route::post('avatar', [AvatarController::class, 'upload']);
+    Route::put('avatar/preset', [AvatarController::class, 'preset']);
+    Route::delete('avatar', [AvatarController::class, 'destroy']);
+});
+Route::middleware('school-user')->get('users/{user}/avatar', [AvatarController::class, 'show']);
 
 // The bell: notifications of the signed-in user.
 Route::middleware('school-user')->prefix('notifications')->group(function (): void {
