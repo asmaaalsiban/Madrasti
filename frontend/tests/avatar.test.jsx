@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
@@ -8,6 +9,10 @@ import Avatar from '../src/components/shared/Avatar'
 import ProfilePage from '../src/features/Profile/ProfilePage'
 
 vi.mock('../src/api/client', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }))
+// jsdom has no canvas or layout, so the cropper widget and the cut itself are replaced; the real ones are checked in a browser.
+vi.mock('react-easy-crop', () => ({ default: function FakeCropper({ onCropComplete }) { useEffect(() => { onCropComplete({}, { x: 1, y: 2, width: 30, height: 30 }) }, []); return <div data-testid="cropper" /> } }))
+const cut = vi.hoisted(() => new File(['cut'], 'avatar.jpg', { type: 'image/jpeg' }))
+vi.mock('../src/features/Profile/cropImage', () => ({ default: vi.fn(async () => cut) }))
 const auth = vi.hoisted(() => ({ user: null, updateUser: vi.fn() }))
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: auth.user, updateUser: auth.updateUser }) }))
 
@@ -72,15 +77,26 @@ describe('ProfilePage', () => {
   const teacher = { id: 1, name: 'Sami Ali', role: 'teacher', avatar: null }
   const showAs = (user) => { auth.user = user; return wrap(<ProfilePage />) }
 
-  it('lets a teacher choose a photo, which is sent to the server', async () => {
+  it('lets a teacher choose a photo, cut it in the cropper, and sends the cut file', async () => {
     api.post.mockResolvedValue({ data: { data: { ...teacher, avatar: { type: 'photo', url: '/users/1/avatar', v: 'z' } } } })
     showAs(teacher)
-    const photo = new File(['x'], 'me.png', { type: 'image/png' })
-    fireEvent.change(screen.getByLabelText('Choose a photo'), { target: { files: [photo] } })
+    fireEvent.change(screen.getByLabelText('Choose a photo'), { target: { files: [new File(['x'], 'me.png', { type: 'image/png' })] } })
+    expect(api.post).not.toHaveBeenCalled()
+    expect(await screen.findByTestId('cropper')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Save photo' }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())
     expect(api.post.mock.calls[0][0]).toBe('/profile/avatar')
-    expect(api.post.mock.calls[0][1].get('photo')).toBe(photo)
+    expect(api.post.mock.calls[0][1].get('photo')).toBe(cut)
     await waitFor(() => expect(auth.updateUser).toHaveBeenCalledWith(expect.objectContaining({ avatar: expect.objectContaining({ type: 'photo' }) })))
+    await waitFor(() => expect(screen.queryByTestId('cropper')).not.toBeInTheDocument())
+  })
+
+  it('sends nothing when the cropper is cancelled', async () => {
+    showAs(teacher)
+    fireEvent.change(screen.getByLabelText('Choose a photo'), { target: { files: [new File(['x'], 'me.png', { type: 'image/png' })] } })
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByTestId('cropper')).not.toBeInTheDocument()
+    expect(api.post).not.toHaveBeenCalled()
   })
 
   it('shows no photo upload to a student, only the characters', () => {
@@ -118,6 +134,7 @@ describe('ProfilePage', () => {
     api.post.mockRejectedValue({ response: { status: 422, data: { errors: { photo: ['The photo must be at least 64 pixels wide.'] } } } })
     showAs(teacher)
     fireEvent.change(screen.getByLabelText('Choose a photo'), { target: { files: [new File(['x'], 'tiny.png', { type: 'image/png' })] } })
+    fireEvent.click(await screen.findByRole('button', { name: 'Save photo' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('at least 64 pixels')
   })
 
