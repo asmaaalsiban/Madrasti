@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Communication\Http\Controllers;
 
+use App\Modules\Auth\Services\Avatar;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Academic\Models\Classroom;
@@ -228,7 +229,7 @@ class ChatController extends Controller
     /** @return array<string, mixed> */
     private function person(User $u, User $viewer): array
     {
-        return ['id' => $u->id, 'name' => $u->name, 'role' => $u->role->value, 'label' => $this->label($u, $viewer)];
+        return ['id' => $u->id, 'name' => $u->name, 'role' => $u->role->value, 'avatar' => Avatar::for($u), 'label' => $this->label($u, $viewer)];
     }
 
     /** What to show next to a name: a teacher's subject, a student's section, a parent's children. */
@@ -262,7 +263,7 @@ class ChatController extends Controller
     {
         return [
             'id' => $m->id, 'body' => $m->body, 'has_image' => $m->attachment_path !== null, 'created_at' => $m->created_at->toIso8601String(),
-            'sender' => ['id' => $m->sender->id, 'name' => $m->sender->name], 'mine' => $m->sender_id === $me->id,
+            'sender' => ['id' => $m->sender->id, 'name' => $m->sender->name, 'avatar' => Avatar::for($m->sender)], 'mine' => $m->sender_id === $me->id,
             'read_by' => $readBy, 'recipients' => $recipients, 'read' => $recipients > 0 && $readBy >= $recipients,
         ];
     }

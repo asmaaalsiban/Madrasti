@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import Avatar from '../../../components/shared/Avatar'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
@@ -54,7 +55,8 @@ export default function Thread({ conversation, onBack }) {
       </div>
       <ul className="flex-1 space-y-2 overflow-y-auto bg-slate-50 p-3" aria-live="polite">
         {(messages.data ?? []).map((m) => (
-          <li key={m.id} className={`flex ${m.mine ? 'justify-end' : 'justify-start'}`}>
+          <li key={m.id} className={`flex items-end gap-2 ${m.mine ? 'justify-end' : 'justify-start'}`}>
+            {!m.mine && <Avatar user={m.sender} size={28} />}
             <div className={`max-w-[80%] rounded-lg p-2 text-sm ${m.mine ? 'bg-brand text-white' : 'bg-white shadow-sm'}`}>
               {!m.mine && conversation.type === 'group' && <p className="text-xs font-bold text-brand">{m.sender.name}</p>}
               {m.has_image && <ChatImage messageId={m.id} />}

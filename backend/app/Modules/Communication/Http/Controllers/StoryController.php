@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Communication\Http\Controllers;
 
+use App\Modules\Auth\Services\Avatar;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Academic\Models\AcademicYear;
@@ -208,7 +209,7 @@ class StoryController extends Controller
     {
         return [
             'id' => $s->id, 'audience' => $s->audience, 'created_at' => $s->created_at->toIso8601String(), 'body' => $s->body, 'is_pinned' => $s->is_pinned, 'comments_enabled' => $s->comments_enabled,
-            'author' => ['id' => $s->author->id, 'name' => $s->author->name, 'role' => $s->author->role->value, 'staff_type' => $s->author->staffProfile?->staff_type->value],
+            'author' => ['id' => $s->author->id, 'name' => $s->author->name, 'avatar' => Avatar::for($s->author), 'role' => $s->author->role->value, 'staff_type' => $s->author->staffProfile?->staff_type->value],
             'target' => match ($s->audience) { 'classroom' => ['name_ar' => $s->classroom?->name, 'name_en' => $s->classroom?->name], 'grade' => ['name_ar' => $s->gradeLevel?->name_ar, 'name_en' => $s->gradeLevel?->name_en], default => null },
             'media' => $s->media->pluck('id')->values(), 'reactions_count' => (int) $s->reactions_count, 'liked' => $liked, 'comments_count' => (int) $s->comments_count, 'can_manage' => $this->access->canManage($user, $s),
         ];
@@ -217,7 +218,7 @@ class StoryController extends Controller
     /** @return array<string, mixed> */
     private function presentComment(StoryComment $c, User $user, Story $story): array
     {
-        return ['id' => $c->id, 'body' => $c->body, 'created_at' => $c->created_at->toIso8601String(), 'user' => ['id' => $c->user->id, 'name' => $c->user->name, 'role' => $c->user->role->value], 'can_delete' => $c->user_id === $user->id || $this->access->canManage($user, $story)];
+        return ['id' => $c->id, 'body' => $c->body, 'created_at' => $c->created_at->toIso8601String(), 'user' => ['id' => $c->user->id, 'name' => $c->user->name, 'avatar' => Avatar::for($c->user), 'role' => $c->user->role->value], 'can_delete' => $c->user_id === $user->id || $this->access->canManage($user, $story)];
     }
 
     private function user(Request $request): User
