@@ -22,6 +22,7 @@ const RegisterSchoolPage = lazy(() => import('../features/Central/RegisterSchool
 const SchoolsPage = lazy(() => import('../features/SuperAdmin/SchoolsPage'))
 const SchoolPage = lazy(() => import('../features/SuperAdmin/SchoolPage'))
 const AddSchoolPage = lazy(() => import('../features/SuperAdmin/AddSchoolPage'))
+const PlansPage = lazy(() => import('../features/SuperAdmin/PlansPage'))
 const AcademicYearsPage = lazy(() => import('../features/Academic/pages/AcademicYearsPage'))
 const ClassroomsPage = lazy(() => import('../features/Academic/pages/ClassroomsPage'))
 const GradeLevelsPage = lazy(() => import('../features/Academic/pages/GradeLevelsPage'))
@@ -375,6 +376,7 @@ const superAdminRoutes = [
       { path: 'schools', element: <SchoolsPage /> },
       { path: 'schools/new', element: <AddSchoolPage /> },
       { path: 'schools/:id', element: <SchoolPage /> },
+      { path: 'plans', element: <PlansPage /> },
     ],
   },
 ]

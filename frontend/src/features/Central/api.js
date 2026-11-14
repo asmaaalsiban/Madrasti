@@ -6,6 +6,9 @@ export const registerSchool = (payload) => api.post('/central/register', payload
 // Is public registration switched on? (the server decides; the website hides its "register" links while it is off)
 export const registrationEnabled = () => api.get('/central/registration').then((r) => r.data.enabled === true)
 
+// The pricing plans the platform owner decided (only the active ones).
+export const publicPlans = () => api.get('/central/plans').then((r) => r.data.data)
+
 // Signs the new admin in to the school that is already selected (X-School is added by the client).
 export const loginAdmin = async (login, password) => {
   const { data } = await api.post('/auth/login', { login, password, device_name: 'web' })

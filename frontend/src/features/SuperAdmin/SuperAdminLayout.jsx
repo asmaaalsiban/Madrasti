@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Suspense } from 'react'
 import PageFallback from '../../components/shared/PageFallback'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../components/shared/LanguageSwitcher'
@@ -36,7 +36,14 @@ export default function SuperAdminLayout() {
       <ResponsiveTables />
       <header className="sticky top-0 z-30 bg-deep-harbor text-white print:hidden">
         <div className="flex items-center justify-between gap-2 px-4 py-3 lg:px-8">
-          <Link to="/super-admin/schools" className="min-w-0 truncate text-lg font-extrabold">{t('superAdmin.title')}</Link>
+          <div className="flex min-w-0 items-center gap-4">
+            <Link to="/super-admin/schools" className="min-w-0 truncate text-lg font-extrabold max-sm:hidden">{t('superAdmin.title')}</Link>
+            <nav aria-label={t('superAdmin.title')} className="flex items-center gap-1 text-sm font-semibold">
+              {[['schools', 'schoolsLink'], ['plans', 'plansLink']].map(([path, key]) => (
+                <NavLink key={path} to={`/super-admin/${path}`} className={({ isActive }) => `rounded-full px-3 py-1 ${isActive ? 'bg-white/20' : 'text-white/80'}`}>{t(`superAdmin.${key}`)}</NavLink>
+              ))}
+            </nav>
+          </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-full bg-white/90 p-1 text-deep-harbor"><LanguageSwitcher /></span>
             <InteractiveHoverButton variant="outline" type="button" className="border-white/40 px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</InteractiveHoverButton>
