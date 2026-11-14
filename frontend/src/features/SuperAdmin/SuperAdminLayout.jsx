@@ -35,7 +35,7 @@ export default function SuperAdminLayout() {
     <div className="min-h-screen bg-slate-50">
       <ResponsiveTables />
       <header className="sticky top-0 z-30 bg-deep-harbor text-white print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 lg:px-8">
           <Link to="/super-admin/schools" className="min-w-0 truncate text-lg font-extrabold">{t('superAdmin.title')}</Link>
           <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-full bg-white/90 p-1 text-deep-harbor"><LanguageSwitcher /></span>
@@ -43,7 +43,7 @@ export default function SuperAdminLayout() {
           </div>
         </div>
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none"><Suspense fallback={<PageFallback />}><Outlet /></Suspense></main>
+      <main id="main" tabIndex={-1} className="px-4 py-6 outline-none lg:px-8"><Suspense fallback={<PageFallback />}><Outlet /></Suspense></main>
     </div>
   )
 }

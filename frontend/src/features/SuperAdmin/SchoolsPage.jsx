@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { STATES, STATE_STYLE, formatDay } from './format'
 import { useSchools } from './useSuperAdmin'
 import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../components/ui/icon-action-button'
+import { ArrowUpRight } from 'lucide-react'
 
 export const StateBadge = ({ state }) => {
   const { t } = useTranslation()
@@ -31,7 +33,7 @@ export default function SchoolsPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('superAdmin.schools')}</h1>
-        <Link to="/super-admin/schools/new" className="rounded bg-brand px-4 py-2 font-semibold text-white">{t('superAdmin.addSchool')}</Link>
+        <InteractiveHoverButton as={Link} to="/super-admin/schools/new" className="px-4 py-2">{t('superAdmin.addSchool')}</InteractiveHoverButton>
       </div>
 
       <div className="grid gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
@@ -67,8 +69,8 @@ export default function SchoolsPage() {
                     <td className="p-2 font-semibold">{s.name} <span className="block text-xs font-normal text-slate-500" dir="ltr">{s.id}</span></td>
                     <td className="p-2"><StateBadge state={s.state} /></td>
                     <td className="p-2">{s.subscription_ends_at ? formatDay(s.subscription_ends_at, i18n.language) : t('superAdmin.noEndDate')}</td>
-                    <td className="p-2" dir="ltr">{s.students_count} / {s.max_students ?? t('superAdmin.unlimited')}</td>
-                    <td className="p-2"><Link to={`/super-admin/schools/${s.id}`} className="rounded border px-3 py-1">{t('superAdmin.open')}</Link></td>
+                    <td className="p-2"><span dir="ltr" className="inline-block">{s.students_count} / {s.max_students ?? t('superAdmin.unlimited')}</span></td>
+                    <td className="p-2"><IconActionButton as={Link} icon={ArrowUpRight} label={t('superAdmin.open')} to={`/super-admin/schools/${s.id}`} /></td>
                   </tr>
                 ))}
                 {rows.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('superAdmin.none')}</td></tr>}

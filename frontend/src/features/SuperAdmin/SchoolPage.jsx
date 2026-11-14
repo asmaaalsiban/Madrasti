@@ -88,7 +88,7 @@ function StatusCard({ school }) {
         {school.closed_at && <><dt className="text-slate-500">{t('superAdmin.closedAt')}</dt><dd className="text-end">{formatWhen(school.closed_at, i18n.language)}</dd></>}
       </dl>
       {action.isError && <Message>{errorOf(action.error, t('superAdmin.genericError'))}</Message>}
-      <button type="button" className={`rounded px-4 py-2 font-semibold ${blocked ? 'bg-brand text-white' : 'border border-red-300 text-red-700'}`} onClick={() => setConfirm(true)}>{t(`superAdmin.${key}`)}</button>
+      <InteractiveHoverButton type="button" variant={blocked ? undefined : 'outline'} tone={blocked ? undefined : 'red'} className="px-4 py-2" onClick={() => setConfirm(true)}>{t(`superAdmin.${key}`)}</InteractiveHoverButton>
       <ConfirmDialog open={confirm} danger={!blocked} busy={action.isPending} message={t(`superAdmin.${key}Question`)} description={t(`superAdmin.${key}Description`)} confirmLabel={t(`superAdmin.${key}Confirm`)} onConfirm={run} onCancel={() => setConfirm(false)} />
     </Card>
   )

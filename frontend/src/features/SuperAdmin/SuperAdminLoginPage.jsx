@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 import { useTranslation } from 'react-i18next'
 import AuthShell from '../../components/shared/AuthShell'
 import FormField from '../../components/shared/FormField'
@@ -52,7 +53,7 @@ export default function SuperAdminLoginPage({ onSignedIn }) {
             <FormField label={t('superAdmin.password')}>
               <PasswordInput autoComplete="current-password" required value={form.password} onChange={set('password')} />
             </FormField>
-            <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('superAdmin.continue')}</button>
+            <InteractiveHoverButton disabled={busy} className="w-full py-3 text-base disabled:opacity-60">{t('superAdmin.continue')}</InteractiveHoverButton>
           </>
         ) : (
           <>
@@ -60,7 +61,7 @@ export default function SuperAdminLoginPage({ onSignedIn }) {
             <FormField label={t('superAdmin.code')}>
               <input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} dir="ltr" required autoFocus className={`${inputClass} text-center text-lg tracking-widest`} value={form.code} onChange={set('code')} />
             </FormField>
-            <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('superAdmin.signIn')}</button>
+            <InteractiveHoverButton disabled={busy} className="w-full py-3 text-base disabled:opacity-60">{t('superAdmin.signIn')}</InteractiveHoverButton>
             <IconActionButton icon={Undo2} tone="slate" label={t('superAdmin.back')} className="w-full" type="button" onClick={() => { setStep('password'); setError(''); setForm({ ...form, code: '' }) }} />
           </>
         )}
