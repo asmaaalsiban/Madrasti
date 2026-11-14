@@ -2,13 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, Tags, Users } from 'lucide-react'
+import { Plus, Tags, Users, Ban, Power } from 'lucide-react'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
 import Money from '../components/Money'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -146,7 +147,7 @@ function DetailDialog({ billId, options, currency, canManage, onClose, onEdit })
               {bill.payments.map((p) => (
                 <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 p-2">
                   <span><span dir="ltr">{p.paid_on}</span> · <Money value={p.amount} currency={currency} /> · {p.account?.name} · {t(`finance.methods.${p.method}`)}{p.reference && <> · <bdi dir="ltr">{p.reference}</bdi></>}</span>
-                  {canManage && <button type="button" className="text-red-700 underline" onClick={() => setVoiding(p)}>{t('expenses.cancelPayment')}</button>}
+                  {canManage && <IconActionButton icon={Ban} tone="red" label={t('expenses.cancelPayment')} type="button" onClick={() => setVoiding(p)} />}
                 </li>
               ))}
             </ul>
@@ -189,7 +190,7 @@ function CategoriesDialog({ canManage, onClose }) {
           {(data ?? []).map((c) => (
             <li key={c.id} className={`flex items-center justify-between gap-2 p-2 ${c.is_active ? '' : 'text-slate-400'}`}>
               <span>{c[`name_${i18n.language}`] || c.name_ar} <span className="text-xs text-slate-400">({c.bills})</span></span>
-              {canManage && <button type="button" className="text-brand underline" onClick={() => toggle.mutate(c)}>{c.is_active ? t('expenses.switchOff') : t('expenses.switchOn')}</button>}
+              {canManage && <IconActionButton icon={Power} tone="brand" label={c.is_active ? t('expenses.switchOff') : t('expenses.switchOn')} type="button" onClick={() => toggle.mutate(c)} />}
             </li>
           ))}
         </ul>

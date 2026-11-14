@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Plus, Power, Trash2 } from 'lucide-react'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -47,7 +48,7 @@ function EntryDialog({ accounts, onClose }) {
               <input type="number" min="0" step="0.01" dir="ltr" aria-label={t('journal.credit')} placeholder={t('journal.credit')} className="rounded border p-2" value={l.credit} onChange={(e) => setLine(i, 'credit', e.target.value)} />
             </div>
           ))}
-          <button type="button" className="text-sm text-brand underline" onClick={() => setLines([...lines, emptyLine()])}>{t('journal.addLine')}</button>
+          <IconActionButton icon={Plus} tone="brand" label={t('journal.addLine')} type="button" onClick={() => setLines([...lines, emptyLine()])} />
         </div>
         <p className={`text-sm ${balanced ? 'text-green-700' : 'text-amber-700'}`}>{t('journal.totals', { debit: (debit / 100).toFixed(2), credit: (credit / 100).toFixed(2) })}</p>
         <div className="flex justify-end gap-2">
@@ -73,7 +74,7 @@ function AccountsTab({ data, canManage }) {
         {data.data.map((a) => (
           <li key={a.id} className={`flex items-center justify-between gap-2 p-2 ${a.is_active ? '' : 'text-slate-400'}`}>
             <span><b dir="ltr" className="me-2">{a.code}</b>{a[`name_${i18n.language}`] || a.name_ar} <span className="text-xs text-slate-500">· {t(`journal.types.${a.type}`)}</span></span>
-            {canManage && <button type="button" className="text-brand underline" onClick={() => toggle.mutate(a)}>{a.is_active ? t('expenses.switchOff') : t('expenses.switchOn')}</button>}
+            {canManage && <IconActionButton icon={Power} tone="brand" label={a.is_active ? t('expenses.switchOff') : t('expenses.switchOn')} type="button" onClick={() => toggle.mutate(a)} />}
           </li>
         ))}
       </ul>
@@ -130,7 +131,7 @@ export default function JournalPage() {
                 <article key={e.id} className="rounded-lg border bg-white p-3 text-sm">
                   <div className="flex items-start justify-between gap-2">
                     <p><b dir="ltr">{e.date}</b> · {e.memo}{!e.manual && <span className="ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">{t('journal.automatic')}</span>}</p>
-                    {canManage && e.manual && <button type="button" className="text-red-700 underline" onClick={() => setRemoving(e)}>{t('admin.actions.delete')}</button>}
+                    {canManage && e.manual && <IconActionButton icon={Trash2} tone="red" label={t('admin.actions.delete')} type="button" onClick={() => setRemoving(e)} />}
                   </div>
                   <table className="mt-2 w-full">
                     <tbody>

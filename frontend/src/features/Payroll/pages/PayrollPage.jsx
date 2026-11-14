@@ -7,6 +7,8 @@ import Money from '../../Finance/components/Money'
 import { useAuth } from '../../Auth/AuthProvider'
 import { MonthInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -49,7 +51,7 @@ export default function PayrollPage({ base }) {
                 <td className="p-2">{r.payslips_count}</td>
                 <td className="p-2"><Money value={r.total_net} currency={data.currency} /></td>
                 <td className="p-2"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{t(`payroll.runStatus.${r.status}`)}</span></td>
-                <td className="p-2 text-end"><Link className="text-brand underline" to={`${base}/payroll/${r.id}`}>{t('payroll.open')}</Link></td>
+                <td className="p-2 text-end"><IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('payroll.open')} to={`${base}/payroll/${r.id}`} /></td>
               </tr>
             ))}
             {data.data.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('payroll.noRuns')}</td></tr>}

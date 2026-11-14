@@ -5,6 +5,8 @@ import FormField from '../../components/shared/FormField'
 import PasswordInput from '../../components/shared/PasswordInput'
 import saApi, { setSaToken } from './saApi'
 import { errorOf } from './useSuperAdmin'
+import { IconActionButton } from '../../components/ui/icon-action-button'
+import { Undo2 } from 'lucide-react'
 
 const inputClass = 'w-full rounded border p-2'
 
@@ -59,7 +61,7 @@ export default function SuperAdminLoginPage({ onSignedIn }) {
               <input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} dir="ltr" required autoFocus className={`${inputClass} text-center text-lg tracking-widest`} value={form.code} onChange={set('code')} />
             </FormField>
             <button disabled={busy} className="cta w-full bg-brand text-white disabled:opacity-60">{t('superAdmin.signIn')}</button>
-            <button type="button" className="w-full text-sm underline" onClick={() => { setStep('password'); setError(''); setForm({ ...form, code: '' }) }}>{t('superAdmin.back')}</button>
+            <IconActionButton icon={Undo2} tone="slate" label={t('superAdmin.back')} className="w-full" type="button" onClick={() => { setStep('password'); setError(''); setForm({ ...form, code: '' }) }} />
           </>
         )}
       </form>

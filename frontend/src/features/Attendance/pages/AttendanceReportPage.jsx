@@ -1,3 +1,4 @@
+import { Eye } from 'lucide-react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,7 +37,7 @@ export default function AttendanceReportPage() {
   const rows = report.data?.data ?? []
   const meta = report.data?.meta
   const number = (row, status) => (row[status] > 0 ? (
-    <button type="button" aria-label={`${t(`attendance.${status}`)}: ${row[status]}`} className="font-bold text-brand underline" onClick={() => setOpen({ student: row.student, status })}>{row[status]}</button>
+    <button type="button" aria-label={`${t(`attendance.${status}`)}: ${row[status]}`} className="inline-flex items-center gap-1 font-bold text-brand" onClick={() => setOpen({ student: row.student, status })}>{row[status]}<Eye size={14} aria-hidden /></button>
   ) : 0)
 
   return (

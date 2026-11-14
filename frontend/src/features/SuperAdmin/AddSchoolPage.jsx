@@ -6,6 +6,8 @@ import FormField from '../../components/shared/FormField'
 import PasswordInput from '../../components/shared/PasswordInput'
 import { normalizeSchoolCode } from '../../tenant/school'
 import { errorOf, fieldErrors, useCreateSchool } from './useSuperAdmin'
+import { IconActionButton } from '../../components/ui/icon-action-button'
+import { Undo2 } from 'lucide-react'
 
 const EMPTY = { name: '', id: '', admin_name: '', admin_email: '', admin_password: '', max_students: '', subscription_ends_at: '', default_locale: 'ar' }
 const inputClass = 'w-full rounded border p-2'
@@ -30,7 +32,7 @@ export default function AddSchoolPage() {
 
   return (
     <section className="mx-auto max-w-xl space-y-4">
-      <Link to="/super-admin/schools" className="text-sm underline">{t('superAdmin.backToSchools')}</Link>
+      <IconActionButton as={Link} icon={Undo2} tone="slate" label={t('superAdmin.backToSchools')} to="/super-admin/schools" />
       <form onSubmit={submit} className="space-y-4 rounded-lg border bg-white p-4">
         <h1 className="text-xl font-bold">{t('superAdmin.addSchool')}</h1>
         {create.isError && !Object.keys(errors).length && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{errorOf(create.error, t('superAdmin.genericError'))}</p>}

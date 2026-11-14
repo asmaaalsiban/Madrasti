@@ -2,9 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Download } from 'lucide-react'
+import { Download, SquareArrowOutUpRight } from 'lucide-react'
 import { api } from '../../api/client'
 import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../components/ui/icon-action-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const STYLE = { pending: 'bg-amber-100 text-amber-800', done: 'bg-green-100 text-green-800', refused: 'bg-red-100 text-red-700' }
@@ -45,7 +46,7 @@ export default function PrivacyPage() {
   return (
     <section className="space-y-5">
       <h1>{t('privacy.title')}</h1>
-      <p className="text-sm text-slate-600">{t('privacy.help')} <Link to="/privacy" className="text-brand underline">{t('legal.privacy.title')}</Link></p>
+      <p className="text-sm text-slate-600">{t('privacy.help')} <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('legal.privacy.title')} to="/privacy" /></p>
       {message && <p role="status" className={`rounded p-2 text-sm ${message.ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'}`}>{message.text}</p>}
 
       {children.length > 0 && (

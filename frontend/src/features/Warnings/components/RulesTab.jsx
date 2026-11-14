@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Plus, Power, Pencil, Trash2 } from 'lucide-react'
 import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import Modal from '../../../components/shared/Modal'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
 
 const CATEGORIES = ['absence', 'late', 'behavior', 'violence', 'academic', 'uniform', 'other']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -83,9 +84,9 @@ export default function RulesTab() {
                 <span className="block text-slate-600">{t('warnings.rules.sentence', { measure: t(`warnings.rules.metrics.${r.metric}`), count: r.threshold, days: r.window_days, level: t(`warnings.levels.${r.level}`) })} · {r.auto_send ? t('warnings.rules.sentAtOnce') : t('warnings.rules.needsApproval')}</span>
               </span>
               <span className="flex items-center gap-3">
-                <button type="button" className="text-brand underline" onClick={() => toggle.mutate(r)}>{r.is_active ? t('warnings.rules.switchOff') : t('warnings.rules.switchOn')}</button>
-                <button type="button" className="text-brand underline" onClick={() => setDialog({ rule: r })}>{t('admin.actions.edit')}</button>
-                <button type="button" className="text-red-700 underline" onClick={() => setRemoving(r)}>{t('admin.actions.delete')}</button>
+                <IconActionButton icon={Power} tone="brand" label={r.is_active ? t('warnings.rules.switchOff') : t('warnings.rules.switchOn')} type="button" onClick={() => toggle.mutate(r)} />
+                <IconActionButton icon={Pencil} tone="brand" label={t('admin.actions.edit')} type="button" onClick={() => setDialog({ rule: r })} />
+                <IconActionButton icon={Trash2} tone="red" label={t('admin.actions.delete')} type="button" onClick={() => setRemoving(r)} />
               </span>
             </li>
           ))}

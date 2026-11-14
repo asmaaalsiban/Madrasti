@@ -8,6 +8,8 @@ import CommitmentCard from '../components/CommitmentCard'
 import ThisMonthCard from '../components/ThisMonthCard'
 import SalaryDonut from '../components/SalaryDonut'
 import Money from '../../Finance/components/Money'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { FileText } from 'lucide-react'
 
 // "My salary": the current contract, the last paid month with how it was calculated, a chart of the months, and the history.
 export default function MyPayslipsPage({ base }) {
@@ -38,7 +40,7 @@ export default function MyPayslipsPage({ base }) {
           </div>
           <p className="pt-1 text-sm font-medium">{t('payroll.howCalculated')}</p>
           <Breakdown payslip={latest} currency={data.currency} />
-          <Link className="inline-block text-sm text-brand underline" to={`${base}/payslips/${latest.id}`}>{t('payroll.payslip')}</Link>
+          <IconActionButton as={Link} icon={FileText} tone="brand" label={t('payroll.payslip')} to={`${base}/payslips/${latest.id}`} />
         </div>
       )}
 
@@ -64,7 +66,7 @@ export default function MyPayslipsPage({ base }) {
             {open === p.id && (
               <div className="mt-3 space-y-2">
                 <Breakdown payslip={p} currency={data.currency} />
-                <Link className="text-sm text-brand underline" to={`${base}/payslips/${p.id}`}>{t('payroll.payslip')}</Link>
+                <IconActionButton as={Link} icon={FileText} tone="brand" label={t('payroll.payslip')} to={`${base}/payslips/${p.id}`} />
               </div>
             )}
           </li>

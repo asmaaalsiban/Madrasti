@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { useResource } from '../hooks/useResource'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const FIELDS = [['mixed', 'mixed'], ['male', 'boys'], ['female', 'girls']]
 
@@ -41,7 +43,7 @@ export default function GenerateClassroomsPage() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('generate.title')}</h1>
-        <Link to="/admin/classrooms" className="text-sm text-brand underline">{t('generate.toClassrooms')}</Link>
+        <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="brand" label={t('generate.toClassrooms')} to="/admin/classrooms" />
       </div>
       <p className="text-sm text-slate-600">{t('generate.help')}</p>
 

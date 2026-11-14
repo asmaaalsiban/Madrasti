@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Ban } from 'lucide-react'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -45,7 +47,7 @@ export default function CoverPage() {
         </label>
       </div>
       {away.length > 0 && !teacherId && (
-        <p className="text-sm">{t('cover.awayToday')} {away.map((x, i) => <button key={x.id} type="button" className="me-2 text-brand underline" onClick={() => setTeacherId(String(x.id))}>{x.name}{i < away.length - 1 ? '،' : ''}</button>)}</p>
+        <p className="text-sm">{t('cover.awayToday')} {away.map((x) => <button key={x.id} type="button" className="me-2 rounded-full bg-brand/10 px-2 py-0.5 text-brand" onClick={() => setTeacherId(String(x.id))}>{x.name}</button>)}</p>
       )}
       {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
       {teacherId && (!plan.data ? <p className="text-slate-500">{t('common.loading')}</p> : plan.data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('cover.noLessons')}</p> : (
@@ -57,7 +59,7 @@ export default function CoverPage() {
                 {l.cover && (
                   <span className="flex items-center gap-3 rounded-full bg-green-50 px-3 py-1 text-sm text-green-800">
                     {t('cover.coveredBy', { name: l.cover.teacher.name })}
-                    <button type="button" className="text-red-700 underline" onClick={() => cancel.mutate(l.cover.id)}>{t('cover.cancel')}</button>
+                    <IconActionButton icon={Ban} tone="red" label={t('cover.cancel')} type="button" onClick={() => cancel.mutate(l.cover.id)} />
                   </span>
                 )}
               </div>

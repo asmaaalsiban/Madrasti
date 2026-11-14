@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ExportButton from '../../../components/shared/ExportButton'
@@ -51,7 +52,7 @@ export default function AccountsPage({ base }) {
           <tbody>
             {(list.data?.data ?? []).map((r) => (
               <tr key={r.id} className="border-t">
-                <td className="p-2"><Link className="text-brand underline" to={`${base}/finance/students/${r.id}`}>{r[`name_${i18n.language}`] || r.name_ar}</Link></td>
+                <td className="p-2"><Link className="inline-flex items-center gap-1 text-brand" to={`${base}/finance/students/${r.id}`}>{r[`name_${i18n.language}`] || r.name_ar}<ArrowUpRight size={14} aria-hidden /></Link></td>
                 <td className="p-2">{r.classroom}</td>
                 <td className="p-2"><Money value={r.net} currency={list.data.currency} /></td>
                 <td className="p-2"><Money value={r.paid} currency={list.data.currency} /></td>

@@ -2,13 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, Check, PackageCheck, Pencil, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
+import { CalendarClock, Check, PackageCheck, Pencil, Plus, ShoppingCart, Trash2, X, SquareArrowOutUpRight } from 'lucide-react'
 import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
 import ConfirmDialog from '../../components/shared/ConfirmDialog'
 import Modal from '../../components/shared/Modal'
 import Money from '../Finance/components/Money'
 import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../components/ui/icon-action-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const COLUMNS = ['pending', 'approved', 'purchased', 'received']
@@ -153,7 +154,7 @@ function Card({ r, data, onDialog }) {
       {r.description && <p className="text-sm text-slate-600">{r.description}</p>}
       <p className="text-xs text-slate-500">{r.requester.name}{r.reviewed_by && ` · ${r.status === 'rejected' ? t('procurement.declinedBy') : t('procurement.approvedBy')} ${r.reviewed_by}`}</p>
       {r.review_note && <p className="rounded-lg bg-slate-50 p-2 text-xs text-slate-600">“{r.review_note}”</p>}
-      {r.supplier && <p className="rounded-lg bg-green-50 p-2 text-xs text-green-900">{t('procurement.boughtFrom', { supplier: r.supplier })} · <Money value={r.actual_cost} currency={data.currency} />{r.purchase_ref && <> · <bdi dir="ltr">{r.purchase_ref}</bdi></>}{r.expense_id && <> · <Link to={`${base}/finance/expenses`} className="underline">{t('procurement.billRecorded')}</Link></>}</p>}
+      {r.supplier && <p className="rounded-lg bg-green-50 p-2 text-xs text-green-900">{t('procurement.boughtFrom', { supplier: r.supplier })} · <Money value={r.actual_cost} currency={data.currency} />{r.purchase_ref && <> · <bdi dir="ltr">{r.purchase_ref}</bdi></>}{r.expense_id && <> · <IconActionButton as={Link} icon={SquareArrowOutUpRight} tone="slate" label={t('procurement.billRecorded')} to={`${base}/finance/expenses`} /></>}</p>}
       <div className="flex flex-wrap gap-2 pt-1">
         {data.can_review && r.status === 'pending' && <button type="button" disabled={act.isPending} className={`${btn} bg-green-700 text-white`} onClick={() => act.mutate('approve')}><Check size={15} aria-hidden />{t('procurement.approve')}</button>}
         {data.can_review && r.status === 'pending' && <button type="button" className={`${btn} border border-red-300 text-red-700`} onClick={() => onDialog({ type: 'reject', request: r })}><X size={15} aria-hidden />{t('procurement.reject')}</button>}

@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import Money from './Money'
 import StatusBadge from './StatusBadge'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight, FileText, Ban } from 'lucide-react'
 
 // A student's statement: totals, then every fee with its installments and payments. `actions` adds buttons (accountant).
 export default function Statement({ data, onPay = null, onReceipt = null, onVoid = null, onDeleteFee = null, onTransport = null, onDiscount = null, onPayOnline = null }) {
@@ -35,7 +37,7 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
                   <span>{item.kind === 'discount' ? t('finance.discount') : item.description}</span>
                   <span className="flex items-center gap-2">
                     <Money value={item.amount} currency={c} />
-                    {onTransport && item.kind === 'transport' && <button type="button" className="text-xs text-brand underline" onClick={() => onTransport(fee, item)}>{t('finance.changeTransport')}</button>}
+                    {onTransport && item.kind === 'transport' && <IconActionButton icon={SquareArrowOutUpRight} tone="brand" label={t('finance.changeTransport')} type="button" onClick={() => onTransport(fee, item)} />}
                   </span>
                 </li>
               ))}
@@ -77,8 +79,8 @@ export default function Statement({ data, onPay = null, onReceipt = null, onVoid
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
                     <span><span dir="ltr">{p.paid_on}</span> · <Money value={p.amount} currency={c} /> · {t(`finance.methods.${p.method}`)} · <span dir="ltr">{p.receipt}</span>{p.payer_name && <> · {t('finance.paidBy', { name: p.payer_name })}</>}</span>
                     <span className="flex gap-2">
-                      {onReceipt && p.method !== 'carry_forward' && <button type="button" className="text-brand underline" onClick={() => onReceipt(p, fee)}>{t('finance.receipt')}</button>}
-                      {onVoid && p.method !== 'carry_forward' && <button type="button" className="text-red-700 underline" onClick={() => onVoid(p)}>{t('finance.voidPayment')}</button>}
+                      {onReceipt && p.method !== 'carry_forward' && <IconActionButton icon={FileText} tone="brand" label={t('finance.receipt')} type="button" onClick={() => onReceipt(p, fee)} />}
+                      {onVoid && p.method !== 'carry_forward' && <IconActionButton icon={Ban} tone="red" label={t('finance.voidPayment')} type="button" onClick={() => onVoid(p)} />}
                     </span>
                   </li>
                 ))}

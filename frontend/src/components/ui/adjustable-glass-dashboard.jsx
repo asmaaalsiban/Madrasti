@@ -926,7 +926,7 @@ const styles = `
 .gw-empty { text-align: center; padding: 70px 15px; color: var(--gw-muted); font-size: 12px; }
 .gw-empty svg { margin-bottom: 12px; }
 .gw-empty h3 { font-size: 15px; color: var(--gw-ink); margin-bottom: 6px; }
-.gw-empty button { margin-top: 15px; text-decoration: underline; }
+.gw-empty button { margin-top: 15px; font-weight: 600; }
 .gw-savings-intro { display: flex; align-items: center; gap: 20px; padding: 20px 10px 35px; }
 .gw-savings-orb { width: 65px; height: 65px; display: grid; place-items: center; border-radius: 50%; background: var(--gw-savings-orb); box-shadow: inset 0 1px 0 var(--gw-strong-edge); }
 .gw-savings-intro p { font-size: 12px; color: var(--gw-muted); }

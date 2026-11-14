@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import HomeworkImage from './HomeworkImage'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Trash2 } from 'lucide-react'
 
 const MAX = 10
 
@@ -32,13 +34,13 @@ export default function ImagePicker({ files, onChange, saved = [], onRemoveSaved
           {saved.map((id, i) => (
             <li key={`s${id}`} className="space-y-1">
               <HomeworkImage fileId={id} label={t('homework.page', { number: i + 1 })} />
-              <button type="button" className="text-sm text-red-700 underline" onClick={() => onRemoveSaved(id)}>{t('homework.removePhoto', { number: i + 1 })}</button>
+              <IconActionButton icon={Trash2} tone="red" label={t('homework.removePhoto', { number: i + 1 })} type="button" onClick={() => onRemoveSaved(id)} />
             </li>
           ))}
           {previews.map((url, i) => (
             <li key={`n${url}`} className="space-y-1">
               <img src={url} alt={t('homework.newPage', { number: saved.length + i + 1 })} className="max-h-40 rounded border" />
-              <button type="button" className="text-sm text-red-700 underline" onClick={() => onChange(files.filter((_, j) => j !== i))}>{t('homework.removePhoto', { number: saved.length + i + 1 })}</button>
+              <IconActionButton icon={Trash2} tone="red" label={t('homework.removePhoto', { number: saved.length + i + 1 })} type="button" onClick={() => onChange(files.filter((_, j) => j !== i))} />
             </li>
           ))}
         </ul>

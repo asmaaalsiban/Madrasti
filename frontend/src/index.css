@@ -235,7 +235,7 @@ html[data-lite] .lp-tilt { transition: none; }
 .auth-card { background: var(--color-snow); color: var(--color-ink); border-radius: 28px; padding: 1.75rem; box-shadow: 0 24px 50px -18px rgba(0,0,0,.55); animation: auth-in .45s cubic-bezier(.2,.7,.2,1) both; }
 .auth-card input:not([type="checkbox"]):not([type="radio"]) { border-radius: 14px; padding: .65rem .85rem; transition: box-shadow .15s ease, border-color .15s ease; }
 .auth-card input:not([type="checkbox"]):not([type="radio"]):focus { outline: none; border-color: var(--color-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 28%, transparent); }
-.auth-link { color: var(--color-sky-tint); text-decoration: underline; text-underline-offset: 3px; }
+.auth-link { color: var(--color-sky-tint); font-weight: 600; }
 @keyframes auth-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 /* Dashboard: cards come in one after another (opacity and position only, 0.4s: cheap even on weak devices). */
@@ -337,12 +337,12 @@ html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-
 /* Outline variant (cancel, previous/next...): on a phone it stays a plain outline button. */
 .ihb-outline { background: var(--color-snow); color: inherit; border: 1px solid #cbd5e1; font-weight: 500; }
 /* Icon-only row actions (components/ui/icon-action-button.jsx). */
-.ihb-icon { --ihb-color: var(--color-brand); }
+.ihb-icon { --ihb-color: var(--color-brand); display: inline-flex; align-items: center; justify-content: center; background: var(--ihb-color); padding: 0.25rem 0.75rem; text-decoration: none; vertical-align: middle; }
 .ihb-slate { --ihb-color: #334155; }
 .ihb-red { --ihb-color: #dc2626; }
 .ihb-icon .ihb-label { margin-inline-start: 0.25rem; }
 @media (min-width: 768px) and (hover: hover) {
-  .ihb-icon { min-width: 0; width: 2.25rem; height: 2.25rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--ihb-color); border-color: color-mix(in srgb, var(--ihb-color) 35%, white); }
+  .ihb-icon { background: var(--color-snow); min-width: 0; width: 2.25rem; height: 2.25rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--ihb-color); border-color: color-mix(in srgb, var(--ihb-color) 35%, white); }
   .ihb-icon .ihb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
   .ihb-icon > .ihb-text, .ihb-icon:hover > .ihb-text { transform: none; opacity: 1; }
   .ihb-icon > .ihb-dot { background: var(--ihb-color); inset-inline-start: 50%; top: 50%; width: 0; height: 0; transform: none; }

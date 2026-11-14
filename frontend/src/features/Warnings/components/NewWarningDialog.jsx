@@ -5,6 +5,8 @@ import { api } from '../../../api/client'
 import { DateInput } from '../../../components/shared/DateInput'
 import Modal from '../../../components/shared/Modal'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { SquareArrowOutUpRight } from 'lucide-react'
 
 const CATEGORIES = ['absence', 'late', 'behavior', 'violence', 'academic', 'uniform', 'other']
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
@@ -39,7 +41,7 @@ export default function NewWarningDialog({ canWarnStaff, initialSubject = 'stude
           </div>
         )}
         {pick ? (
-          <p className="flex items-center justify-between rounded bg-slate-50 p-2 text-sm"><b>{pick.label}</b><button type="button" className="text-brand underline" onClick={() => setPick(null)}>{t('warnings.change')}</button></p>
+          <p className="flex items-center justify-between rounded bg-slate-50 p-2 text-sm"><b>{pick.label}</b><IconActionButton icon={SquareArrowOutUpRight} tone="brand" label={t('warnings.change')} type="button" onClick={() => setPick(null)} /></p>
         ) : subject === 'student' ? (
           <div className="space-y-1">
             <label className="block text-sm">{t('warnings.searchStudent')}<input className="mt-1 w-full rounded border p-2" value={term} onChange={(e) => setTerm(e.target.value)} /></label>

@@ -5,6 +5,8 @@ import { api } from '../../../api/client'
 import ConfirmDialog from '../../../components/shared/ConfirmDialog'
 import { DateInput } from '../../../components/shared/DateInput'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Trash2 } from 'lucide-react'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -70,7 +72,7 @@ export default function DailySummaryPage() {
           <li key={s.id} className="rounded border bg-white p-3">
             <p className="text-sm font-medium"><span dir="ltr">{s.date}</span> · {s.classroom.name} · {subject(s.subject)}</p>
             <p className="whitespace-pre-line text-sm text-slate-700">{s.summary}</p>
-            <button type="button" className="text-xs text-red-700 underline" onClick={() => setRemoving(s)}>{t('admin.actions.delete')}</button>
+            <IconActionButton icon={Trash2} tone="red" label={t('admin.actions.delete')} type="button" onClick={() => setRemoving(s)} />
           </li>
         ))}
       </ul>

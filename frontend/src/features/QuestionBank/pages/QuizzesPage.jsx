@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import QuizHistory from '../components/QuizHistory'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Undo2 } from 'lucide-react'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 
@@ -89,7 +91,7 @@ export default function QuizzesPage() {
         <h2 className="font-bold">{t('quiz.history')}</h2>
         <QuizHistory rows={history.data} resumeBase="/student/quizzes" onRetake={(row) => retake.mutate(row.id)} />
       </div>
-      <p className="text-sm"><Link to="/student" className="text-brand underline">{t('common.back')}</Link></p>
+      <p className="text-sm"><IconActionButton as={Link} icon={Undo2} tone="brand" label={t('common.back')} to="/student" /></p>
     </section>
   )
 }

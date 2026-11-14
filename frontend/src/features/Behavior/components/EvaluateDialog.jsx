@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
+import { IconActionButton } from '../../../components/ui/icon-action-button'
+import { Plus } from 'lucide-react'
 
 // Scores one student against the criteria (1-5, or leave empty), with a note, and can add a quick positive / negative note.
 export default function EvaluateDialog({ student, date, onClose }) {
@@ -81,7 +83,7 @@ export default function EvaluateDialog({ student, date, onClose }) {
             <InteractiveHoverButton type="button" className="px-3 py-2 disabled:opacity-50" disabled={!newCriterion.name_ar || !newCriterion.name_en || addCriterion.isPending} onClick={() => addCriterion.mutate()}>{t('behavior.saveCriterion')}</InteractiveHoverButton>
             <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" onClick={() => setAdding(false)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           </div>
-        ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAdding(true)}>{t('behavior.addCriterion')}</button>}
+        ) : <IconActionButton icon={Plus} tone="brand" label={t('behavior.addCriterion')} type="button" onClick={() => setAdding(true)} />}
         <div className="space-y-2 rounded-lg border border-dashed border-brand bg-blue-50/40 p-3">
           <h3 className="font-bold">{t('behavior.special.title', { name: student[`name_${i18n.language}`] || student.name_ar })}</h3>
           <p className="text-xs text-slate-600">{t('behavior.special.help')}</p>
