@@ -30,12 +30,17 @@ class AvatarTest extends TenantTestCase
         return $user;
     }
 
-    private function photo(int $w = 400, int $h = 300): UploadedFile
+    /** A square JPEG, like the one the browser cuts (see browser-crop.jpg: a real 512x512 file produced by PhotoCropper in Chromium). */
+    private function photo(?int $side = null): UploadedFile
     {
-        return UploadedFile::fake()->image('me.png', $w, $h);
+        if ($side === null) {
+            return new UploadedFile(__DIR__.'/browser-crop.jpg', 'avatar.jpg', 'image/jpeg', null, true);
+        }
+
+        return UploadedFile::fake()->image('avatar.jpg', $side, $side);
     }
 
-    public function test_a_teacher_uploads_a_photo_which_is_cut_to_a_small_square(): void
+    public function test_a_teacher_uploads_the_photo_the_browser_cut(): void
     {
         $teacher = $this->as(Role::Teacher);
 
@@ -45,7 +50,7 @@ class AvatarTest extends TenantTestCase
         $path = $teacher->fresh()->avatar_path;
         Storage::assertExists($path);
         [$w, $h, $type] = getimagesizefromstring(Storage::get($path));
-        $this->assertSame([256, 256, IMAGETYPE_JPEG], [$w, $h, $type]);
+        $this->assertSame([512, 512, IMAGETYPE_JPEG], [$w, $h, $type]);
     }
 
     public function test_a_new_photo_replaces_the_old_one_and_removes_its_file(): void
@@ -54,7 +59,7 @@ class AvatarTest extends TenantTestCase
         $this->post('/api/profile/avatar', ['photo' => $this->photo()], ['Accept' => 'application/json'])->assertOk();
         $first = $teacher->fresh()->avatar_path;
 
-        $this->post('/api/profile/avatar', ['photo' => $this->photo(300, 500)], ['Accept' => 'application/json'])->assertOk();
+        $this->post('/api/profile/avatar', ['photo' => $this->photo(300)], ['Accept' => 'application/json'])->assertOk();
 
         Storage::assertMissing($first);
         Storage::assertExists($teacher->fresh()->avatar_path);
@@ -66,8 +71,11 @@ class AvatarTest extends TenantTestCase
         $this->as(Role::Teacher);
 
         $this->post('/api/profile/avatar', ['photo' => UploadedFile::fake()->create('x.txt', 5, 'text/plain')], ['Accept' => 'application/json'])->assertStatus(422);
-        $this->post('/api/profile/avatar', ['photo' => $this->photo(32, 32)], ['Accept' => 'application/json'])->assertStatus(422);
-        $this->post('/api/profile/avatar', ['photo' => UploadedFile::fake()->image('big.png', 400, 400)->size(4000)], ['Accept' => 'application/json'])->assertStatus(422);
+        $this->post('/api/profile/avatar', ['photo' => $this->photo(32)], ['Accept' => 'application/json'])->assertStatus(422); // too small
+        $this->post('/api/profile/avatar', ['photo' => $this->photo(2000)], ['Accept' => 'application/json'])->assertStatus(422); // too big
+        $this->post('/api/profile/avatar', ['photo' => UploadedFile::fake()->image('wide.jpg', 400, 300)], ['Accept' => 'application/json'])->assertStatus(422); // not square
+        $this->post('/api/profile/avatar', ['photo' => UploadedFile::fake()->image('a.png', 400, 400)], ['Accept' => 'application/json'])->assertStatus(422); // not a JPEG
+        $this->post('/api/profile/avatar', ['photo' => UploadedFile::fake()->createWithContent('x.jpg', '<?php echo 1;')], ['Accept' => 'application/json'])->assertStatus(422); // named .jpg, is not a picture
         $this->assertCount(0, Storage::files('avatars'));
     }
 

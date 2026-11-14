@@ -23,7 +23,13 @@ class AvatarController extends Controller
     public function upload(Request $request, Avatar $avatar): JsonResponse
     {
         abort_if($request->user()->role === Role::Student, 403, __('avatar.students_choose'));
-        $request->validate(['photo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072', 'dimensions:min_width=64,min_height=64,max_width=6000,max_height=6000']]);
+        // The browser sends the cut picture: a square JPEG (checked by its real content, not its name), 64-1024 px.
+        $request->validate(['photo' => ['required', 'file', 'max:1024', function ($attribute, $file, $fail) {
+            $info = @getimagesize($file->getRealPath());
+            if (! $info || $info[2] !== IMAGETYPE_JPEG || $info[0] !== $info[1] || $info[0] < 64 || $info[0] > 1024) {
+                $fail(__('avatar.bad_photo'));
+            }
+        }]]);
 
         $avatar->setPhoto($request->user(), $request->file('photo'));
 
