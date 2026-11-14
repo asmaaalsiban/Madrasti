@@ -135,6 +135,7 @@ const ChatPage = lazy(() => import('../features/Chat/pages/ChatPage'))
 const ParentHome = lazy(() => import('../features/Parent/pages/ParentHome'))
 
 const GlassDemoPage = lazy(() => import('../features/Demo/GlassDemoPage'))
+const PricingDemoPage = lazy(() => import('../features/Demo/PricingDemoPage'))
 
 const ROLES = ['admin', 'teacher', 'student', 'parent']
 
@@ -275,6 +276,7 @@ export const routes = [
             children: [
               { path: '/admin', element: <OverviewPage /> },
               { path: '/admin/glass-demo', element: <GlassDemoPage /> }, // trial page of the glass dashboard component (sample data)
+              { path: '/admin/pricing-demo', element: <PricingDemoPage /> }, // trial page of the pricing block (sample plans, not real prices)
               { path: '/admin/academic-years', element: <AcademicYearsPage /> },
               { path: '/admin/grade-levels', element: <GradeLevelsPage /> },
               { path: '/admin/classrooms', element: <ClassroomsPage /> },
