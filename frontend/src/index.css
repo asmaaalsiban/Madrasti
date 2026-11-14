@@ -323,19 +323,25 @@ html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-
 .ihb:disabled { pointer-events: none; }
 @media (min-width: 768px) and (hover: hover) {
   .ihb { min-width: 7.5rem; background: var(--color-snow); color: var(--color-deep-harbor); border: 1px solid #cbd5e1; }
-  .ihb > .ihb-text { transform: translateX(calc(var(--s) * 0.25rem)); transition: transform .3s, opacity .3s, color .3s; }
+  .ihb > .ihb-text { margin-inline-start: 1rem; transform: translateX(calc(var(--s) * 0.25rem)); transition: transform .3s, opacity .3s, color .3s; } /* the dot sits in this gutter, never over the text */
   .ihb > .ihb-in { display: flex; position: absolute; inset: 0; z-index: 2; align-items: center; justify-content: center; gap: 0.5rem; color: #fff; opacity: 0; transform: translateX(calc(var(--s) * 3rem)); transition: transform .3s, opacity .3s; }
   .ihb > .ihb-in::before { content: attr(data-text); }
-  .ihb > .ihb-dot { display: block; position: absolute; inset-inline-start: 20%; top: 40%; width: 0.5rem; height: 0.5rem; border-radius: 0.5rem; background: var(--color-brand); transition: all .3s; }
+  .ihb > .ihb-dot { display: block; position: absolute; inset-inline-start: 0.8rem; top: calc(50% - 0.25rem); width: 0.5rem; height: 0.5rem; border-radius: 0.5rem; background: var(--ihb-color, var(--color-brand)); transition: all .3s; }
   .ihb:hover > .ihb-text { transform: translateX(calc(var(--s) * 3rem)); opacity: 0; }
   .ihb:hover > .ihb-in { opacity: 1; transform: translateX(calc(var(--s) * -0.25rem)); }
   .ihb:hover > .ihb-dot { inset-inline-start: 0; top: 0; width: 100%; height: 100%; transform: scale(1.8); }
+  .ihb-outline { color: var(--color-deep-harbor); }
+  .ihb-outline.ihb-red { color: #b91c1c; }
   .ihb-plain:hover { color: #fff; }
+  .ihb-icon > .ihb-text { margin-inline-start: 0; }
   .ihb-plain:hover > .ihb-text { transform: translateX(calc(var(--s) * 0.25rem)); opacity: 1; }
 }
 
+/* Red tone of the text buttons (suspend, delete...). */
+.ihb-red { --ihb-color: #dc2626; }
+.ihb-outline.ihb-red { border-color: #fca5a5; color: #b91c1c; }
 /* Outline variant (cancel, previous/next...): on a phone it stays a plain outline button. */
-.ihb-outline { background: var(--color-snow); color: inherit; border: 1px solid #cbd5e1; font-weight: 500; }
+.ihb-outline { background: var(--color-snow); color: var(--color-deep-harbor); border: 1px solid #cbd5e1; font-weight: 500; }
 /* Icon-only row actions (components/ui/icon-action-button.jsx). */
 .ihb-icon { --ihb-color: var(--color-brand); display: inline-flex; align-items: center; justify-content: center; background: var(--ihb-color); padding: 0.25rem 0.75rem; text-decoration: none; vertical-align: middle; }
 .ihb-slate { --ihb-color: #334155; }
@@ -344,7 +350,7 @@ html[data-lite] .glass-card, html[data-lite] .glass-dark, html[data-lite] .dash-
 @media (min-width: 768px) and (hover: hover) {
   .ihb-icon { background: var(--color-snow); min-width: 0; width: 2.25rem; height: 2.25rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--ihb-color); border-color: color-mix(in srgb, var(--ihb-color) 35%, white); }
   .ihb-icon .ihb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
-  .ihb-icon > .ihb-text, .ihb-icon:hover > .ihb-text { transform: none; opacity: 1; }
+  .ihb-icon > .ihb-text, .ihb-icon:hover > .ihb-text { margin-inline-start: 0; transform: none; opacity: 1; }
   .ihb-icon > .ihb-dot { background: var(--ihb-color); inset-inline-start: 50%; top: 50%; width: 0; height: 0; transform: none; }
   .ihb-icon:hover > .ihb-dot { inset-inline-start: 0; top: 0; width: 100%; height: 100%; transform: scale(1.8); }
   .ihb-icon:hover { color: #fff; }

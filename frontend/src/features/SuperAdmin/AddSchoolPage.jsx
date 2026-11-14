@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { DateInput } from '../../components/shared/DateInput'
@@ -46,7 +47,7 @@ export default function AddSchoolPage() {
         <FormField label={t('superAdmin.adminPassword')} error={errors.admin_password?.[0]}><PasswordInput required minLength={8} autoComplete="new-password" value={form.admin_password} onChange={set('admin_password')} /></FormField>
         <FormField label={t('superAdmin.maxStudents')} hint={t('superAdmin.maxStudentsHint')} error={errors.max_students?.[0]}><input type="number" min="1" dir="ltr" className={inputClass} value={form.max_students} onChange={set('max_students')} /></FormField>
         <FormField label={t('superAdmin.endDate')} hint={t('superAdmin.endDateHint')} error={errors.subscription_ends_at?.[0]}><DateInput className={inputClass} value={form.subscription_ends_at} onChange={set('subscription_ends_at')} /></FormField>
-        <button disabled={create.isPending} className="cta w-full bg-brand text-white disabled:opacity-60">{t('superAdmin.addSchool')}</button>
+        <InteractiveHoverButton disabled={create.isPending} className="w-full py-3 text-base disabled:opacity-60">{t('superAdmin.addSchool')}</InteractiveHoverButton>
       </form>
     </section>
   )
