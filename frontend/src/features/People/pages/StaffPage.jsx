@@ -1,3 +1,4 @@
+import { KeyRound } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +13,7 @@ const CATEGORIES = ['all', 'teaching', 'administrative', 'student_affairs', 'hea
 const rowActions = [
   {
     key: 'reset',
+    icon: KeyRound,
     label: 'people.actions.resetPassword',
     confirm: 'people.actions.resetConfirm',
     done: 'people.actions.resetDone',

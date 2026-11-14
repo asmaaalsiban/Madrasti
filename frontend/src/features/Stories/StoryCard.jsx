@@ -116,9 +116,9 @@ export default function StoryCard({ story }) {
           <div className="space-y-3">
             <AuthImage path={`/stories/media/${story.media[viewer]}`} alt="" className="mx-auto max-h-[70vh] rounded-lg" />
             <div className="flex items-center justify-between text-sm">
-              <button type="button" disabled={viewer === 0} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setViewer(viewer - 1)}>{t('admin.actions.prev')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={viewer === 0} className="px-3 py-1 disabled:opacity-40" onClick={() => setViewer(viewer - 1)}>{t('admin.actions.prev')}</InteractiveHoverButton>
               <span dir="ltr">{viewer + 1} / {story.media.length}</span>
-              <button type="button" disabled={viewer >= story.media.length - 1} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setViewer(viewer + 1)}>{t('admin.actions.next')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={viewer >= story.media.length - 1} className="px-3 py-1 disabled:opacity-40" onClick={() => setViewer(viewer + 1)}>{t('admin.actions.next')}</InteractiveHoverButton>
             </div>
           </div>
         </Modal>

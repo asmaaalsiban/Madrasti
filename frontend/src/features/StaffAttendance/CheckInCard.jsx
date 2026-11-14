@@ -28,7 +28,7 @@ export default function CheckInCard() {
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       </div>
       {!today?.check_in && <InteractiveHoverButton type="button" disabled={act.isPending} className="px-4 py-2 disabled:opacity-50" onClick={() => act.mutate('check-in')}>{t('staffAttendance.checkIn')}</InteractiveHoverButton>}
-      {today?.check_in && !today.check_out && <button type="button" disabled={act.isPending} className="rounded border px-4 py-2 text-brand disabled:opacity-50" onClick={() => act.mutate('check-out')}>{t('staffAttendance.checkOut')}</button>}
+      {today?.check_in && !today.check_out && <InteractiveHoverButton variant="outline" type="button" disabled={act.isPending} className="px-4 py-2 text-brand disabled:opacity-50" onClick={() => act.mutate('check-out')}>{t('staffAttendance.checkOut')}</InteractiveHoverButton>}
     </div>
   )
 }

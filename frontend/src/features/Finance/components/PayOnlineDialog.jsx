@@ -91,7 +91,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           <label className="block text-sm">{t('finance.fields.payerName')}<input required className="mt-1 w-full rounded border p-2" value={form.payer_name} onChange={(e) => setForm({ ...form, payer_name: e.target.value })} /></label>
           <p className="text-xs text-slate-500">{t('finance.receiptInName')}</p>
           <div className="flex justify-end gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={start.isPending}>{t('finance.continueToPay')}</InteractiveHoverButton>
           </div>
         </form>
@@ -113,7 +113,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           <label className="block text-sm">{t('finance.transfer.reference')}<input required dir="ltr" maxLength={100} className="mt-1 w-full rounded border p-2" placeholder={t('finance.transfer.referenceHint')} value={proof.transfer_reference} onChange={(e) => setProof({ ...proof, transfer_reference: e.target.value })} /></label>
           <AttachmentsField files={proof.files} onChange={(files) => setProof({ ...proof, files })} label={t('finance.transfer.proof')} />
           <div className="flex justify-end gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={() => setStep('details')}>{t('finance.transfer.back')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setStep('details')}>{t('finance.transfer.back')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={sendTransfer.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('finance.transfer.submit')}</InteractiveHoverButton>
           </div>
         </form>
@@ -137,7 +137,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
             <label className="block text-sm">{t('finance.card.cvc')}<input required type="password" inputMode="numeric" autoComplete="cc-csc" dir="ltr" maxLength={4} className="mt-1 w-full rounded border p-2" value={card.cvc} onChange={setC('cvc')} /></label>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={pay.isPending}>{t('finance.card.pay', { amount: form.amount, currency })}</InteractiveHoverButton>
           </div>
         </form>
@@ -149,7 +149,7 @@ export default function PayOnlineDialog({ studentId, fee, currency, payerDefault
           {result.status === 'failed' && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{t(`finance.online.failed.${result.failure_reason}`, { defaultValue: t('finance.online.failed.default') })}</p>}
           {result.status === 'review' && <p role="alert" className="rounded bg-amber-50 p-3 text-amber-800">{t('finance.online.review')}</p>}
           <div className="flex justify-end gap-2">
-            {result.status === 'failed' && <button type="button" className="rounded border px-3 py-1.5" onClick={() => { setResult(null); setStep('details') }}>{t('finance.online.tryAgain')}</button>}
+            {result.status === 'failed' && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => { setResult(null); setStep('details') }}>{t('finance.online.tryAgain')}</InteractiveHoverButton>}
             <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={onClose}>{t('finance.close')}</InteractiveHoverButton>
           </div>
         </div>

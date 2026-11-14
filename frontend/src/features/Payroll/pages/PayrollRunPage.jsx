@@ -38,7 +38,7 @@ function ItemDialog({ slip, onClose }) {
         <label className="block text-sm">{t('payroll.label')}<input required className="mt-1 w-full rounded border p-2" placeholder={t('payroll.reasonHint')} value={form.label} onChange={set('label')} /></label>
         <label className="block text-sm">{t('payroll.amount')}<input required type="number" step="0.01" min="0.01" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.amount} onChange={set('amount')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -91,7 +91,7 @@ function ApplyRuleDialog({ run, slip, onClose }) {
         </label>
         {rules.length === 0 && <p className="text-sm text-slate-500">{t('payroll.noTemplates')}</p>}
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || !id} className="px-4 py-1.5 disabled:opacity-50">{t('payroll.apply')}</InteractiveHoverButton>
         </div>
       </form>
@@ -130,7 +130,7 @@ function PayDialog({ run, onClose }) {
         <label className="block text-sm">{t('payroll.paidOn')}<DateInput required className="mt-1 w-full rounded border p-2" value={form.paid_on} onChange={set('paid_on')} /></label>
         <label className="block text-sm">{t('payroll.reference')}<input className="mt-1 w-full rounded border p-2" value={form.reference} onChange={set('reference')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('payroll.confirmPay')}</InteractiveHoverButton>
         </div>
       </form>
@@ -182,12 +182,12 @@ export default function PayrollRunPage({ base }) {
 
       <div className="flex flex-wrap gap-2">
         {manage && draft && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => act.mutate({ path: 'submit' })}>{t('payroll.submit')}</InteractiveHoverButton>}
-        {manage && draft && <button type="button" className="rounded border px-4 py-1.5" onClick={() => api.post('/payroll/runs', { month: run.month }).then(refresh)}>{t('payroll.addNewcomers')}</button>}
-        {manage && draft && <button type="button" className="rounded border px-4 py-1.5 text-brand" title={t('payroll.refreshHint')} onClick={() => api.post(`/payroll/runs/${run.id}/refresh-commitment`).then(refresh).catch((err) => setError(errorOf(err, t('admin.actions.error'))))}>{t('payroll.refreshFromAttendance')}</button>}
-        {manage && draft && <button type="button" className="rounded border px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'rule' })}>{t('payroll.applyRuleAll')}</button>}
+        {manage && draft && <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5" onClick={() => api.post('/payroll/runs', { month: run.month }).then(refresh)}>{t('payroll.addNewcomers')}</InteractiveHoverButton>}
+        {manage && draft && <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5 text-brand" title={t('payroll.refreshHint')} onClick={() => api.post(`/payroll/runs/${run.id}/refresh-commitment`).then(refresh).catch((err) => setError(errorOf(err, t('admin.actions.error'))))}>{t('payroll.refreshFromAttendance')}</InteractiveHoverButton>}
+        {manage && draft && <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5 text-brand" onClick={() => setDialog({ type: 'rule' })}>{t('payroll.applyRuleAll')}</InteractiveHoverButton>}
         {manage && draft && <button type="button" className="rounded border border-red-300 px-4 py-1.5 text-red-700" onClick={() => drop.mutate()}>{t('payroll.deleteRun')}</button>}
         {approve && run.status === 'submitted' && <button type="button" className="rounded bg-green-700 px-4 py-1.5 text-white" onClick={() => act.mutate({ path: 'approve' })}>{t('payroll.approve')}</button>}
-        {approve && run.status === 'submitted' && <button type="button" className="rounded border px-4 py-1.5" onClick={() => setBack(true)}>{t('payroll.sendBack')}</button>}
+        {approve && run.status === 'submitted' && <InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5" onClick={() => setBack(true)}>{t('payroll.sendBack')}</InteractiveHoverButton>}
         {manage && run.status === 'approved' && <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => setDialog({ type: 'pay' })}>{t('payroll.payAll')}</InteractiveHoverButton>}
       </div>
       {run.approved_by && <p className="text-sm text-slate-600">{t('payroll.approvedBy', { name: run.approved_by })}</p>}
@@ -195,7 +195,7 @@ export default function PayrollRunPage({ base }) {
       {back && (
         <form className="space-y-2 rounded-lg border bg-white p-3" onSubmit={(e) => { e.preventDefault(); act.mutate({ path: 'send-back', body: { note: note || null } }) }}>
           <label className="block text-sm">{t('payroll.returnNote')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
-          <div className="flex gap-2"><InteractiveHoverButton type="submit" className="px-3 py-1.5">{t('payroll.sendBack')}</InteractiveHoverButton><button type="button" className="rounded border px-3 py-1.5" onClick={() => setBack(false)}>{t('admin.actions.cancel')}</button></div>
+          <div className="flex gap-2"><InteractiveHoverButton type="submit" className="px-3 py-1.5">{t('payroll.sendBack')}</InteractiveHoverButton><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setBack(false)}>{t('admin.actions.cancel')}</InteractiveHoverButton></div>
         </form>
       )}
 
@@ -223,8 +223,8 @@ export default function PayrollRunPage({ base }) {
                 <td className="p-2"><PaymentCell slip={s} editable={manage && !s.paid_on && run.status !== 'paid'} /></td>
                 <td className="p-2">
                   <span className="flex flex-wrap justify-end gap-2">
-                    {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'item', slip: s })}>{t('payroll.addBonusOrDeduction')}</button>}
-                    {manage && draft && <button type="button" className="rounded border px-2 py-1 text-brand" onClick={() => setDialog({ type: 'rule', slip: s })}>{t('payroll.rule')}</button>}
+                    {manage && draft && <InteractiveHoverButton variant="outline" type="button" className="px-2 py-1 text-brand" onClick={() => setDialog({ type: 'item', slip: s })}>{t('payroll.addBonusOrDeduction')}</InteractiveHoverButton>}
+                    {manage && draft && <InteractiveHoverButton variant="outline" type="button" className="px-2 py-1 text-brand" onClick={() => setDialog({ type: 'rule', slip: s })}>{t('payroll.rule')}</InteractiveHoverButton>}
                     {manage && draft && <button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700" onClick={() => removeSlip.mutate(s.id)}>{t('payroll.removeFromRun')}</button>}
                     <Link className="rounded border px-2 py-1 text-brand" to={`${base}/payroll/payslips/${s.id}`}>{t('payroll.payslip')}</Link>
                   </span>

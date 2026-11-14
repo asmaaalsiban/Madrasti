@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Download, Share, SquarePlus } from 'lucide-react'
 import Modal from '../components/shared/Modal'
 import { useInstall } from './pwa'
+import { InteractiveHoverButton } from '../components/ui/interactive-hover-button'
 
 // "Install the app" in the user menu: one tap where the browser allows it, and instructions for iPhone (Safari has no install button).
 export default function InstallMenuItem({ className, onDone }) {
@@ -21,7 +22,7 @@ export default function InstallMenuItem({ className, onDone }) {
           <li className="flex items-start gap-3"><SquarePlus aria-hidden size={20} className="mt-0.5 shrink-0 text-brand" /><span>{t('pwa.iosStep2')}</span></li>
           <li className="flex items-start gap-3"><Download aria-hidden size={20} className="mt-0.5 shrink-0 text-brand" /><span>{t('pwa.iosStep3')}</span></li>
         </ol>
-        <div className="mt-4 flex justify-end"><button type="button" className="rounded border px-4 py-1.5" onClick={() => { setHelp(false); onDone?.() }}>{t('transport.close')}</button></div>
+        <div className="mt-4 flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5" onClick={() => { setHelp(false); onDone?.() }}>{t('transport.close')}</InteractiveHoverButton></div>
       </Modal>
     </>
   )

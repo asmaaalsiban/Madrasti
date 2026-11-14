@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Gives every subject of every classroom a teacher (from the curriculum), previewing first.
 export default function AutoAssignDialog({ open, onClose }) {
@@ -76,8 +77,8 @@ export default function AutoAssignDialog({ open, onClose }) {
         )}
 
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={close}>{t('autoAssign.close')}</button>
-          <button type="button" disabled={run.isPending} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => run.mutate({ dry: true })}>{t('generate.preview')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={close}>{t('autoAssign.close')}</InteractiveHoverButton>
+          <InteractiveHoverButton variant="outline" type="button" disabled={run.isPending} className="px-3 py-1.5 disabled:opacity-50" onClick={() => run.mutate({ dry: true })}>{t('generate.preview')}</InteractiveHoverButton>
           {result?.dry_run && result.assigned > 0 && (
             <button type="button" disabled={run.isPending} className="rounded bg-green-700 px-3 py-1.5 text-white disabled:opacity-50" onClick={() => run.mutate({ dry: false })}>{t('autoAssign.apply')}</button>
           )}

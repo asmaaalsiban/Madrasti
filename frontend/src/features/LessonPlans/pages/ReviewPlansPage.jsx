@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import PlanCard from '../components/PlanCard'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Admin: the plans the teachers submitted. Approve, or reject with a note the teacher sees.
 export default function ReviewPlansPage() {
@@ -40,7 +41,7 @@ export default function ReviewPlansPage() {
             {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
             <label className="block text-sm">{t('lessonPlans.rejectNote')}<textarea required rows={4} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setRejecting(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setRejecting(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <button type="submit" className="rounded bg-red-600 px-4 py-1.5 text-white">{t('lessonPlans.reject')}</button>
             </div>
           </form>

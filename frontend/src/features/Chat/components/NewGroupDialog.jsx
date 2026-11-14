@@ -33,7 +33,7 @@ export default function NewGroupDialog({ onClose, onOpened }) {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!form.members_can_post} onChange={(e) => setForm({ ...form, members_can_post: !e.target.checked })} />{t('chat.teachersOnly')}</label>
         <p className="text-xs text-slate-500">{t('chat.groupHelp')}</p>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={create.isPending || !classroomId}>{t('chat.createGroup')}</InteractiveHoverButton>
         </div>
       </form>

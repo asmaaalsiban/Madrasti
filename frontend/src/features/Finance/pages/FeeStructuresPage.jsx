@@ -54,7 +54,7 @@ export default function FeeStructuresPage() {
             {canManage && (
               <div className="flex flex-wrap gap-2">
                 <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setApplying(s)}>{t('finance.giveToStudents')}</InteractiveHoverButton>
-                <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => { setError(''); setForm({ id: s.id, grade_level_id: String(s.grade_level.id), name: s.name, amount: s.amount, installments_count: String(s.installments_count), first_due: s.first_due ?? '', every_months: String(s.every_months), auto_apply: s.auto_apply }) }}>{t('admin.actions.edit')}</button>
+                <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => { setError(''); setForm({ id: s.id, grade_level_id: String(s.grade_level.id), name: s.name, amount: s.amount, installments_count: String(s.installments_count), first_due: s.first_due ?? '', every_months: String(s.every_months), auto_apply: s.auto_apply }) }}>{t('admin.actions.edit')}</InteractiveHoverButton>
                 <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(s)}>{t('admin.actions.delete')}</button>
               </div>
             )}
@@ -77,7 +77,7 @@ export default function FeeStructuresPage() {
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.auto_apply} onChange={(e) => setForm({ ...form, auto_apply: e.target.checked })} />{t('finance.autoApply')}</label>
             <p className="text-xs text-slate-500">{t('finance.autoApplyHelp')}</p>
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>

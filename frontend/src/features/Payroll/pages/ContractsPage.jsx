@@ -69,7 +69,7 @@ export default function ContractsPage({ base, canManage }) {
                       {canManage && c?.status === 'active' && <InteractiveHoverButton type="button" className="px-3 py-1" onClick={() => setDialog({ type: 'renew', staff: r })}>{t('payroll.renew')}</InteractiveHoverButton>}
                       {canManage && c?.status === 'active' && <button type="button" className="rounded border border-red-300 px-3 py-1 text-red-700" onClick={() => setDialog({ type: 'end', staff: r })}>{t('payroll.endContract')}</button>}
                       {canManage && (!c || c.status !== 'active') && <InteractiveHoverButton type="button" className="px-3 py-1" onClick={() => setDialog({ type: 'new', staff: r })}>{t('payroll.newContract')}</InteractiveHoverButton>}
-                      {r.contracts_count > 0 && <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setDialog({ type: 'history', staff: r })}>{t('payroll.history')}</button>}
+                      {r.contracts_count > 0 && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => setDialog({ type: 'history', staff: r })}>{t('payroll.history')}</InteractiveHoverButton>}
                     </span>
                   </td>
                 </tr>

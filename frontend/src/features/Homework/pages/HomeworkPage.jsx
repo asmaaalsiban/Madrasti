@@ -70,7 +70,7 @@ export default function HomeworkPage() {
             <p className="text-xs text-slate-500">{t('homework.dueOn', { date: h.due_on })} · {h.teacher.name}</p>
             <div className="flex gap-2 pt-1">
               <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => setViewing(h)}>{t('homework.answers')}</InteractiveHoverButton>
-              <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(h)}>{t('admin.actions.edit')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => edit(h)}>{t('admin.actions.edit')}</InteractiveHoverButton>
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(h)}>{t('admin.actions.delete')}</button>
             </div>
           </li>
@@ -99,7 +99,7 @@ export default function HomeworkPage() {
               <p className="text-xs text-slate-500">{t('homework.imageHint')}</p>
             </div>
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setForm(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={save.isPending}>{t('admin.actions.save')}</InteractiveHoverButton>
             </div>
           </form>

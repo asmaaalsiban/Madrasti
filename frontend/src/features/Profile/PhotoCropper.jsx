@@ -3,6 +3,7 @@ import Cropper from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
 import Modal from '../../components/shared/Modal'
 import cropImage from './cropImage'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // Lets the person move and zoom the picture inside a round frame and choose exactly what is kept; onSave gets the cropped file.
 export default function PhotoCropper({ file, busy, onSave, onCancel }) {
@@ -41,7 +42,7 @@ export default function PhotoCropper({ file, busy, onSave, onCancel }) {
       </label>
       {failed && <p role="alert" className="mt-3 rounded bg-red-50 p-2 text-sm text-red-700">{t('profile.cropFailed')}</p>}
       <div className="mt-5 flex justify-end gap-2">
-        <button type="button" className="rounded-full border px-4 py-2 font-semibold" onClick={onCancel}>{t('profile.cancel')}</button>
+        <InteractiveHoverButton variant="outline" type="button" className="px-4 py-2 font-semibold" onClick={onCancel}>{t('profile.cancel')}</InteractiveHoverButton>
         <button type="button" disabled={!area || busy} className="rounded-full bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60" onClick={save}>{t('profile.savePhoto')}</button>
       </div>
     </Modal>

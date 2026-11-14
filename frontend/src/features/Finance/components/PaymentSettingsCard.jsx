@@ -46,7 +46,7 @@ function Form({ settings }) {
       <p className="text-xs text-slate-500">{t('paySettings.callback')}: <bdi dir="ltr" className="break-all">{settings.callback_url}</bdi></p>
       <div className="flex flex-wrap gap-2">
         <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
-        <button type="button" disabled={test.isPending || !settings.server_key_set} className="rounded border px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => { setMessage(null); test.mutate() }}>{test.isPending ? t('paySettings.testing') : t('paySettings.test')}</button>
+        <InteractiveHoverButton variant="outline" type="button" disabled={test.isPending || !settings.server_key_set} className="px-4 py-1.5 text-brand disabled:opacity-50" onClick={() => { setMessage(null); test.mutate() }}>{test.isPending ? t('paySettings.testing') : t('paySettings.test')}</InteractiveHoverButton>
       </div>
     </form>
   )

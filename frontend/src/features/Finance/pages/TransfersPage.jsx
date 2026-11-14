@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
 import { AttachmentList } from '../../../components/shared/Attachments'
 import Money from '../components/Money'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 const errorOf = (err, fallback) => Object.values(err.response?.data?.errors ?? {})[0]?.[0] || err.response?.data?.message || fallback
 const STYLE = { pending: 'bg-amber-100 text-amber-800', paid: 'bg-green-100 text-green-800', failed: 'bg-red-100 text-red-700', review: 'bg-amber-100 text-amber-800' }
@@ -22,7 +23,7 @@ function RejectDialog({ row, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <label className="block text-sm">{t('transfers.reason')}<textarea required rows={2} className="mt-1 w-full rounded border p-2" value={note} onChange={(e) => setNote(e.target.value)} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <button type="submit" disabled={reject.isPending} className="rounded bg-red-600 px-4 py-1.5 text-white disabled:opacity-50">{t('transfers.reject')}</button>
         </div>
       </form>

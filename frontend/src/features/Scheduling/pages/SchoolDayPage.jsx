@@ -143,7 +143,7 @@ export default function SchoolDayPage() {
               </li>
             ))}
           </ul>
-          <button type="button" disabled={saveGrades.isPending} className="rounded border px-4 py-1.5 disabled:opacity-60" onClick={() => saveGrades.mutate()}>{t('schoolDay.saveGrades')}</button>
+          <InteractiveHoverButton variant="outline" type="button" disabled={saveGrades.isPending} className="px-4 py-1.5 disabled:opacity-60" onClick={() => saveGrades.mutate()}>{t('schoolDay.saveGrades')}</InteractiveHoverButton>
         </div>
         </div>
       </div>

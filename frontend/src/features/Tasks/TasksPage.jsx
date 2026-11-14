@@ -124,7 +124,7 @@ function TaskDialog({ task, onClose }) {
           )}
         </fieldset>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || form.user_ids.length === 0} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>

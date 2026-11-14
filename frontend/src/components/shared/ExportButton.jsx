@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
 // The file name the server chose (Content-Disposition), or a fallback.
 const fileName = (headers, fallback) => /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(headers?.['content-disposition'] ?? '')?.[1] ?? fallback
@@ -33,7 +34,7 @@ export default function ExportButton({ path, params = {}, fallbackName = 'export
 
   return (
     <span className="inline-flex items-center gap-2">
-      <button type="button" disabled={busy} className="rounded border px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={download}>{label ?? t('common.exportExcel')}</button>
+      <InteractiveHoverButton variant="outline" type="button" disabled={busy} className="px-3 py-1.5 text-sm text-brand disabled:opacity-50" onClick={download}>{label ?? t('common.exportExcel')}</InteractiveHoverButton>
       {failed && <span role="alert" className="text-sm text-red-700">{t('common.exportFailed')}</span>}
     </span>
   )

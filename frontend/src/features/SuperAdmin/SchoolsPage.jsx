@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { STATES, STATE_STYLE, formatDay } from './format'
 import { useSchools } from './useSuperAdmin'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 export const StateBadge = ({ state }) => {
   const { t } = useTranslation()
@@ -77,9 +78,9 @@ export default function SchoolsPage() {
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-600">{t('superAdmin.total', { count: data.meta.total })}</span>
             <span className="flex items-center gap-2">
-              <button type="button" disabled={page <= 1} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setPage(page - 1)}>{t('admin.actions.prev')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={page <= 1} className="px-3 py-1 disabled:opacity-40" onClick={() => setPage(page - 1)}>{t('admin.actions.prev')}</InteractiveHoverButton>
               <span dir="ltr">{data.meta.current_page} / {data.meta.last_page}</span>
-              <button type="button" disabled={page >= data.meta.last_page} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setPage(page + 1)}>{t('admin.actions.next')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={page >= data.meta.last_page} className="px-3 py-1 disabled:opacity-40" onClick={() => setPage(page + 1)}>{t('admin.actions.next')}</InteractiveHoverButton>
             </span>
           </div>
         </>

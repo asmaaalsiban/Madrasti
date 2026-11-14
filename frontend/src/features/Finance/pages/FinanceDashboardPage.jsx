@@ -6,6 +6,7 @@ import { api } from '../../../api/client'
 import Money from '../components/Money'
 import PaymentSettingsCard from '../components/PaymentSettingsCard'
 import BankTransferSettingsCard from '../components/BankTransferSettingsCard'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // The money of the school at a glance: expected, collected, remaining, overdue. The accountant also sets the currency.
 export default function FinanceDashboardPage({ base }) {
@@ -53,7 +54,7 @@ export default function FinanceDashboardPage({ base }) {
           <label className="text-sm">{t('finance.currency')}
             <input dir="ltr" maxLength={8} className="mt-1 block w-28 rounded border p-2" placeholder={settings.data.currency} value={currency} onChange={(e) => setCurrency(e.target.value)} />
           </label>
-          <button type="submit" className="rounded border px-3 py-2 text-sm" disabled={!currency}>{t('admin.actions.save')}</button>
+          <InteractiveHoverButton variant="outline" type="submit" className="px-3 py-2 text-sm" disabled={!currency}>{t('admin.actions.save')}</InteractiveHoverButton>
         </form>
       )}
       <PaymentSettingsCard />

@@ -60,7 +60,7 @@ export default function QuizRunPage() {
         <p className="text-5xl font-extrabold" dir="ltr">{quiz.correct} / {total}</p>
         <p className={`text-lg font-bold ${pct >= 50 ? 'text-green-700' : 'text-red-700'}`} dir="ltr">{pct}%</p>
         <div className="flex flex-wrap justify-center gap-2">
-          <button type="button" disabled={retake.isPending} className="rounded border border-brand px-5 py-2 text-brand" onClick={() => retake.mutate()}>{t('quiz.retake')}</button>
+          <InteractiveHoverButton variant="outline" type="button" disabled={retake.isPending} className="border-brand px-5 py-2 text-brand" onClick={() => retake.mutate()}>{t('quiz.retake')}</InteractiveHoverButton>
           {(quiz.wrong > 0 || quiz.answered < total) && <button type="button" disabled={practice.isPending} className="rounded bg-amber-600 px-5 py-2 text-white" onClick={() => practice.mutate()}>{t('quiz.practiceMistakes')}</button>}
           <Link to="/student/quizzes" className="rounded bg-brand px-5 py-2 text-white">{t('quiz.backToQuizzes')}</Link>
         </div>

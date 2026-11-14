@@ -65,7 +65,7 @@ function EditDialog({ session, onClose }) {
         <div className="flex justify-between gap-2">
           <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => setConfirming(true)}>{t('admin.actions.delete')}</button>
           <span className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
@@ -101,7 +101,7 @@ function BulkDialog({ scope, count, onClose }) {
         )}
         {scope.kind !== 'monthly' && <label className="block text-sm">{t('exams.newStart')}<input type="time" className="mt-1 w-full rounded border p-2" value={form.start_time} onChange={set('start_time')} /></label>}
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || !(form.shift_days || form.period_from || form.start_time)} className="px-4 py-1.5 disabled:opacity-50">{t('exams.applyToAll')}</InteractiveHoverButton>
         </div>
       </form>
@@ -207,7 +207,7 @@ export default function ExamsAdminPage() {
           <div className="flex flex-wrap items-center gap-2">
             {off.map((d) => <span key={d} className="rounded-full bg-sky-tint px-3 py-1" dir="ltr">{d}<button type="button" aria-label={t('admin.actions.delete')} className="ms-2 text-red-700" onClick={() => setOff(off.filter((x) => x !== d))}>✕</button></span>)}
             <DateInput aria-label={t('exams.holidays')} className="rounded border p-1.5" value={offDraft} onChange={(e) => setOffDraft(e.target.value)} />
-            <button type="button" disabled={!offDraft} className="rounded border px-3 py-1 text-brand disabled:opacity-40" onClick={() => { setOff([...new Set([...off, offDraft])]); setOffDraft('') }}>{t('exams.addHoliday')}</button>
+            <InteractiveHoverButton variant="outline" type="button" disabled={!offDraft} className="px-3 py-1 text-brand disabled:opacity-40" onClick={() => { setOff([...new Set([...off, offDraft])]); setOffDraft('') }}>{t('exams.addHoliday')}</InteractiveHoverButton>
           </div>
         </div>
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
@@ -218,7 +218,7 @@ export default function ExamsAdminPage() {
           </div>
         )}
         <div className="flex flex-wrap gap-2">
-          <button type="submit" disabled={run.isPending || !ready} className="rounded border px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('exams.preview')}</button>
+          <InteractiveHoverButton variant="outline" type="submit" disabled={run.isPending || !ready} className="px-4 py-2 font-semibold text-brand disabled:opacity-50">{t('exams.preview')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" disabled={run.isPending || !ready} className="px-5 py-2 disabled:opacity-50" onClick={() => run.mutate(false)}>{t('exams.publish')}</InteractiveHoverButton>
         </div>
       </form>
@@ -271,7 +271,7 @@ function AdminList({ sessions, onEdit }) {
                 <span className="inline-block whitespace-nowrap rounded-full bg-deep-harbor px-2.5 py-0.5 text-[11px] font-semibold text-white"><bdi>{s.kind === 'final' ? t('exams.kinds.final') : t('exams.monthlyN', { n: s.round })}</bdi></span>
                 <span className="inline-block whitespace-nowrap rounded-full bg-sky-tint px-3 py-0.5 text-xs"><bdi dir="ltr">{s.classroom.name}</bdi></span>
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{s.invigilators.map((u) => (u.period_from !== null && s.period_from !== null && (u.period_from !== s.period_from || u.period_to !== s.period_to) ? `${u.name} (${u.period_from === u.period_to ? t('exams.periodOne', { n: u.period_from }) : t('exams.periodsRange', { from: u.period_from, to: u.period_to })})` : u.name)).join('، ')}</span>
-                <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => onEdit(s)}>{t('admin.actions.edit')}</button>
+                <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => onEdit(s)}>{t('admin.actions.edit')}</InteractiveHoverButton>
               </li>
             ))}
           </ul>

@@ -74,9 +74,9 @@ export default function LessonPlansPage() {
         {(mine.data ?? []).map((p) => (
           <PlanCard key={p.id} plan={p}>
             <div className="flex flex-wrap gap-2 pt-1">
-              <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => edit(p)}>{t('admin.actions.edit')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => edit(p)}>{t('admin.actions.edit')}</InteractiveHoverButton>
               {['draft', 'rejected'].includes(p.status) && <InteractiveHoverButton type="button" className="px-3 py-1 text-sm" onClick={() => submit.mutate(p.id)}>{t('lessonPlans.submit')}</InteractiveHoverButton>}
-              {p.status === 'submitted' && <button type="button" className="rounded border px-3 py-1 text-sm" onClick={() => withdraw.mutate(p.id)}>{t('lessonPlans.withdraw')}</button>}
+              {p.status === 'submitted' && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-sm" onClick={() => withdraw.mutate(p.id)}>{t('lessonPlans.withdraw')}</InteractiveHoverButton>}
               <button type="button" className="rounded border border-red-300 px-3 py-1 text-sm text-red-700" onClick={() => setRemoving(p)}>{t('admin.actions.delete')}</button>
             </div>
           </PlanCard>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../api/client'
 import Modal from '../../../components/shared/Modal'
+import { InteractiveHoverButton } from '../../../components/ui/interactive-hover-button'
 
 // Start a chat: search the people you may write to and pick one.
 export default function NewChatDialog({ onClose, onOpened }) {
@@ -26,7 +27,7 @@ export default function NewChatDialog({ onClose, onOpened }) {
             </li>
           ))}
         </ul>
-        <div className="flex justify-end"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button></div>
+        <div className="flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton></div>
       </div>
     </Modal>
   )

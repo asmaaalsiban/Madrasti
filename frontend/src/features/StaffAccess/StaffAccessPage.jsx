@@ -43,7 +43,7 @@ function AccessDialog({ people, onClose }) {
             <button type="button" className="text-brand" onClick={() => setHidden(GROUPS.flatMap((g) => g.features))}>{t('staffAccess.hideAll')}</button>
           </span>
           <span className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
           </span>
         </div>
@@ -91,7 +91,7 @@ export default function StaffAccessPage() {
                 <td className="p-2 font-medium"><bdi>{p.name}</bdi></td>
                 <td className="p-2 text-slate-600">{p.staff_type ? t(`staff.types.${p.staff_type}`) : '—'}</td>
                 <td className="p-2">{p.hidden.length === 0 ? <span className="text-slate-500">{t('staffAccess.seesAll')}</span> : <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{t('staffAccess.hiddenCount', { count: p.hidden.length })}</span>}</td>
-                <td className="p-2 text-end"><button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setDialog([p])}>{t('admin.actions.edit')}</button></td>
+                <td className="p-2 text-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => setDialog([p])}>{t('admin.actions.edit')}</InteractiveHoverButton></td>
               </tr>
             ))}
             {data && shown.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-slate-500">{t('tasks.noMatch')}</td></tr>}

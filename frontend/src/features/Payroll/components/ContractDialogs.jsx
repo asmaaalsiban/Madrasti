@@ -77,7 +77,7 @@ export function NewContractDialog({ staff, onClose }) {
         <ItemsEditor items={items} onChange={setItems} />
         <label className="block text-sm">{t('payroll.notes')}<textarea rows={2} className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-4 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -120,7 +120,7 @@ export function RenewDialog({ staff, currency, onClose }) {
         {c.items.length > 0 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.carry_items} onChange={set('carry_items')} />{t('payroll.carryItems')}</label>}
         <label className="block text-sm">{t('payroll.notes')}<input className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || preview <= 0} className="px-4 py-1.5 disabled:opacity-50">{t('payroll.renew')}</InteractiveHoverButton>
         </div>
       </form>
@@ -144,7 +144,7 @@ export function EndDialog({ staff, onClose }) {
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         <label className="block text-sm">{t('payroll.lastDay')}<DateInput required className="mt-1 w-full rounded border p-2" value={on} onChange={(e) => setOn(e.target.value)} /></label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <button type="submit" disabled={save.isPending} className="rounded bg-red-700 px-4 py-1.5 text-white disabled:opacity-50">{t('payroll.endContract')}</button>
         </div>
       </form>
@@ -167,7 +167,7 @@ export function HistoryDialog({ staff, currency, onClose }) {
           </li>
         ))}
       </ul>
-      <div className="mt-3 flex justify-end"><button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</button></div>
+      <div className="mt-3 flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('payroll.close')}</InteractiveHoverButton></div>
     </Modal>
   )
 }

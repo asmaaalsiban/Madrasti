@@ -1,3 +1,4 @@
+import { KeyRound, UserRoundCog } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -86,6 +87,7 @@ const baseColumns = [
 const rowActions = [
   {
     key: 'reset',
+    icon: KeyRound,
     label: 'people.actions.resetPassword',
     confirm: 'people.actions.resetConfirm',
     done: 'people.actions.resetDone',
@@ -93,6 +95,7 @@ const rowActions = [
   },
   {
     key: 'reset-guardian',
+    icon: UserRoundCog,
     label: 'people.actions.resetGuardianPassword',
     confirm: 'people.actions.resetConfirm',
     done: 'people.actions.resetDone',

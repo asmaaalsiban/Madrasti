@@ -41,7 +41,7 @@ export default function AnswerDialog({ homework, onClose }) {
         <div className="flex flex-wrap justify-between gap-2">
           {mine ? <button type="button" className="rounded border border-red-300 px-3 py-1.5 text-red-700" onClick={() => remove.mutate()}>{t('homework.withdraw')}</button> : <span />}
           <span className="flex gap-2">
-            <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             <InteractiveHoverButton type="submit" className="px-4 py-1.5 disabled:opacity-50" disabled={send.isPending}>{t('homework.send')}</InteractiveHoverButton>
           </span>
         </div>

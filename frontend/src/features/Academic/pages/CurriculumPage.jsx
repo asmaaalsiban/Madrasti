@@ -76,8 +76,8 @@ export default function CurriculumPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('curriculum.title')}</h1>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" disabled={dirty} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => setCopy({ from: String(data.grades[0]?.id ?? ''), to: [] })}>{t('curriculum.copyGrade')}</button>
-          <button type="button" disabled={dirty} className="rounded border px-3 py-1.5 disabled:opacity-50" onClick={() => setConfirmPlan(true)}>{t('curriculum.standardPlan')}</button>
+          <InteractiveHoverButton variant="outline" type="button" disabled={dirty} className="px-3 py-1.5 disabled:opacity-50" onClick={() => setCopy({ from: String(data.grades[0]?.id ?? ''), to: [] })}>{t('curriculum.copyGrade')}</InteractiveHoverButton>
+          <InteractiveHoverButton variant="outline" type="button" disabled={dirty} className="px-3 py-1.5 disabled:opacity-50" onClick={() => setConfirmPlan(true)}>{t('curriculum.standardPlan')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" disabled={!dirty || save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate()}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function CurriculumPage() {
             </fieldset>
             <p className="text-xs text-slate-500">{t('curriculum.copyWarning')}</p>
             <div className="flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-1.5" onClick={() => setCopy(null)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={() => setCopy(null)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
               <InteractiveHoverButton type="button" disabled={copy.to.length === 0 || copyGrade.isPending} className="px-3 py-1.5 disabled:opacity-50" onClick={() => copyGrade.mutate()}>{t('curriculum.copy')}</InteractiveHoverButton>
             </div>
           </div>

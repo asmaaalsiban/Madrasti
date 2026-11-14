@@ -9,6 +9,7 @@ import { paletteFromFile, shownPrimary } from '../../tenant/palette'
 import { applyTheme, clearTheme } from '../../tenant/theme'
 import { useSchool } from '../../tenant/useSchool'
 import SchoolDetailsCard from './SchoolDetailsCard'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const MAX_BYTES = 2 * 1024 * 1024
 const TYPES = ['image/png', 'image/jpeg', 'image/webp']
@@ -113,7 +114,7 @@ export default function BrandingPage() {
               : <span aria-hidden className="grid h-20 w-20 place-items-center rounded-2xl border border-dashed text-slate-400"><ImagePlus size={28} /></span>}
             <div className="space-y-2">
               <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" aria-label={t('branding.choose')} tabIndex={-1} onChange={pick} />
-              <button type="button" className="rounded border px-4 py-2 text-brand" onClick={() => input.current?.click()}>{t('branding.choose')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-4 py-2 text-brand" onClick={() => input.current?.click()}>{t('branding.choose')}</InteractiveHoverButton>
               <p className="text-xs text-slate-500">{t('branding.hint')}</p>
             </div>
           </div>

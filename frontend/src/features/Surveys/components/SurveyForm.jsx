@@ -146,11 +146,11 @@ export default function SurveyForm({ isAdmin, onClose, onCreated }) {
               {form.type !== 'poll' && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={q.is_required} onChange={(e) => setQ(i, { is_required: e.target.checked })} />{t('surveys.required')}</label>}
             </div>
           ))}
-          {form.type !== 'poll' && <button type="button" className="rounded border px-3 py-1.5 text-sm text-brand" onClick={() => setQuestions((qs) => [...qs, blank('text')])}>{t('surveys.addQuestion')}</button>}
+          {form.type !== 'poll' && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-sm text-brand" onClick={() => setQuestions((qs) => [...qs, blank('text')])}>{t('surveys.addQuestion')}</InteractiveHoverButton>}
         </div>
 
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || (staffMode ? staffPicked.length === 0 : form.audience === 'classrooms' && picked.length === 0)} className="px-4 py-1.5 disabled:opacity-50">{t('surveys.send')}</InteractiveHoverButton>
         </div>
       </form>

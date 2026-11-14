@@ -20,7 +20,7 @@ function Form({ title, onClose, onSubmit, pending, error, children, submitLabel 
         {error && <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
         {children}
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={pending} className="px-4 py-1.5 disabled:opacity-50">{submitLabel ?? t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>

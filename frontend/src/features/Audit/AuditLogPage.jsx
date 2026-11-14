@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import { DateInput } from '../../components/shared/DateInput'
 import ExportButton from '../../components/shared/ExportButton'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 const ACTION_STYLE = { created: 'bg-green-100 text-green-800', updated: 'bg-amber-100 text-amber-800', deleted: 'bg-red-100 text-red-700' }
 const show = (v) => (v === null || v === undefined ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v))
@@ -80,9 +81,9 @@ export default function AuditLogPage() {
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-600">{t('audit.total', { count: data.meta.total })}</span>
             <span className="flex items-center gap-2">
-              <button type="button" disabled={page <= 1} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setPage(page - 1)}>{t('audit.previous')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={page <= 1} className="px-3 py-1 disabled:opacity-40" onClick={() => setPage(page - 1)}>{t('audit.previous')}</InteractiveHoverButton>
               <span dir="ltr">{data.meta.current_page} / {data.meta.last_page}</span>
-              <button type="button" disabled={page >= data.meta.last_page} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => setPage(page + 1)}>{t('audit.next')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={page >= data.meta.last_page} className="px-3 py-1 disabled:opacity-40" onClick={() => setPage(page + 1)}>{t('audit.next')}</InteractiveHoverButton>
             </span>
           </div>
         </>

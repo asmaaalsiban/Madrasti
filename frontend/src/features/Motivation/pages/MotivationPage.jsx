@@ -94,7 +94,7 @@ export default function MotivationPage({ base }) {
               <label className="text-sm">{t('behavior.nameEn')}<input dir="ltr" className="mt-1 block rounded border p-2" value={newCategory.name_en} onChange={(e) => setNewCategory({ ...newCategory, name_en: e.target.value })} /></label>
               <label className="text-sm">{t('motivation.points')}<input type="number" min="-20" max="20" dir="ltr" className="mt-1 block w-24 rounded border p-2" value={newCategory.points} onChange={(e) => setNewCategory({ ...newCategory, points: e.target.value })} /></label>
               <InteractiveHoverButton type="button" disabled={!newCategory.name_ar || !newCategory.name_en || !newCategory.points || createCategory.isPending} onClick={() => createCategory.mutate()} className="px-4 py-2 disabled:opacity-40">{t('motivation.saveCategory')}</InteractiveHoverButton>
-              <button type="button" className="rounded border px-3 py-2" onClick={() => setAddingCategory(false)}>{t('admin.actions.cancel')}</button>
+              <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" onClick={() => setAddingCategory(false)}>{t('admin.actions.cancel')}</InteractiveHoverButton>
             </div>
           ) : <button type="button" className="text-sm text-brand underline" onClick={() => setAddingCategory(true)}>{t('motivation.addOwnCategory')}</button>}
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); award.mutate({ points: Number(custom.points), note: custom.note }) }}>
@@ -110,7 +110,7 @@ export default function MotivationPage({ base }) {
                 {(roster.data?.badges ?? []).map((b) => <option key={b.id} value={b.id}>{b.icon} {name(b)}</option>)}
               </select>
             </label>
-            {badgeId !== 'new' && <button type="button" disabled={picked.length === 0 || !badgeId || giveBadge.isPending} onClick={() => giveBadge.mutate()} className="rounded border px-4 py-2 text-brand disabled:opacity-40">{t('motivation.giveBadge')}</button>}
+            {badgeId !== 'new' && <InteractiveHoverButton variant="outline" type="button" disabled={picked.length === 0 || !badgeId || giveBadge.isPending} onClick={() => giveBadge.mutate()} className="px-4 py-2 text-brand disabled:opacity-40">{t('motivation.giveBadge')}</InteractiveHoverButton>}
           </div>
           {badgeId === 'new' && (
             <div className="flex flex-wrap items-end gap-2 rounded border bg-slate-50 p-2">
@@ -137,7 +137,7 @@ export default function MotivationPage({ base }) {
             <span className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-slate-600">{t('motivation.weekPoints')}: <b dir="ltr">{sign(s.week)}</b></span>
               <span>{t('motivation.totalPoints')}: <b dir="ltr">{s.total}</b></span>
-              <button type="button" disabled={s.is_star || crown.isPending} onClick={() => crown.mutate(s.id)} className="rounded border px-3 py-1 text-brand disabled:opacity-40">{t('motivation.crown')}</button>
+              <InteractiveHoverButton variant="outline" type="button" disabled={s.is_star || crown.isPending} onClick={() => crown.mutate(s.id)} className="px-3 py-1 text-brand disabled:opacity-40">{t('motivation.crown')}</InteractiveHoverButton>
               <Link to={`${base}/motivation/students/${s.id}`} className="rounded border px-3 py-1 text-brand">{t('motivation.details')}</Link>
             </span>
           </li>

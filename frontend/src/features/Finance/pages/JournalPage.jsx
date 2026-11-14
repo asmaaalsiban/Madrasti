@@ -51,7 +51,7 @@ function EntryDialog({ accounts, onClose }) {
         </div>
         <p className={`text-sm ${balanced ? 'text-green-700' : 'text-amber-700'}`}>{t('journal.totals', { debit: (debit / 100).toFixed(2), credit: (credit / 100).toFixed(2) })}</p>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={!balanced || save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -121,7 +121,7 @@ export default function JournalPage() {
         <>
           <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-white p-3 text-sm">
             <label>{t('journal.lockedUntil')}<DateInput className="mt-1 block rounded border p-1.5" disabled={!canManage} value={lockDate ?? locked} onChange={(e) => setLockDate(e.target.value)} /></label>
-            {canManage && <button type="button" className="rounded border px-3 py-1.5 text-brand" onClick={() => { lock.mutate(lockDate ?? locked); setLockDate(null) }}>{t('journal.saveLock')}</button>}
+            {canManage && <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5 text-brand" onClick={() => { lock.mutate(lockDate ?? locked); setLockDate(null) }}>{t('journal.saveLock')}</InteractiveHoverButton>}
             <span className="text-slate-500">{locked ? t('journal.lockedNote', { date: locked }) : t('journal.open')}</span>
           </div>
           {!journal.data ? <p className="text-slate-500">{t('common.loading')}</p> : journal.data.data.length === 0 ? <p className="rounded-lg border bg-white p-6 text-center text-slate-500">{t('journal.none')}</p> : (

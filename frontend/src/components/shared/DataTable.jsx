@@ -1,6 +1,9 @@
+import { KeyRound, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { IconActionButton } from '../ui/icon-action-button'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
-// extraActions: [{ key, label, onClick(row), when?(row) }] shown between Edit and Delete.
+// extraActions: [{ key, label, icon?, onClick(row), when?(row) }] (icon: a lucide icon, KeyRound if none) shown between Edit and Delete.
 export default function DataTable({ columns, rows, loading, search, onSearch, onEdit, onDelete, extraActions = [], page = 1, lastPage = 1, onPage }) {
   const { t } = useTranslation()
   const hasActions = Boolean(onEdit || onDelete || extraActions.length)
@@ -29,11 +32,11 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
                 {columns.map((c) => <td key={c.key} className="p-2 sm:p-3" data-title={c.key === titleKey ? '' : undefined}>{c.render ? c.render(row) : row[c.key]}</td>)}
                 {hasActions && (
                   <td className="p-2 sm:p-3" data-actions=""><div className="flex flex-wrap gap-2">
-                    {onEdit && <button type="button" className="text-brand" onClick={() => onEdit(row)}>{t('admin.actions.edit')}</button>}
+                    {onEdit && <IconActionButton icon={Pencil} label={t('admin.actions.edit')} onClick={() => onEdit(row)} />}
                     {extraActions.filter((a) => !a.when || a.when(row)).map((a) => (
-                      <button key={a.key} type="button" className="text-slate-700 underline" onClick={() => a.onClick(row)}>{a.label}</button>
+                      <IconActionButton key={a.key} icon={a.icon ?? KeyRound} tone="slate" label={a.label} onClick={() => a.onClick(row)} />
                     ))}
-                    {onDelete && <button type="button" className="text-red-600" onClick={() => onDelete(row)}>{t('admin.actions.delete')}</button>}
+                    {onDelete && <IconActionButton icon={Trash2} tone="red" label={t('admin.actions.delete')} onClick={() => onDelete(row)} />}
                   </div></td>
                 )}
               </tr>
@@ -44,9 +47,9 @@ export default function DataTable({ columns, rows, loading, search, onSearch, on
       </div>
       {lastPage > 1 && (
         <div className="flex items-center justify-between text-sm">
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('admin.actions.prev')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('admin.actions.prev')}</InteractiveHoverButton>
           <span>{page} / {lastPage}</span>
-          <button type="button" className="rounded border px-3 py-1 disabled:opacity-50" disabled={page >= lastPage} onClick={() => onPage(page + 1)}>{t('admin.actions.next')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 disabled:opacity-50" disabled={page >= lastPage} onClick={() => onPage(page + 1)}>{t('admin.actions.next')}</InteractiveHoverButton>
         </div>
       )}
     </div>

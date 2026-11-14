@@ -46,7 +46,7 @@ export default function Thread({ conversation, onBack }) {
   return (
     <div className="flex h-full min-h-[28rem] flex-col rounded-lg border bg-white">
       <div className="flex items-center gap-2 border-b p-3">
-        <button type="button" className="rounded border px-2 py-1 text-sm md:hidden" onClick={onBack}>{t('chat.back')}</button>
+        <InteractiveHoverButton variant="outline" type="button" className="px-2 py-1 text-sm md:hidden" onClick={onBack}>{t('chat.back')}</InteractiveHoverButton>
         <div>
           <p className="font-bold">{conversation.title}</p>
           <p className="text-xs text-slate-500">
@@ -77,7 +77,7 @@ export default function Thread({ conversation, onBack }) {
           {photo && <p className="text-xs text-slate-600">📷 {photo.name} <button type="button" className="text-red-700 underline" onClick={() => setPhoto(null)}>{t('homework.removeImage')}</button></p>}
           <div className="flex items-end gap-2">
             <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={t('chat.photo')} onChange={(e) => { setPhoto(e.target.files[0] ?? null); e.target.value = '' }} />
-            <button type="button" className="rounded border px-3 py-2" aria-label={t('chat.addPhoto')} title={t('chat.addPhoto')} onClick={() => input.current.click()}>📷</button>
+            <InteractiveHoverButton variant="outline" type="button" className="px-3 py-2" aria-label={t('chat.addPhoto')} title={t('chat.addPhoto')} onClick={() => input.current.click()}>📷</InteractiveHoverButton>
             <textarea rows={1} aria-label={t('chat.message')} placeholder={t('chat.message')} className="min-w-0 flex-1 rounded border p-2" value={text} onChange={(e) => setText(e.target.value)} />
             <InteractiveHoverButton type="submit" className="px-4 py-2 disabled:opacity-50" disabled={send.isPending}>{t('chat.send')}</InteractiveHoverButton>
           </div>

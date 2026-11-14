@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../api/client'
 import StoryCard from './StoryCard'
 import StoryComposer from './StoryComposer'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // The class feed: news and photos from the teachers and the school, newest first (pinned posts on top).
 export default function StoriesPage() {
@@ -24,7 +25,7 @@ export default function StoriesPage() {
       ) : (
         <div className="space-y-4">{stories.map((s) => <StoryCard key={s.id} story={s} />)}</div>
       )}
-      {feed.hasNextPage && <div className="text-center"><button type="button" disabled={feed.isFetchingNextPage} className="rounded border px-6 py-2 text-brand disabled:opacity-50" onClick={() => feed.fetchNextPage()}>{t('stories.more')}</button></div>}
+      {feed.hasNextPage && <div className="text-center"><InteractiveHoverButton variant="outline" type="button" disabled={feed.isFetchingNextPage} className="px-6 py-2 text-brand disabled:opacity-50" onClick={() => feed.fetchNextPage()}>{t('stories.more')}</InteractiveHoverButton></div>}
     </section>
   )
 }

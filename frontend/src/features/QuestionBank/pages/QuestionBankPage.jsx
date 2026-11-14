@@ -77,7 +77,7 @@ function QuestionDialog({ lessonId, question, onClose }) {
         <label className="block text-sm">{t('questionBank.explanation')}<textarea rows={3} dir="auto" className="mt-1 w-full rounded border p-2" value={explanation} onChange={(e) => setExplanation(e.target.value)} /><span className="text-xs text-slate-500">{t('questionBank.explanationHint')}</span></label>
         <ImageField slot="explanation" question={question} files={files} setFiles={setFiles} removed={removed} setRemoved={setRemoved} />
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || options.filter((o) => o.is_correct).length !== 1} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>

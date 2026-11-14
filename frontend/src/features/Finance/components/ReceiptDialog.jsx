@@ -23,7 +23,7 @@ export default function ReceiptDialog({ payment, fee, student, currency, onClose
           </dl>
         </div>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('homework.close')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('homework.close')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" className="px-4 py-1.5" onClick={() => window.print()}>{t('finance.print')}</InteractiveHoverButton>
         </div>
       </div>

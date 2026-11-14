@@ -38,7 +38,7 @@ function RoundDialog({ round, onClose }) {
           <label className="block text-sm">{t('transport.endsAt')}<input type="time" dir="ltr" className="mt-1 w-full rounded border p-2" value={form.ends_at} onChange={set('ends_at')} /></label>
         </div>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -82,7 +82,7 @@ function SubstituteDialog({ bus, round, escorts, current, onClose }) {
           </select>
         </label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="button" disabled={!escortId || save.isPending} className="px-5 py-1.5 disabled:opacity-50" onClick={() => save.mutate({ id: Number(escortId) })}>{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </div>
@@ -158,7 +158,7 @@ function BusDialog({ bus, rounds, drivers = [], escorts = [], onClose }) {
         <label className="block text-sm">{t('transport.notes')}<input className="mt-1 w-full rounded border p-2" value={form.notes} onChange={set('notes')} /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />{t('transport.active')}</label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -188,7 +188,7 @@ function RidersDialog({ bus, rounds, onClose }) {
           ))}
         </div>
       )}
-      <div className="mt-4 flex justify-end"><button type="button" className="rounded border px-4 py-1.5" onClick={onClose}>{t('transport.close')}</button></div>
+      <div className="mt-4 flex justify-end"><InteractiveHoverButton variant="outline" type="button" className="px-4 py-1.5" onClick={onClose}>{t('transport.close')}</InteractiveHoverButton></div>
     </Modal>
   )
 }
@@ -244,7 +244,7 @@ function AssignDialog({ student, overview, onClose }) {
         </div>
         <p className="text-xs text-slate-500">{t('transport.seatsHint')}</p>
         <div className="flex justify-end gap-2">
-          <button type="button" className="rounded border px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</button>
+          <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1.5" onClick={onClose}>{t('admin.actions.cancel')}</InteractiveHoverButton>
           <InteractiveHoverButton type="submit" disabled={save.isPending || !ready} className="px-5 py-1.5 disabled:opacity-50">{t('admin.actions.save')}</InteractiveHoverButton>
         </div>
       </form>
@@ -370,7 +370,7 @@ function StudentsTab({ overview }) {
                 <td className="p-2">{leg(s.ride?.pickup_round, s.ride?.pickup_bus)}</td>
                 <td className="p-2">{leg(s.ride?.dropoff_round, s.ride?.dropoff_bus)}</td>
                 <td className="p-2"><span className="flex justify-end gap-2">
-                  <button type="button" className="rounded border px-3 py-1 text-brand" onClick={() => setEdit(s)}>{s.ride ? t('admin.actions.edit') : t('transport.assign')}</button>
+                  <InteractiveHoverButton variant="outline" type="button" className="px-3 py-1 text-brand" onClick={() => setEdit(s)}>{s.ride ? t('admin.actions.edit') : t('transport.assign')}</InteractiveHoverButton>
                   {s.ride && <button type="button" aria-label={t('admin.actions.delete')} className="rounded border border-red-300 p-1.5 text-red-700" onClick={() => setDel(s)}><Trash2 size={16} aria-hidden /></button>}
                 </span></td>
               </tr>

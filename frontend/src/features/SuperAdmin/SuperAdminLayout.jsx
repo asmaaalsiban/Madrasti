@@ -8,6 +8,7 @@ import LanguageSwitcher from '../../components/shared/LanguageSwitcher'
 import ResponsiveTables from '../../components/shared/ResponsiveTables'
 import SuperAdminLoginPage from './SuperAdminLoginPage'
 import saApi, { getSaToken, setSaToken } from './saApi'
+import { InteractiveHoverButton } from '../../components/ui/interactive-hover-button'
 
 // The frame of the Super Admin area: without a token every page is the sign-in; with one, one top bar and the page.
 export default function SuperAdminLayout() {
@@ -38,7 +39,7 @@ export default function SuperAdminLayout() {
           <Link to="/super-admin/schools" className="min-w-0 truncate text-lg font-extrabold">{t('superAdmin.title')}</Link>
           <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-full bg-white/90 p-1 text-deep-harbor"><LanguageSwitcher /></span>
-            <button type="button" className="rounded border border-white/40 px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</button>
+            <InteractiveHoverButton variant="outline" type="button" className="border-white/40 px-3 py-1 text-sm" onClick={logout}>{t('common.logout')}</InteractiveHoverButton>
           </div>
         </div>
       </header>
