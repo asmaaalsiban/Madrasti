@@ -59,3 +59,8 @@ export const errorOf = (err, fallback) => {
   return err.response?.data?.message ?? fallback
 }
 export const fieldErrors = (err) => err.response?.data?.errors ?? {}
+
+// The pricing plans of the public website: the owner decides every one of them (names, prices, features, which is popular, which are shown).
+export const usePlans = () => useQuery({ queryKey: ['sa', 'plans'], queryFn: async () => (await saApi.get('/admin/plans')).data.data })
+export const useSavePlan = () => useAction(async ({ id, ...payload }) => (id ? (await saApi.put(`/admin/plans/${id}`, payload)) : (await saApi.post('/admin/plans', payload))).data.data)
+export const useDeletePlan = () => useAction(async (id) => { await saApi.delete(`/admin/plans/${id}`) })

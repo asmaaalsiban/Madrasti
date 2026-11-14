@@ -1,17 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../src/i18n'
 import { routesFor } from '../src/app/router'
 import SwitchSchoolButton from '../src/components/shared/SwitchSchoolButton'
-import { loginAdmin, registerSchool, registrationEnabled, schoolExists } from '../src/features/Central/api'
+import { loginAdmin, publicPlans, registerSchool, registrationEnabled, schoolExists } from '../src/features/Central/api'
 import FindSchoolPage from '../src/features/Central/FindSchoolPage'
 import RegisterSchoolPage from '../src/features/Central/RegisterSchoolPage'
 import WelcomePage from '../src/features/Central/WelcomePage'
 import { clearSchool, getSchool, goTo, setSchool } from '../src/tenant/school'
 
-vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn(), registrationEnabled: vi.fn() }))
+vi.mock('../src/features/Central/api', () => ({ registerSchool: vi.fn(), loginAdmin: vi.fn(), schoolExists: vi.fn(), registrationEnabled: vi.fn(), publicPlans: vi.fn(() => Promise.resolve([])) }))
 vi.mock('../src/tenant/school', async (orig) => ({ ...(await orig()), goTo: vi.fn() }))
 vi.mock('../src/features/Auth/AuthProvider', () => ({ useAuth: () => ({ user: null, loading: false }) }))
 vi.mock('../src/tenant/useSchool', () => ({ useSchool: () => ({ data: { name: 'School Two' } }) }))
@@ -35,6 +35,23 @@ describe('WelcomePage', () => {
     await i18n.changeLanguage('ar')
     renderPage(<WelcomePage />)
     expect((await screen.findAllByRole('link', { name: 'إنشاء حساب' })).length).toBeGreaterThan(0)
+  })
+
+  it('shows the pricing plans the owner set, in the language of the page, and nothing when there are none', async () => {
+    window.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} }
+    publicPlans.mockResolvedValue([{ id: 1, name_ar: 'الأساسية', name_en: 'Basic', price_monthly: 50, price_yearly: 40, currency: 'JOD', max_students: 200, description_ar: 'لمدرسة صغيرة', description_en: 'Small school', features_ar: ['الحضور'], features_en: ['Attendance'], is_popular: true }])
+    renderPage(<WelcomePage />)
+    const pricing = within(await waitFor(() => { const el = document.getElementById('pricing'); if (!el) throw new Error('no pricing yet'); return el }))
+    expect(pricing.getByText('Basic')).toBeInTheDocument()
+    expect(pricing.getByText('Up to 200 students')).toBeInTheDocument()
+    expect(pricing.getByText('Attendance')).toBeInTheDocument()
+    expect(pricing.getByText('Small school')).toBeInTheDocument()
+  })
+
+  it('has no pricing section while there are no active plans', async () => {
+    renderPage(<WelcomePage />)
+    await screen.findAllByRole('link', { name: 'Sign in' })
+    expect(screen.queryByText('Simple, transparent pricing')).not.toBeInTheDocument()
   })
 
   it('hides the register links when the server has public registration off', async () => {

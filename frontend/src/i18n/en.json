@@ -3452,7 +3452,44 @@
       "openDescription": "Once the archive and the package are ready, everybody except the school administrators is blocked on their next request, until the window ends. Nothing is deleted.",
       "openConfirm": "Allow the download",
       "retryStuck": "Stuck: retry"
-    }
+    },
+    "plans": {
+      "title": "Pricing plans",
+      "add": "Add a plan",
+      "edit": "Edit the plan",
+      "help": "These plans are shown on the website. Only you decide the names, prices, features and which plan is the popular one. A plan that is not shown stays here but is hidden from the website.",
+      "none": "No plans yet.",
+      "popular": "Popular",
+      "yes": "Yes",
+      "no": "No",
+      "deleteQuestion": "Delete the plan \"{{name}}\"?",
+      "cols": {
+        "name": "Plan name",
+        "monthly": "Monthly price",
+        "yearly": "Price when paid yearly",
+        "students": "Students",
+        "shown": "Shown",
+        "order": "Order",
+        "actions": "Actions"
+      },
+      "fields": {
+        "nameAr": "Name (Arabic)",
+        "nameEn": "Name (English)",
+        "monthly": "Monthly price",
+        "yearly": "Monthly price when paid yearly",
+        "currency": "Currency (3 letters)",
+        "students": "Student limit",
+        "descriptionAr": "Short description (Arabic)",
+        "descriptionEn": "Short description (English)",
+        "featuresAr": "Features, Arabic (one per line)",
+        "featuresEn": "Features, English (one per line)",
+        "order": "Order (smaller comes first)",
+        "popular": "The popular plan",
+        "shown": "Show on the website"
+      }
+    },
+    "plansLink": "Pricing plans",
+    "schoolsLink": "Schools"
   },
   "exit": {
     "title": "Download your data",
@@ -3539,5 +3576,19 @@
         "Priority support"
       ]
     }
+  },
+  "pricing": {
+    "title": "Simple, transparent pricing",
+    "description": "Pick the plan that fits your school.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save": "cheaper",
+    "popular": "Popular",
+    "billedMonthly": "billed monthly",
+    "billedAnnually": "billed annually",
+    "perMonth": "month",
+    "choose": "Start now",
+    "upTo": "Up to {{count}} students",
+    "unlimited": "Unlimited students"
   }
 }

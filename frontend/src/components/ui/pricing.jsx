@@ -60,7 +60,7 @@ export function Pricing({ plans, title, description, labels, currency = 'JOD', l
             whileInView={desktop ? { y: plan.isPopular ? -20 : 0, opacity: 1, x: (index === 2 ? -30 : index === 0 ? 30 : 0) * (rtl ? -1 : 1), scale: index === 0 || index === 2 ? 0.94 : 1 } : {}}
             viewport={{ once: true }}
             transition={{ duration: 1.6, type: 'spring', stiffness: 100, damping: 30, delay: 0.4, opacity: { duration: 0.5 } }}
-            className={`relative flex flex-col rounded-2xl bg-white p-6 text-center lg:justify-center ${plan.isPopular ? 'z-10 border-2 border-brand' : 'z-0 mt-5 border'}`}
+            className={`relative flex flex-col rounded-2xl bg-white p-6 text-center lg:justify-center ${plan.isPopular ? 'z-10 order-first border-2 border-brand md:order-none' : 'z-0 mt-5 border'}`}
           >
             {plan.isPopular && (
               <div className="absolute end-0 top-0 flex items-center rounded-es-xl rounded-se-xl bg-brand px-2 py-0.5 text-white">
@@ -72,7 +72,7 @@ export function Pricing({ plans, title, description, labels, currency = 'JOD', l
               <p className="text-base font-semibold text-slate-500">{plan.name}</p>
               <div className="mt-6 flex items-center justify-center gap-x-2" dir="ltr">
                 <span className="text-5xl font-bold tracking-tight text-deep-harbor">
-                  <NumberFlow value={Number(annual ? plan.yearlyPrice : plan.price)} locales={locale} format={{ style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }} transformTiming={{ duration: 500, easing: 'ease-out' }} willChange />
+                  <NumberFlow value={Number(annual ? plan.yearlyPrice : plan.price)} locales={locale} format={{ style: 'currency', currency: plan.currency ?? currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }} transformTiming={{ duration: 500, easing: 'ease-out' }} willChange />
                 </span>
                 {plan.period && <span className="text-sm font-semibold tracking-wide text-slate-500">/ {plan.period}</span>}
               </div>

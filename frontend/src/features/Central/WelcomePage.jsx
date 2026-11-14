@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../components/shared/LanguageSwitcher'
 import LandingView from '../Auth/components/LandingView'
+import PublicPricing from './PublicPricing'
 import { useRegistration } from './useRegistration'
 
 // The first page when no school is chosen yet: the platform's own welcome, with the two ways in.
@@ -23,6 +24,7 @@ export default function WelcomePage() {
       header={<><LanguageSwitcher /><Link to="/find-school" className="rounded bg-brand px-5 py-2 text-sm text-white">{t('central.signIn')}</Link></>}
       actions={actions}
       ctaActions={actions}
+      extra={<PublicPricing href={canRegister ? '/register' : '/find-school'} />}
     />
   )
 }

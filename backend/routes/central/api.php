@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Central\Http\Controllers\CentralAuthController;
 use App\Central\Http\Controllers\ExitWindowController;
 use App\Central\Http\Controllers\PaymentWebhookController;
+use App\Central\Http\Controllers\PlanController;
 use App\Central\Http\Controllers\RegisterSchoolController;
 use App\Central\Http\Controllers\SchoolActionController;
 use App\Central\Http\Controllers\TenantController;
@@ -20,6 +21,9 @@ Route::post('register', RegisterSchoolController::class)->middleware('throttle:r
 // Is public registration on? The website hides its "register a school" links while it is off.
 Route::get('registration', fn () => response()->json(['enabled' => (bool) config('tenancy.registration_enabled')]));
 
+// The pricing plans shown on the website (only the active ones; the Super Admin manages them below).
+Route::get('plans', [PlanController::class, 'publicIndex'])->middleware('throttle:60,1');
+
 // The payment provider's callback: the school code is in the URL (a provider cannot send our X-School header); its signature is what is trusted.
 Route::post('payments/webhook/{school}/{provider}', PaymentWebhookController::class)->middleware('throttle:120,1');
 
@@ -34,6 +38,10 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::middleware(['auth:sanctum', 'super-admin'])->group(function (): void {
+    Route::get('admin/plans', [PlanController::class, 'index']);
+    Route::post('admin/plans', [PlanController::class, 'store']);
+    Route::put('admin/plans/{plan}', [PlanController::class, 'update']);
+    Route::delete('admin/plans/{plan}', [PlanController::class, 'destroy']);
     Route::apiResource('tenants', TenantController::class)->only(['index', 'show', 'store', 'update']);
     Route::post('tenants/{tenant}/suspend', [SchoolActionController::class, 'suspend']);
     Route::post('tenants/{tenant}/reactivate', [SchoolActionController::class, 'reactivate']);

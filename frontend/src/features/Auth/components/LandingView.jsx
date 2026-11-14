@@ -104,7 +104,7 @@ function DashboardMock({ t }) {
 
 // The welcome page itself: used for a school (its logo and name) and for the platform when no school is chosen yet.
 // `header` and `actions` are the buttons at the top and under the title; `ctaActions` those of the closing band.
-export default function LandingView({ name, logo, title, text, header, actions, ctaActions }) {
+export default function LandingView({ name, logo, title, text, header, actions, ctaActions, extra = null }) {
   const { t } = useTranslation()
   useSmoothScroll()
   const words = name.trim().split(/\s+/)
@@ -194,6 +194,8 @@ export default function LandingView({ name, logo, title, text, header, actions, 
           <Reveal delay={150}><DashboardMock t={t} /></Reveal>
         </div>
       </section>
+
+      {extra}
 
       <section className="mx-auto max-w-6xl px-4 py-20">
         <Reveal>
